@@ -1190,7 +1190,7 @@ class RuleManager
                             'name' => 'bidirectional',
                             'required' => false,
                             'type' => 'option',
-                            'label' => 'create_rule.step3.params.sync',
+                            'label' => 'Bidirectional synchronization',
                             'option' => $option,
                         ],
                     ];
@@ -1201,7 +1201,7 @@ class RuleManager
         }
         return null;
     }
-
+    
     /**
      * @throws \Doctrine\DBAL\Exception
      */

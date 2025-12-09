@@ -1,36 +1,21 @@
-<section class="mb-5 d-none" id="step-3" data-path-duplicate="{{ path('regle_list_duplicate_fields') }}">
+<section class="mb-5 d-none" 
+    id="step-3" 
+    data-path-duplicate="{{ path('regle_list_duplicate_fields') }}"
+    data-path-params="{{ path('regle_params_fields') }}">
 
-  <div class="section-chevron" aria-hidden="true">
-    <a href="#step-3" class="section-chevron">
-      <i class="fa-solid fa-circle-chevron-down"></i>
-    </a> 
-  </div>
+    <div class="section-chevron" aria-hidden="true">
+        <a href="#step-3" class="section-chevron">
+            <i class="fa-solid fa-circle-chevron-down"></i>
+        </a> 
+    </div>
 
-  <button id="nav-create-rule-sync" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
+    <button id="nav-create-rule-sync" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
         <i class="fa-solid fa-list-ul"></i>
-  </button>
-  <h3 class="section-create-rule fw-bold mb-4 fw-bold mb-4">
-    {{ 'create_rule.step3.syncdata.title'|trans }}
-  </h3>
+    </button>
 
-  <div class="row g-4 align-items-start">
-    <div class="col-12 col-md-6">
-      <label class="form-label">{{ 'create_rule.step3.syncdata.label'|trans}}</label>
-      <select id="sync-mode" class="form-select form-select-lg" disabled>
-        <option value="" selected disabled></option>
-        <option value="C">{{ 'create_rule.step3.syncdata.create_only'|trans}}</option>
-        <option value="U">{{ 'create_rule.step3.syncdata.update_only'|trans}}</option>
-        <option value="0">{{ 'create_rule.step3.syncdata.create_modify'|trans}}</option>
-        <option value="S">{{ 'create_rule.step3.syncdata.search_only'|trans}}</option>
-      </select>
-      <div id="sync-mode-feedback" class="form-text"></div>
-    </div>
+    <h3 class="section-create-rule fw-bold mb-4 fw-bold mb-4">
+        {{ 'create_rule.step3.syncdata.title'|trans }}
+    </h3>
 
-    <div class="col-12 col-md-6">
-      <label class="form-label">{{ 'create_rule.step5.params.duplicate'|trans }}</label>
-      <select id="duplicate-field" class="form-select form-select-lg" disabled>
-        <option value="" selected disabled placeholder="..."></option>
-      </select>
-    </div>
-  </div>
+    <div id="step-3-params-container"></div>
 </section>

@@ -1260,11 +1260,11 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 }
 
 .simulate-radio--source::after {
-  background: #fd7e14; /* orange */
+  background: #fd7e14;
 }
 
 .simulate-radio--target::after {
-  background: #0d6efd; /* bleu Bootstrap */
+  background: #0d6efd;
 }
 
 .simulate-list {
@@ -1313,4 +1313,31 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     background-color: #fff;
     color: #000000;
     border: 2px dashed #03c4eb;
+}
+
+.template-card {
+  position: relative;
+  border-radius: .75rem;
+  border: 1px solid var(--bs-border-color);
+  cursor: pointer;
+  transition:
+    box-shadow .15s ease-out,
+    transform .15s ease-out,
+    border-color .15s ease-out,
+    background-color .15s ease-out;
+}
+
+.template-card.is-selected {
+	box-shadow: rgb(3 196 235) 0px 1px 9px !important;
+	border:none;
+}
+
+.js-template-choose{
+	color: #03c4eb !important;
+	border-color: #05bfe6 !important;
+}
+
+.js-template-choose:hover{
+	background-color: #05bfe6 !important;
+	color: #ffffff !important;
 }

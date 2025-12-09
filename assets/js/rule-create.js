@@ -1,12 +1,63 @@
-/* =========================
+// ============================================================
+// 1. UTILITIES
+// ============================================================
+const UI = {
+  get: (id) => document.getElementById(id),
+  
+  toggle: (el, show) => {
+    if (!el) return;
+    show ? el.classList.remove('d-none') : el.classList.add('d-none');
+    if (show && el.id === 'step-2') el.style.opacity = '1'; // Force l'opacité pour Step 2
+  },
+  
+  resetSelect: (el, placeholder = '') => {
+    if (!el) return;
+    el.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+    el.disabled = true;
+    if (el.selectize) {
+      el.selectize.clearOptions();
+      el.selectize.disable();
+    }
+  },
+  
+  enableSelect: (el) => {
+    if (!el) return;
+    el.disabled = false;
+    if (el.selectize) el.selectize.enable();
+  },
+
+  setValue: (el, value) => {
+      if (!el) return;
+      el.value = String(value);
+      if (el.selectize) {
+          el.selectize.setValue(String(value), true); 
+      }
+  },
+
+  syncSelectize: (el) => {
+      if (el && el.selectize) {
+          el.selectize.refreshOptions(false);
+      }
+  },
+
+  fetchHtml: async (url, params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const target = query ? `${url}?${query}` : url;
+    const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return await res.text();
+  }
+};
+
+/* ============================================================
  * STEP 1 — NAME VALIDATION
- * ========================= */
+ * ============================================================ */
 (function () {
   const isEdit       = !!window.__EDIT_MODE__;
-  const inputName    = document.getElementById('rulename');
-  const feedback     = document.getElementById('rulename-feedback');
-  const spinner      = document.getElementById('rulename-spinner');
-  const step2Section = document.getElementById('step-2');
+  const inputName    = UI.get('rulename');
+  const feedback     = UI.get('rulename-feedback');
+  const spinner      = UI.get('rulename-spinner');
+  const step2Section = UI.get('step-2');
 
   if (!inputName || !feedback) return;
 
@@ -14,87 +65,67 @@
   let lastValueSent = '';
   let step2Shown    = false;
 
-  const showSpinner = () => spinner?.classList.remove('d-none');
-  const hideSpinner = () => spinner?.classList.add('d-none');
+  const toggleSpinner = (show) => UI.toggle(spinner, show);
 
-  function setNeutral() {
+  function setStatus(status, msg) {
+    toggleSpinner(false);
     inputName.classList.remove('is-invalid', 'is-valid');
     feedback.className = 'form-text';
-    feedback.textContent = '';
-  }
-
-  function setError(msg) {
-    hideSpinner();
-    inputName.classList.remove('is-valid');
-    inputName.classList.add('is-invalid');
-    feedback.className = 'form-text text-danger';
+    
+    if (status === 'error') {
+      inputName.classList.add('is-invalid');
+      feedback.classList.add('text-danger');
+    } else if (status === 'success') {
+      inputName.classList.add('is-valid');
+      feedback.classList.add('text-success');
+      revealStep2();
+    }
     feedback.textContent = msg || '';
   }
 
   function revealStep2() {
     if (step2Shown || !step2Section) return;
     step2Shown = true;
-    step2Section.classList.remove('d-none');
+    UI.toggle(step2Section, true);
     step2Section.style.opacity = 0;
     step2Section.style.transition = 'opacity .25s ease';
     requestAnimationFrame(() => { step2Section.style.opacity = 1; });
     step2Section.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
-  }
-
-  function setSuccess(msg) {
-    hideSpinner();
-    inputName.classList.remove('is-invalid');
-    inputName.classList.add('is-valid');
-    feedback.className = 'form-text text-success';
-    feedback.textContent = msg || '';
-    revealStep2();
-  }
-
-  function basicCheck(v) {
-    if (v.length < 3) {
-      setError(window.transRuleNameTooShort || 'Please enter at least 3 characters.');
-      return false;
-    }
-    return true;
   }
 
   async function checkUniqueness(nameVal) {
     const url = inputName.getAttribute('data-check-url');
-    if (!url) return setError('Validation URL missing.');
+    if (!url) return setStatus('error', 'Validation URL missing.');
+
     try {
-      const res  = await fetch(url, {
+      const res = await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'X-Requested-With': 'XMLHttpRequest'
-        },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
         body: new URLSearchParams({ name: nameVal })
       });
       const text = await res.text();
       let existsFlag;
       try { existsFlag = JSON.parse(text); } catch { existsFlag = text; }
+
       if (existsFlag === 0 || existsFlag === '0') {
-        setSuccess(window.transRuleNameAvailable || 'Name is available.');
+        setStatus('success', window.transRuleNameAvailable || 'Name is available.');
       } else {
-        setError(window.transRuleNameTaken || 'This name is already taken.');
+        setStatus('error', window.transRuleNameTaken || 'This name is already taken.');
       }
     } catch {
-      setError(window.transRuleNameNetworkErr || 'Network error, try again.');
+      setStatus('error', window.transRuleNameNetworkErr || 'Network error.');
     }
   }
 
-  window.__revealStep2 = window.__revealStep2 || revealStep2;
   if (isEdit) return;
 
-  // Mode création : listeners de validation
   inputName.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
       const v = inputName.value.trim();
-      if (!basicCheck(v)) return;
-      showSpinner();
+      if (v.length < 3) return setStatus('error', window.transRuleNameTooShort || 'Min 3 chars.');
+      toggleSpinner(true);
       lastValueSent = v;
       checkUniqueness(v);
     }
@@ -102,292 +133,291 @@
 
   inputName.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    setNeutral();
-
+    setStatus('neutral');
     const v = inputName.value.trim();
-    if (!v) { hideSpinner(); return; }
-    showSpinner();
+    if (!v) { toggleSpinner(false); return; }
+    toggleSpinner(true);
 
     if (v.length < 3) {
       debounceTimer = setTimeout(() => {
-        hideSpinner();
-        setError(window.transRuleNameTooShort || 'Please enter at least 3 characters.');
-      }, 200);
+        setStatus('error', window.transRuleNameTooShort || 'Min 3 chars.');
+      }, 300);
       return;
     }
 
     if (v === lastValueSent && inputName.classList.contains('is-valid')) {
-      hideSpinner();
+      toggleSpinner(false);
       revealStep2();
       return;
     }
 
     debounceTimer = setTimeout(() => {
       lastValueSent = v;
-      if (!basicCheck(v)) { hideSpinner(); return; }
       checkUniqueness(v);
-    }, 300);
+    }, 400);
   });
 })();
 
-/* ===========================================
- * STEP 2 + 3 + 4 + 5
- * =========================================== */
+/* ============================================================
+ * STEP 2 + 3 + 4 + 5 (CORE LOGIC & LOADERS)
+ * ============================================================ */
 (function () {
-  const step2 = document.getElementById('step-2');
+  const step2 = UI.get('step-2');
   if (!step2) return;
 
-  const pathListConnectors = step2.getAttribute('data-path-connectors');
-  const pathListModule     = step2.getAttribute('data-path-module');
+  const PATHS = {
+    connectors: step2.getAttribute('data-path-connectors'),
+    modules: step2.getAttribute('data-path-module')
+  };
 
-  // Source
-  const srcSol   = document.getElementById('source-solution');
-  const srcConn  = document.getElementById('source-connector');
-  const srcMod   = document.getElementById('source-module');
-  const srcSpin  = document.getElementById('source-connector-spinner');
-  const srcFeed  = document.getElementById('source-connector-feedback');
-  const srcModSpin  = document.getElementById('source-module-spinner');
+  const EL = {
+    src: { sol: UI.get('source-solution'), conn: UI.get('source-connector'), mod: UI.get('source-module'), spin: UI.get('source-connector-spinner'), modSpin: UI.get('source-module-spinner'), feed: UI.get('source-connector-feedback') },
+    tgt: { sol: UI.get('target-solution'), conn: UI.get('target-connector'), mod: UI.get('target-module'), spin: UI.get('target-connector-spinner'), modSpin: UI.get('target-module-spinner'), feed: UI.get('target-connector-feedback') },
+    step3: UI.get('step-3'),
+    step4: UI.get('step-4'),
+    step5: UI.get('step-5'),
+    step4Body: UI.get('step-4-body'),
+    paramsContainer: UI.get('step-3-params-container')
+  };
 
-  // Target
-  const tgtSol   = document.getElementById('target-solution');
-  const tgtConn  = document.getElementById('target-connector');
-  const tgtMod   = document.getElementById('target-module');
-  const tgtSpin  = document.getElementById('target-connector-spinner');
-  const tgtFeed  = document.getElementById('target-connector-feedback');
-  const tgtModSpin  = document.getElementById('target-module-spinner');
+  const step3ParamsPath = EL.step3 ? EL.step3.getAttribute('data-path-params') : null;
+  let filtersLoaded = false;
 
-  // STEP 3
-  const step3        = document.getElementById('step-3');
-  const duplicateSel = step3 ? document.getElementById('duplicate-field') : null;
-  const syncSel      = step3 ? document.getElementById('sync-mode') : null;
-  const pathDup      = step3 ? step3.getAttribute('data-path-duplicate') : null;
-
-  // STEP 4 & 5
-  const step4Section = document.getElementById('step-4');
-  const step5Section = document.getElementById('step-5');
-  const step4Body    = document.getElementById('step-4-body');
-  let filtersLoaded  = false;
-
-  function resetSelect(selectEl, placeholder = '') {
-    if (!selectEl) return;
-    selectEl.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
-    selectEl.disabled = true;
-  }
-
-  function setFeed(side, msg, isError = false) {
-    const el = side === 'source' ? srcFeed : tgtFeed;
-    if (!el) return;
-    el.className = 'form-text' + (isError ? ' text-danger' : '');
-    el.textContent = msg || '';
-  }
-
-  function getFieldsFromModuleSelect(selectEl) {
-    if (!selectEl || !selectEl.value) return null;
-    const opt = selectEl.options[selectEl.selectedIndex];
-    if (!opt) return null;
-    const fieldsStr = opt.getAttribute('data-fields');
-    if (!fieldsStr) return null;
-    try { return JSON.parse(fieldsStr); } catch { return null; }
-  }
-
-  async function loadConnectorsFor(side, solutionId) {
-    const selectEl  = side === 'source' ? srcConn : tgtConn;
-    const spinnerEl = side === 'source' ? srcSpin : tgtSpin;
-
-    resetSelect(selectEl);
-    setFeed(side, '');
-
-    if (!pathListConnectors || !solutionId) return;
+  async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
+    UI.resetSelect(targetSelect);
+    if (feedbackEl) feedbackEl.textContent = '';
+    if (!url) return;
 
     try {
-      spinnerEl?.classList.remove('d-none');
-      const res  = await fetch(`${pathListConnectors}?solution_id=${encodeURIComponent(solutionId)}`, {
-        headers: { 'X-Requested-With': 'XMLHttpRequest' }
-      });
-      const html = await res.text();
-      selectEl.innerHTML = '';
-
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      placeholder.textContent = '';
-      selectEl.appendChild(placeholder);
-
+      UI.toggle(spinner, true);
+      const html = await UI.fetchHtml(url, params);
+      
+      targetSelect.innerHTML = '';
+      targetSelect.appendChild(new Option('', '', true, true));
+      
       if (html) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = html;
-        tmp.querySelectorAll('option').forEach(opt => {
-          selectEl.appendChild(opt);
-        });
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        Array.from(temp.querySelectorAll('option')).forEach(opt => targetSelect.appendChild(opt));
       }
-      selectEl.disabled = false;
+      
+      UI.syncSelectize(targetSelect);
+      UI.enableSelect(targetSelect);
 
-      if (window.makeSelectSearchable) {
-        window.makeSelectSearchable(selectEl);
-      }
-    } catch {
-      resetSelect(selectEl);
-      selectEl.disabled = false;
-      setFeed(side, 'Impossible de charger les connecteurs.', true);
+    } catch (e) {
+      UI.resetSelect(targetSelect);
+      UI.enableSelect(targetSelect);
+      if (feedbackEl) feedbackEl.textContent = 'Error loading data.';
     } finally {
-      spinnerEl?.classList.add('d-none');
+      UI.toggle(spinner, false);
     }
   }
 
-  async function loadModulesFor(side, connectorId) {
-    const selectEl  = side === 'source' ? srcMod : tgtMod;
-    const spinnerEl = side === 'source' ? srcModSpin : tgtModSpin;
+  const loadConnectorsFor = (side, solutionId) => {
+    if (!solutionId) return Promise.resolve();
+    const group = side === 'source' ? EL.src : EL.tgt;
+    return loadSelectData('connectors', PATHS.connectors, { solution_id: solutionId }, group.conn, group.spin, group.feed);
+  };
 
-    resetSelect(selectEl);
-
-    if (!pathListModule || !connectorId) return;
-
+  const loadModulesFor = (side, connectorId) => {
+    if (!connectorId) return Promise.resolve();
+    const group = side === 'source' ? EL.src : EL.tgt;
     const type = side === 'source' ? 'source' : 'cible';
-    const url  = `${pathListModule}?id=${encodeURIComponent(connectorId)}&type=${encodeURIComponent(type)}`;
+    return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, null);
+  };
+
+  async function loadStep3Params() {
+    if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
+    
+    if (!EL.src.conn.value || !EL.tgt.conn.value || !EL.src.mod.value || !EL.tgt.mod.value) {
+        EL.paramsContainer.innerHTML = '';
+        return;
+    }
+
+    const params = {
+      src_connector: EL.src.conn.value,
+      tgt_connector: EL.tgt.conn.value,
+      src_module: EL.src.mod.value,
+      tgt_module: EL.tgt.mod.value
+    };
 
     try {
-      spinnerEl?.classList.remove('d-none');
-      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      const html = await res.text();
-      selectEl.innerHTML = '';
-      const placeholder = document.createElement('option');
-      placeholder.value = '';
-      placeholder.disabled = true;
-      placeholder.selected = true;
-      placeholder.textContent = '';
-      selectEl.appendChild(placeholder);
+      EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
+      const html = await UI.fetchHtml(step3ParamsPath, params);
+      EL.paramsContainer.innerHTML = html;
 
-      if (html) {
-        const tmp = document.createElement('div');
-        tmp.innerHTML = html;
-        tmp.querySelectorAll('option').forEach(opt => {
-          selectEl.appendChild(opt);
+      const modeSelect = UI.get('mode');
+      if (modeSelect) {
+        modeSelect.addEventListener('change', () => { if (step3IsComplete()) revealStep4and5(); });
+        if (modeSelect.value) revealStep4and5();
+      }
+
+      const dupSelect = UI.get('duplicate-field');
+      if (dupSelect) {
+        dupSelect.addEventListener('change', () => {
+          if (step3IsComplete()) revealStep4and5();
+          const label = dupSelect.options[dupSelect.selectedIndex]?.textContent?.trim();
+          if (label && window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(label);
         });
       }
-
-      selectEl.disabled = false;
-
-      // ➜ Search sur les modules
-      if (window.makeSelectSearchable) {
-        window.makeSelectSearchable(selectEl);
-      }
-    } catch {
-      resetSelect(selectEl);
-    } finally {
-      spinnerEl?.classList.add('d-none');
+    } catch (e) {
+      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Impossible de charger les paramètres.</div>';
     }
+  }
+
+  function step3IsComplete() {
+    const modeEl = UI.get('mode');
+    return !!(modeEl && modeEl.value);
   }
 
   function bothModulesSelected() {
-    return !!(srcMod && srcMod.value && tgtMod && tgtMod.value);
+    return !!(EL.src.mod.value && EL.tgt.mod.value);
   }
 
   function revealStep3() {
-    if (!step3) return;
-    step3.classList.remove('d-none');
+    if (!EL.step3) return;
+    UI.toggle(EL.step3, true);
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
-  async function loadDuplicateFields() {
-    if (!step3 || !duplicateSel || !pathDup) return;
-    if (!tgtConn?.value || !tgtMod?.value) {
-      duplicateSel.innerHTML = '<option value="" selected></option>';
-      duplicateSel.disabled = true;
-      return;
-    }
-
-    const url = `${pathDup}?connector_id=${encodeURIComponent(tgtConn.value)}&module=${encodeURIComponent(tgtMod.value)}`;
-
-    try {
-      const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      const html = await res.text();
-      duplicateSel.innerHTML = html || '<option value="" disabled selected></option>';
-      duplicateSel.disabled = false;
-      if (syncSel) syncSel.disabled = false;
-
-      if (window.makeSelectSearchable) {
-        window.makeSelectSearchable(duplicateSel);
-      }
-    } catch {
-      duplicateSel.innerHTML = '<option value="" disabled selected></option>';
-      duplicateSel.disabled = true;
-    }
-  }
-
   function tryRevealStep3() {
-    if (!step3) return;
+    if (!EL.step3) return;
     if (bothModulesSelected()) {
       revealStep3();
-      loadDuplicateFields();
+      loadStep3Params();
     }
   }
 
-  /* STEP 4 — FILTERS */
-  function buildFilterFieldOptions() {
-    const filterSelect = document.getElementById('rule-filter-field');
+  function resetStep3AndBelow() {
+    if (EL.paramsContainer) EL.paramsContainer.innerHTML = '';
+    if (EL.step4Body) EL.step4Body.innerHTML = '';
+    filtersLoaded = false;
+    const mapBody = UI.get('rule-mapping-body');
+    if (mapBody) mapBody.innerHTML = '';
+    
+    UI.toggle(EL.step4, false);
+    UI.toggle(EL.step5, false);
+  }
+
+  const loadFiltersUI = async () => {
+    if (!EL.step4 || !EL.step4Body) return;
+    const pathFilter = EL.step4.getAttribute('data-path-filters');
+    if (!pathFilter) return;
+
+    const params = {
+      src_solution_id: EL.src.sol.value,
+      tgt_solution_id: EL.tgt.sol.value,
+      src_module: EL.src.mod.value,
+      tgt_module: EL.tgt.mod.value,
+      src_connector_id: EL.src.conn.value,
+      tgt_connector_id: EL.tgt.conn.value
+    };
+
+    const rid = new URLSearchParams(location.search).get('rule_id');
+    if (rid) params.rule_id = rid;
+
+    try {
+      const html = await UI.fetchHtml(pathFilter, params);
+      EL.step4Body.innerHTML = html;
+      if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
+      if (window.initFiltersUI) window.initFiltersUI();
+      if (window.initMappingUI) window.initMappingUI();
+    } catch {
+      EL.step4Body.innerHTML = '<p class="text-danger">Impossible de charger les filtres.</p>';
+    }
+  };
+  window.mydLoadRuleFilters = loadFiltersUI;
+
+  function revealStep4and5() {
+    if (EL.step4 && EL.step4.classList.contains('d-none')) {
+      UI.toggle(EL.step4, true);
+      if (window.mydLoadRuleFilters && !filtersLoaded) {
+        window.mydLoadRuleFilters();
+        filtersLoaded = true;
+      }
+    }
+    if (EL.step5) {
+      UI.toggle(EL.step5, true);
+      if (window.initMappingUI) window.initMappingUI();
+    }
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
+  }
+
+  EL.src.sol?.addEventListener('change', () => {
+    UI.resetSelect(EL.src.conn); UI.resetSelect(EL.src.mod);
+    loadConnectorsFor('source', EL.src.sol.value);
+  });
+  EL.tgt.sol?.addEventListener('change', () => {
+    UI.resetSelect(EL.tgt.conn); UI.resetSelect(EL.tgt.mod);
+    loadConnectorsFor('cible', EL.tgt.sol.value);
+  });
+  EL.src.conn?.addEventListener('change', () => loadModulesFor('source', EL.src.conn.value));
+  EL.tgt.conn?.addEventListener('change', () => {
+    loadModulesFor('cible', EL.tgt.conn.value);
+    if (EL.tgt.mod.value) tryRevealStep3();
+  });
+  EL.src.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
+  EL.tgt.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
+
+  window.loadConnectorsFor = loadConnectorsFor;
+  window.loadModulesFor = loadModulesFor;
+  window.tryRevealStep3 = tryRevealStep3;
+  window.loadStep3Params = loadStep3Params;
+})();
+
+/* ============================================================
+ * FILTERS & MAPPING UI FUNCTIONS (Global)
+ * ============================================================ */
+(function() {
+  const getJsonAttr = (el, attr) => {
+    if (!el || !el.value) return null;
+    const opt = el.options[el.selectedIndex];
+    try { return JSON.parse(opt.getAttribute(attr)); } catch { return null; }
+  };
+
+  window.buildFilterFieldOptions = function() {
+    const filterSelect = UI.get('rule-filter-field');
+    const srcMod = UI.get('source-module');
+    const tgtMod = UI.get('target-module');
     if (!filterSelect) return;
 
-    const placeholderText = filterSelect.querySelector('option[value=""]')?.textContent || '';
+    const placeholder = filterSelect.querySelector('option[value=""]')?.textContent || '';
     filterSelect.innerHTML = '';
-    const placeholder = document.createElement('option');
-    placeholder.value = '';
-    placeholder.textContent = placeholderText;
-    filterSelect.appendChild(placeholder);
-    const srcFields = getFieldsFromModuleSelect(srcMod);
-    const tgtFields = getFieldsFromModuleSelect(tgtMod);
+    filterSelect.appendChild(new Option(placeholder, '', true, true));
 
-    if (srcFields && Object.keys(srcFields).length) {
-      const og = document.createElement('optgroup');
-      og.label = 'Source Fields';
-      Object.entries(srcFields).forEach(([name, label]) => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = label;
-        og.appendChild(opt);
-      });
-      filterSelect.appendChild(og);
-    }
+    const addGroup = (label, fields) => {
+      if (fields && Object.keys(fields).length) {
+        const og = document.createElement('optgroup');
+        og.label = label;
+        Object.entries(fields).forEach(([val, txt]) => og.appendChild(new Option(val, val)));
+        filterSelect.appendChild(og);
+      }
+    };
 
-    if (tgtFields && Object.keys(tgtFields).length) {
-      const og = document.createElement('optgroup');
-      og.label = 'Target Fields';
-      Object.entries(tgtFields).forEach(([name, label]) => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = label;
-        og.appendChild(opt);
-      });
-      filterSelect.appendChild(og);
-    }
+    addGroup('Source Fields', getJsonAttr(srcMod, 'data-fields'));
+    addGroup('Target Fields', getJsonAttr(tgtMod, 'data-fields'));
+  };
 
-    if (window.makeSelectSearchable) {
-      window.makeSelectSearchable(filterSelect);
-    }
-  }
+  window.addFilterRow = function(fieldVal, opVal, valueVal) {
+      const listWrap = UI.get('rule-filters-list');
+      const fieldSelect = UI.get('rule-filter-field');
+      const opSelect = UI.get('rule-filter-operator');
+      
+      if (!listWrap || !fieldVal || !opVal) return;
+      let fieldLabel = fieldVal;
+      let opLabel = opVal;
 
-  function initFiltersUI() {
-    const fieldSelect = document.getElementById('rule-filter-field');
-    const opSelect    = document.getElementById('rule-filter-operator');
-    const valueInput  = document.getElementById('rule-filter-value');
-    const addBtn      = document.getElementById('rule-filter-add');
-    const listWrap    = document.getElementById('rule-filters-list');
+      if (fieldSelect) {
+          const opt = Array.from(fieldSelect.querySelectorAll('option')).find(o => o.value === fieldVal);
+          if (opt) fieldLabel = opt.textContent;
+      }
+      if (opSelect) {
+          const opt = Array.from(opSelect.options).find(o => o.value === opVal);
+          if (opt) opLabel = opt.textContent;
+      }
 
-    if (!fieldSelect || !opSelect || !valueInput || !addBtn || !listWrap) return;
-    if (addBtn.dataset.mydFiltersBound === '1') return;
-    addBtn.dataset.mydFiltersBound = '1';
-
-    addBtn.addEventListener('click', () => {
-      const fieldVal   = fieldSelect.value;
-      const fieldLabel = fieldSelect.options[fieldSelect.selectedIndex]?.text || fieldVal;
-      const opVal      = opSelect.value;
-      const opLabel    = opSelect.options[opSelect.selectedIndex]?.text || opVal;
-      const value      = valueInput.value.trim();
-
-      if (!fieldVal || !opVal || !value) return;
-
-      const emptyP = listWrap.querySelector('p.text-muted');
-      if (emptyP) emptyP.remove();
+      const emptyMsg = listWrap.querySelector('p.text-muted');
+      if (emptyMsg) emptyMsg.remove();
 
       let ul = listWrap.querySelector('ul');
       if (!ul) {
@@ -398,668 +428,325 @@
 
       const li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center';
-      const span = document.createElement('span');
-      span.innerHTML = `<strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${value}`;
+      
+      li.innerHTML = `<span><strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${valueVal}</span>`;
+      
       const delBtn = document.createElement('button');
-      delBtn.type = 'button';
       delBtn.className = 'btn btn-sm text-danger';
       delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-      delBtn.addEventListener('click', () => {
+      delBtn.type = 'button';
+      delBtn.onclick = () => {
         li.remove();
-        if (!ul.querySelector('li')) {
-          const p = document.createElement('p');
-          p.className = 'text-muted mb-0';
-          p.textContent = 'No filters have been defined yet.';
-          listWrap.appendChild(p);
-        }
-      });
-
-      li.appendChild(span);
+        if (!ul.children.length) listWrap.innerHTML = '<p class="text-muted mb-0">No filters have been defined yet.</p>';
+      };
+      
       li.appendChild(delBtn);
       ul.appendChild(li);
-      fieldSelect.value = '';
-      opSelect.value    = '';
-      valueInput.value  = '';
+  };
+
+  window.initFiltersUI = function() {
+    const addBtn = UI.get('rule-filter-add');
+    if (!addBtn || addBtn.dataset.bound) return;
+    addBtn.dataset.bound = '1';
+
+    addBtn.addEventListener('click', () => {
+      const fieldSel = UI.get('rule-filter-field');
+      const opSel = UI.get('rule-filter-operator');
+      const valInput = UI.get('rule-filter-value');
+
+      if (!fieldSel.value || !opSel.value || !valInput.value.trim()) return;
+
+      window.addFilterRow(fieldSel.value, opSel.value, valInput.value.trim());
+      fieldSel.value = ''; 
+      opSel.value = ''; 
+      valInput.value = '';
     });
-  }
+  };
 
-  /* STEP 5 — MAPPING */
-  function createMappingSelect(fieldsObj, placeholderText) {
-    const select = document.createElement('select');
-    select.className = 'form-select';
-
-    const optEmpty = document.createElement('option');
-    optEmpty.value = '';
-    optEmpty.textContent = placeholderText || '';
-    select.appendChild(optEmpty);
-
-    if (fieldsObj && Object.keys(fieldsObj).length) {
-      Object.entries(fieldsObj).forEach(([name, label]) => {
-        const opt = document.createElement('option');
-        opt.value = name;
-        opt.textContent = label;
-        select.appendChild(opt);
-      });
-    }
-    return select;
+  function createMappingSelect(fields) {
+    const sel = document.createElement('select');
+    sel.className = 'form-select';
+    sel.appendChild(new Option('', '', true, true));
+    if (fields) Object.entries(fields).forEach(([v, t]) => sel.appendChild(new Option(v, v)));
+    return sel;
   }
 
   function genRowId() {
-    if (window.crypto?.getRandomValues) {
-      const buf = new Uint8Array(16);
-      window.crypto.getRandomValues(buf);
-      buf[6] = (buf[6] & 0x0f) | 0x40;
-      buf[8] = (buf[8] & 0x3f) | 0x80;
-      const toHex = n => n.toString(16).padStart(2, '0');
-      const hex = Array.from(buf, toHex).join('');
-      return `${hex.slice(0,8)}-${hex.slice(8,12)}-${hex.slice(12,16)}-${hex.slice(16,20)}-${hex.slice(20)}`;
-    }
-    return 'row-' + Date.now() + '-' + Math.random().toString(36).slice(2, 10);
+    return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   }
 
-  function addMappingRow(tbody) {
-    const srcFields = getFieldsFromModuleSelect(srcMod);
-    const tgtFields = getFieldsFromModuleSelect(tgtMod);
-    const tr    = document.createElement('tr');
-    const tdTgt = document.createElement('td'); tdTgt.className = 'cell-target';
-    const tdSrc = document.createElement('td'); tdSrc.className = 'cell-source';
-    const tdAct = document.createElement('td'); tdAct.className = 'cell-actions';
-    const tdDel = document.createElement('td'); tdDel.className = 'cell-delete text-end';
-    const tgtSelect = createMappingSelect(tgtFields, '');
-    tgtSelect.classList.add('rule-mapping-target');
-    if (window.makeSelectSearchable) {
-      window.makeSelectSearchable(tgtSelect);
-    }
+  window.addMappingRow = function(tbody) {
+    const srcFields = getJsonAttr(UI.get('source-module'), 'data-fields');
+    const tgtFields = getJsonAttr(UI.get('target-module'), 'data-fields');
 
+    const tr = document.createElement('tr');
+    tr.dataset.rowId = genRowId();
+
+    // Target Select
+    const tdTgt = document.createElement('td');
+    const tgtSel = createMappingSelect(tgtFields);
+    tgtSel.classList.add('rule-mapping-target');
+    tdTgt.appendChild(tgtSel);
+
+    // Source Select + Badges
+    const tdSrc = document.createElement('td');
     const srcWrapper = document.createElement('div');
     srcWrapper.className = 'mapping-src-wrapper';
-    const srcBadgesContainer = document.createElement('div');
-    srcBadgesContainer.className = 'mapping-src-badges pt-1';
+    const srcSel = createMappingSelect(srcFields);
+    srcSel.classList.add('rule-mapping-source-picker');
+    const badgesDiv = document.createElement('div');
+    badgesDiv.className = 'mapping-src-badges pt-1';
 
-    const srcSelect = createMappingSelect(srcFields, '');
-    srcSelect.classList.add('rule-mapping-source-picker');
-    if (window.makeSelectSearchable) {
-      window.makeSelectSearchable(srcSelect);
-    }
-
-    srcSelect.addEventListener('change', () => {
-      const value = srcSelect.value;
-      if (!value) return;
-      const label = srcSelect.options[srcSelect.selectedIndex]?.text || value;
-      if (srcBadgesContainer.querySelector(`[data-field="${CSS.escape(value)}"]`)) {
-        srcSelect.value = '';
-        return;
+    srcSel.addEventListener('change', () => {
+      const val = srcSel.value;
+      if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
+        srcSel.value = ''; return;
       }
-
+      const txt = srcSel.options[srcSel.selectedIndex].text;
       const badge = document.createElement('span');
       badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-      badge.dataset.field = value;
-
-      const badgeLabel = document.createElement('span');
-      badgeLabel.className = 'mapping-src-badge-label';
-      badgeLabel.textContent = label;
-
-      const removeBtn = document.createElement('button');
-      removeBtn.type = 'button';
-      removeBtn.className = 'p-0 ms-2 mapping-src-badge-remove';
-      removeBtn.innerHTML = '&times;';
-      removeBtn.addEventListener('click', () => badge.remove());
-
-      badge.appendChild(badgeLabel);
-      badge.appendChild(removeBtn);
-      srcBadgesContainer.appendChild(badge);
-      srcSelect.value = '';
+      badge.dataset.field = val;
+      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
+      badge.querySelector('button').onclick = () => badge.remove();
+      badgesDiv.appendChild(badge);
+      srcSel.value = '';
     });
 
-    srcWrapper.appendChild(srcSelect);
-    srcWrapper.appendChild(srcBadgesContainer);
-    const actions = document.createElement('div');
-    actions.className = 'mapping-actions d-flex align-items-center';
-    const formulaSlot = document.createElement('div');
-    formulaSlot.className = 'formula-slot is-empty';
-    formulaSlot.textContent = '...';
-    const formBtn = document.createElement('button');
-    formBtn.type  = 'button';
-    formBtn.setAttribute('data-bs-toggle', 'modal');
-    formBtn.setAttribute('data-bs-target', '#mapping-formula');
-    formBtn.className = 'btn btn-sm ms-2 rule-mapping-formula';
-    formBtn.innerHTML = '<i class="fa fa-code"></i>';
+    srcWrapper.append(srcSel, badgesDiv);
+    tdSrc.appendChild(srcWrapper);
 
-    actions.appendChild(formulaSlot);
-    actions.appendChild(formBtn);
-
+    // Actions (Formula)
+    const tdAct = document.createElement('td');
+    tdAct.className = 'd-flex align-items-center';
+    const slot = document.createElement('div');
+    slot.className = 'formula-slot is-empty';
+    slot.textContent = '...';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm ms-2 rule-mapping-formula';
+    btn.innerHTML = '<i class="fa fa-code"></i>';
+    btn.type = 'button';
+    btn.setAttribute('data-bs-toggle', 'modal');
+    btn.setAttribute('data-bs-target', '#mapping-formula');
+    
     const hidden = document.createElement('input');
-    hidden.type = 'hidden';
-    hidden.className = 'rule-mapping-formula-input';
-    hidden.name = 'mapping_formula[]';
+    hidden.type = 'hidden'; hidden.className = 'rule-mapping-formula-input'; hidden.name = 'mapping_formula[]';
 
+    tdAct.append(slot, btn, hidden);
+
+    btn.onclick = () => {
+      const container = UI.get('formula-selected-fields');
+      const modal = UI.get('mapping-formula');
+      if (container && modal) {
+        container.innerHTML = '';
+        const badges = tr.querySelectorAll('.mapping-src-badge');
+        if (!badges.length) container.innerHTML = '<span class="text-muted">No field</span>';
+        
+        badges.forEach(b => {
+          const chip = document.createElement('span');
+          chip.className = 'badge-formula rounded-pill px-3 mb-3';
+          chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
+          chip.dataset.field = b.dataset.field;
+          container.appendChild(chip);
+        });
+        
+        modal.dataset.currentRowId = tr.dataset.rowId;
+        const area = UI.get('area_insert');
+        if (area) area.value = hidden.value || '';
+      }
+    };
+
+    // Delete
+    const tdDel = document.createElement('td');
+    tdDel.className = 'text-end';
     const delBtn = document.createElement('button');
-    delBtn.type  = 'button';
     delBtn.className = 'btn btn-sm text-danger';
     delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.addEventListener('click', () => tr.remove());
-
-    tdTgt.appendChild(tgtSelect);
-    tdSrc.appendChild(srcWrapper);
-    tdAct.appendChild(actions);
-    tdAct.appendChild(hidden);
+    delBtn.type = 'button';
+    delBtn.onclick = () => tr.remove();
     tdDel.appendChild(delBtn);
 
-    tr.appendChild(tdTgt);
-    tr.appendChild(tdSrc);
-    tr.appendChild(tdAct);
-    tr.appendChild(tdDel);
-
+    tr.append(tdTgt, tdSrc, tdAct, tdDel);
     tbody.appendChild(tr);
+  };
 
-    formBtn.addEventListener('click', () => {
-      const container = document.getElementById('formula-selected-fields');
-      if (!container) return;
+  window.initMappingUI = function() {
+    const btn = UI.get('rule-mapping-add');
+    const tbody = UI.get('rule-mapping-body');
+    if (!btn || !tbody) return;
 
-      container.innerHTML = '';
-      const srcBadges = tr.querySelectorAll('.mapping-src-badge');
+    if (!tbody.querySelector('tr')) window.addMappingRow(tbody);
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => window.addMappingRow(tbody));
+  };
 
-      srcBadges.forEach((b) => {
-        const label = b.querySelector('.mapping-src-badge-label')?.textContent || b.dataset.field;
-        const chip  = document.createElement('span');
-        chip.className = 'badge-formula rounded-pill px-3 mb-3';
-        chip.textContent = label;
-        if (b.dataset.field) chip.dataset.field = b.dataset.field;
-        container.appendChild(chip);
-      });
-
-      if (!container.children.length) {
-        const span = document.createElement('span');
-        span.className = 'text-muted';
-        span.textContent = 'No field';
-        container.appendChild(span);
-      }
-
-      const modalEl = document.getElementById('mapping-formula');
-      if (!modalEl) return;
-
-      const id = tr.dataset.rowId || genRowId();
-      tr.dataset.rowId = id;
-      modalEl.dataset.currentRowId = id;
-
-      const area = document.getElementById('area_insert');
-      if (area) area.value = hidden.value || '';
-    });
-  }
-
-  function initMappingUI() {
-    const addBtn = document.getElementById('rule-mapping-add');
-    const tbody  = document.getElementById('rule-mapping-body');
-    if (!addBtn || !tbody) return;
-    if (addBtn.dataset.mydMappingBound === '1') return;
-    addBtn.dataset.mydMappingBound = '1';
-    addBtn.addEventListener('click', () => addMappingRow(tbody));
-    if (!tbody.querySelector('tr')) addMappingRow(tbody);
-  }
-
-  function ensureDuplicateMappingRow(targetField) {
-    if (!targetField) return;
-
-    const tbody = document.getElementById('rule-mapping-body');
+  window.ensureDuplicateMappingRow = function(targetField) {
+    const tbody = UI.get('rule-mapping-body');
     if (!tbody) return;
-
-    if (typeof initMappingUI === 'function') {
-      initMappingUI();
-    }
+    window.initMappingUI();
 
     const rows = Array.from(tbody.querySelectorAll('tr'));
+    const exists = rows.some(tr => tr.querySelector('.rule-mapping-target')?.value === targetField);
+    if (exists) return;
 
-    // Si une ligne existe déjà pour ce target → on ne touche à rien
-    const existingRow = rows.find(tr => {
-      const sel = tr.querySelector('.rule-mapping-target');
-      return sel && sel.value === targetField;
-    });
-    if (existingRow) return;
-
-    // Chercher d'abord une ligne avec target vide
-    let row = rows.find(tr => {
-      const sel = tr.querySelector('.rule-mapping-target');
-      return sel && !sel.value;
-    });
-
-    // Sinon on ajoute une nouvelle ligne
-    if (!row && typeof addMappingRow === 'function') {
-      addMappingRow(tbody);
-      row = tbody.lastElementChild;
-    }
-    if (!row) return;
-
-    const tgtSelect = row.querySelector('.rule-mapping-target');
-    if (!tgtSelect) return;
-
-    let option = tgtSelect.querySelector(`option[value="${CSS.escape(targetField)}"]`);
-
-    if (!option) {
-      const lower = targetField.toLowerCase();
-      option = Array.from(tgtSelect.options).find(o =>
-        o.value.toLowerCase() === lower ||
-        o.textContent.trim().toLowerCase() === lower
-      );
-    }
-
-    if (option) {
-      tgtSelect.value = option.value;
-    }
-  }
-
-  function resetStep3AndBelow() {
-    if (duplicateSel) {
-      duplicateSel.innerHTML = '<option value="" disabled selected></option>';
-      duplicateSel.value     = '';
-      duplicateSel.disabled  = true;
-    }
-    if (syncSel) {
-      syncSel.value    = '';
-      syncSel.disabled = true;
-    }
-    if (step4Body) step4Body.innerHTML = '';
-    filtersLoaded = false;
-    const mappingBody = document.getElementById('rule-mapping-body');
-    if (mappingBody) mappingBody.innerHTML = '';
-  }
-
-  function step3IsComplete() {
-    return !!(syncSel && syncSel.value);
-  }
-
-  (function () {
-    const step4 = document.getElementById('step-4');
-    if (!step4) return;
-
-    const step4BodyLocal = document.getElementById('step-4-body');
-    const pathFilter     = step4.getAttribute('data-path-filters');
-
-    async function loadFiltersUI() {
-      if (!pathFilter || !step4BodyLocal) return;
-
-      const params = new URLSearchParams();
-      const srcSol  = document.getElementById('source-solution');
-      const tgtSol  = document.getElementById('target-solution');
-      const srcMod  = document.getElementById('source-module');
-      const tgtMod  = document.getElementById('target-module');
-      const srcConn = document.getElementById('source-connector');
-      const tgtConn = document.getElementById('target-connector');
-
-      if (srcSol?.value)  params.append('src_solution_id', srcSol.value);
-      if (tgtSol?.value)  params.append('tgt_solution_id', tgtSol.value);
-      if (srcMod?.value)  params.append('src_module', srcMod.value);
-      if (tgtMod?.value)  params.append('tgt_module', tgtMod.value);
-      if (srcConn?.value) params.append('src_connector_id', srcConn.value);
-      if (tgtConn?.value) params.append('tgt_connector_id', tgtConn.value);
-
-      const qp  = new URLSearchParams(location.search);
-      const rid = qp.get('rule_id');
-      if (rid) params.append('rule_id', rid);
-
-      const url = params.toString() ? `${pathFilter}?${params.toString()}` : pathFilter;
-
-      try {
-        const res  = await fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-        const html = await res.text();
-        step4BodyLocal.innerHTML = html;
-
-        buildFilterFieldOptions();
-        initFiltersUI();
-        initMappingUI();
-      } catch {
-        step4BodyLocal.innerHTML = '<p class="text-danger">Impossible de charger les filtres.</p>';
-      }
-    }
-
-    window.mydLoadRuleFilters = loadFiltersUI;
-  })();
-
-  function revealStep4and5() {
-    if (step4Section && step4Section.classList.contains('d-none')) {
-      step4Section.classList.remove('d-none');
-      if (window.mydLoadRuleFilters && !filtersLoaded) {
-        window.mydLoadRuleFilters();
-        filtersLoaded = true;
-      }
-    }
-    if (step5Section) {
-      step5Section.classList.remove('d-none');
-      initMappingUI();
-    }
-
-    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
-  }
-
-  if (duplicateSel) {
-    duplicateSel.addEventListener('change', () => {
-      if (step3IsComplete()) {
-        revealStep4and5();
-      }
-
-      const selectedOption = duplicateSel.options[duplicateSel.selectedIndex];
-      if (!selectedOption) return;
-
-      // on utilise le texte affiché : "email", "username", etc.
-      const label = (selectedOption.textContent || '').trim();
-      if (!label) return;
-
-      ensureDuplicateMappingRow(label);
-    });
-  }
-
-  if (syncSel) {
-    syncSel.addEventListener('change', () => {
-      if (step3IsComplete()) revealStep4and5();
-    });
-  }
-
-  srcMod?.addEventListener('change', () => {
-    resetStep3AndBelow();
-    tryRevealStep3();
-    buildFilterFieldOptions();
-    if (step4Section && !step4Section.classList.contains('d-none') && window.mydLoadRuleFilters) {
-      window.mydLoadRuleFilters();
-      filtersLoaded = true;
-    }
-  });
-
-  tgtMod?.addEventListener('change', () => {
-    resetStep3AndBelow();
-    tryRevealStep3();
-    buildFilterFieldOptions();
-    if (step4Section && !step4Section.classList.contains('d-none') && window.mydLoadRuleFilters) {
-      window.mydLoadRuleFilters();
-      filtersLoaded = true;
-    }
-  });
-
-  srcSol?.addEventListener('change', () => {
-    resetSelect(srcConn);
-    resetSelect(srcMod);
-    loadConnectorsFor('source', srcSol.value);
-  });
-
-  tgtSol?.addEventListener('change', () => {
-    resetSelect(tgtConn);
-    resetSelect(tgtMod);
-    loadConnectorsFor('cible', tgtSol.value);
-  });
-
-  srcConn?.addEventListener('change', () => {
-    loadModulesFor('source', srcConn.value);
-  });
-
-  tgtConn?.addEventListener('change', () => {
-    loadModulesFor('cible', tgtConn.value);
-    if (tgtMod && tgtMod.value) tryRevealStep3();
-  });
-
-  window.loadConnectorsFor       = loadConnectorsFor;
-  window.loadModulesFor          = loadModulesFor;
-  window.buildFilterFieldOptions = buildFilterFieldOptions;
-  window.initMappingUI           = initMappingUI;
-  window.addMappingRow           = addMappingRow;
-  window.tryRevealStep3          = tryRevealStep3;
-  window.loadDuplicateFields     = loadDuplicateFields;
+    let row = rows.find(tr => !tr.querySelector('.rule-mapping-target')?.value);
+    if (!row) { window.addMappingRow(tbody); row = tbody.lastElementChild; }
+    
+    const sel = row.querySelector('.rule-mapping-target');
+    const opt = Array.from(sel.options).find(o => o.value === targetField || o.text.trim() === targetField);
+    if (opt) sel.value = opt.value;
+  };
 })();
 
-/* ===========================================
- * EDIT BOOTSTRAP 
- * =========================================== */
+/* ============================================================
+ * EDIT
+ * ============================================================ */
 (function () {
   const ruleData = window.initialRule || null;
   if (!ruleData) {
-    if (typeof window.ruleInitDone === 'function') {
-      window.ruleInitDone();
-    }
+    if (typeof window.ruleInitDone === 'function') window.ruleInitDone();
     return;
   }
 
-  if (!ruleData.mode) {
-    ruleData.mode = 'edit';
-  }
-
   window.__EDIT_MODE__ = true;
-
-  const step2   = document.getElementById('step-2');
-  const step3   = document.getElementById('step-3');
-  const step4   = document.getElementById('step-4');
-  const step5   = document.getElementById('step-5');
-  const srcSol  = document.getElementById('source-solution');
-  const tgtSol  = document.getElementById('target-solution');
-  const srcConn = document.getElementById('source-connector');
-  const tgtConn = document.getElementById('target-connector');
-  const srcMod  = document.getElementById('source-module');
-  const tgtMod  = document.getElementById('target-module');
-  const duplicateSel = document.getElementById('duplicate-field');
-  const syncSel      = document.getElementById('sync-mode');
-  const nameInput    = document.getElementById('rulename');
-  const loadConnectorsFor       = window.loadConnectorsFor;
-  const loadModulesFor          = window.loadModulesFor;
-  const buildFilterFieldOptions = window.buildFilterFieldOptions;
-  const initMappingUI           = window.initMappingUI;
-  const addMappingRow           = window.addMappingRow;
-  const mydLoadRuleFilters      = window.mydLoadRuleFilters;
-
-  function hydrateFiltersFromJson(filters) {
-    if (!filters || !filters.length) return;
-
-    const listWrap    = document.getElementById('rule-filters-list');
-    const fieldSelect = document.getElementById('rule-filter-field');
-    const opSelect    = document.getElementById('rule-filter-operator');
-
-    if (!listWrap || !fieldSelect || !opSelect) return;
-
-    const emptyP = listWrap.querySelector('p.text-muted');
-    if (emptyP) emptyP.remove();
-
-    let ul = listWrap.querySelector('ul');
-    if (!ul) {
-      ul = document.createElement('ul');
-      ul.className = 'list-group';
-      listWrap.appendChild(ul);
-    }
-
-    const getFieldLabel = (field) => {
-      const opt = fieldSelect.querySelector(`option[value="${CSS.escape(field)}"]`);
-      return opt ? opt.textContent : field;
-    };
-
-    const getOpLabel = (op) => {
-      const opt = Array.from(opSelect.options).find(o => o.value === op);
-      return opt ? opt.textContent : op;
-    };
-
-    filters.forEach(f => {
-      const li = document.createElement('li');
-      li.className = 'list-group-item d-flex justify-content-between align-items-center';
-      const fieldLabel = getFieldLabel(f.field);
-      const opLabel    = getOpLabel(f.operator);
-      const span = document.createElement('span');
-      span.innerHTML = `<strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${f.value}`;
-      const delBtn = document.createElement('button');
-      delBtn.type = 'button';
-      delBtn.className = 'btn btn-sm text-danger';
-      delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-      delBtn.addEventListener('click', () => {
-        li.remove();
-        if (!ul.querySelector('li')) {
-          const p = document.createElement('p');
-          p.className = 'text-muted mb-0';
-          p.textContent = 'No filters have been defined yet.';
-          listWrap.appendChild(p);
-        }
-      });
-
-      li.appendChild(span);
-      li.appendChild(delBtn);
-      ul.appendChild(li);
-    });
-  }
-
-  function hydrateMappingFromJson(mapping) {
-    if (!mapping || !mapping.length) return;
-    const tbody = document.getElementById('rule-mapping-body');
-    if (!tbody || typeof addMappingRow !== 'function') return;
-
-    tbody.innerHTML = '';
-
-    mapping.forEach(row => {
-      addMappingRow(tbody);
-      const tr = tbody.lastElementChild;
-      if (!tr) return;
-
-      const tgtSelect       = tr.querySelector('.rule-mapping-target');
-      const srcSelect       = tr.querySelector('.rule-mapping-source-picker');
-      const badgesContainer = tr.querySelector('.mapping-src-badges.pt-1, .mapping-src-badges'); // petit fallback
-      const formulaInput    = tr.querySelector('.rule-mapping-formula-input');
-      const formulaSlot     = tr.querySelector('.formula-slot');
-
-      if (tgtSelect && row.target) {
-        tgtSelect.value = row.target;
-      }
-
-      if (srcSelect && badgesContainer && row.source) {
-        const sources = Array.isArray(row.source)
-          ? row.source
-          : String(row.source).split(';').map(s => s.trim()).filter(Boolean);
-
-        sources.forEach(field => {
-          const opt   = srcSelect.querySelector(`option[value="${CSS.escape(field)}"]`);
-          const label = opt ? opt.textContent : field;
-          const badge = document.createElement('span');
-          badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-          badge.dataset.field = field;
-          const badgeLabel = document.createElement('span');
-          badgeLabel.className = 'mapping-src-badge-label';
-          badgeLabel.textContent = label;
-          const removeBtn = document.createElement('button');
-          removeBtn.type = 'button';
-          removeBtn.className = 'p-0 ms-2 mapping-src-badge-remove';
-          removeBtn.innerHTML = '&times;';
-          removeBtn.addEventListener('click', () => badge.remove());
-          badge.appendChild(badgeLabel);
-          badge.appendChild(removeBtn);
-          badgesContainer.appendChild(badge);
-        });
-      }
-
-      if (formulaInput && typeof row.formula === 'string') {
-        const f = row.formula.trim();
-        formulaInput.value = f;
-        if (formulaSlot) {
-          if (f) {
-            formulaSlot.classList.remove('is-empty');
-            formulaSlot.textContent = f;
-          } else {
-            formulaSlot.classList.add('is-empty');
-            formulaSlot.textContent = '';
-          }
-        }
-      }
-    });
-  }
+  const nameInput = UI.get('rulename');
 
   async function hydrateEditFromJson() {
-    console.log('[EDIT] hydrateEditFromJson() with ruleData = ', ruleData);
-
     try {
       if (nameInput) {
         nameInput.value = ruleData.name || '';
         nameInput.classList.add('is-valid');
       }
 
-      if (typeof window.__revealStep2 === 'function') {
-        window.__revealStep2();
-      } else if (step2) {
-        step2.classList.remove('d-none');
-      }
-
-      if (srcSol && ruleData.connection?.source?.solutionId && typeof loadConnectorsFor === 'function') {
-        srcSol.value = String(ruleData.connection.source.solutionId);
-        await loadConnectorsFor('source', srcSol.value);
-      }
-
-      if (tgtSol && ruleData.connection?.target?.solutionId && typeof loadConnectorsFor === 'function') {
-        tgtSol.value = String(ruleData.connection.target.solutionId);
-        await loadConnectorsFor('cible', tgtSol.value);
-      }
-
-      if (srcConn && ruleData.connection?.source?.connectorId && typeof loadModulesFor === 'function') {
-        srcConn.value = String(ruleData.connection.source.connectorId);
-        await loadModulesFor('source', srcConn.value);
-      }
-
-      if (tgtConn && ruleData.connection?.target?.connectorId && typeof loadModulesFor === 'function') {
-        tgtConn.value = String(ruleData.connection.target.connectorId);
-        await loadModulesFor('cible', tgtConn.value);
-      }
-
-      if (srcMod && ruleData.connection?.source?.module) {
-        srcMod.value = ruleData.connection.source.module;
-      }
-      if (tgtMod && ruleData.connection?.target?.module) {
-        tgtMod.value = ruleData.connection.target.module;
-      }
-
-      // Désactivation des selects en mode édition (y compris selectize si présent)
-      if (window.__EDIT_MODE__) {
-        const toDisable = [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod];
-        toDisable.forEach(el => {
-          if (!el) return;
-          el.disabled = true;
-          if (el.selectize && typeof el.selectize.disable === 'function') {
-            el.selectize.disable();
+      if (typeof window.__revealStep2 === 'function') window.__revealStep2();
+      else {
+          const s2 = UI.get('step-2');
+          if(s2) {
+              s2.classList.remove('d-none');
+              s2.style.opacity = '1';
           }
-        });
       }
 
-      if (step3) {
-        step3.classList.remove('d-none');
+      const srcSol = UI.get('source-solution');
+      if (srcSol && ruleData.connection?.source?.solutionId) {
+        UI.setValue(srcSol, ruleData.connection.source.solutionId);
+        await window.loadConnectorsFor('source', srcSol.value);
+      }
+      
+      const tgtSol = UI.get('target-solution');
+      if (tgtSol && ruleData.connection?.target?.solutionId) {
+        UI.setValue(tgtSol, ruleData.connection.target.solutionId);
+        await window.loadConnectorsFor('cible', tgtSol.value);
       }
 
-      if (duplicateSel && ruleData.syncOptions?.duplicateField) {
-        duplicateSel.disabled = false;
-        duplicateSel.value = ruleData.syncOptions.duplicateField;
-        if (window.makeSelectSearchable) {
-          window.makeSelectSearchable(duplicateSel);
-        }
+      const srcConn = UI.get('source-connector');
+      if (srcConn && ruleData.connection?.source?.connectorId) {
+        UI.setValue(srcConn, ruleData.connection.source.connectorId);
+        await window.loadModulesFor('source', srcConn.value);
       }
 
-      if (syncSel && ruleData.syncOptions?.type) {
-        syncSel.disabled = false;
-        syncSel.value = ruleData.syncOptions.type;
+      const tgtConn = UI.get('target-connector');
+      if (tgtConn && ruleData.connection?.target?.connectorId) {
+        UI.setValue(tgtConn, ruleData.connection.target.connectorId);
+        await window.loadModulesFor('cible', tgtConn.value);
       }
 
-      if (step4) {
-        step4.classList.remove('d-none');
+      const srcMod = UI.get('source-module');
+      if (srcMod && ruleData.connection?.source?.module) {
+        UI.setValue(srcMod, ruleData.connection.source.module);
       }
 
-      if (typeof mydLoadRuleFilters === 'function') {
-        await mydLoadRuleFilters();
+      const tgtMod = UI.get('target-module');
+      if (tgtMod && ruleData.connection?.target?.module) {
+        UI.setValue(tgtMod, ruleData.connection.target.module);
       }
 
-      if (typeof buildFilterFieldOptions === 'function') {
-        buildFilterFieldOptions();
+      [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod].forEach(el => {
+        if (!el) return;
+        el.disabled = true;
+        if (el.selectize) el.selectize.disable();
+      });
+
+      // Step 3
+      const step3 = UI.get('step-3');
+      if(step3) {
+          UI.toggle(step3, true);
+          await window.loadStep3Params();
+
+          if (ruleData.syncOptions?.type) {
+             UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
+          }
+          if (ruleData.syncOptions?.duplicateField) {
+            const d = UI.get('duplicate-field');
+            if (d) { 
+                d.disabled = false; 
+                UI.setValue(d, ruleData.syncOptions.duplicateField); 
+            }
+          }
+          if (ruleData.params) {
+            Object.entries(ruleData.params).forEach(([k, v]) => {
+              UI.setValue(UI.get(k), v);
+            });
+          }
       }
 
-      hydrateFiltersFromJson(ruleData.filters || []);
-
-      if (step5) {
-        step5.classList.remove('d-none');
+      // Step 4
+      const step4 = UI.get('step-4');
+      if(step4) {
+          UI.toggle(step4, true);
+          await window.mydLoadRuleFilters();
+          
+          if (ruleData.filters && ruleData.filters.length > 0) {
+              if (typeof window.addFilterRow === 'function') {
+                  ruleData.filters.forEach(f => {
+                      window.addFilterRow(f.field, f.operator, f.value);
+                  });
+              } else {
+                  console.error('Fonction addFilterRow introuvable');
+              }
+          }
       }
 
-      if (typeof initMappingUI === 'function') {
-        initMappingUI();
+      // Step 5
+      const step5 = UI.get('step-5');
+      if(step5) {
+          UI.toggle(step5, true);
+          window.initMappingUI();
+          
+          const tbody = UI.get('rule-mapping-body');
+          if (tbody) tbody.innerHTML = ''; 
+
+          (ruleData.mapping || []).forEach(row => {
+            window.addMappingRow(tbody);
+            const tr = tbody.lastElementChild;
+            if(!tr) return;
+            
+            const tSel = tr.querySelector('.rule-mapping-target');
+            if (tSel && row.target) tSel.value = row.target;
+
+            const sSel = tr.querySelector('.rule-mapping-source-picker');
+            if (sSel && row.source) {
+              const srcs = Array.isArray(row.source) ? row.source : row.source.split(';');
+              srcs.filter(Boolean).forEach(s => {
+                sSel.value = s.trim();
+                sSel.dispatchEvent(new Event('change'));
+              });
+            }
+
+            const hidden = tr.querySelector('.rule-mapping-formula-input');
+            const slot = tr.querySelector('.formula-slot');
+            if (row.formula && hidden) {
+              hidden.value = row.formula;
+              slot.textContent = row.formula;
+              slot.classList.remove('is-empty');
+            }
+          });
       }
 
-      hydrateMappingFromJson(ruleData.mapping || []);
     } catch (e) {
-      console && console.error && console.error('hydrateEditFromJson error', e);
+      console.error(e);
     } finally {
-      if (typeof window.ruleInitDone === 'function') {
-        window.ruleInitDone();
-      }
+      if (typeof window.ruleInitDone === 'function') window.ruleInitDone();
     }
   }
 
@@ -1071,872 +758,364 @@
 })();
 
 /* ===========================================
- * FUNCTION WIZARD — POPUP #mapping-formula
+ * FUNCTION WIZARD
  * =========================================== */
 $(function () {
-  const functionSelect      = $('#function-select');
-  const lookupOptions       = $('#lookup-options');
-  const lookupRule          = $('#lookup-rule');
-  const lookupField         = $('#lookup-field');
-  const functionParameter   = $('#function-parameter');
-  const insertFunctionBtn   = $('#insert-function-parameter');
-  const tooltipBox          = $('#function-tooltip');
-  const roundPrecisionInput = $('#round-precision');
-  const mappingFormulaModal = $('#mapping-formula');
-
-  let tooltipVisible   = false;
-  let currentTooltip   = '';
-  let selectedFunction = '';
-
-  function insertAtCursor($textarea, text) {
-    const el = $textarea[0];
+  const insertAtCursor = (el, text) => {
     if (!el) return;
-    const start = typeof el.selectionStart === 'number' ? el.selectionStart : el.value.length;
-    const end   = typeof el.selectionEnd   === 'number' ? el.selectionEnd   : start;
-    const before = el.value.substring(0, start);
-    const after  = el.value.substring(end);
-    el.value = before + text + after;
-    const newPos = start + text.length;
-    el.selectionStart = el.selectionEnd = newPos;
+    const [start, end] = [el.selectionStart, el.selectionEnd];
+    el.value = el.value.substring(0, start) + text + el.value.substring(end);
+    el.selectionStart = el.selectionEnd = start + text.length;
     el.focus();
-  }
+  };
+
+  const UI_WIZ = {
+    sel: $('#function-select'),
+    lookupOpts: $('#lookup-options'),
+    lookupRule: $('#lookup-rule'),
+    lookupField: $('#lookup-field'),
+    param: $('#function-parameter'),
+    tooltip: $('#function-tooltip'),
+    prec: $('#round-precision')
+  };
+
+  let tooltipVisible = false;
 
   $('#formula-selected-fields').on('click', '.badge-formula', function () {
-    const fieldName = $(this).data('field') || $(this).text().trim();
-    if (!fieldName) return;
-    insertAtCursor($('#area_insert'), `{${fieldName}}`);
-    if (typeof colorationSyntax === 'function') colorationSyntax();
-    if (typeof theme === 'function' && typeof style_template !== 'undefined') theme(style_template);
+    const field = $(this).data('field') || $(this).text().trim();
+    if (field) insertAtCursor(document.getElementById('area_insert'), `{${field}}`);
   });
 
   $('#toggle-tooltip').on('click', function () {
     tooltipVisible = !tooltipVisible;
-    if (tooltipVisible) {
-      $(this).find('i').removeClass('fa-question').addClass('fa-question-circle');
-      if (functionSelect.val() && currentTooltip) tooltipBox.text(currentTooltip).show();
-    } else {
-      $(this).find('i').removeClass('fa-question-circle').addClass('fa-question');
-      tooltipBox.hide();
-    }
+    $(this).find('i').toggleClass('fa-question fa-question-circle');
+    const tip = UI_WIZ.sel.find(':selected').data('tooltip');
+    if (tooltipVisible && tip) UI_WIZ.tooltip.text(tip).show();
+    else UI_WIZ.tooltip.hide();
   });
 
-  functionSelect.on('change', function () {
-    const selectedOption = $(this).find('option:selected');
-    selectedFunction = $(this).val();
-    currentTooltip   = selectedOption.data('tooltip');
+  UI_WIZ.sel.on('change', function () {
+    const val = $(this).val();
+    const isMdw = val.startsWith('mdw_');
+    const isRound = val === 'round';
+    const isLookup = val === 'lookup';
 
-    if (selectedFunction && selectedFunction.startsWith('mdw_')) {
-      $('#function-parameter-input').show();
-      $('#function-parameter').hide();
-    } else {
-      $('#function-parameter-input').show();
-      $('#function-parameter').show();
-    }
+    $('#function-parameter-input').toggle(!isLookup);
+    UI_WIZ.param.toggle(!isMdw);
+    $('#round-precision-input').toggle(isRound);
+    UI_WIZ.lookupOpts.toggle(isLookup);
 
-    if (currentTooltip && tooltipVisible && selectedFunction) {
-      tooltipBox.text(currentTooltip).show();
-    } else {
-      tooltipBox.hide();
-    }
-
-    $('#round-precision-input').toggle(selectedFunction === 'round');
-
-    if (selectedFunction === 'lookup') {
-      lookupOptions.show();
-      $('#function-parameter-input').hide();
-
-      $.ajax({
-        url: lookupgetrule,
-        method: 'GET',
-        data: { arg1: connectorsourceidlookup, arg2: connectortargetidlookup },
-        success: function (rules) {
-          lookupRule.empty();
-          lookupRule.append('<option value="">' + translations.selectRule + '</option>');
-          rules.forEach(rule => {
-            lookupRule.append(`<option value="${rule.id}">${rule.name}</option>`);
-          });
-          lookupRule.prop('disabled', false);
-        }
+    if (isLookup && typeof lookupgetrule !== 'undefined') {
+      $.get(lookupgetrule, { 
+        arg1: (typeof connectorsourceidlookup !== 'undefined' ? connectorsourceidlookup : 0), 
+        arg2: (typeof connectortargetidlookup !== 'undefined' ? connectortargetidlookup : 0) 
+      }, (res) => {
+        UI_WIZ.lookupRule.empty().append(new Option('Select...', ''));
+        res.forEach(r => UI_WIZ.lookupRule.append(new Option(r.name, r.id)));
+        UI_WIZ.lookupRule.prop('disabled', false);
       });
-    } else {
-      lookupOptions.hide();
-      $('#function-parameter-input').show();
     }
   });
 
-  insertFunctionBtn.on('click', function () {
-    if (!selectedFunction) return;
+  $('#insert-function-parameter').on('click', function () {
+    const func = UI_WIZ.sel.val();
+    if (!func) return;
+    const cat = UI_WIZ.sel.find(':selected').data('type');
+    const val = UI_WIZ.param.val().trim();
+    let call = `${func}()`;
 
-    const functionCategory = $('#function-select option:selected').data('type');
-    const areaInsert       = $('#area_insert');
-    const content          = areaInsert.val();
-    const position         = areaInsert[0]?.selectionStart ?? content.length;
-    let functionCall       = '';
-
-    if (selectedFunction === 'round') {
-      const parameterValue = functionParameter.val().trim();
-      const precision      = parseInt(roundPrecisionInput.val(), 10);
-
-      if (isNaN(precision) || precision < 1 || precision > 100) {
-        roundPrecisionInput.addClass('is-invalid');
-        return;
-      }
-
-      roundPrecisionInput.removeClass('is-invalid');
-      functionCall = `round(${parameterValue}, ${precision})`;
-      functionParameter.val('');
-      roundPrecisionInput.val('');
-    } else if (selectedFunction.startsWith('mdw_')) {
-      functionCall = `"${selectedFunction}"`;
-    } else {
-      const parameterValue = functionParameter.val().trim();
-      if (parameterValue) {
-        switch (functionCategory) {
-          case 1:
-            functionCall = `${selectedFunction}(${parameterValue})`;
-            break;
-          case 2:
-          case 3:
-            functionCall = `${selectedFunction}("${parameterValue}")`;
-            break;
-          case 4:
-            functionCall = `${selectedFunction}()`;
-            break;
-          default:
-            functionCall = `${selectedFunction}("${parameterValue}")`;
-        }
-      } else {
-        functionCall = `${selectedFunction}()`;
-      }
-      functionParameter.val('');
+    if (func === 'round') {
+      const p = parseInt(UI_WIZ.prec.val());
+      if (isNaN(p)) return UI_WIZ.prec.addClass('is-invalid');
+      UI_WIZ.prec.removeClass('is-invalid');
+      call = `round(${val}, ${p})`;
+    } else if (func.startsWith('mdw_')) {
+      call = `"${func}"`;
+    } else if (val) {
+      call = (cat === 1 || cat === 4) ? `${func}(${val})` : `${func}("${val}")`;
     }
 
-    const before = content.substring(0, position);
-    const after  = content.substring(position);
-    areaInsert.val(before + functionCall + after);
-
-    if (typeof colorationSyntax === 'function') colorationSyntax();
-    if (typeof theme === 'function' && typeof style_template !== 'undefined') theme(style_template);
+    insertAtCursor(document.getElementById('area_insert'), call);
+    UI_WIZ.param.val('');
   });
 
-  lookupRule.on('change', function () {
-    const selectedRule = $(this).val();
-    if (selectedRule) {
-      lookupField.empty().append('<option value="">' + translations.selectField + '</option>');
-      $('#formula-selected-fields .badge-formula').each(function () {
-        const fieldName = $(this).data('field') || $(this).text().trim();
-        lookupField.append(`<option value="${fieldName}">${fieldName}</option>`);
-      });
-      lookupField.prop('disabled', false);
-    } else {
-      lookupField.prop('disabled', true);
-    }
-  });
-
-  $('#submit-lookup').on('click', function () {
-    const val = lookupField.val();
-    if (!val) return;
-
-    const fieldName = String(val).split(' (')[0];
-    const errorEmpty    = $('#lookup-error-empty').is(':checked') ? 1 : 0;
-    const errorNotFound = $('#lookup-error-not-found').is(':checked') ? 1 : 0;
-    const lookupFormula = `lookup({${fieldName}}, "${lookupRule.val()}", ${errorEmpty}, ${errorNotFound})`;
-    const areaInsert = $('#area_insert');
-    const content    = areaInsert.val();
-    const position   = areaInsert[0]?.selectionStart ?? content.length;
-    const before = content.substring(0, position);
-    const after  = content.substring(position);
-    areaInsert.val(before + lookupFormula + after);
-
-    if (typeof colorationSyntax === 'function') colorationSyntax();
-    if (typeof theme === 'function' && typeof style_template !== 'undefined') theme(style_template);
-  });
-
-  roundPrecisionInput.on('input', function () {
-    const sanitized = this.value.replace(/[^0-9]/g, '');
-    if (sanitized !== this.value) this.value = sanitized;
-    const n = parseInt(sanitized, 10);
-    $(this).toggleClass('is-invalid', isNaN(n) || n < 1 || n > 100);
-  });
-
-  $('#mapping-formula-save').off('click').on('click', function () {
-    const modalEl = document.getElementById('mapping-formula');
-    const rowId   = modalEl?.dataset?.currentRowId;
-    if (!rowId) return;
-
-    const tr = document.querySelector(`tr[data-row-id="${CSS.escape(rowId)}"]`);
-    if (!tr) return;
-
-    const formula = ($('#area_insert').val() || '').trim();
-    window.setRowFormula(tr, formula);
-  });
-
-  function resetFunctionWizard() {
-    functionSelect.val('').trigger('change');
-    lookupRule.val('').trigger('change');
-    lookupField.val('').prop('disabled', true);
-    functionParameter.val('');
-    roundPrecisionInput.val('').removeClass('is-invalid');
-    tooltipBox.hide();
-    tooltipVisible   = false;
-    currentTooltip   = '';
-    selectedFunction = '';
-  }
-
-  mappingFormulaModal.on('hidden.bs.modal', resetFunctionWizard);
-});
-
-/* ===========================================
- * SIMULATION
- * =========================================== */
-(function () {
-  const modal    = document.getElementById('mapping-simulation');
-  if (!modal) return;
-
-  const runUrl   = modal.getAttribute('data-endpoint-run') || '';
-  const countUrl = modal.getAttribute('data-endpoint-count') || '';
-  const result   = modal.querySelector('#sim-result');
-  const alertEl  = modal.querySelector('#sim-alert');
-  const emptyEl  = modal.querySelector('#sim-empty');
-  const idInput  = modal.querySelector('#sim-record-id');
-  const btnManual= modal.querySelector('#sim-run-manual');
-  const btnSimple= modal.querySelector('#sim-run-simple');
-  const btnRerun = modal.querySelector('#sim-rerun');
-  const badgeCount = modal.querySelector('#sim-count-badge');
-
-  let lastRun = { mode: null, id: null };
-
-  function showAlert(type, msg) {
-    alertEl.className = `alert alert-${type}`;
-    alertEl.textContent = msg || '';
-    alertEl.classList.remove('d-none');
-  }
-
-  function hideAlert() {
-    alertEl.classList.add('d-none');
-    alertEl.textContent = '';
-  }
-
-  function lockButtons(lock) {
-    [btnManual, btnSimple, btnRerun].forEach(b => b && (b.disabled = !!lock));
-  }
-
-  function showSkeleton() {
-    emptyEl?.classList.add('d-none');
-    result.innerHTML = `
-      <div class="row g-3">
-        <div class="col-12 col-md-6">
-          <div class="skeleton mb-2"></div><div class="skeleton mb-2"></div><div class="skeleton mb-2"></div>
-        </div>
-        <div class="col-12 col-md-6">
-          <div class="skeleton mb-2"></div><div class="skeleton mb-2"></div><div class="skeleton mb-2"></div>
-        </div>
-      </div>`;
-  }
-
-  function collectMappingPayload() {
-    const tbody = document.getElementById('rule-mapping-body');
-    const rows  = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
-    const champs   = {};
-    const formules = {};
-
-    rows.forEach(tr => {
-      const target = tr.querySelector('.rule-mapping-target')?.value?.trim();
-      if (!target) return;
-
-      const srcBadges = Array.from(tr.querySelectorAll('.mapping-src-badge'))
-        .map(b => b.dataset.field)
-        .filter(Boolean);
-
-      const formula = tr.querySelector('.rule-mapping-formula-input')?.value?.trim() || '';
-
-      if (!champs[target])   champs[target]   = [];
-      if (!formules[target]) formules[target] = [];
-
-      if (srcBadges.length) champs[target].push(...srcBadges);
-      if (formula)          formules[target].push(formula);
+  UI_WIZ.lookupRule.on('change', function() {
+    if (!this.value) return UI_WIZ.lookupField.prop('disabled', true);
+    UI_WIZ.lookupField.empty().append(new Option('Select Field', ''));
+    $('#formula-selected-fields .badge-formula').each(function() {
+      const t = $(this).data('field') || $(this).text().trim();
+      UI_WIZ.lookupField.append(new Option(t, t));
     });
-
-    return { champs, formules };
-  }
-
-  async function runSimulation(useManualId) {
-    hideAlert();
-    if (!runUrl) {
-      showAlert('danger', 'Simulation endpoint missing.');
-      return;
-    }
-
-    const { champs, formules } = collectMappingPayload();
-    if (!Object.keys(champs).length && !Object.keys(formules).length) {
-      showAlert('warning', '{{ "create_rule.step3.empty_simulate"|trans }}');
-      return;
-    }
-
-    const fd = new FormData();
-
-    const _selInfo = (id) => {
-      const el = document.getElementById(id);
-      if (!el) return { value: '', label: '', dataSolution: '' };
-      const opt = el.options?.[el.selectedIndex];
-      return {
-        value: el.value || '',
-        label: opt ? opt.text : '',
-        dataSolution: opt?.dataset?.solution || ''
-      };
-    };
-
-    const srcSolInfo  = _selInfo('source-solution');
-    const tgtSolInfo  = _selInfo('target-solution');
-    const srcConnInfo = _selInfo('source-connector');
-    const tgtConnInfo = _selInfo('target-connector');
-    const srcModInfo  = _selInfo('source-module');
-    const tgtModInfo  = _selInfo('target-module');
-
-    if (srcSolInfo.value)  fd.append('src_solution_id',  srcSolInfo.value);
-    if (tgtSolInfo.value)  fd.append('tgt_solution_id',  tgtSolInfo.value);
-
-    const srcSolName = srcSolInfo.dataSolution || (srcSolInfo.label || '').trim().toLowerCase();
-    const tgtSolName = tgtSolInfo.dataSolution || (tgtSolInfo.label || '').trim().toLowerCase();
-    if (srcSolName) fd.append('src_solution_name', srcSolName);
-    if (tgtSolName) fd.append('tgt_solution_name', tgtSolName);
-
-    if (srcConnInfo.value) fd.append('src_connector_id', srcConnInfo.value);
-    if (tgtConnInfo.value) fd.append('tgt_connector_id', tgtConnInfo.value);
-    if (srcModInfo.value)  fd.append('src_module',       srcModInfo.value);
-    if (tgtModInfo.value)  fd.append('tgt_module',       tgtModInfo.value);
-
-    Object.entries(champs).forEach(([tgt, arr]) =>
-      arr.forEach(v => fd.append(`champs[${tgt}][]`, v))
-    );
-    Object.entries(formules).forEach(([tgt, arr]) =>
-      arr.forEach(v => fd.append(`formules[${tgt}][]`, v))
-    );
-
-    let chosenId = null;
-    if (useManualId) {
-      chosenId = (idInput.value || '').trim();
-      if (!chosenId) {
-        showAlert('warning', 'Please provide a record id.');
-        return;
-      }
-      fd.append('query', chosenId);
-    }
-
-    lockButtons(true);
-    showSkeleton();
-
-    try {
-      const res  = await fetch(runUrl, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: fd
-      });
-      const html = await res.text();
-
-      if (html.startsWith('{') && html.includes('"error"')) {
-        const j = JSON.parse(html);
-        throw new Error(j.error || 'Simulation error');
-      }
-
-      result.innerHTML = html || '<div class="text-muted">No content.</div>';
-      lastRun = { mode: useManualId ? 'manual' : 'simple', id: chosenId };
-    } catch (e) {
-      result.innerHTML = '';
-      emptyEl?.classList.remove('d-none');
-      showAlert('danger', e.message || 'Network error');
-    } finally {
-      lockButtons(false);
-    }
-  }
-
-  async function loadCount() {
-    if (!countUrl) return;
-    try {
-      const res = await fetch(countUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      const txt = await res.text();
-      if (txt && !isNaN(+txt)) {
-        badgeCount.textContent = txt;
-        badgeCount.classList.remove('d-none');
-      }
-    } catch {
-    }
-  }
-
-  btnManual?.addEventListener('click', () => runSimulation(true));
-  btnSimple?.addEventListener('click', () => runSimulation(false));
-  btnRerun?.addEventListener('click', () => runSimulation(lastRun.mode === 'manual'));
-
-  modal.addEventListener('shown.bs.modal', () => {
-    hideAlert();
-    loadCount();
-    idInput?.focus();
+    UI_WIZ.lookupField.prop('disabled', false);
   });
-})();
+
+  $('#submit-lookup').on('click', function() {
+    const f = UI_WIZ.lookupField.val();
+    if (!f) return;
+    const r = UI_WIZ.lookupRule.val();
+    const e1 = $('#lookup-error-empty').is(':checked') ? 1 : 0;
+    const e2 = $('#lookup-error-not-found').is(':checked') ? 1 : 0;
+    insertAtCursor(document.getElementById('area_insert'), `lookup({${f.split(' (')[0]}}, "${r}", ${e1}, ${e2})`);
+  });
+
+  $('#mapping-formula-save').on('click', function () {
+    const id = $('#mapping-formula').data('currentRowId');
+    const tr = document.querySelector(`tr[data-row-id="${id}"]`);
+    if (tr) {
+      const val = $('#area_insert').val().trim();
+      tr.querySelector('.rule-mapping-formula-input').value = val;
+      const slot = tr.querySelector('.formula-slot');
+      slot.textContent = val;
+      slot.classList.toggle('is-empty', !val);
+    }
+  });
+});
 
 /* ===========================================
  * SAVE
  * =========================================== */
 (function () {
-  const saveBtn = document.getElementById('rule-save');
+  const saveBtn = UI.get('rule-save');
   if (!saveBtn) return;
 
-  function collectMappingPayload() {
-    const tbody = document.getElementById('rule-mapping-body');
-    const rows  = tbody ? Array.from(tbody.querySelectorAll('tr')) : [];
-    const champs   = {};
-    const formules = {};
-
+  function collectData() {
+    const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
+    const mapping = { fields: {}, formulas: {} };
+    
     rows.forEach(tr => {
-      const target = tr.querySelector('.rule-mapping-target')?.value?.trim();
-      if (!target) return;
+      const tgt = tr.querySelector('.rule-mapping-target')?.value;
+      if (!tgt) return;
+      
+      const srcs = Array.from(tr.querySelectorAll('.mapping-src-badge')).map(b => b.dataset.field);
+      const form = tr.querySelector('.rule-mapping-formula-input')?.value?.trim();
 
-      const srcBadges = Array.from(tr.querySelectorAll('.mapping-src-badge'))
-        .map(b => b.dataset.field)
-        .filter(Boolean);
+      if (!mapping.fields[tgt]) mapping.fields[tgt] = [];
+      if (!mapping.formulas[tgt]) mapping.formulas[tgt] = [];
 
-      const formula = tr.querySelector('.rule-mapping-formula-input')?.value?.trim() || '';
-
-      if (!champs[target])   champs[target]   = [];
-      if (!formules[target]) formules[target] = [];
-
-      if (srcBadges.length) champs[target].push(...srcBadges);
-      if (formula)          formules[target].push(formula);
+      if (srcs.length) mapping.fields[tgt].push(...srcs);
+      if (form) mapping.formulas[tgt].push(form);
     });
 
-    return { champs, formules };
-  }
-
-  // Utilisé par le wizard pour appliquer la formule sur une ligne
-  window.setRowFormula = function (tr, formula) {
-    if (!tr) return;
-
-    const hidden = tr.querySelector('.rule-mapping-formula-input');
-    const slot   = tr.querySelector('.formula-slot');
-    const f      = (formula || '').trim();
-
-    if (hidden) hidden.value = f;
-
-    if (slot) {
-      if (f) {
-        slot.classList.remove('is-empty');
-        slot.textContent = f;
-      } else {
-        slot.classList.add('is-empty');
-        slot.textContent = '';
-      }
-    }
-  };
-
-  function collectFiltersPayload() {
-    const listWrap = document.getElementById('rule-filters-list');
-    const rules = [];
-    if (!listWrap) return rules;
-
-    const items = listWrap.querySelectorAll('li.list-group-item');
-
-    items.forEach(li => {
-      const strong = li.querySelector('strong');
-      const small  = li.querySelector('small');
-      const text   = li.querySelector('span')?.textContent || '';
-      const field = strong?.textContent?.trim();
-      const op    = small?.textContent?.replace(/[()]/g, '').trim();
-
-      let value = '';
-      const m = text.match(/=\s*(.*)$/);
-      if (m) value = m[1].trim();
-
-      if (field && op && value !== '') {
-        rules.push({ field, operator: op, value });
-      }
+    const filters = [];
+    document.querySelectorAll('#rule-filters-list li').forEach(li => {
+      const txt = li.innerText; 
+      const parts = txt.match(/^(.*?) \((.*?)\) = (.*)$/);
+      if (parts) filters.push({ field: parts[1], operator: parts[2], value: parts[3] });
     });
-    return rules;
+
+    return { mapping, filters };
   }
 
-  function currentSelections() {
-    const getSel = id => {
-      const el = document.getElementById(id);
-      if (!el) return { value: '', label: '', dataSolution: '' };
-      const opt = el.options[el.selectedIndex] || {};
-      return {
-        value: el.value || '',
-        label: opt.text || '',
-        dataSolution: opt.getAttribute('data-solution') || ''
-      };
-    };
-
-    return {
-      name: (document.getElementById('rulename')?.value || '').trim(),
-      sourceSolution:   getSel('source-solution'),
-      targetSolution:   getSel('target-solution'),
-      sourceConnector:  getSel('source-connector'),
-      targetConnector:  getSel('target-connector'),
-      sourceModule:     getSel('source-module'),
-      targetModule:     getSel('target-module'),
-      duplicateField:   document.getElementById('duplicate-field')?.value || '',
-      syncMode:         document.getElementById('sync-mode')?.value || ''
-    };
-  }
-
-  async function saveRule() {
+  async function save() {
     const url = saveBtn.getAttribute('data-path-save');
-    if (!url) {
-      alert('Save endpoint missing');
-      return;
-    }
+    if (!url) return alert('Missing save endpoint');
 
-    const sel = currentSelections();
-    const { champs, formules } = collectMappingPayload();
-    const filters = collectFiltersPayload();
     const fd = new FormData();
+    const add = (k, v) => fd.append(k, v);
+    const getVal = (id) => UI.get(id)?.value || '';
+    const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text || ''; };
 
-    fd.append('name', sel.name);
-    fd.append('src_solution_id', sel.sourceSolution.value);
-    fd.append('tgt_solution_id', sel.targetSolution.value);
-    fd.append('src_solution_name', sel.sourceSolution.label.toLowerCase());
-    fd.append('tgt_solution_name', sel.targetSolution.label.toLowerCase());
-    fd.append('src_connector_id', sel.sourceConnector.value);
-    fd.append('tgt_connector_id', sel.targetConnector.value);
-    fd.append('src_module', sel.sourceModule.value);
-    fd.append('tgt_module', sel.targetModule.value);
-    fd.append('duplicate_field', sel.duplicateField);
-    fd.append('sync_mode', sel.syncMode);
-    fd.append('filters', JSON.stringify(filters));
+    add('name', getVal('rulename'));
+    add('src_solution_id', getVal('source-solution'));
+    add('tgt_solution_id', getVal('target-solution'));
+    add('src_solution_name', getTxt('source-solution').toLowerCase());
+    add('tgt_solution_name', getTxt('target-solution').toLowerCase());
+    add('src_connector_id', getVal('source-connector'));
+    add('tgt_connector_id', getVal('target-connector'));
+    add('src_module', getVal('source-module'));
+    add('tgt_module', getVal('target-module'));
 
-    Object.entries(champs).forEach(([tgt, arr]) =>
-      arr.forEach(v => fd.append(`champs[${tgt}][]`, v))
-    );
-    Object.entries(formules).forEach(([tgt, arr]) =>
-      arr.forEach(v => fd.append(`formules[${tgt}][]`, v))
-    );
-
-    // Mode édition : on envoie aussi le rule_id
-    if (window.initialRule && window.initialRule.mode === 'edit' && window.initialRule.id) {
-      fd.append('rule_id', window.initialRule.id);
+    const pContainer = UI.get('step-3-params-container');
+    if (pContainer) {
+      pContainer.querySelectorAll('input, select, textarea').forEach(el => {
+        if (!el.name || el.disabled) return;
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+        add(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
+      });
+    } else {
+        const mode = UI.get('mode') || UI.get('sync-mode');
+        if(mode) add('sync_mode', mode.value);
     }
+
+    const { mapping, filters } = collectData();
+    add('filters', JSON.stringify(filters));
+    Object.entries(mapping.fields).forEach(([t, arr]) => arr.forEach(v => add(`champs[${t}][]`, v)));
+    Object.entries(mapping.formulas).forEach(([t, arr]) => arr.forEach(v => add(`formules[${t}][]`, v)));
+
+    if (window.initialRule?.mode === 'edit') add('rule_id', window.initialRule.id);
 
     saveBtn.disabled = true;
-    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Saving...';
+    const oldHtml = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
 
     try {
-      const res  = await fetch(url, {
-        method: 'POST',
-        headers: { 'X-Requested-With': 'XMLHttpRequest' },
-        body: fd
-      });
+      const res = await fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });
       const text = await res.text();
-
-      if (!res.ok) {
-        try {
-          const j = JSON.parse(text);
-          throw new Error(j.error || 'Save failed');
-        } catch {
-          throw new Error(text || 'Save failed');
-        }
-      }
-
-      let payload = {};
-      try { payload = JSON.parse(text); } catch {}
-      if (payload.redirect) {
-        window.location.assign(payload.redirect);
-      } else {
-        alert('Rule saved.');
-      }
+      if (!res.ok) throw new Error(text);
+      
+      const json = JSON.parse(text);
+      if (json.redirect) window.location.assign(json.redirect);
+      else alert('Rule saved.');
     } catch (e) {
-      console.error('[SAVE] failed', e);
-      alert(e.message || 'Save failed');
+      alert('Save failed: ' + e.message);
     } finally {
       saveBtn.disabled = false;
-      saveBtn.innerHTML = 'Save rule';
+      saveBtn.innerHTML = oldHtml;
     }
   }
-  saveBtn.addEventListener('click', saveRule);
+
+  saveBtn.addEventListener('click', save);
 })();
 
 /* ===========================================
- * SELECT SEARCH (Selectize wrapper)
- * =========================================== */
-window.makeSelectSearchable = function (selectEl) {
-  if (!selectEl) return;
-
-  if (!window.$ || !$.fn.selectize) {
-    console.warn('[makeSelectSearchable] jQuery ou Selectize non disponible pour', selectEl.id);
-    return;
-  }
-
-  const $sel = $(selectEl);
-
-  // Détruire proprement une éventuelle instance existante
-  var existing = $sel[0].selectize || $sel.data('selectize');
-  if (existing && typeof existing.destroy === 'function') {
-    existing.destroy();
-  }
-
-  const instance = $sel.selectize({
-    // ce qui nous intéresse vraiment pour la recherche :
-    searchField: ['text', 'value'],  // on cherche sur le label et la value
-    sortField: 'text',
-    allowEmptyOption: true,
-    dropdownParent: 'body',
-    create: false,
-    openOnFocus: true,
-    selectOnTab: false,
-    closeAfterSelect: false
-  })[0].selectize;
-
-  // Petit log pour vérifier que c'est bien passé
-  console.log('[makeSelectSearchable] Selectize initialisé sur', selectEl.id, instance);
-};
-/* ===========================================
- * TEMPLATE MODE SWITCH
+ * SIMULATION
  * =========================================== */
 (function () {
-  const switchEl = document.getElementById('template-mode-switch');
+  const modal = UI.get('mapping-simulation');
+  if (!modal) return;
+
+  const endpoints = { run: modal.getAttribute('data-endpoint-run'), count: modal.getAttribute('data-endpoint-count') };
+  const EL = { res: modal.querySelector('#sim-result'), alert: modal.querySelector('#sim-alert'), input: modal.querySelector('#sim-record-id') };
+
+  const showAlert = (msg, type = 'danger') => {
+    EL.alert.className = `alert alert-${type}`;
+    EL.alert.textContent = msg;
+    EL.alert.classList.remove('d-none');
+  };
+
+  async function runSim(manual) {
+    EL.alert.classList.add('d-none');
+    if (!endpoints.run) return showAlert('Missing endpoint');
+
+    const fd = new FormData();
+    const getVal = (id) => UI.get(id)?.value || '';
+    const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text?.trim().toLowerCase() || ''; };
+    
+    fd.append('src_solution_id', getVal('source-solution'));
+    fd.append('tgt_solution_id', getVal('target-solution'));
+    fd.append('src_solution_name', getTxt('source-solution'));
+    fd.append('tgt_solution_name', getTxt('target-solution'));
+    fd.append('src_connector_id', getVal('source-connector'));
+    fd.append('tgt_connector_id', getVal('target-connector'));
+    fd.append('src_module', getVal('source-module'));
+    fd.append('tgt_module', getVal('target-module'));
+
+    const pContainer = UI.get('step-3-params-container');
+    if (pContainer) {
+      pContainer.querySelectorAll('input, select').forEach(el => {
+        if(el.name) fd.append(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
+      });
+    }
+
+    const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
+    rows.forEach(tr => {
+        const tgt = tr.querySelector('.rule-mapping-target')?.value;
+        if(!tgt) return;
+        Array.from(tr.querySelectorAll('.mapping-src-badge')).forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));
+        const form = tr.querySelector('.rule-mapping-formula-input')?.value;
+        if(form) fd.append(`formules[${tgt}][]`, form);
+    });
+
+    if (manual) {
+      const id = EL.input.value.trim();
+      if (!id) return showAlert('ID required', 'warning');
+      fd.append('query', id);
+    }
+
+    EL.res.innerHTML = '<div class="text-center">Loading...</div>';
+    
+    try {
+      const res = await fetch(endpoints.run, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });
+      const html = await res.text();
+      EL.res.innerHTML = html;
+    } catch {
+      EL.res.innerHTML = '';
+      showAlert('Simulation network error');
+    }
+  }
+
+  modal.querySelector('#sim-run-manual')?.addEventListener('click', () => runSim(true));
+  modal.querySelector('#sim-run-simple')?.addEventListener('click', () => runSim(false));
+})();
+
+/* ===========================================
+ * TEMPLATE LOGIC
+ * =========================================== */
+(function () {
+  const switchEl = UI.get('template-mode-switch');
+  const zone = UI.get('rule-template-zone');
+  const path = UI.get('step-2')?.getAttribute('data-path-templates');
+  const saveBtn = UI.get('rule-save-template');
+
   if (!switchEl) return;
 
-  const ruleCreate       = document.getElementById('rule-create');
-  const step1            = document.getElementById('step-1');
-  const step3            = document.getElementById('step-3');
-  const step4            = document.getElementById('step-4');
-  const step5            = document.getElementById('step-5');
-  const srcModuleGroup   = document.getElementById('source-module-group');
-  const tgtModuleGroup   = document.getElementById('target-module-group');
-  const stepTemplates    = document.getElementById('step-templates');
+  switchEl.addEventListener('change', () => {
+    const isTpl = switchEl.checked;
+    UI.toggle(UI.get('source-module-group'), !isTpl);
+    UI.toggle(UI.get('target-module-group'), !isTpl);
+    UI.toggle(UI.get('step-templates'), isTpl);
+    [3,4,5].forEach(i => UI.toggle(UI.get(`step-${i}`), false));
 
-  function clearWizardExceptStep1() {
-    if (!ruleCreate || !step1) return;
-
-    const fields = ruleCreate.querySelectorAll('input, textarea, select');
-    fields.forEach(el => {
-      if (step1.contains(el)) return;
-
-      if (el.type === 'checkbox' || el.type === 'radio') {
-        el.checked = false;
+    if (isTpl && path) {
+      const s = UI.get('source-solution'), t = UI.get('target-solution');
+      const sSlug = s.options[s.selectedIndex]?.getAttribute('data-solution-slug');
+      const tSlug = t.options[t.selectedIndex]?.getAttribute('data-solution-slug');
+      
+      if (sSlug && tSlug) {
+        zone.innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
+        UI.fetchHtml(path, { src_solution: sSlug, tgt_solution: tSlug })
+          .then(html => zone.innerHTML = html || '<p>No templates.</p>')
+          .catch(() => zone.innerHTML = '<p class="text-danger">Error.</p>');
       } else {
-        el.value = '';
+        zone.innerHTML = '<p class="text-muted">Select solutions first.</p>';
       }
-
-      el.classList?.remove('is-valid', 'is-invalid');
-    });
-
-    const filtersList = document.getElementById('rule-filters-list');
-    if (filtersList) {
-      filtersList.innerHTML = '<p class="text-muted mb-0">No filters have been defined yet.</p>';
-    }
-
-    const mappingBody = document.getElementById('rule-mapping-body');
-    if (mappingBody) {
-      mappingBody.innerHTML = '';
-    }
-  }
-
-  function applyTemplateMode(isTemplate) {
-    clearWizardExceptStep1();
-
-    if (isTemplate) {
-      srcModuleGroup && srcModuleGroup.classList.add('d-none');
-      tgtModuleGroup && tgtModuleGroup.classList.add('d-none');
-
-      stepTemplates && stepTemplates.classList.remove('d-none');
-
-      step3 && step3.classList.add('d-none');
-      step4 && step4.classList.add('d-none');
-      step5 && step5.classList.add('d-none');
-    } else {
-      srcModuleGroup && srcModuleGroup.classList.remove('d-none');
-      tgtModuleGroup && tgtModuleGroup.classList.remove('d-none');
-      stepTemplates && stepTemplates.classList.add('d-none');
-      step3 && step3.classList.add('d-none');
-      step4 && step4.classList.add('d-none');
-      step5 && step5.classList.add('d-none');
-    }
-
-    if (typeof window.updateRuleNavLinks === 'function') {
-      window.updateRuleNavLinks();
-    }
-  }
-  switchEl.addEventListener('change', function () {
-    applyTemplateMode(this.checked);
-  });
-})();
-/* ===========================================
- * TEMPLATE LIST LOADER
- * =========================================== */
-(function () {
-  const step2        = document.getElementById('step-2');
-  if (!step2) return;
-
-  const templatesUrl = step2.getAttribute('data-path-templates');
-  const templateZone = document.getElementById('rule-template-zone');
-  const srcSol       = document.getElementById('source-solution');
-  const tgtSol       = document.getElementById('target-solution');
-  const switchEl     = document.getElementById('template-mode-switch');
-
-  if (!templatesUrl || !templateZone || !srcSol || !tgtSol || !switchEl) {
-    return;
-  }
-
-  function loadTemplates() {
-    if (!switchEl.checked) return;
-
-    const srcOpt = srcSol.options[srcSol.selectedIndex];
-    const tgtOpt = tgtSol.options[tgtSol.selectedIndex];
-
-    const srcSlug = srcOpt ? srcOpt.getAttribute('data-solution-slug') : '';
-    const tgtSlug = tgtOpt ? tgtOpt.getAttribute('data-solution-slug') : '';
-
-    if (!srcSlug || !tgtSlug) {
-      templateZone.innerHTML =
-        '<p class="text-muted mb-0">Select a source and target solution to see the available templates</p>';
-      return;
-    }
-
-    const params = new URLSearchParams({
-      src_solution: srcSlug,
-      tgt_solution: tgtSlug
-    });
-
-    templateZone.innerHTML = `
-      <div class="text-center py-4">
-        <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
-      </div>`;
-
-    fetch(`${templatesUrl}?${params.toString()}`, {
-      headers: { 'X-Requested-With': 'XMLHttpRequest' }
-    })
-      .then(res => res.text())
-      .then(html => {
-        templateZone.innerHTML = html || '<p class="text-muted mb-0">No templates available for this combination.</p>';
-      })
-      .catch(() => {
-        templateZone.innerHTML = '<p class="text-danger mb-0">Error loading templates</p>';
-      });
-  }
-
-  switchEl.addEventListener('change', function () {
-    if (this.checked) {
-      loadTemplates();
     }
   });
 
-  srcSol.addEventListener('change', loadTemplates);
-  tgtSol.addEventListener('change', loadTemplates);
-
-  document.addEventListener('click', function (e) {
+  document.addEventListener('click', e => {
     const btn = e.target.closest('.js-template-choose');
     if (!btn) return;
-
-    const card = btn.closest('.template-card');
-    if (!card) return;
-
-    document.querySelectorAll('.template-card.is-selected')
-      .forEach(c => c.classList.remove('is-selected'));
-    card.classList.add('is-selected');
-
-    let hidden = document.getElementById('selected-template-name');
-    if (!hidden) {
-      hidden = document.createElement('input');
-      hidden.type = 'hidden';
-      hidden.id = 'selected-template-name';
-      hidden.name = 'selected_template_name';
-      document.getElementById('step-1')?.appendChild(hidden);
+    document.querySelectorAll('.template-card.is-selected').forEach(c => c.classList.remove('is-selected'));
+    btn.closest('.template-card').classList.add('is-selected');
+    
+    let inp = UI.get('selected-template-name');
+    if (!inp) {
+        inp = document.createElement('input'); 
+        inp.type='hidden'; inp.id='selected-template-name'; 
+        UI.get('step-1').appendChild(inp);
     }
-    hidden.value = btn.dataset.templateName || '';
+    inp.value = btn.dataset.templateName;
   });
-})();
 
-/* ===========================================
- * TEMPLATE — SAVE RULE FROM TEMPLATE
- * =========================================== */
-(function () {
-  const btnTemplateSave = document.getElementById('rule-save-template');
-  const switchEl        = document.getElementById('template-mode-switch');
-  if (!btnTemplateSave || !switchEl) return;
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async (e) => {
+      e.preventDefault();
+      const url = saveBtn.getAttribute('data-path-template-apply');
+      const tplName = UI.get('selected-template-name')?.value;
+      const name = UI.get('rulename')?.value;
+      
+      if (!name || !tplName) return alert('Missing Name or Template selection');
 
-  const rulenameInput   = document.getElementById('rulename');
-  const srcConnSelect   = document.getElementById('source-connector');
-  const tgtConnSelect   = document.getElementById('target-connector');
-
-  function getSelectedTemplateName() {
-    const hidden = document.getElementById('selected-template-name');
-    return hidden ? (hidden.value || '').trim() : '';
+      saveBtn.disabled = true;
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            ruleName: name,
+            templateName: tplName,
+            connectorSourceId: UI.get('source-connector').value,
+            connectorTargetId: UI.get('target-connector').value
+          })
+        });
+        const json = await res.json();
+        if (json.redirect) window.location.assign(json.redirect);
+        else alert('Error: ' + (json.message || 'Unknown'));
+      } catch (e) {
+        alert('Network Error');
+      } finally {
+        saveBtn.disabled = false;
+      }
+    });
   }
-
-  btnTemplateSave.addEventListener('click', function (e) {
-    e.preventDefault();
-    if (!switchEl.checked) {
-      alert('Le mode template n\'est pas activé.');
-      return;
-    }
-
-    const ruleName   = (rulenameInput?.value || '').trim();
-    const template   = getSelectedTemplateName();
-    const srcConnId  = srcConnSelect?.value || '';
-    const tgtConnId  = tgtConnSelect?.value || '';
-    const endpoint   = btnTemplateSave.getAttribute('data-path-template-apply') || '';
-
-    if (!endpoint) {
-      alert('Missing template backup endpoint');
-      return;
-    }
-    if (!ruleName) {
-      alert('Please enter a rule name');
-      return;
-    }
-    if (!template) {
-      alert('Please select a template');
-      return;
-    }
-    if (!srcConnId || !tgtConnId) {
-      alert('Please select a source connector and a target connector');
-      return;
-    }
-
-    const payload = {
-      ruleName: ruleName,
-      templateName: template,
-      connectorSourceId: srcConnId,
-      connectorTargetId: tgtConnId
-    };
-
-    btnTemplateSave.disabled = true;
-    const originalLabel = btnTemplateSave.innerHTML;
-    btnTemplateSave.innerHTML = '<span class="spinner-template spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Saving...';
-
-    fetch(endpoint, {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Requested-With': 'XMLHttpRequest'
-  },
-  body: JSON.stringify(payload)
-})
-  .then(async (res) => {
-    const text = await res.text();
-
-    let data;
-    try {
-      data = JSON.parse(text);
-    } catch (e) {
-      throw new Error('La réponse du serveur n\'est pas un JSON');
-    }
-
-    if (!data || data.success !== true) {
-      throw new Error(data && data.message ? data.message : 'Save failed');
-    }
-
-    if (data.redirect) {
-      window.location.assign(data.redirect);
-    } else {
-    }
-  })
-  .catch(err => {
-    alert(err.message || 'Error');
-  })
-  .finally(() => {
-    btnTemplateSave.disabled = false;
-    btnTemplateSave.innerHTML = originalLabel;
-  });
-
-  });
 })();

@@ -63,11 +63,12 @@ use App\Service\RuleCleanupService;
 use App\Repository\ConfigRepository;
 use Illuminate\Encryption\Encrypter;
 use App\Form\Type\RelationFilterType;
-use App\Service\TwoFactorAuthService;
 use App\Service\RuleDuplicateService;
-use App\Service\RuleSimulationService;
+use App\Service\TwoFactorAuthService;
 use App\Repository\DocumentRepository;
 use App\Repository\VariableRepository;
+use App\Service\RuleSimulationService;
+use App\Repository\ConnectorRepository;
 use App\Repository\RuleFieldRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
@@ -110,6 +111,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         private TwoFactorAuthService $twoFactorAuthService;
         private RequestStack $requestStack;
         private TemplateManager $template;
+        private $connectorRepository;
 
         public function __construct(
             LoggerInterface $logger,
@@ -120,6 +122,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             SessionService $sessionService,
             EntityManagerInterface $entityManager,
             RuleRepository $ruleRepository,
+            ConnectorRepository $connectorRepository,
             RuleFieldRepository $ruleFieldRepository,
             JobRepository $jobRepository,
             DocumentRepository $documentRepository,
@@ -143,6 +146,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $this->documentManager = $documentManager;
             $this->sessionService = $sessionService;
             $this->entityManager = $entityManager;
+            $this->connectorRepository = $connectorRepository;
             $this->ruleCleanupService = $ruleCleanupService;
             $this->ruleDuplicateService = $ruleDuplicateService;
             $this->ruleSimulationService = $ruleSimulationService;
@@ -1281,6 +1285,121 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
             'duplicates' => $duplicates,
         ]);
+    }
+    
+#[Route('/create/params/fields', name: 'regle_params_fields', methods: ['GET'])]
+    public function getParamsFields(Request $request): Response
+    {
+        $srcConnectorId = (int) $request->query->get('src_connector', 0);
+        $tgtConnectorId = (int) $request->query->get('tgt_connector', 0);
+        $srcModule = trim((string) $request->query->get('src_module', ''));
+        $tgtModule = trim((string) $request->query->get('tgt_module', ''));
+
+        if ($srcConnectorId === 0 || $tgtConnectorId === 0 || empty($srcModule) || empty($tgtModule)) {
+             return new JsonResponse(['success' => false, 'error' => 'Missing parameters'], 400);
+        }
+
+        try {
+            $srcConnector = $this->connectorRepository->find($srcConnectorId);
+            $tgtConnector = $this->connectorRepository->find($tgtConnectorId);
+
+            if (!$srcConnector || !$tgtConnector) {
+                return new JsonResponse(['success' => false, 'error' => 'Connector not found'], 404);
+            }
+            $srcSolution = $this->solutionManager->get($srcConnector->getSolution()->getName());
+            $tgtSolution = $this->solutionManager->get($tgtConnector->getSolution()->getName());
+            $srcSolution->login($this->resolveConnectorParams($srcConnectorId));
+            $tgtSolution->login($this->resolveConnectorParams($tgtConnectorId));
+            $targetParams = (array) $tgtSolution->getFieldsParamUpd('target', $tgtModule);
+            $sourceParams = (array) $srcSolution->getFieldsParamUpd('source', $srcModule);
+
+            $ruleParams = array_merge($sourceParams, $targetParams);
+            $targetMode = (array) $tgtSolution->getRuleMode($tgtModule, 'target');
+            $sourceMode = (array) $srcSolution->getRuleMode($srcModule, 'source');
+
+            if (array_key_exists('S', $targetMode)) {
+                $sourceMode['S'] = 'search_only';
+            }
+            $intersectMode = array_intersect_key($targetMode, $sourceMode);
+
+            if (empty($intersectMode)) {
+                $intersectMode = ['C' => 'create_only'];
+            }
+            
+            $fieldsDuplicateTarget = $tgtSolution->getFieldsDuplicate($tgtModule) ?? [];
+            if (!empty($fieldsDuplicateTarget)) {
+                $intersectMode['S'] = 'search_only';
+            }
+
+            $modeTranslate = [];
+            foreach ($intersectMode as $key => $value) {
+                $modeTranslate[$key] = $this->translator->trans('create_rule.step3.syncdata.' . $value); 
+            }
+
+            $ruleParams[] = [
+                'id' => 'mode',
+                'name' => 'mode',
+                'required' => true,
+                'type' => 'option',
+                'label' => $this->translator->trans('create_rule.step3.syncdata.label'),
+                'option' => $modeTranslate,
+                'value' => ''
+            ];
+
+            $bidirectional_params = [
+                'connector' => [
+                    'source' => $srcConnectorId,
+                    'cible'  => $tgtConnectorId,
+                ],
+                'module' => [
+                    'source' => $srcModule,
+                    'cible'  => $tgtModule,
+                ]
+            ];
+
+            $bidirectional = RuleManager::getBidirectionalRules(
+                $this->connection, 
+                $bidirectional_params, 
+                $srcSolution, 
+                $tgtSolution
+            );
+            
+            if (!empty($bidirectional)) {
+                $ruleParams = array_merge($ruleParams, $bidirectional);
+            }
+            $readDeletion = $srcSolution->getReadDeletion($srcModule) ?? false;
+            $sendDeletion = $tgtSolution->getSendDeletion($tgtModule) ?? false;
+
+            if ($readDeletion && $sendDeletion) {
+                $ruleParams[] = [
+                    'id'   => 'deletion',
+                    'name' => 'deletion',
+                    'required' => false,
+                    'type'  => 'option',
+                    'label' => $this->translator->trans('create_rule.step3.deletion.label'),
+                    'option'  => [
+                        0 => $this->translator->trans('create_rule.step3.deletion.no'),
+                        1 => $this->translator->trans('create_rule.step3.deletion.yes'),
+                    ],
+                ];
+            }
+
+            $ruleParams = array_values($ruleParams); 
+            
+           return $this->render('Rule/create/ajax_step3/_options_params.html.twig', [
+            'rule_params' => $ruleParams,
+            'duplicate_target' => $fieldsDuplicateTarget,
+        ]);
+
+        } catch (\Throwable $e) {
+            $this->logger->error('Error in getParamsFields: ' . $e->getMessage());
+            return new Response(
+                '<div class="alert alert-danger">' . 
+                $this->translator->trans('error.rule.params_load') . ' : ' . $e->getMessage() . 
+                '</div>', 
+                500
+            );
+        }
     }
 
     #[Route('/create/step3/simulation/', name: 'regle_simulation', methods: ['POST'])]
