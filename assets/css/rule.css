@@ -1027,7 +1027,8 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 }
 
 #step-2 { 
-	opacity: 0; transition: opacity .25s ease; 
+	opacity: 0; 
+	transition: opacity .25s ease; 
 }
 #step-2:not(.d-none)[style=""] {
 	opacity: 1; 
@@ -1111,7 +1112,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 .formula-slot {
 	flex: 1 1 auto;
-	min-width: 0;
+    max-width: 200px;
 	padding: .375rem .5rem;
 	border-radius: .5rem;
 	background: #f8fafc;

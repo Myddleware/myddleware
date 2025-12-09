@@ -1057,7 +1057,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         ]);
     }
 
-   #[Route('/create/list-module', name: 'regle_list_module', methods: ['GET'])]
+    #[Route('/create/list-module', name: 'regle_list_module', methods: ['GET'])]
     public function listModules(Request $request): Response
     {
         $connectorId = $request->query->getInt('id');
@@ -1065,15 +1065,13 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
         $connector = $this->entityManager->getRepository(Connector::class)->find($connectorId);
         if (!$connector || !$connector->getSolution()) {
-            return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
-                'modules'       => [],
-                'modulesFields' => [],
-            ]);
+            return new Response('<option value="">Connector not found</option>', 404);
         }
 
         $solutionName = $connector->getSolution()->getName();
         $solution     = $this->solutionManager->get(strtolower($solutionName));
 
+        // Récupération des paramètres
         $connectorParams = $this->entityManager
             ->getRepository(ConnectorParam::class)
             ->findBy(['connector' => $connector]);
@@ -1083,37 +1081,41 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             $params[$p->getName()] = $p->getValue();
         }
 
+        // TENTATIVE DE CONNEXION AVEC GESTION D'ERREUR
         try {
             $solution->login($params);
+            
+            // Si la solution a une propriété pour vérifier la validité (ex: connexion_valide)
+            if (property_exists($solution, 'connexion_valide') && $solution->connexion_valide === false) {
+                 throw new \Exception("Login failed");
+            }
+            
         } catch (\Throwable $e) {
-            // TODO: message d’erreur
-            return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
-                'modules'       => [],
-                'modulesFields' => [],
-            ]);
+            return new Response(
+               $e->getMessage(), 
+                400
+            );
         }
 
+        // ... Le reste du code (récupération des modules) reste identique ...
         $direction = ($type === 'cible') ? 'target' : 'source';
         $modules   = $solution->get_modules($direction) ?? [];
+        
+        // ... (Logique $modulesFields inchangée) ...
         $modulesFields = [];
-
         foreach ($modules as $moduleName => $moduleLabel) {
-            try {
+             // ... ton code existant pour get_module_fields ...
+             try {
                 $fields = $solution->get_module_fields($moduleName, $direction);
-
-                if (!is_array($fields)) {
-                    $fields = [];
-                }
+                if (!is_array($fields)) $fields = [];
                 $simpleFields = [];
                 foreach ($fields as $fieldName => $def) {
                     $simpleFields[$fieldName] = $def['label'] ?? $fieldName;
                 }
-
                 $modulesFields[$moduleName] = $simpleFields;
-            } catch (\Throwable $e) {
-                $this->logger->error('get_module_fields failed for module '.$moduleName.' : '.$e->getMessage());
+             } catch (\Throwable $e) {
                 $modulesFields[$moduleName] = [];
-            }
+             }
         }
 
         return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
@@ -1259,35 +1261,8 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
             'ruleKey'       => $ruleId,
         ]);
     }
-
-    #[Route('/create/list-duplicate-fields', name: 'regle_list_duplicate_fields', methods: ['GET'])]
-    public function listDuplicateFields(Request $request): Response
-    {
-        $connectorId = $request->query->getInt('connector_id');
-        $module      = trim((string) $request->query->get('module', ''));
-
-        if ($connectorId <= 0 || $module === '') {
-            return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
-                'duplicates' => [],
-            ]);
-        }
-        $connector = $this->entityManager->getRepository(Connector::class)->find($connectorId);
-        if (!$connector || !$connector->getSolution()) {
-            return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
-                'duplicates' => [],
-            ]);
-        }
-
-        $solutionName = strtolower($connector->getSolution()->getName());
-        $solution     = $this->solutionManager->get($solutionName);
-        $duplicates = $solution->getFieldsDuplicate($module) ?? [];
-
-        return $this->render('Rule/create/ajax_step3/_options_duplicate_fields.html.twig', [
-            'duplicates' => $duplicates,
-        ]);
-    }
     
-#[Route('/create/params/fields', name: 'regle_params_fields', methods: ['GET'])]
+    #[Route('/create/params/fields', name: 'regle_params_fields', methods: ['GET'])]
     public function getParamsFields(Request $request): Response
     {
         $srcConnectorId = (int) $request->query->get('src_connector', 0);
@@ -1606,12 +1581,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
         $paramsForView = [
             'source' => [
-                'solution' => (string) ($solutionSourceName ?? ''), // ex: "moodle"
-                'module'   => (string) ($sourceModule ?? ''),       // ex: "users"
+                'solution' => (string) ($solutionSourceName ?? ''),
+                'module'   => (string) ($sourceModule ?? ''),
             ],
             'cible' => [
-                'solution' => (string) ($targetSolutionName ?? ''), // ex: "suitecrm"
-                'module'   => (string) ($targetModule ?? ''),       // ex: "Accounts"
+                'solution' => (string) ($targetSolutionName ?? ''),
+                'module'   => (string) ($targetModule ?? ''),
             ],
         ];
 
@@ -1924,488 +1899,12 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         throw $this->createNotFoundException('Error');
     }
 
-    // /**
-    //  * CREATION - STEP THREE - Validation du formulaire.
-    //  */
-    // #[Route('/create/step3/formula/', name: 'regle_formula', methods: ['POST'])]
-    // public function ruleValidation(Request $request): JsonResponse
-    // {
-    //     // On récupére l'EntityManager
-    //     $this->getInstanceBdd();
-    //     $this->entityManager->getConnection()->beginTransaction();
-    //     try {
-    //         // Decode the JSON params from the request
-    //         $paramsRaw = $request->request->get('params');
-    //         $decodedParams = json_decode($paramsRaw, true); // or directly use if already an array
-    //         // Get rule id from params
-    //         if (!empty($decodedParams)) {
-    //             foreach ($decodedParams as $searchRuleId) {
-    //                 if ('regleId' === $searchRuleId['name']) {
-    //                     $ruleKey = $searchRuleId['value'];
-    //                     break;
-    //                 }
-    //             }
-    //         }
-    //         $formattedParams = [];
-            
-    //         foreach ($decodedParams as $item) {
-    //             if (isset($item['name']) && isset($item['value'])) {
-    //                 $formattedParams[$item['name']] = is_numeric($item['value']) ? (int)$item['value'] : $item['value'];
-    //             }
-    //         }
-
-    //         $params = $formattedParams;
-            
-
-    //         // retourne un tableau prêt à l'emploi
-    //         $tab_new_rule = $this->createListeParamsRule(
-    //             $request->request->get('champs'), // Fields
-    //             $request->request->get('formules'), // Formula
-    //             $params // Decoded params
-    //         );
-    //         unset($tab_new_rule['params']['regleId']); // delete id regle for gestion session
-
-    //         $requestAll = $request->request->all();
-
-    //         $duplicate = $requestAll['duplicate'] ?? [];
-
-    //         // fields relate
-    //         if (!empty($duplicate)) {
-    //             // fix : Put the duplicate fields values in the old $tab_new_rule array
-    //             $duplicateArray = implode(';', $duplicate);
-    //             $tab_new_rule['params']['rule']['duplicate_fields'] = $duplicateArray;
-    //             $this->sessionService->setParamParentRule($ruleKey, 'duplicate_fields', $duplicateArray);
-    //         }
-    //         // si le nom de la règle est inferieur à 3 caractères :
-    //         if (strlen($this->sessionService->getParamRuleName($ruleKey)) < 3 || false == $this->sessionService->getParamRuleNameValid($ruleKey)) {
-    //             return new JsonResponse(0);
-    //         }
-
-    //         //------------ Create rule
-    //         $connector_source = $this->entityManager
-    //             ->getRepository(Connector::class)
-    //             ->find($this->sessionService->getParamRuleConnectorSourceId($ruleKey));
-
-    //         $connector_target = $this->entityManager
-    //             ->getRepository(Connector::class)
-    //             ->find($this->sessionService->getParamRuleConnectorCibleId($ruleKey));
-
-    //         $param = RuleManager::getFieldsParamDefault();
-
-    //         // unset description from param['RuleParam'] if it not a new rule
-    //         if (!$this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
-    //             unset($param['RuleParam']['description']);
-    //         }
-
-    //         // Get the id of the rule if we edit a rule
-    //         // Generate Rule object (create a new one or instanciate the existing one
-    //         if (!$this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
-    //             $oneRule = $this->entityManager->getRepository(Rule::class)->find($this->sessionService->getParamRuleLastId($ruleKey));
-    //             $oneRule->setDateModified(new \DateTime());
-    //             $oneRule->setModifiedBy($this->getUser());
-    //         } else {
-    //             $oneRule = new Rule();
-    //             $oneRule->setConnectorSource($connector_source);
-    //             $oneRule->setConnectorTarget($connector_target);
-    //             $oneRule->setDateCreated(new \DateTime());
-    //             $oneRule->setDateModified(new \DateTime());
-    //             $oneRule->setCreatedBy($this->getUser());
-    //             $oneRule->setModifiedBy($this->getUser());
-    //             $oneRule->setModuleSource($this->sessionService->getParamRuleSourceModule($ruleKey));
-    //             $oneRule->setModuleTarget($this->sessionService->getParamRuleCibleModule($ruleKey));
-    //             $oneRule->setDeleted(0);
-    //             $oneRule->setActive((int) $param['active']);
-    //             $oneRule->setName($this->sessionService->getParamRuleName($ruleKey));
-    //         }
-    //         $this->entityManager->persist($oneRule);
-    //         // On fait le flush pour obtenir le nameSlug. En cas de problème on fait un remove dans le catch
-    //         $this->entityManager->flush();
-    //         $this->sessionService->setRuleId($ruleKey, $oneRule->getId());
-    //         $nameRule = $oneRule->getNameSlug();
-
-    //         // BEFORE SAVE rev 1.08 ----------------------
-    //         $relationshipsBeforeSave = $request->request->get('relations');
-    //         $before_save = $this->ruleManager->beforeSave($this->solutionManager,
-    //             ['ruleName' => $nameRule,
-    //                 'RuleId' => $oneRule->getId(),
-    //                 'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
-    //                 'content' => $tab_new_rule,
-    //                 'relationships' => $relationshipsBeforeSave,
-    //                 'module' => [
-    //                     'source' => [
-    //                         'solution' => $this->sessionService->getParamRuleSourceSolution($ruleKey),
-    //                         'name' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-    //                     ],
-    //                     'target' => [
-    //                         'solution' => $this->sessionService->getParamRuleCibleSolution($ruleKey),
-    //                         'name' => $this->sessionService->getParamRuleCibleModule($ruleKey),
-    //                     ],
-    //                 ],
-    //             ]
-    //         );
-    //         if (!$before_save['done']) {
-    //             throw new Exception($before_save['message']);
-    //         }
-    //         // Si le retour du beforeSave contient des paramètres alors on les ajoute à la règle avant sauvegarde
-    //         if (!empty($before_save['params'])) {
-    //             if (empty($tab_new_rule['params'])) {
-    //                 $tab_new_rule['params'] = $before_save['params'];
-    //             } else {
-    //                 $tab_new_rule['params'] = array_merge($tab_new_rule['params'], $before_save['params']);
-    //             }
-    //         }
-
-    //         // Check if search rule then duplicate field shouldn't be empty
-    //         if (
-    //             'S' == $tab_new_rule['params']['mode']
-    //             and empty($tab_new_rule['params']['rule']['duplicate_fields'])
-    //         ) {
-    //             throw new Exception($this->translator->trans('Failed to save the rule. If you choose to retrieve data with your rule, you have to select at least one duplicate field.'));
-    //         }
-
-    //         // Edit mode
-    //         if (!$this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) {
-    //             foreach ($oneRule->getFields() as $ruleField) {
-    //                 $this->entityManager->remove($ruleField);
-    //                 $this->entityManager->flush();
-    //             }
-
-    //             foreach ($oneRule->getRelationsShip() as $ruleRelationShip) {
-    //                 $this->entityManager->remove($ruleRelationShip);
-    //                 $this->entityManager->flush();
-    //             }
-
-    //             foreach ($oneRule->getFilters() as $ruleFilter) {
-    //                 $this->entityManager->remove($ruleFilter);
-    //                 $this->entityManager->flush();
-    //             }
-
-    //             // Rule Params
-    //             foreach ($oneRule->getParams() as $ruleParam) {
-    //                 // Save reference date
-    //                 if ('datereference' == $ruleParam->getName()) {
-    //                     $date_reference = $ruleParam->getValue();
-    //                 }
-    //                 if ('limit' === $ruleParam->getName()) {
-    //                     $limit = $ruleParam->getValue();
-    //                 }
-    //                 if (in_array($ruleParam->getName(), $this->tools->getRuleParam())) {
-    //                     $this->entityManager->remove($ruleParam);
-    //                     $this->entityManager->flush();
-    //                 }
-    //             }
-    //         } // Create mode
-    //         else {
-    //             if ($this->sessionService->isParamRuleSourceDateReference($ruleKey) && $this->sessionService->getParamRuleSourceDateReference($ruleKey)) {
-    //                 $date_reference = date('Y-m-d 00:00:00');
-    //             } else {
-    //                 $date_reference = '';
-    //             }
-    //         }
-
-    //         //------------------------------- Create rule params -------------------
-    //         if (isset($tab_new_rule['params']) || isset($param['RuleParam'])) {
-    //             if (!isset($tab_new_rule['params'])) {
-    //                 $p = $param['RuleParam'];
-    //             } else {
-    //                 $p = array_merge($param['RuleParam'], $tab_new_rule['params']);
-    //             }
-
-    //         // find in the database the id of the solution with the name dynamicsbusiness
-    //         $solutionDynamicsBusiness = $this->entityManager
-    //             ->getRepository(Solution::class)
-    //             ->findOneBy([
-    //                 'name' => 'dynamicsbusiness',
-    //             ]);
-
-
-
-    //             if(!empty($solutionDynamicsBusiness) && $solutionDynamicsBusiness->getConnector()->count() > 0)
-    //             {
-    //                 // if $oneRule connector source get name == dynamicsbusiness then set param parentmoduleid
-    //                 if ($oneRule->getConnectorSource()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
-    //                     // Check if parentmoduleid parameter already exists in the database
-    //                     $existingParam = $this->entityManager->getRepository(RuleParam::class)
-    //                         ->findOneBy([
-    //                             'rule' => $oneRule->getId(),
-    //                             'name' => 'parentmoduleid'
-    //                         ]);
-
-    //                     if (!$existingParam) {
-    //                         $moduleSource = $oneRule->getModuleSource();
-
-    //                         // destructure $moduleSource to get $companyId and $apiModuleName
-    //                         list($companyId, $apiModuleName) = explode('_', $moduleSource, 2);
-
-    //                         $p['parentmoduleid'] = $companyId;
-    //                     }
-    //                 }
-                    
-                    
-    //                 // if $oneRule connector target get name == dynamicsbusiness then set param parentmoduleid
-    //                 if ($oneRule->getConnectorTarget()->getSolution()->getId() == $solutionDynamicsBusiness->getId()) {
-    //                     // Check if parentmoduleid parameter already exists in the database
-    //                     $existingParam = $this->entityManager->getRepository(RuleParam::class)
-    //                         ->findOneBy([
-    //                             'rule' => $oneRule->getId(),
-    //                             'name' => 'parentmoduleid'
-    //                         ]);
-
-    //                     if (!$existingParam) {
-    //                         $moduleTarget = $oneRule->getModuleTarget();
-
-    //                         // destructure $moduleSource to get $companyId and $apiModuleName
-    //                         list($companyId, $apiModuleName) = explode('_', $moduleTarget, 2);
-
-    //                         $p['parentmoduleid'] = $companyId;
-    //                     }
-    //                 }
-    //             } // end if dynamics business not null
-                    
-    //             $bidirectional = '';
-    //             foreach ($p as $key => $value) {
-    //                 // Value could be empty, for bidirectional parameter for example (we don't test empty because mode could be equal 0)
-    //                 if ('' == $value) {
-    //                     continue;
-    //                 }
-    //                 $oneRuleParam = new RuleParam();
-    //                 $oneRuleParam->setRule($oneRule);
-
-    //                 // si tableau de doublon
-    //                 if ('rule' == $key) {
-    //                     $oneRuleParam->setName('duplicate_fields');
-    //                     $oneRuleParam->setValue($value['duplicate_fields']);
-    //                 } else {
-    //                     $oneRuleParam->setName($key);
-    //                     if ('datereference' == $key) {
-    //                         // date de référence change en fonction create ou update
-    //                         $oneRuleParam->setValue($date_reference);
-    //                     // Limit change according to create or update
-    //                     } elseif ('limit' == $key) {
-    //                         // Set default value 100 for limit
-    //                         if (empty($limit)) {
-    //                             $limit = 100;
-    //                         }
-    //                         $oneRuleParam->setValue($limit);
-    //                     } else {
-    //                         $oneRuleParam->setValue($value);
-    //                     }
-    //                 }
-    //                 // Save the parameter
-    //                 if ('bidirectional' == $key) {
-    //                     $bidirectional = $value;
-    //                 }
-    //                 $this->entityManager->persist($oneRuleParam);
-    //                 $this->entityManager->flush();
-    //             }
-
-    //             // If a bidirectional parameter exist, we check if the opposite one exists too
-    //             if (!empty($bidirectional)) {
-    //                 // Update the opposite rule if birectional rule
-    //                 $ruleParamBidirectionalOpposite = $this->entityManager->getRepository(RuleParam::class)
-    //                     ->findOneBy([
-    //                         'rule' => $bidirectional,
-    //                         'name' => 'bidirectional',
-    //                         'value' => $oneRule->getId(),
-    //                     ]);
-    //                 $bidirectionalRule = $this->ruleRepository->find($bidirectional);
-    //                 // If the bidirectional parameter doesn't exist on the opposite rule we create it
-    //                 if (empty($ruleParamBidirectionalOpposite)) {
-    //                     $ruleParamBidirectionalOpposite = new RuleParam();
-    //                     $ruleParamBidirectionalOpposite->setRule($bidirectionalRule);
-    //                     $ruleParamBidirectionalOpposite->setName('bidirectional');
-    //                     $ruleParamBidirectionalOpposite->setValue($oneRule->getId());
-    //                     $this->entityManager->persist($ruleParamBidirectionalOpposite);
-    //                 }
-    //             } else {
-    //                 // If no bidirectional parameter on the rule and if the bidirectional parametr exist on an opposite rule, we delete it
-    //                 $ruleParamBidirectionalDelete = $this->entityManager->getRepository(RuleParam::class)
-    //                     ->findOneBy([
-    //                         'value' => $oneRule->getId(),
-    //                         'name' => 'bidirectional',
-    //                     ]);
-    //                 if (!empty($ruleParamBidirectionalDelete)) {
-    //                     $this->entityManager->remove($ruleParamBidirectionalDelete);
-    //                     $this->entityManager->flush();
-    //                 }
-    //             }
-    //         }
-
-    //         //------------------------------- Create rule fields -------------------
-    //         $debug = [];
-
-    //         if (isset($tab_new_rule['fields'])) {
-    //             foreach ($tab_new_rule['fields']['name'] as $field_target => $c) {
-    //                 $field_source = '';
-    //                 if (isset($c['champs'])) {
-    //                     foreach ($c['champs'] as $name) {
-    //                         $field_source .= $name.';';
-    //                     }
-    //                     $field_source = trim($field_source, ';');
-    //                 }
-
-    //                 // Formula
-    //                 $formule = '';
-    //                 if (isset($c['formule'])) {
-    //                     foreach ($c['formule'] as $name) {
-    //                         $formule .= $name.' ';
-    //                         $debug[] = $name.' ';
-    //                     }
-    //                 }
-
-    //                 // Insert
-    //                 $oneRuleField = new RuleField();
-    //                 $oneRuleField->setRule($oneRule);
-    //                 $oneRuleField->setTarget(trim($field_target));
-    //                 $oneRuleField->setSource(((!empty($field_source)) ? $field_source : 'my_value'));
-    //                 $oneRuleField->setFormula(((!empty($formule)) ? trim($formule) : null));
-    //                 $this->entityManager->persist($oneRuleField);
-    //                 $this->entityManager->flush();
-    //             }
-    //         }
-
-    //         //------------------------------- RELATIONSHIPS -------------------
-    //         $tabRelationShips = [];
-    //         if (!is_null($request->request->get('relations'))) {
-    //             foreach ($request->request->get('relations') as $rel) {
-    //                 if (
-    //                     !empty($rel['rule'])
-    //                     && !empty($rel['source'])
-    //                 ) {
-    //                     // Creation dans la table RelationShips
-    //                     $oneRuleRelationShip = new RuleRelationShip();
-    //                     $oneRuleRelationShip->setRule($oneRule);
-    //                     $oneRuleRelationShip->setFieldNameSource($rel['source']);
-    //                     $oneRuleRelationShip->setFieldNameTarget($rel['target']);
-    //                     // No error empty or missing for parent relationship, we set default values
-    //                     if (!empty($rel['parent'])) {
-    //                         $rel['errorEmpty'] = '0';
-    //                         $rel['errorMissing'] = '1';
-    //                     }
-    //                     $oneRuleRelationShip->setErrorEmpty($rel['errorEmpty']);
-    //                     $oneRuleRelationShip->setErrorMissing($rel['errorMissing']);
-    //                     $oneRuleRelationShip->setFieldId($rel['rule']);
-    //                     $oneRuleRelationShip->setParent($rel['parent']);
-    //                     $oneRuleRelationShip->setDeleted(0);
-    //                     // We don't create the field target if the relatiobnship is a parent one
-    //                     // We only use this field to search in the source application, not to send the data to the target application.
-    //                     if (empty($rel['parent'])) {
-    //                         $tabRelationShips['target'][] = $rel['target'];
-    //                     }
-    //                     $tabRelationShips['source'][] = $rel['source'];
-    //                     $this->entityManager->persist($oneRuleRelationShip);
-    //                     $this->entityManager->flush();
-    //                 }
-    //             }
-    //         }
-
-    //         //------------------------------- RuleFilter ------------------------
-    //         // Get all request data and extract the filter
-    //         $requestData = $request->request->all();
-    //         $filtersRaw = $requestData['filter'] ?? null;
-
-    //         // Handle both JSON string and array cases
-    //         $filters = is_string($filtersRaw) ? json_decode($filtersRaw, true) : $filtersRaw;
-
-    //         if (!empty($filters)) {
-    //             foreach ($filters as $filterData) {
-    //                 $oneRuleFilter = new RuleFilter();
-    //                 $oneRuleFilter->setTarget($filterData['target']);
-    //                 $oneRuleFilter->setRule($oneRule);
-    //                 $oneRuleFilter->setType($filterData['filter']);
-    //                 $oneRuleFilter->setValue($filterData['value']);
-    //                 $this->entityManager->persist($oneRuleFilter);
-    //             }
-    //             $this->entityManager->flush();
-    //         }
-
-    //         // --------------------------------------------------------------------------------------------------
-    //         // Order all rules
-    //         $this->jobManager->orderRules();
-
-    //         // --------------------------------------------------------------------------------------------------
-    //         // Create rule history in order to follow all modifications
-    //         // Encode every rule parameters
-    //         $ruledata = json_encode(
-    //             [
-    //                 'ruleName' => $nameRule,
-    //                 'limit' => $limit,
-    //                 'datereference' => $date_reference,
-    //                 'content' => $tab_new_rule,
-    //                 'filters' => $filters,
-    //                 'relationships' => $relationshipsBeforeSave,
-    //             ]
-    //         );
-    //         // Save the rule audit
-    //         $oneRuleAudit = new RuleAudit();
-    //         $oneRuleAudit->setRule($oneRule);
-    //         $oneRuleAudit->setDateCreated(new \DateTime());
-    //         $oneRuleAudit->setData($ruledata);
-    //         $oneRuleAudit->setCreatedBy($this->getUser());
-    //         $this->entityManager->persist($oneRuleAudit);
-    //         $this->entityManager->flush();
-
-    //         // notification
-    //         $solution_source = $this->solutionManager->get($this->sessionService->getParamRuleSourceSolution($ruleKey));
-    //         $solution_source->setMessageCreateRule($this->sessionService->getParamRuleSourceModule($ruleKey));
-
-    //         $solution_target = $this->solutionManager->get($this->sessionService->getParamRuleCibleSolution($ruleKey));
-    //         $solution_target->setMessageCreateRule($this->sessionService->getParamRuleCibleModule($ruleKey));
-    //         // notification
-
-    //         // --------------------------------------------------------------------------------------------------
-
-    //         // Détection règle root ou child rev 1.08 ----------------------
-    //         // On réactualise les paramètres
-    //         $tab_new_rule['content']['params'] = $p;
-    //         $this->ruleManager->afterSave($this->solutionManager,
-    //                                         [
-    //                                             'ruleId' => $oneRule->getId(),
-    //                                             'ruleName' => $nameRule,
-    //                                             'oldRule' => ($this->sessionService->isParamRuleLastVersionIdEmpty($ruleKey)) ? '' : $this->sessionService->getParamRuleLastId($ruleKey),
-    //                                             'datereference' => $date_reference,
-    //                                             'limit' => $limit,
-    //                                             'connector' => $this->sessionService->getParamParentRule($ruleKey, 'connector'),
-    //                                             'content' => $tab_new_rule,
-    //                                             'relationships' => $relationshipsBeforeSave,
-    //                                             'module' => [
-    //                                                 'source' => [
-    //                                                     'solution' => $this->sessionService->getParamRuleSourceSolution($ruleKey),
-    //                                                     'name' => $this->sessionService->getParamRuleSourceModule($ruleKey),
-    //                                                 ],
-    //                                                 'target' => [
-    //                                                     'solution' => $this->sessionService->getParamRuleCibleSolution($ruleKey),
-    //                                                     'name' => $this->sessionService->getParamRuleCibleModule($ruleKey),
-    //                                                 ],
-    //                                             ],
-    //                                         ],
-    //                                         $this->requestStack
-    //         );
-    //         if ($this->sessionService->isParamRuleExist($ruleKey)) {
-    //             $this->sessionService->removeParamRule($ruleKey);
-    //         }
-    //         $this->entityManager->getConnection()->commit();
-            
-    //         $rule_id = $oneRule->getId();
-    //         $response = ['status' => 1, 'id' => $rule_id];
-
-    //     } catch (Exception $e) {
-    //         $this->entityManager->getConnection()->rollBack();
-    //         $this->logger->error('2;'.htmlentities($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')'));
-    //         $response = '2;'.htmlentities($e->getMessage().' ('.$e->getFile().' line '.$e->getLine().')');
-    //     }
-
-    //     $this->entityManager->close();
-    //     return new JsonResponse($response);
-    // }
-
      /**
      * TABLEAU DE BORD.
      */
     #[Route('/panel', name: 'regle_panel')]
     public function panel(Request $request): Response
     {
-
         $session = $request->getSession();
 
         // Check if the user has completed 2FA
@@ -2518,6 +2017,7 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         $yaml = Yaml::parseFile($yamlFile);
         return $yaml['non-required-fields'];
     }
+
     // /**
     //  * LISTE DES TEMPLATES.
     //  */
@@ -2582,99 +2082,95 @@ use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
         }
     }
 
-    /* ******************************************************
-        * METHODES PRATIQUES
-        ****************************************************** */
+    // // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
+    // private function createListeParamsRule($fields, $formula, $params): array
+    // {
+    //     $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
 
-    // CREATION REGLE - STEP THREE - Retourne les paramètres dans un bon format de tableau
-    private function createListeParamsRule($fields, $formula, $params): array
-    {
-        $phrase_placeholder = $this->translator->trans('rule.step3.placeholder');
+    //     // Structure de sortie initialisée pour éviter les "undefined index"
+    //     $tab = [
+    //         'fields' => [
+    //             'name' => []   // attendue par le reste du code: ['fields']['name'][<target>]['champs'| 'formule']
+    //         ],
+    //         'params' => []
+    //     ];
 
-        // Structure de sortie initialisée pour éviter les "undefined index"
-        $tab = [
-            'fields' => [
-                'name' => []   // attendue par le reste du code: ['fields']['name'][<target>]['champs'| 'formule']
-            ],
-            'params' => []
-        ];
+    //     // ---------- NORMALISATION DES ENTREES ----------
+    //     // 1) $fields peut être: (a) string "tgt[=]src;tgt2[=]src2" (legacy) ou (b) array ['tgt'=>['src1','src2']]
+    //     $fieldsMap = []; // ['target' => ['src1','src2']]
+    //     if (is_string($fields) && $fields !== '') {
+    //         $pairs = explode(';', $fields);
+    //         foreach ($pairs as $pair) {
+    //             $chp = explode('[=]', $pair, 2);
+    //             $tgt = $chp[0] ?? '';
+    //             $src = $chp[1] ?? '';
+    //             if ($tgt !== '' && $src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
+    //                 $fieldsMap[$tgt][] = $src;
+    //             }
+    //         }
+    //     } elseif (is_array($fields)) {
+    //         // format nouveau: champs[target][]=src
+    //         foreach ($fields as $tgt => $arr) {
+    //             if (!is_array($arr)) { continue; }
+    //             foreach ($arr as $src) {
+    //                 if ($src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
+    //                     $fieldsMap[$tgt][] = $src;
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        // ---------- NORMALISATION DES ENTREES ----------
-        // 1) $fields peut être: (a) string "tgt[=]src;tgt2[=]src2" (legacy) ou (b) array ['tgt'=>['src1','src2']]
-        $fieldsMap = []; // ['target' => ['src1','src2']]
-        if (is_string($fields) && $fields !== '') {
-            $pairs = explode(';', $fields);
-            foreach ($pairs as $pair) {
-                $chp = explode('[=]', $pair, 2);
-                $tgt = $chp[0] ?? '';
-                $src = $chp[1] ?? '';
-                if ($tgt !== '' && $src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
-                    $fieldsMap[$tgt][] = $src;
-                }
-            }
-        } elseif (is_array($fields)) {
-            // format nouveau: champs[target][]=src
-            foreach ($fields as $tgt => $arr) {
-                if (!is_array($arr)) { continue; }
-                foreach ($arr as $src) {
-                    if ($src !== '' && $src !== $phrase_placeholder && $src !== 'my_value') {
-                        $fieldsMap[$tgt][] = $src;
-                    }
-                }
-            }
-        }
+    //     // 2) $formula peut être: (a) string "tgt[=]expr;tgt2[=]expr2" (legacy) ou (b) array ['tgt'=>['expr']]
+    //     $formulaMap = []; // ['target' => ['expr1','expr2']]
+    //     if (is_string($formula) && $formula !== '') {
+    //         $pairs = explode(';', $formula);
+    //         foreach ($pairs as $pair) {
+    //             $chp = explode('[=]', $pair, 2);
+    //             $tgt = $chp[0] ?? '';
+    //             $exp = $chp[1] ?? '';
+    //             if ($tgt !== '' && $exp !== '') {
+    //                 $formulaMap[$tgt][] = $exp;
+    //             }
+    //         }
+    //     } elseif (is_array($formula)) {
+    //         foreach ($formula as $tgt => $arr) {
+    //             if (!is_array($arr)) { continue; }
+    //             foreach ($arr as $exp) {
+    //                 if ($exp !== '') {
+    //                     $formulaMap[$tgt][] = $exp;
+    //                 }
+    //             }
+    //         }
+    //     }
 
-        // 2) $formula peut être: (a) string "tgt[=]expr;tgt2[=]expr2" (legacy) ou (b) array ['tgt'=>['expr']]
-        $formulaMap = []; // ['target' => ['expr1','expr2']]
-        if (is_string($formula) && $formula !== '') {
-            $pairs = explode(';', $formula);
-            foreach ($pairs as $pair) {
-                $chp = explode('[=]', $pair, 2);
-                $tgt = $chp[0] ?? '';
-                $exp = $chp[1] ?? '';
-                if ($tgt !== '' && $exp !== '') {
-                    $formulaMap[$tgt][] = $exp;
-                }
-            }
-        } elseif (is_array($formula)) {
-            foreach ($formula as $tgt => $arr) {
-                if (!is_array($arr)) { continue; }
-                foreach ($arr as $exp) {
-                    if ($exp !== '') {
-                        $formulaMap[$tgt][] = $exp;
-                    }
-                }
-            }
-        }
+    //     // ---------- CONSTRUCTION DE LA STRUCTURE DE SORTIE ----------
+    //     foreach ($fieldsMap as $tgt => $srcList) {
+    //         if (!isset($tab['fields']['name'][$tgt])) {
+    //             $tab['fields']['name'][$tgt] = [];
+    //         }
+    //         if (!empty($srcList)) {
+    //             $tab['fields']['name'][$tgt]['champs'] = array_values($srcList);
+    //         }
+    //     }
 
-        // ---------- CONSTRUCTION DE LA STRUCTURE DE SORTIE ----------
-        foreach ($fieldsMap as $tgt => $srcList) {
-            if (!isset($tab['fields']['name'][$tgt])) {
-                $tab['fields']['name'][$tgt] = [];
-            }
-            if (!empty($srcList)) {
-                $tab['fields']['name'][$tgt]['champs'] = array_values($srcList);
-            }
-        }
+    //     foreach ($formulaMap as $tgt => $expList) {
+    //         if (!isset($tab['fields']['name'][$tgt])) {
+    //             $tab['fields']['name'][$tgt] = [];
+    //         }
+    //         if (!empty($expList)) {
+    //             $tab['fields']['name'][$tgt]['formule'] = array_values($expList);
+    //         }
+    //     }
 
-        foreach ($formulaMap as $tgt => $expList) {
-            if (!isset($tab['fields']['name'][$tgt])) {
-                $tab['fields']['name'][$tgt] = [];
-            }
-            if (!empty($expList)) {
-                $tab['fields']['name'][$tgt]['formule'] = array_values($expList);
-            }
-        }
+    //     // ---------- PARAMS (inchangé, mais safe) ----------
+    //     if (is_array($params)) {
+    //         foreach ($params as $k => $p) {
+    //             $tab['params'][$k] = $p;
+    //         }
+    //     }
 
-        // ---------- PARAMS (inchangé, mais safe) ----------
-        if (is_array($params)) {
-            foreach ($params as $k => $p) {
-                $tab['params'][$k] = $p;
-            }
-        }
-
-        return $tab;
-    }
+    //     return $tab;
+    // }
 
 
     #[Route('/rule/update_description', name: 'update_rule_description', methods: ['POST'])]

@@ -41,12 +41,15 @@ const UI = {
   },
 
   fetchHtml: async (url, params = {}) => {
-    const query = new URLSearchParams(params).toString();
-    const target = query ? `${url}?${query}` : url;
-    const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
-  }
+      const query = new URLSearchParams(params).toString();
+      const target = query ? `${url}?${query}` : url;
+      const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      if (!res.ok) {
+          const errorMsg = await res.text();
+          throw new Error(errorMsg || `Erreur HTTP ${res.status}`);
+      }
+      return await res.text();
+    }
 };
 
 /* ============================================================
@@ -185,12 +188,23 @@ const UI = {
 
   async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
     UI.resetSelect(targetSelect);
-    if (feedbackEl) feedbackEl.textContent = '';
+    if (feedbackEl) {
+        feedbackEl.textContent = '';
+        feedbackEl.classList.remove('text-danger', 'text-success');
+    }
     if (!url) return;
 
     try {
       UI.toggle(spinner, true);
-      const html = await UI.fetchHtml(url, params);
+      const htmlParams = new URLSearchParams(params).toString();
+      const res = await UI.fetchHtml(url, params);
+      const response = await fetch(`${url}?${htmlParams}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+      
+      if (!response.ok) {
+          const errorMsg = await response.text(); 
+          throw new Error(errorMsg || `Erreur ${response.status}`);
+      }
+      const html = await response.text();
       
       targetSelect.innerHTML = '';
       targetSelect.appendChild(new Option('', '', true, true));
@@ -205,9 +219,14 @@ const UI = {
       UI.enableSelect(targetSelect);
 
     } catch (e) {
+      console.warn("Connexion refusée (Normal si mauvais mot de passe):", e.message);
       UI.resetSelect(targetSelect);
       UI.enableSelect(targetSelect);
-      if (feedbackEl) feedbackEl.textContent = 'Error loading data.';
+      
+   if (feedbackEl) {
+          feedbackEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + e.message; 
+          feedbackEl.className = 'form-text text-danger fw-bold';
+      }
     } finally {
       UI.toggle(spinner, false);
     }
@@ -223,7 +242,7 @@ const UI = {
     if (!connectorId) return Promise.resolve();
     const group = side === 'source' ? EL.src : EL.tgt;
     const type = side === 'source' ? 'source' : 'cible';
-    return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, null);
+    return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, group.feed);
   };
 
   async function loadStep3Params() {
@@ -1046,35 +1065,45 @@ $(function () {
   const zone = UI.get('rule-template-zone');
   const path = UI.get('step-2')?.getAttribute('data-path-templates');
   const saveBtn = UI.get('rule-save-template');
+  
+  const sSelect = UI.get('source-solution');
+  const tSelect = UI.get('target-solution');
 
   if (!switchEl) return;
 
+  const loadTemplates = () => {
+    if (!switchEl.checked) return;
+
+    if (path) {
+      const sSlug = sSelect.options[sSelect.selectedIndex]?.getAttribute('data-solution-slug');
+      const tSlug = tSelect.options[tSelect.selectedIndex]?.getAttribute('data-solution-slug');
+      
+      if (sSlug && tSlug) {
+        zone.innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
+        UI.fetchHtml(path, { src_solution: sSlug, tgt_solution: tSlug })
+          .then(html => zone.innerHTML = html || '<p>No templates found for this pair.</p>')
+          .catch(() => zone.innerHTML = '<p class="text-danger">Error loading templates.</p>');
+      }
+    }
+  };
+
   switchEl.addEventListener('change', () => {
     const isTpl = switchEl.checked;
+    
     UI.toggle(UI.get('source-module-group'), !isTpl);
     UI.toggle(UI.get('target-module-group'), !isTpl);
     UI.toggle(UI.get('step-templates'), isTpl);
     [3,4,5].forEach(i => UI.toggle(UI.get(`step-${i}`), false));
 
-    if (isTpl && path) {
-      const s = UI.get('source-solution'), t = UI.get('target-solution');
-      const sSlug = s.options[s.selectedIndex]?.getAttribute('data-solution-slug');
-      const tSlug = t.options[t.selectedIndex]?.getAttribute('data-solution-slug');
-      
-      if (sSlug && tSlug) {
-        zone.innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
-        UI.fetchHtml(path, { src_solution: sSlug, tgt_solution: tSlug })
-          .then(html => zone.innerHTML = html || '<p>No templates.</p>')
-          .catch(() => zone.innerHTML = '<p class="text-danger">Error.</p>');
-      } else {
-        zone.innerHTML = '<p class="text-muted">Select solutions first.</p>';
-      }
-    }
+    loadTemplates();
   });
 
+  if (sSelect) sSelect.addEventListener('change', loadTemplates);
+  if (tSelect) tSelect.addEventListener('change', loadTemplates);
   document.addEventListener('click', e => {
     const btn = e.target.closest('.js-template-choose');
     if (!btn) return;
+    
     document.querySelectorAll('.template-card.is-selected').forEach(c => c.classList.remove('is-selected'));
     btn.closest('.template-card').classList.add('is-selected');
     
