@@ -4,6 +4,7 @@ require('./app.scss');
 let $ = require('jquery');// create global $ and jQuery variables
 global.$ = global.jQuery = $;
 
+require('selectize');
 // Import FOSJs routing
 const routes = require('../public/js/fos_js_routes.json');
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';

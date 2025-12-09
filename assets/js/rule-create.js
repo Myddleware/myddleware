@@ -7,16 +7,22 @@ const UI = {
   toggle: (el, show) => {
     if (!el) return;
     show ? el.classList.remove('d-none') : el.classList.add('d-none');
-    if (show && el.id === 'step-2') el.style.opacity = '1'; // Force l'opacité pour Step 2
+    if (show && el.id === 'step-2') el.style.opacity = '1'; 
   },
   
   resetSelect: (el, placeholder = '') => {
     if (!el) return;
     el.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
     el.disabled = true;
+    
     if (el.selectize) {
+      el.selectize.clear();
       el.selectize.clearOptions();
       el.selectize.disable();
+      if (placeholder) {
+          el.selectize.settings.placeholder = placeholder;
+          el.selectize.updatePlaceholder();
+      }
     }
   },
   
@@ -30,25 +36,40 @@ const UI = {
       if (!el) return;
       el.value = String(value);
       if (el.selectize) {
-          el.selectize.setValue(String(value), true); 
+          el.selectize.setValue(String(value), false); 
       }
   },
 
   syncSelectize: (el) => {
       if (el && el.selectize) {
-          el.selectize.refreshOptions(false);
+          const selectize = el.selectize;
+          selectize.clearOptions();
+          
+          Array.from(el.options).forEach(opt => {
+              if (opt.value) {
+                  selectize.addOption({
+                      value: opt.value,
+                      text: opt.text
+                  });
+              }
+          });
+          selectize.refreshOptions(false);
       }
   },
 
   fetchHtml: async (url, params = {}) => {
       const query = new URLSearchParams(params).toString();
       const target = query ? `${url}?${query}` : url;
-      const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      if (!res.ok) {
-          const errorMsg = await res.text();
-          throw new Error(errorMsg || `Erreur HTTP ${res.status}`);
+      try {
+          const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          if (!res.ok) {
+              const errorMsg = await res.text();
+              throw new Error(errorMsg || `Erreur HTTP ${res.status}`);
+          }
+          return await res.text();
+      } catch (err) {
+          throw err;
       }
-      return await res.text();
     }
 };
 
@@ -187,7 +208,7 @@ const UI = {
   let filtersLoaded = false;
 
   async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
-    UI.resetSelect(targetSelect);
+    UI.resetSelect(targetSelect, 'Loading...');
     if (feedbackEl) {
         feedbackEl.textContent = '';
         feedbackEl.classList.remove('text-danger', 'text-success');
@@ -197,7 +218,6 @@ const UI = {
     try {
       UI.toggle(spinner, true);
       const htmlParams = new URLSearchParams(params).toString();
-      const res = await UI.fetchHtml(url, params);
       const response = await fetch(`${url}?${htmlParams}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
       
       if (!response.ok) {
@@ -214,16 +234,16 @@ const UI = {
         temp.innerHTML = html;
         Array.from(temp.querySelectorAll('option')).forEach(opt => targetSelect.appendChild(opt));
       }
-      
+
       UI.syncSelectize(targetSelect);
       UI.enableSelect(targetSelect);
 
     } catch (e) {
-      console.warn("Connexion refusée (Normal si mauvais mot de passe):", e.message);
-      UI.resetSelect(targetSelect);
+      console.warn("Erreur chargement:", e.message);
+      UI.resetSelect(targetSelect, 'Error loading list');
       UI.enableSelect(targetSelect);
       
-   if (feedbackEl) {
+       if (feedbackEl) {
           feedbackEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + e.message; 
           feedbackEl.className = 'form-text text-danger fw-bold';
       }
@@ -248,18 +268,22 @@ const UI = {
   async function loadStep3Params() {
     if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
     
-    if (!EL.src.conn.value || !EL.tgt.conn.value || !EL.src.mod.value || !EL.tgt.mod.value) {
+    const valSrcConn = EL.src.conn.value;
+    const valTgtConn = EL.tgt.conn.value;
+    const valSrcMod = EL.src.mod.value;
+    const valTgtMod = EL.tgt.mod.value;
+    if (!valSrcConn || !valTgtConn || !valSrcMod || !valTgtMod) {
         EL.paramsContainer.innerHTML = '';
+        console.groupEnd();
         return;
     }
 
     const params = {
-      src_connector: EL.src.conn.value,
-      tgt_connector: EL.tgt.conn.value,
-      src_module: EL.src.mod.value,
-      tgt_module: EL.tgt.mod.value
+      src_connector: valSrcConn,
+      tgt_connector: valTgtConn,
+      src_module: valSrcMod,
+      tgt_module: valTgtMod
     };
-
     try {
       EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
       const html = await UI.fetchHtml(step3ParamsPath, params);
@@ -280,8 +304,9 @@ const UI = {
         });
       }
     } catch (e) {
-      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Impossible de charger les paramètres.</div>';
+      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Impossible de charger les paramètres. (' + e.message + ')</div>';
     }
+    console.groupEnd();
   }
 
   function step3IsComplete() {
@@ -341,9 +366,10 @@ const UI = {
       if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
       if (window.initFiltersUI) window.initFiltersUI();
       if (window.initMappingUI) window.initMappingUI();
-    } catch {
-      EL.step4Body.innerHTML = '<p class="text-danger">Impossible de charger les filtres.</p>';
+    } catch (e) {
+      EL.step4Body.innerHTML = '<p class="text-danger">Impossible de charger les filtres. (' + e.message + ')</p>';
     }
+    console.groupEnd();
   };
   window.mydLoadRuleFilters = loadFiltersUI;
 
@@ -504,7 +530,7 @@ const UI = {
     // Target Select
     const tdTgt = document.createElement('td');
     const tgtSel = createMappingSelect(tgtFields);
-    tgtSel.classList.add('rule-mapping-target');
+    tgtSel.classList.add('rule-mapping-target', 'js-select-search');
     tdTgt.appendChild(tgtSel);
 
     // Source Select + Badges
@@ -512,7 +538,7 @@ const UI = {
     const srcWrapper = document.createElement('div');
     srcWrapper.className = 'mapping-src-wrapper';
     const srcSel = createMappingSelect(srcFields);
-    srcSel.classList.add('rule-mapping-source-picker');
+    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search');
     const badgesDiv = document.createElement('div');
     badgesDiv.className = 'mapping-src-badges pt-1';
 
@@ -1056,6 +1082,19 @@ $(function () {
   modal.querySelector('#sim-run-manual')?.addEventListener('click', () => runSim(true));
   modal.querySelector('#sim-run-simple')?.addEventListener('click', () => runSim(false));
 })();
+
+$(document).ready(function() {
+    $('.js-select-search').selectize({
+        sortField: 'text',
+        placeholder: 'Search...',
+        allowEmptyOption: true,
+        onChange: function(value) {
+            if(this.$input && this.$input[0]) {
+              //AV plus tard ..
+            }
+        }
+    });
+});
 
 /* ===========================================
  * TEMPLATE LOGIC
