@@ -1403,6 +1403,12 @@ class suitecrm extends solution
 
             // we check if we have a cookie file to manage the session
             $this->logger->critical("checking for cookie file - path: " . ($this->cookieFilePath ?? 'null'));
+            if ($this->isCacheValid($this->cookieFilePath)) {
+                $this->logger->critical("cookie cache is VALID check before cookie content");
+            } else {
+                $this->logger->critical("cookie cache is NOT valid check before cookie content");
+                $this->invalidateSession();
+            }
             if ($this->cookieFilePath && file_exists($this->cookieFilePath)) {
                 $this->logger->critical("cookie file EXISTS, reading content");
                 $cookieContent = file_get_contents($this->cookieFilePath);
