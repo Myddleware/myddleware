@@ -1,6 +1,15 @@
 #!/bin/bash
 
-LOG_FILE="var/log/dev.log"
+# Read APP_ENV from .env.local
+if [ -f ".env.local" ]; then
+  APP_ENV=$(grep "^APP_ENV=" .env.local | cut -d '=' -f2)
+else
+  echo "❌ .env.local file not found"
+  exit 1
+fi
+
+# Set LOG_FILE based on APP_ENV
+LOG_FILE="var/log/background.log"
 TEMP_FILE="${LOG_FILE}.tmp"
 
 # Check if the log file exists
