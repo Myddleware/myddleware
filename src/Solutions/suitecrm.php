@@ -36,7 +36,7 @@ class suitecrm extends solution
 
     protected ?array $cachedSession = null;
     protected ?int $sessionCacheTime = null;
-    protected int $sessionCacheTTL = 1200; // 20 minutes in seconds
+    protected int $sessionCacheTTL = 300; // 5 minutes in seconds (reduced from 20 minutes because SuiteCRM invalidates sessions faster)
     protected ?string $cookieFilePath = null;
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
@@ -115,22 +115,37 @@ class suitecrm extends solution
     {
         parent::login($paramConnexion);
         try {
+            $this->logger->critical("starting the login process");
+            $this->logger->critical("login credentials - user: " . $this->paramConnexion['login'] . ", url: " . $this->paramConnexion['url']);
+
             // Initialize cookie file path based on credentials
+            $this->logger->critical("calling initializeCookieFile");
             $this->initializeCookieFile();
+            $this->logger->critical("initializeCookieFile completed, cookieFilePath: " . ($this->cookieFilePath ?? 'null'));
 
             // Generate cache key based on login credentials and URL
             $cacheKey = md5($this->paramConnexion['login'] . $this->paramConnexion['password'] . $this->paramConnexion['url']);
+            $this->logger->critical("generated cache key: " . $cacheKey);
 
+            $originalUrl = $this->paramConnexion['url'];
             $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
+            $this->logger->critical("removed index.php from URL - before: " . $originalUrl . ", after: " . $this->paramConnexion['url']);
 
             $this->paramConnexion['url'] .= $this->urlSuffix;
+            $this->logger->critical("added urlSuffix to URL - final URL: " . $this->paramConnexion['url']);
 
+            $this->logger->critical("checking if cache is valid for cache key: " . $cacheKey);
             if ($this->isCacheValid($cacheKey)) {
                 $this->session = $this->cachedSession['session_id'];
-                $this->logger->critical("cache is valid, skipping login");
+                $this->logger->critical("cache is valid, skipping login - session ID: " . $this->session);
                 $this->connexion_valide = true;
+                $this->logger->critical("connexion_valide set to true, returning early");
                 return;
+            } else {
+                $this->logger->critical("cache is NOT valid, proceeding with full login");
             }
+
+            $this->logger->critical("preparing login parameters");
             $login_paramaters = [
                 'user_auth' => [
                     'user_name' => $this->paramConnexion['login'],
@@ -139,23 +154,38 @@ class suitecrm extends solution
                 ],
                 'application_name' => 'myddleware',
             ];
+            $this->logger->critical("login parameters prepared - user_name: " . $this->paramConnexion['login']);
 
+            $this->logger->critical("making login call to: " . $this->paramConnexion['url']);
             $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            $this->logger->critical("login call completed, result is: " . ($result === false ? 'FALSE' : 'not false'));
 
             if (false != $result) {
+                $this->logger->critical("result is not false, checking for result->id");
                 if (empty($result->id)) {
+                    $this->logger->critical("result->id is EMPTY - error description: " . ($result->description ?? 'no description'));
                     throw new \Exception($result->description);
+                } else {
+                    $this->logger->critical("result->id is present: " . $result->id);
                 }
 
                 $this->session = $result->id;
+                $this->logger->critical("session set to: " . $this->session);
+
                 // Cache the session
+                $this->logger->critical("caching session with cache key: " . $cacheKey);
                 $this->cacheSession($cacheKey, $result->id);
+                $this->logger->critical("session cached successfully");
+
                 $this->connexion_valide = true;
+                $this->logger->critical("connexion_valide set to true - login successful");
             } else {
+                $this->logger->critical("result is FALSE - URL check failed");
                 throw new \Exception('Please check url');
             }
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->critical("EXCEPTION caught in login - " . $error);
             $this->logger->error($error);
 
             return ['error' => $error];
@@ -181,11 +211,31 @@ class suitecrm extends solution
      */
     protected function clearCookieFile(): void
     {
+        $this->logger->critical("clearCookieFile called");
         if ($this->cookieFilePath !== null && file_exists($this->cookieFilePath)) {
+            $this->logger->critical("cookie file exists and path is not null - path: " . $this->cookieFilePath);
             $fs = new Filesystem();
+            $this->logger->critical("removing cookie file");
             $fs->remove($this->cookieFilePath);
+            $this->logger->critical("cookie file removed successfully");
             $this->cookieFilePath = null;
+            $this->logger->critical("cookieFilePath set to null");
+        } else {
+            $this->logger->critical("cookie file does not exist or path is null - path: " . ($this->cookieFilePath ?? 'null') . ", file_exists: " . ($this->cookieFilePath !== null && file_exists($this->cookieFilePath) ? 'true' : 'false'));
         }
+    }
+
+    /**
+     * Invalidate the current session cache
+     */
+    protected function invalidateSession(): void
+    {
+        $this->logger->critical("invalidateSession called - clearing all session data");
+        $this->cachedSession = null;
+        $this->sessionCacheTime = null;
+        $this->session = null;
+        $this->clearCookieFile();
+        $this->logger->critical("session invalidated - all data cleared");
     }
 
     /**
@@ -193,19 +243,28 @@ class suitecrm extends solution
      */
     protected function initializeCookieFile(): void
     {
+        $this->logger->critical("initializeCookieFile called - cookieFilePath: " . ($this->cookieFilePath ?? 'null'));
         if ($this->cookieFilePath !== null) {
+            $this->logger->critical("cookieFilePath is already initialized, returning early - path: " . $this->cookieFilePath);
             return; // Already initialized
+        } else {
+            $this->logger->critical("cookieFilePath is null, proceeding with initialization");
         }
 
         $cacheKey = md5($this->paramConnexion['login'] . $this->paramConnexion['password'] . $this->paramConnexion['url']);
-        $cookieDir = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/solutions/suitecrm';
-        $this->cookieFilePath = $cookieDir . '/cookies_' . $cacheKey . '.txt';
+        $this->logger->critical("generated cache key for cookie file: " . $cacheKey);
 
+        $cookieDir = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/solutions/suitecrm';
+        $this->logger->critical("cookie directory: " . $cookieDir);
+
+        $this->cookieFilePath = $cookieDir . '/cookies_' . $cacheKey . '.txt';
+        $this->logger->critical("cookie file path set to: " . $this->cookieFilePath);
 
         // Create directory if it doesn't exist
         $fs = new Filesystem();
+        $this->logger->critical("creating cookie directory if it doesn't exist");
         $fs->mkdir($cookieDir);
-
+        $this->logger->critical("cookie directory created/verified");
     }
 
     /**
@@ -213,13 +272,16 @@ class suitecrm extends solution
      */
     protected function cacheSession(string $cacheKey, string $sessionId): void
     {
+        $this->logger->critical("cacheSession called - cacheKey: " . $cacheKey . ", sessionId: " . $sessionId);
 
         $this->cachedSession = [
             'cache_key' => $cacheKey,
             'session_id' => $sessionId,
         ];
-        $this->sessionCacheTime = time(); // current moment
+        $this->logger->critical("cachedSession array set with cache_key and session_id");
 
+        $this->sessionCacheTime = time(); // current moment
+        $this->logger->critical("sessionCacheTime set to: " . $this->sessionCacheTime);
     }
 
     /**
@@ -227,54 +289,92 @@ class suitecrm extends solution
      */
     protected function isCacheValid(string $cacheKey): bool
     {
+        $this->logger->critical("isCacheValid called - cacheKey: " . $cacheKey);
+        $this->logger->critical("cachedSession is: " . ($this->cachedSession === null ? 'NULL' : 'not null'));
+        $this->logger->critical("sessionCacheTime is: " . ($this->sessionCacheTime === null ? 'NULL' : $this->sessionCacheTime));
+
         // If class variables are null, check if the session file exists on disk
         if ($this->cachedSession === null || $this->sessionCacheTime === null) {
+            $this->logger->critical("cachedSession or sessionCacheTime is null, checking disk for session file");
             $cookieFilePath = $this->parameterBagInterface->get('kernel.cache_dir') . '/myddleware/solutions/suitecrm/cookies_' . $cacheKey . '.txt';
+            $this->logger->critical("checking for cookie file at path: " . $cookieFilePath);
 
             if (file_exists($cookieFilePath)) {
+                $this->logger->critical("cookie file EXISTS on disk");
                 // Session file exists, extract session ID from cookie file
+                $this->logger->critical("calling extractSessionIdFromCookieFile");
                 $sessionId = $this->extractSessionIdFromCookieFile($cookieFilePath);
+                $this->logger->critical("extractSessionIdFromCookieFile returned: " . ($sessionId ?? 'null'));
+
                 if (empty($sessionId)) {
+                    $this->logger->critical("sessionId is EMPTY, returning false");
                     return false;
+                } else {
+                    $this->logger->critical("sessionId is NOT empty, loading into class variables");
                 }
 
                 // Load it into class variables and validate
                 $this->cookieFilePath = $cookieFilePath;
+                $this->logger->critical("cookieFilePath set to: " . $this->cookieFilePath);
+
                 $this->cachedSession = ['cache_key' => $cacheKey, 'session_id' => $sessionId];
+                $this->logger->critical("cachedSession array created with cache_key and session_id");
+
                 $this->sessionCacheTime = filemtime($cookieFilePath);
-                $this->logger->critical("session file found on disk, loading from file");
+                $this->logger->critical("session file found on disk, loading from file - sessionCacheTime: " . $this->sessionCacheTime);
             } else {
+                $this->logger->critical("cookie file does NOT exist on disk, returning false - cache not used");
                 return false; // cache not used
             }
+        } else {
+            $this->logger->critical("cachedSession and sessionCacheTime are already set, proceeding with validation");
         }
 
         // Check if cache key matches
+        $this->logger->critical("checking if cache key matches - stored: " . ($this->cachedSession['cache_key'] ?? 'null') . ", provided: " . $cacheKey);
         if ($this->cachedSession['cache_key'] !== $cacheKey) {
-            $this->logger->critical("wrong credentials");
+            $this->logger->critical("cache key MISMATCH - wrong credentials");
             $this->clearCookieFile(); // because the cache wrong or corrupted, clear the file
+            $this->logger->critical("returning false - cache created but for different credentials");
             return false; // cache created but for different credentials
+        } else {
+            $this->logger->critical("cache key MATCHES - proceeding");
         }
 
         // Check if cache has expired (TTL exceeded)
         $currentTime = time();
+        $this->logger->critical("checking cache expiration - currentTime: " . $currentTime . ", sessionCacheTime: " . $this->sessionCacheTime);
         $cacheAge = $currentTime - $this->sessionCacheTime;
+        $this->logger->critical("cache age calculated: " . $cacheAge . " seconds, TTL: " . $this->sessionCacheTTL . " seconds");
 
         if ($cacheAge > $this->sessionCacheTTL) { // if cache is too old because its age is superior to TTL
+            $this->logger->critical("cache age EXCEEDS TTL - cache is expired");
             $this->cachedSession = null;
+            $this->logger->critical("cachedSession set to null");
             $this->sessionCacheTime = null;
+            $this->logger->critical("sessionCacheTime set to null");
             $this->clearCookieFile(); // because the cache is too old, empty the file
-            $this->logger->critical("expired cache");
+            $this->logger->critical("expired cache - returning false");
             return false;
+        } else {
+            $this->logger->critical("cache age is within TTL - cache is NOT expired");
         }
 
         // Check if the session file still exists
+        $this->logger->critical("checking if session file still exists - path: " . ($this->cookieFilePath ?? 'null'));
         if ($this->cookieFilePath === null || !file_exists($this->cookieFilePath)) {
+            $this->logger->critical("session file does NOT exist or path is null");
             $this->cachedSession = null;
+            $this->logger->critical("cachedSession set to null");
             $this->sessionCacheTime = null;
-            $this->logger->critical("session file not found");
+            $this->logger->critical("sessionCacheTime set to null");
+            $this->logger->critical("session file not found - returning false");
             return false;
+        } else {
+            $this->logger->critical("session file still EXISTS");
         }
 
+        $this->logger->critical("ALL VALIDATION CHECKS PASSED - cache is valid, returning true");
         return true;
     }
 
@@ -283,34 +383,61 @@ class suitecrm extends solution
      */
     protected function extractSessionIdFromCookieFile(string $filePath): ?string
     {
+        $this->logger->critical("extractSessionIdFromCookieFile called - filePath: " . $filePath);
+
         if (!file_exists($filePath)) {
+            $this->logger->critical("file does NOT exist, returning null");
             return null;
+        } else {
+            $this->logger->critical("file exists, proceeding to read");
         }
 
         $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+        $this->logger->critical("read file lines - count: " . (is_array($lines) ? count($lines) : 0));
+
         if (empty($lines)) {
+            $this->logger->critical("lines array is EMPTY, returning null");
             return null;
+        } else {
+            $this->logger->critical("lines array is NOT empty, proceeding to parse");
         }
 
+        $lineNumber = 0;
         foreach ($lines as $line) {
+            $lineNumber++;
+            $this->logger->critical("processing line #" . $lineNumber . ": " . substr($line, 0, 100));
+
             // Skip comment lines
             if (strpos($line, 'LEGACYSESSID') === 0) {
+                $this->logger->critical("line starts with LEGACYSESSID (comment line), skipping");
                 continue;
+            } else {
+                $this->logger->critical("line does NOT start with LEGACYSESSID, parsing as cookie");
             }
 
             // Parse Netscape cookie format: domain, flag, path, secure, expiration, name, value
             $parts = preg_split('/\t+/', trim($line));
+            $this->logger->critical("split line into parts - count: " . count($parts));
+
             if (count($parts) >= 7) {
+                $this->logger->critical("line has >= 7 parts, extracting cookie name and value");
                 $cookieName = $parts[5];
                 $cookieValue = $parts[6];
+                $this->logger->critical("cookieName: " . $cookieName . ", cookieValue: " . substr($cookieValue, 0, 50));
 
                 // Look for LEGACYSESSID cookie
                 if ($cookieName === 'LEGACYSESSID') {
+                    $this->logger->critical("FOUND LEGACYSESSID cookie, returning value: " . $cookieValue);
                     return $cookieValue;
+                } else {
+                    $this->logger->critical("cookieName is NOT LEGACYSESSID, continuing to next line");
                 }
+            } else {
+                $this->logger->critical("line has LESS than 7 parts, skipping to next line");
             }
         }
 
+        $this->logger->critical("finished processing all lines, LEGACYSESSID not found, returning null");
         return null;
     }
 
@@ -535,30 +662,46 @@ class suitecrm extends solution
      */
     public function read($param)
     {
+        $this->logger->critical("read() method called - module: " . ($param['module'] ?? 'unknown'));
+        $this->logger->critical("read() - current session ID: " . ($this->session ?? 'null'));
+        $this->logger->critical("read() - query params: " . json_encode($param['query'] ?? 'no query'));
+
         $result = [];
 
         // Manage delete option to enable
         $deleted = false;
         if (!empty($param['ruleParams']['deletion'])) {
+            $this->logger->critical("read() - deletion enabled, adding deleted field");
             $deleted = true;
             $param['fields'][] = 'deleted';
+        } else {
+            $this->logger->critical("read() - deletion NOT enabled");
         }
+
         $totalCount = 0;
         $currentCount = 0;
         $query = '';
 
         // On va chercher le nom du champ pour la date de référence: Création ou Modification
+        $this->logger->critical("read() - getting reference field name");
         $dateRefField = $this->getRefFieldName($param);
+        $this->logger->critical("read() - reference field: " . $dateRefField);
 
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on récupère tous les enregistrements du module parent modifié
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            $this->logger->critical("read() - module is many-to-many relationship, adjusting params");
             $paramSave = $param;
             $param['fields'] = [];
             $param['module'] = $this->module_relationship_many_to_many[$paramSave['module']]['module_name'];
+            $this->logger->critical("read() - adjusted module to: " . $param['module']);
+        } else {
+            $this->logger->critical("read() - module is NOT many-to-many");
         }
 
         // Built the query
+        $this->logger->critical("read() - generating query");
         $query = $this->generateQuery($param, 'read');
+        $this->logger->critical("read() - query generated: " . $query);
         //Pour tous les champs, si un correspond à une relation custom alors on change le tableau en entrée
         $link_name_to_fields_array = [];
         foreach ($param['fields'] as $field) {
@@ -586,11 +729,16 @@ class suitecrm extends solution
 
         // add limit to query
         if (!empty($param['limit'])) {
+            $this->logger->critical("read() - setting limit to: " . $param['limit']);
             $this->limitCall = $param['limit'];
+        } else {
+            $this->logger->critical("read() - using default limit: " . $this->limitCall);
         }
 
         // On lit les données dans le CRM
+        $this->logger->critical("read() - starting do-while loop to read data from CRM");
         do {
+            $this->logger->critical("read() - preparing get_entry_list parameters - offset: " . ($param['offset'] ?? 0));
             $get_entry_list_parameters = [
                 'session' => $this->session,
                 'module_name' => $param['module'],
@@ -602,9 +750,14 @@ class suitecrm extends solution
                 'max_results' => $this->limitCall,
                 'deleted' => $deleted,
             ];
+            $this->logger->critical("read() - calling API get_entry_list with session: " . $this->session . ", module: " . $param['module']);
             $get_entry_list_result = $this->call('get_entry_list', $get_entry_list_parameters);
+            $this->logger->critical("read() - get_entry_list call completed");
+
             // Construction des données de sortie
+            $this->logger->critical("read() - checking if result has result_count");
             if (isset($get_entry_list_result->result_count)) {
+                $this->logger->critical("read() - result_count is SET: " . $get_entry_list_result->result_count);
                 $currentCount = $get_entry_list_result->result_count;
                 $totalCount += $currentCount;
                 $record = [];
@@ -659,12 +812,22 @@ class suitecrm extends solution
                     $record = [];
                 }
                 // Préparation l'offset dans le cas où on fera un nouvel appel à Salesforce
+                $this->logger->critical("read() - incrementing offset by: " . $this->limitCall);
                 $param['offset'] += $this->limitCall;
+                $this->logger->critical("read() - new offset: " . $param['offset']);
             } else {
+                $this->logger->critical("read() - result_count is NOT set - ERROR occurred");
+                $this->logger->critical("read() - full result object: " . json_encode($get_entry_list_result));
                 if (!empty($get_entry_list_result->number)) {
+                    $this->logger->critical("read() - error number is set: " . $get_entry_list_result->number);
+                    $this->logger->critical("read() - error name: " . ($get_entry_list_result->name ?? 'no name'));
+                    $this->logger->critical("read() - error description: " . ($get_entry_list_result->description ?? 'no description'));
+                    $this->logger->critical("read() - THROWING EXCEPTION with error details");
                     // $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
                     throw new \Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
                 } else {
+                    $this->logger->critical("read() - error number is NOT set");
+                    $this->logger->critical("read() - THROWING EXCEPTION - no error details from SuiteCRM");
                     // $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
                     throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
                 }
@@ -673,19 +836,26 @@ class suitecrm extends solution
         }
         // On continue si le nombre de résultat du dernier appel est égal à la limite
         while ($currentCount == $this->limitCall and $totalCount < $param['limit'] - 1); // -1 because a limit of 1000 = 1001 in the system
+        $this->logger->critical("read() - do-while loop completed - totalCount: " . $totalCount);
         // Si on est sur un module relation, on récupère toutes les données liées à tous les module sparents modifiés
         if (!empty($paramSave)) {
+            $this->logger->critical("read() - processing many-to-many relationship, calling readRelationship");
             $resultRel = $this->readRelationship($paramSave, $result);
             // Récupération des données sauf de la date de référence qui dépend des enregistrements parent
             if (!empty($resultRel['count'])) {
+                $this->logger->critical("read() - readRelationship returned count: " . $resultRel['count']);
                 $result = $resultRel['values'];
             }
             // Si aucun résultat dans les relations on renvoie null, sinon un flux vide serait créé.
             else {
+                $this->logger->critical("read() - readRelationship returned NO results, returning null");
                 return;
             }
+        } else {
+            $this->logger->critical("read() - NOT a many-to-many relationship");
         }
 
+        $this->logger->critical("read() - returning result with " . (is_array($result) ? count($result) : 0) . " records");
         return $result;
     }
 
@@ -770,69 +940,107 @@ class suitecrm extends solution
      */
     public function createData($param): array
     {
+        $this->logger->critical("createData() method called - module: " . ($param['module'] ?? 'unknown'));
+        $this->logger->critical("createData() - data count: " . (isset($param['data']) ? count($param['data']) : 0));
+        $this->logger->critical("createData() - current session ID: " . ($this->session ?? 'null'));
+
         // Si le module est un module "fictif" relation créé pour Myddlewar	alors on ne fait pas de readlast
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            $this->logger->critical("createData() - module is many-to-many relationship, calling createRelationship");
             return $this->createRelationship($param);
+        } else {
+            $this->logger->critical("createData() - module is NOT many-to-many, proceeding with normal creation");
         }
 
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
+            $this->logger->critical("createData() - processing document ID: " . $idDoc);
             try {
                 // Check control before create
+                $this->logger->critical("createData() - calling checkDataBeforeCreate for doc: " . $idDoc);
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+                $this->logger->critical("createData() - checkDataBeforeCreate completed for doc: " . $idDoc);
+
                 $dataSugar = [];
+                $this->logger->critical("createData() - building dataSugar array from data fields");
                 foreach ($data as $key => $value) {
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
+                        $this->logger->critical("createData() - skipping Birthdate field with 0000-00-00 value");
                         continue;
-                    }
-                    // Si un champ est une relation custom alors on enlève le prefix
-                    if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
-                        $key = substr($key, strlen($this->customRelationship));
+                    } else if ('Birthdate' == $key) {
+                        $this->logger->critical("createData() - including Birthdate field with value: " . $value);
                     }
 
-                    // Note are sent using setNoteAttachement function 
+                    // Si un champ est une relation custom alors on enlève le prefix
+                    if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+                        $originalKey = $key;
+                        $key = substr($key, strlen($this->customRelationship));
+                        $this->logger->critical("createData() - removed custom relationship prefix - original: " . $originalKey . ", new: " . $key);
+                    }
+
+                    // Note are sent using setNoteAttachement function
                     if (
                         $param['module'] == 'Notes'
                         and $key == 'filecontents'
                     ) {
+                        $this->logger->critical("createData() - skipping filecontents field for Notes module");
                         continue;
                     }
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
+                $this->logger->critical("createData() - dataSugar array built with " . count($dataSugar) . " fields");
+
                 $setEntriesListParameters = [
                     'session' => $this->session,
                     'module_name' => $param['module'],
                     'name_value_list' => $dataSugar,
                 ];
+                $this->logger->critical("createData() - calling API set_entry with session: " . $this->session . ", module: " . $param['module']);
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
+                $this->logger->critical("createData() - set_entry call completed");
 
+                $this->logger->critical("createData() - checking if result has id field");
                 if (!empty($get_entry_list_result->id)) {
+                    $this->logger->critical("createData() - result HAS id: " . $get_entry_list_result->id);
+
                     // In case of module note with attachement, we generate a second call to add the file
                     if (
                         $param['module'] == 'Notes'
                         and !empty($data['filecontents'])
                     ) {
+                        $this->logger->critical("createData() - Notes module with filecontents, calling setNoteAttachement");
                         $this->setNoteAttachement($data, $get_entry_list_result->id);
-                    } 
+                        $this->logger->critical("createData() - setNoteAttachement completed");
+                    } else {
+                        $this->logger->critical("createData() - NOT a Notes module with filecontents, skipping attachment");
+                    }
 
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
                     ];
+                    $this->logger->critical("createData() - SUCCESS for doc " . $idDoc . ", created ID: " . $get_entry_list_result->id);
                 } else {
+                    $this->logger->critical("createData() - result does NOT have id - THROWING EXCEPTION");
+                    $this->logger->critical("createData() - error name: " . (!empty($get_entry_list_result->name) ? $get_entry_list_result->name : 'empty'));
+                    $this->logger->critical("createData() - error description: " . (!empty($get_entry_list_result->description) ? $get_entry_list_result->description : 'empty'));
+                    $this->logger->critical("createData() - full result object: " . json_encode($get_entry_list_result));
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $this->logger->critical("createData() - EXCEPTION caught for doc " . $idDoc . " - " . $error);
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
             // Modification du statut du flux
+            $this->logger->critical("createData() - updating document status for doc: " . $idDoc);
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
+        $this->logger->critical("createData() - returning result with " . (isset($result) ? count($result) : 0) . " documents");
         return $result;
     }
 
@@ -843,18 +1051,33 @@ class suitecrm extends solution
      */
     protected function createRelationship($param)
     {
+        $this->logger->critical("createRelationship() method called - module: " . ($param['module'] ?? 'unknown'));
+        $this->logger->critical("createRelationship() - data count: " . (isset($param['data']) ? count($param['data']) : 0));
+        $this->logger->critical("createRelationship() - current session ID: " . ($this->session ?? 'null'));
+
         foreach ($param['data'] as $idDoc => $data) {
+            $this->logger->critical("createRelationship() - processing document ID: " . $idDoc);
             try {
                 // Check control before create
+                $this->logger->critical("createRelationship() - calling checkDataBeforeCreate for doc: " . $idDoc);
                 $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
+                $this->logger->critical("createRelationship() - checkDataBeforeCreate completed for doc: " . $idDoc);
+
                 $dataSugar = [];
                 if (!empty($this->module_relationship_many_to_many[$param['module']]['fields'])) {
+                    $this->logger->critical("createRelationship() - module has relationship fields, building dataSugar");
                     foreach ($this->module_relationship_many_to_many[$param['module']]['fields'] as $field) {
                         if (isset($data[$field])) {
+                            $this->logger->critical("createRelationship() - adding field: " . $field);
                             $dataSugar[] = ['name' => $field, 'value' => $data[$field]];
+                        } else {
+                            $this->logger->critical("createRelationship() - field NOT set: " . $field);
                         }
                     }
+                } else {
+                    $this->logger->critical("createRelationship() - module has NO relationship fields");
                 }
+
                 $set_relationship_params = [
                     'session' => $this->session,
                     'module_name' => $this->module_relationship_many_to_many[$param['module']]['module_name'],
@@ -864,14 +1087,21 @@ class suitecrm extends solution
                     'name_value_list' => $dataSugar,
                     'delete' => (!empty($data['deleted']) ? 1 : 0),
                 ];
+                $this->logger->critical("createRelationship() - calling API set_relationship with session: " . $this->session);
                 $set_relationship_result = $this->call('set_relationship', $set_relationship_params);
+                $this->logger->critical("createRelationship() - set_relationship call completed");
 
+                $this->logger->critical("createRelationship() - checking if result has created field");
                 if (!empty($set_relationship_result->created)) {
+                    $this->logger->critical("createRelationship() - relationship created SUCCESSFULLY");
                     $result[$idDoc] = [
                         'id' => $idDoc, // On met $idDoc car onn a pas l'id de la relation
                         'error' => false,
                     ];
+                    $this->logger->critical("createRelationship() - SUCCESS for doc " . $idDoc);
                 } else {
+                    $this->logger->critical("createRelationship() - relationship NOT created - setting error code 01");
+                    $this->logger->critical("createRelationship() - result object: " . json_encode($set_relationship_result));
                     $result[$idDoc] = [
                         'id' => '-1',
                         'error' => '01',
@@ -879,15 +1109,18 @@ class suitecrm extends solution
                 }
             } catch (\Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $this->logger->critical("createRelationship() - EXCEPTION caught for doc " . $idDoc . " - " . $error);
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
             // Modification du statut du flux
+            $this->logger->critical("createRelationship() - updating document status for doc: " . $idDoc);
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
+        $this->logger->critical("createRelationship() - returning result with " . (isset($result) ? count($result) : 0) . " documents");
         return $result;
     }
 
@@ -896,30 +1129,46 @@ class suitecrm extends solution
      */
     public function updateData($param): array
     {
+        $this->logger->critical("updateData() method called - module: " . ($param['module'] ?? 'unknown'));
+        $this->logger->critical("updateData() - data count: " . (isset($param['data']) ? count($param['data']) : 0));
+        $this->logger->critical("updateData() - current session ID: " . ($this->session ?? 'null'));
+
         // In case of many to many relationship, the update is done by using createRelationship function
         if (array_key_exists($param['module'], $this->module_relationship_many_to_many)) {
+            $this->logger->critical("updateData() - module is many-to-many relationship, calling createRelationship");
             return $this->createRelationship($param);
+        } else {
+            $this->logger->critical("updateData() - module is NOT many-to-many, proceeding with normal update");
         }
 
         // Transformation du tableau d'entrée pour être compatible webservice Sugar
         foreach ($param['data'] as $idDoc => $data) {
+            $this->logger->critical("updateData() - processing document ID: " . $idDoc);
             try {
                 // Check control before update
+                $this->logger->critical("updateData() - calling checkDataBeforeUpdate for doc: " . $idDoc);
                 $data = $this->checkDataBeforeUpdate($param, $data, $idDoc);
+                $this->logger->critical("updateData() - checkDataBeforeUpdate completed for doc: " . $idDoc);
+
                 $dataSugar = [];
+                $this->logger->critical("updateData() - building dataSugar array from data fields");
                 foreach ($data as $key => $value) {
                     // Important de renommer le champ id pour que SuiteCRM puisse effectuer une modification et non une création
                     if ('target_id' == $key) {
+                        $this->logger->critical("updateData() - renaming target_id to id");
                         $key = 'id';
                     }
                     // Si un champ est une relation custom alors on enlève le prefix
                     if (substr($key, 0, strlen($this->customRelationship)) == $this->customRelationship) {
+                        $originalKey = $key;
                         $key = substr($key, strlen($this->customRelationship));
+                        $this->logger->critical("updateData() - removed custom relationship prefix - original: " . $originalKey . ", new: " . $key);
                     }
 
                     if ('Birthdate' == $key && '0000-00-00' == $value) {
+                        $this->logger->critical("updateData() - skipping Birthdate field with 0000-00-00 value");
                         continue;
-                        // Note are sent using setNoteAttachement function 
+                        // Note are sent using setNoteAttachement function
                         if (
                             $param['module'] == 'Notes'
                             and $key == 'filecontents'
@@ -928,49 +1177,71 @@ class suitecrm extends solution
                         }
                     }
 
-                    // Note are sent using setNoteAttachement function 
+                    // Note are sent using setNoteAttachement function
                     if (
                         $param['module'] == 'Notes'
                         and $key == 'filecontents'
                     ) {
+                        $this->logger->critical("updateData() - skipping filecontents field for Notes module");
                         continue;
                     }
 
                     $dataSugar[] = ['name' => $key, 'value' => $value];
                 }
+                $this->logger->critical("updateData() - dataSugar array built with " . count($dataSugar) . " fields");
+
                 $setEntriesListParameters = [
                     'session' => $this->session,
                     'module_name' => $param['module'],
                     'name_value_list' => $dataSugar,
                 ];
+                $this->logger->critical("updateData() - calling API set_entry with session: " . $this->session . ", module: " . $param['module']);
 
                 $get_entry_list_result = $this->call('set_entry', $setEntriesListParameters);
+                $this->logger->critical("updateData() - set_entry call completed");
+
+                $this->logger->critical("updateData() - checking if result has id field");
                 if (!empty($get_entry_list_result->id)) {
+                    $this->logger->critical("updateData() - result HAS id: " . $get_entry_list_result->id);
+
                     // In case of module note with attachement, we generate a second call to add the file
                     if (
                         $param['module'] == 'Notes'
                         and !empty($data['filecontents'])
                     ) {
+                        $this->logger->critical("updateData() - Notes module with filecontents, calling setNoteAttachement");
                         $this->setNoteAttachement($data, $get_entry_list_result->id);
-                    } 
+                        $this->logger->critical("updateData() - setNoteAttachement completed");
+                    } else {
+                        $this->logger->critical("updateData() - NOT a Notes module with filecontents, skipping attachment");
+                    }
+
                     $result[$idDoc] = [
                         'id' => $get_entry_list_result->id,
                         'error' => false,
                     ];
+                    $this->logger->critical("updateData() - SUCCESS for doc " . $idDoc . ", updated ID: " . $get_entry_list_result->id);
                 } else {
+                    $this->logger->critical("updateData() - result does NOT have id - THROWING EXCEPTION");
+                    $this->logger->critical("updateData() - error name: " . (!empty($get_entry_list_result->name) ? $get_entry_list_result->name : 'empty'));
+                    $this->logger->critical("updateData() - error description: " . (!empty($get_entry_list_result->description) ? $get_entry_list_result->description : 'empty'));
+                    $this->logger->critical("updateData() - full result object: " . json_encode($get_entry_list_result));
                     throw new \Exception('error '.(!empty($get_entry_list_result->name) ? $get_entry_list_result->name : '').' : '.(!empty($get_entry_list_result->description) ? $get_entry_list_result->description : ''));
                 }
             } catch (\Exception $e) {
                 $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $this->logger->critical("updateData() - EXCEPTION caught for doc " . $idDoc . " - " . $error);
                 $result[$idDoc] = [
                     'id' => '-1',
                     'error' => $error,
                 ];
             }
             // Modification du statut du flux
+            $this->logger->critical("updateData() - updating document status for doc: " . $idDoc);
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
+        $this->logger->critical("updateData() - returning result with " . (isset($result) ? count($result) : 0) . " documents");
         return $result;
     }
 
@@ -1124,50 +1395,111 @@ class suitecrm extends solution
     protected function call($method, $parameters)
     {
         try {
+            $this->logger->critical("call() method invoked - method: " . $method);
+            $this->logger->critical("call() - URL: " . $this->paramConnexion['url']);
+
             ob_start();
+            $this->logger->critical("output buffering started");
 
             // we check if we have a cookie file to manage the session
+            $this->logger->critical("checking for cookie file - path: " . ($this->cookieFilePath ?? 'null'));
             if ($this->cookieFilePath && file_exists($this->cookieFilePath)) {
+                $this->logger->critical("cookie file EXISTS, reading content");
                 $cookieContent = file_get_contents($this->cookieFilePath);
+                $this->logger->critical("cookie file content length: " . strlen($cookieContent));
+            } else {
+                $this->logger->critical("cookie file does NOT exist or path is null");
             }
 
+            $this->logger->critical("initializing cURL request");
             $curl_request = curl_init();
+            $this->logger->critical("cURL initialized");
+
+            $this->logger->critical("setting CURLOPT_URL to: " . $this->paramConnexion['url']);
             curl_setopt($curl_request, CURLOPT_URL, $this->paramConnexion['url']);
+            $this->logger->critical("setting CURLOPT_POST to 1");
             curl_setopt($curl_request, CURLOPT_POST, 1);
+            $this->logger->critical("setting CURLOPT_HTTP_VERSION to CURL_HTTP_VERSION_1_0");
             curl_setopt($curl_request, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+            $this->logger->critical("setting CURLOPT_HEADER to 1");
             curl_setopt($curl_request, CURLOPT_HEADER, 1);
+            $this->logger->critical("setting CURLOPT_SSL_VERIFYPEER to 0");
             curl_setopt($curl_request, CURLOPT_SSL_VERIFYPEER, 0);
+            $this->logger->critical("setting CURLOPT_RETURNTRANSFER to 1");
             curl_setopt($curl_request, CURLOPT_RETURNTRANSFER, 1);
+            $this->logger->critical("setting CURLOPT_FOLLOWLOCATION to 0");
             curl_setopt($curl_request, CURLOPT_FOLLOWLOCATION, 0);
+            $this->logger->critical("all base cURL options set");
 
             // If the cookie is found, we use it for the curl request
+            $this->logger->critical("checking if method is 'login' - method: " . $method);
             if ($this->cookieFilePath !== null && $method == 'login') {
+                $this->logger->critical("method IS 'login' and cookieFilePath is not null, setting cookie options");
+                $this->logger->critical("setting CURLOPT_COOKIEJAR to: " . $this->cookieFilePath);
                 curl_setopt($curl_request, CURLOPT_COOKIEJAR, $this->cookieFilePath);
+                $this->logger->critical("setting CURLOPT_COOKIEFILE to: " . $this->cookieFilePath);
                 curl_setopt($curl_request, CURLOPT_COOKIEFILE, $this->cookieFilePath);
+                $this->logger->critical("cookie options set for login");
+            } else {
+                $this->logger->critical("NOT setting cookie options - cookieFilePath: " . ($this->cookieFilePath ?? 'null') . ", method: " . $method);
             }
+
+            $this->logger->critical("encoding parameters to JSON");
             $jsonEncodedData = json_encode($parameters);
+            $this->logger->critical("JSON encoded data length: " . strlen($jsonEncodedData));
+
             $post = [
                 'method' => $method,
                 'input_type' => 'JSON',
                 'response_type' => 'JSON',
                 'rest_data' => $jsonEncodedData,
             ];
+            $this->logger->critical("POST data array created - method: " . $method);
 
+            $this->logger->critical("setting CURLOPT_POSTFIELDS");
             curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
-            $result = curl_exec($curl_request);
-            curl_close($curl_request);
-            if (empty($result)) {
-                return false;
-            }
-            // Extract headers and body
-            $result = explode("\r\n\r\n", $result, 2);
+            $this->logger->critical("CURLOPT_POSTFIELDS set");
 
+            $this->logger->critical("executing cURL request");
+            $result = curl_exec($curl_request);
+            $curlError = curl_error($curl_request);
+            $curlErrno = curl_errno($curl_request);
+            $httpCode = curl_getinfo($curl_request, CURLINFO_HTTP_CODE);
+            $this->logger->critical("cURL request executed - HTTP code: " . $httpCode . ", errno: " . $curlErrno . ", error: " . ($curlError ?: 'none'));
+
+            $this->logger->critical("closing cURL");
+            curl_close($curl_request);
+            $this->logger->critical("cURL closed");
+
+            if (empty($result)) {
+                $this->logger->critical("result is EMPTY, returning false");
+                return false;
+            } else {
+                $this->logger->critical("result is NOT empty, length: " . strlen($result));
+            }
+
+            // Extract headers and body
+            $this->logger->critical("extracting headers and body from result");
+            $result = explode("\r\n\r\n", $result, 2);
+            $this->logger->critical("result split into parts - count: " . count($result));
+
+            $this->logger->critical("decoding JSON response");
             $response = json_decode($result[1] ?? ''); // we add ?? '' to avoid error if index 1 does not exists
+            $this->logger->critical("JSON decoded - response type: " . gettype($response));
+
+            if ($response === null) {
+                $this->logger->critical("JSON decode returned NULL - possible parse error");
+            } else {
+                $this->logger->critical("JSON decoded successfully");
+            }
 
             ob_end_flush();
+            $this->logger->critical("output buffering flushed");
 
+            $this->logger->critical("returning response from call() method");
             return $response;
         } catch (\Exception $e) {
+            $this->logger->critical("EXCEPTION in call() method - message: " . $e->getMessage() . ", file: " . $e->getFile() . ", line: " . $e->getLine());
             return false;
         }
     }
