@@ -1397,19 +1397,14 @@ class suitecrm extends solution
         try {
             $this->logger->critical("call() method invoked - method: " . $method);
             $this->logger->critical("call() - URL: " . $this->paramConnexion['url']);
+            $validCookie = $this->isCacheValid($this->cookieFilePath);
 
             ob_start();
             $this->logger->critical("output buffering started");
 
             // we check if we have a cookie file to manage the session
             $this->logger->critical("checking for cookie file - path: " . ($this->cookieFilePath ?? 'null'));
-            if ($this->isCacheValid($this->cookieFilePath)) {
-                $this->logger->critical("cookie cache is VALID check before cookie content");
-            } else {
-                $this->logger->critical("cookie cache is NOT valid check before cookie content");
-                $this->invalidateSession();
-            }
-            if ($this->cookieFilePath && file_exists($this->cookieFilePath)) {
+            if ($validCookie && $this->cookieFilePath !== null && file_exists($this->cookieFilePath)) {
                 $this->logger->critical("cookie file EXISTS, reading content");
                 $cookieContent = file_get_contents($this->cookieFilePath);
                 $this->logger->critical("cookie file content length: " . strlen($cookieContent));
@@ -1439,7 +1434,7 @@ class suitecrm extends solution
 
             // If the cookie is found, we use it for the curl request
             $this->logger->critical("checking if method is 'login' - method: " . $method);
-            if ($this->cookieFilePath !== null && $method == 'login') {
+            if ($validCookie && $this->cookieFilePath !== null && $method == 'login') {
                 $this->logger->critical("method IS 'login' and cookieFilePath is not null, setting cookie options");
                 $this->logger->critical("setting CURLOPT_COOKIEJAR to: " . $this->cookieFilePath);
                 curl_setopt($curl_request, CURLOPT_COOKIEJAR, $this->cookieFilePath);
