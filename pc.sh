@@ -9,7 +9,7 @@ else
 fi
 
 # Set LOG_FILE based on APP_ENV
-LOG_FILE="var/log/background.log"
+LOG_FILE="var/log/prod.log"
 TEMP_FILE="${LOG_FILE}.tmp"
 
 # Check if the log file exists
