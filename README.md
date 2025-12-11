@@ -22,7 +22,7 @@ Myddleware is the customisable free open-source platform that facilitates data m
 
 ![Create Myddleware "Customer" Rule View with WooCommerce Customers & Vtiger Opportunities modules](docs/images/rule_create_woo_vtiger.png)
 
-[On our documentation website,](https://myddleware.github.io/myddleware) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
+[On our documentation website,](https://myddleware.github.io/myddleware-docs/#/) you’ll find everything you’re looking for to master Myddleware, including step-by-step tutorials. You can also tailor Myddleware to your needs by creating you custom code. Please use [our github](https://github.com/Myddleware) to share it.
 
 This community is ours : let’s all contribute, make it a friendly, helpful space where we can all find what we’re looking for!
 

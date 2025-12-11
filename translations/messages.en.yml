@@ -369,7 +369,7 @@ animate:
         description: Description 
         empty: No template for these solutions, if you want a template, please contact us via <a href="mailto:contact@myddleware.com">contact@myddleware.com</a>
     tutoriel:
-        link: https://myddleware.github.io/myddleware/#/basic_usage
+        link: https://myddleware.github.io/myddleware-docs/#/basic_usage
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
@@ -421,7 +421,7 @@ view_connector:
         help: Assistance
         link_help: Click here to have more information on this connector
     help:
-        link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
+        link: https://myddleware.github.io/myddleware-docs/#/connectors_credentials?id=
 
 edit_connector:
     saved_successfully: Connector saved successfully
@@ -972,9 +972,9 @@ help:
                 To change more parameters in your rule, go to the tab "parameter" on this page.
         mapping: >
                 On this page you will find all the fields of your source and target applications used in your rule. You will also find the formulas for data transformation. 
-                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
+                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
         relate: >
-                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
+                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         param: >
                 The reference date shows which data will be read in your source system. Only data that were created or modified after that date will be read and sent to the target system.
                 Therefore if you want to migrate your old data, you need to take a date in the past. If you only want to transfer the new data, then leave the day's date.
@@ -985,7 +985,7 @@ help:
                 For example, you can choose to put the name of a Sugar contact in the name of a Salesforce account, 
                 for that, just drag the field "name" of your source module and drop it in the field "name" of your target solution. 
                 To delete a field that was already placed, just double click on it. 
-                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
+                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
                 For more information or personalised assistance, feel free to contact us.
         simulate: >
                 Here you can simulate the result of the rules you have implemented in the previous stage. 
@@ -993,11 +993,11 @@ help:
         relate: >
                 This tab allows you to define the relations you want to implement in your interface. That way you can link several rules together. 
                 For example, it is possible to transfer the relation between a contact and an account so that they will also be linked in the target solution.
-                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
+                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         filter: >
                 This tab allows you to filter the fields of your source application at play
                 For example, you can choose to take all the contacts whose country is "France".
-                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
+                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
         validate: >
                 The last stage, if the target application of your rule allows it, you can choose a de-duplication key. To be used in de-duplication, a field must be selected in the tab "field"of the rule. 
                 For example, for a CRM application, you can de-duplicate all the contacts by their mail. Myddleware will check if the recording already exist in your target solution, before creating it. If it does not existe, Myddleware will create it.Otherwise it will just update it.
@@ -1106,7 +1106,7 @@ jobscheduler:
     view:
         show : View details
     description:
-        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>More information here.</a>
+        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware-docs/#/cron_jobs" target=_blank>More information here.</a>
         bottom : > 
                 Add this task in your Linux or Windows task scheduler : php bin/console myddleware:jobScheduler --env=background <BR>
                 For example with Linux, add this command in your crontab if you want to run Myddleware scheduler every 5 minutes : <BR>
