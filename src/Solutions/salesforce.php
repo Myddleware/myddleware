@@ -27,6 +27,8 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Contracts\Cache\ItemInterface;
 
 class salesforce extends solution {
 
@@ -48,7 +50,11 @@ class salesforce extends solution {
 
 	private $access_token;
 	protected $instance_url;
-	
+	private $cache;
+
+	// Cache TTL for instance URL (24 hours in seconds)
+	private const INSTANCE_URL_CACHE_TTL = 86400;
+
 	// Listes des modules et des champs à exclure de Salesforce
 	protected array $exclude_module_list = array(
 										'default' => 
@@ -107,6 +113,9 @@ class salesforce extends solution {
 			    $this->access_token = $token_request_data['access_token'];
 			    $this->instance_url = $token_request_data['instance_url'];
 				$this->connexion_valide = true;
+
+				// Store the instance URL in cache for future use (e.g., generating direct links)
+				$this->storeInstanceUrlInCache($this->paramConnexion, $this->instance_url);
 		    }
 		}
 		catch (\Exception $e) {
@@ -966,5 +975,246 @@ class salesforce extends solution {
 		$date .= '+00:00';
 		return $date;
 	}
-    
+
+	// Build the direct link to the record (used in data transfer view)
+    public function getDirectLink($rule, $document, $type): string
+    {
+		// Determine which connector to use based on the type (source or target)
+		$connector = $this->getConnectorBasedOnType($rule, $type);
+
+		// Get or retrieve the Salesforce instance URL (from cache or by logging in)
+		$salesforceInstanceUrl = $this->retrieveInstanceUrl($connector);
+
+		// Extract the module name and record ID based on the type
+		$moduleNameAndRecordId = $this->extractModuleAndRecordId($rule, $document, $type);
+		$moduleName = $moduleNameAndRecordId['module'];
+		$recordId = $moduleNameAndRecordId['record_id'];
+
+		// Build and return the complete direct link
+		$directLink = $this->buildSalesforceRecordUrl($salesforceInstanceUrl, $moduleName, $recordId);
+
+		return $directLink;
+    }
+
+	/**
+	 * Get the appropriate connector (source or target) based on the type
+	 *
+	 * @param mixed $rule The rule object containing connector information
+	 * @param string $type Either 'source' or 'target'
+	 * @return mixed The connector object
+	 */
+	private function getConnectorBasedOnType($rule, string $type)
+	{
+		if ($type === 'source') {
+			$connector = $rule->getConnectorSource();
+		} else {
+			$connector = $rule->getConnectorTarget();
+		}
+
+		return $connector;
+	}
+
+	/**
+	 * Retrieve the Salesforce instance URL, either from cache or by performing a fresh login
+	 *
+	 * @param mixed $connector The connector object containing authentication parameters
+	 * @return string The Salesforce instance URL
+	 */
+	private function retrieveInstanceUrl($connector): string
+	{
+		// Build minimal connector parameters for cache key generation (no sensitive data)
+		$connectorParametersForCacheKey = $this->buildConnectorParametersForCacheKey($connector);
+
+		// Generate a unique cache key based on the connector parameters
+		$cacheKey = $this->buildInstanceUrlCacheKey($connectorParametersForCacheKey);
+
+		// Try to get the instance URL from cache
+		$cachedInstanceUrl = $this->getInstanceUrlFromCache($cacheKey);
+
+		if ($cachedInstanceUrl !== null) {
+			// Cache hit - return the cached instance URL
+			return $cachedInstanceUrl;
+		}
+
+		// Cache miss - need to perform a fresh login to get the instance URL
+		$fullConnectorParameters = $this->buildFullConnectorParameters($connector);
+		$this->login($fullConnectorParameters);
+
+		// After login, the instance URL is stored in $this->instance_url
+		return $this->instance_url;
+	}
+
+	/**
+	 * Extract module name and record ID from the rule and document based on type
+	 *
+	 * @param mixed $rule The rule object
+	 * @param mixed $document The document object
+	 * @param string $type Either 'source' or 'target'
+	 * @return array Array with 'module' and 'record_id' keys
+	 */
+	private function extractModuleAndRecordId($rule, $document, string $type): array
+	{
+		if ($type === 'source') {
+			$moduleName = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$moduleName = $rule->getModuleTarget();
+			$recordId = $document->getTarget();
+		}
+
+		return [
+			'module' => $moduleName,
+			'record_id' => $recordId
+		];
+	}
+
+	/**
+	 * Build the complete Salesforce Lightning URL for a specific record
+	 *
+	 * @param string $instanceUrl The Salesforce instance URL (e.g., https://example.salesforce.com)
+	 * @param string $moduleName The Salesforce object/module name (e.g., Account, Contact)
+	 * @param string $recordId The Salesforce record ID
+	 * @return string The complete direct link URL
+	 */
+	private function buildSalesforceRecordUrl(string $instanceUrl, string $moduleName, string $recordId): string
+	{
+		// Salesforce Lightning URL format: {instance}/lightning/r/{object}/{id}/view
+		$directLinkUrl = $instanceUrl . '/lightning/r/' . $moduleName . '/' . $recordId . '/view';
+
+		return $directLinkUrl;
+	}
+
+	/**
+	 * Build connector parameters for cache key generation (only non-sensitive identifying data)
+	 *
+	 * @param mixed $connector The connector object
+	 * @return array Array of connector parameters used for cache key generation
+	 */
+	private function buildConnectorParametersForCacheKey($connector): array
+	{
+		$loginUsername = $this->getConnectorParam($connector, 'login');
+		$consumerKey = $this->getConnectorParam($connector, 'consumerkey');
+		$sandboxFlag = $this->getConnectorParam($connector, 'sandbox');
+
+		$connectorParameters = [
+			'login' => $loginUsername,
+			'consumerkey' => $consumerKey,
+			'sandbox' => $sandboxFlag
+		];
+
+		return $connectorParameters;
+	}
+
+	/**
+	 * Build full connector parameters including credentials (for performing login)
+	 *
+	 * @param mixed $connector The connector object
+	 * @return array Array of all connector parameters needed for authentication
+	 */
+	private function buildFullConnectorParameters($connector): array
+	{
+		$loginUsername = $this->getConnectorParam($connector, 'login');
+		$loginPassword = $this->getConnectorParam($connector, 'password');
+		$consumerKey = $this->getConnectorParam($connector, 'consumerkey');
+		$consumerSecret = $this->getConnectorParam($connector, 'consumersecret');
+		$securityToken = $this->getConnectorParam($connector, 'token');
+		$sandboxFlag = $this->getConnectorParam($connector, 'sandbox');
+
+		$fullParameters = [
+			'login' => $loginUsername,
+			'password' => $loginPassword,
+			'consumerkey' => $consumerKey,
+			'consumersecret' => $consumerSecret,
+			'token' => $securityToken,
+			'sandbox' => $sandboxFlag
+		];
+
+		return $fullParameters;
+	}
+
+	/**
+	 * Generate a unique cache key for storing the instance URL
+	 *
+	 * @param array $connectorParameters Array of connector parameters
+	 * @return string The cache key
+	 */
+	private function buildInstanceUrlCacheKey(array $connectorParameters): string
+	{
+		// Convert parameters to JSON for consistent serialization
+		$serializedParameters = json_encode($connectorParameters);
+
+		// Create a hash to ensure the key is of reasonable length and doesn't contain special characters
+		$parametersHash = md5($serializedParameters);
+
+		// Build the cache key with a descriptive prefix
+		$cacheKey = 'salesforce_instance_url_' . $parametersHash;
+
+		return $cacheKey;
+	}
+
+	/**
+	 * Get the Salesforce instance URL from cache
+	 *
+	 * @param string $cacheKey The cache key to look up
+	 * @return string|null The cached instance URL, or null if not found in cache
+	 */
+	private function getInstanceUrlFromCache(string $cacheKey): ?string
+	{
+		// Initialize cache if not already done
+		if ($this->cache === null) {
+			$this->cache = new FilesystemAdapter();
+		}
+
+		// Get the cache item
+		$cacheItem = $this->cache->getItem($cacheKey);
+
+		// Check if the item exists in cache and is not expired
+		$isCacheHit = $cacheItem->isHit();
+
+		if (!$isCacheHit) {
+			// Cache miss - return null
+			return null;
+		}
+
+		// Cache hit - retrieve and return the cached instance URL
+		$cachedInstanceUrl = $cacheItem->get();
+
+		return $cachedInstanceUrl;
+	}
+
+	/**
+	 * Store the Salesforce instance URL in cache with TTL
+	 *
+	 * @param array $connectorParameters Array of connector parameters for building cache key
+	 * @param string $instanceUrl The instance URL to cache
+	 * @return void
+	 */
+	private function storeInstanceUrlInCache(array $connectorParameters, string $instanceUrl): void
+	{
+		// Initialize cache if not already done
+		if ($this->cache === null) {
+			$this->cache = new FilesystemAdapter();
+		}
+
+		// Build connector parameters for cache key (only identifying information)
+		$parametersForCacheKey = [
+			'login' => $connectorParameters['login'] ?? null,
+			'consumerkey' => $connectorParameters['consumerkey'] ?? null,
+			'sandbox' => $connectorParameters['sandbox'] ?? null
+		];
+
+		// Generate the cache key
+		$cacheKey = $this->buildInstanceUrlCacheKey($parametersForCacheKey);
+
+		// Get the cache item
+		$cacheItem = $this->cache->getItem($cacheKey);
+
+		// Set the value and expiration time
+		$cacheItem->set($instanceUrl);
+		$cacheItem->expiresAfter(self::INSTANCE_URL_CACHE_TTL);
+
+		// Save the item to cache
+		$this->cache->save($cacheItem);
+	}
+
 }
