@@ -985,6 +985,11 @@ class salesforce extends solution {
 		// Get or retrieve the Salesforce instance URL (from cache or by logging in)
 		$salesforceInstanceUrl = $this->retrieveInstanceUrl($connector);
 
+		// if instance URL is empty, return empty string
+		if (empty($salesforceInstanceUrl)) {
+			return '';
+		}
+
 		// Extract the module name and record ID based on the type
 		$moduleNameAndRecordId = $this->extractModuleAndRecordId($rule, $document, $type);
 		$moduleName = $moduleNameAndRecordId['module'];
@@ -1039,6 +1044,11 @@ class salesforce extends solution {
 		// Cache miss - need to perform a fresh login to get the instance URL
 		$fullConnectorParameters = $this->buildFullConnectorParameters($connector);
 		$this->login($fullConnectorParameters);
+
+		// return empty string if login failed
+		if (empty($this->instance_url)) {
+			return '';
+		}
 
 		// After login, the instance URL is stored in $this->instance_url
 		return $this->instance_url;
