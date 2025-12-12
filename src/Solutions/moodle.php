@@ -816,6 +816,145 @@ class moodle extends solution
 	
 	protected function getSiteInfo($xml){
 	}
-	
-	
+
+	/**
+	 * Build the direct link to a record in Moodle (used in data transfer view)
+	 *
+	 * @param mixed $rule The rule object containing connector information
+	 * @param mixed $document The document object containing record IDs
+	 * @param string $type Either 'source' or 'target'
+	 * @return string The complete direct link URL to the Moodle record
+	 */
+	public function getDirectLink($rule, $document, $type): string
+	{
+		// Determine which connector to use based on the type (source or target)
+		$connector = $this->getConnectorBasedOnType($rule, $type);
+
+		// Extract the base Moodle URL from connector parameters
+		$moodleBaseUrl = $this->getMoodleBaseUrl($connector);
+
+		// Extract the module name and record ID based on the type
+		$moduleNameAndRecordId = $this->extractModuleAndRecordId($rule, $document, $type);
+		$moduleName = $moduleNameAndRecordId['module'];
+		$recordId = $moduleNameAndRecordId['record_id'];
+
+		// Build and return the complete direct link based on the module type
+		$directLink = $this->buildMoodleRecordUrl($moodleBaseUrl, $moduleName, $recordId);
+
+		return $directLink;
+	}
+
+	/**
+	 * Get the appropriate connector (source or target) based on the type
+	 *
+	 * @param mixed $rule The rule object containing connector information
+	 * @param string $type Either 'source' or 'target'
+	 * @return mixed The connector object
+	 */
+	private function getConnectorBasedOnType($rule, string $type)
+	{
+		if ($type === 'source') {
+			$connector = $rule->getConnectorSource();
+		} else {
+			$connector = $rule->getConnectorTarget();
+		}
+
+		return $connector;
+	}
+
+	/**
+	 * Extract the Moodle base URL from connector parameters
+	 *
+	 * @param mixed $connector The connector object
+	 * @return string The base Moodle URL (without trailing slash)
+	 */
+	private function getMoodleBaseUrl($connector): string
+	{
+		// Get the URL from connector parameters
+		$baseUrl = $this->getConnectorParam($connector, 'url');
+
+		// Remove trailing slash if present to ensure consistent URL formatting
+		$cleanedBaseUrl = rtrim($baseUrl, '/');
+
+		return $cleanedBaseUrl;
+	}
+
+	/**
+	 * Extract module name and record ID from the rule and document based on type
+	 *
+	 * @param mixed $rule The rule object
+	 * @param mixed $document The document object
+	 * @param string $type Either 'source' or 'target'
+	 * @return array Array with 'module' and 'record_id' keys
+	 */
+	private function extractModuleAndRecordId($rule, $document, string $type): array
+	{
+		if ($type === 'source') {
+			$moduleName = $rule->getModuleSource();
+			$recordId = $document->getSource();
+		} else {
+			$moduleName = $rule->getModuleTarget();
+			$recordId = $document->getTarget();
+		}
+
+		return [
+			'module' => $moduleName,
+			'record_id' => $recordId
+		];
+	}
+
+	/**
+	 * Build the complete Moodle URL for a specific record based on module type
+	 *
+	 * Different Moodle modules have different URL patterns:
+	 * - Users: /user/profile.php?id={id}
+	 * - Courses: /course/view.php?id={id}
+	 *
+	 * @param string $baseUrl The Moodle base URL
+	 * @param string $moduleName The Moodle module name (users, courses)
+	 * @param string $recordId The record ID
+	 * @return string The complete direct link URL
+	 */
+	private function buildMoodleRecordUrl(string $baseUrl, string $moduleName, string $recordId): string
+	{
+		// Determine the URL path based on the module type
+		$urlPath = $this->determineMoodleUrlPath($moduleName);
+
+		// If no specific URL path is defined for this module, return the base URL
+		if (empty($urlPath)) {
+			return $baseUrl;
+		}
+
+		// Build the complete URL with the record ID as a query parameter
+		$directLinkUrl = $baseUrl . $urlPath . '?id=' . $recordId;
+
+		return $directLinkUrl;
+	}
+
+	/**
+	 * Determine the URL path for a specific Moodle module
+	 *
+	 * @param string $moduleName The Moodle module name
+	 * @return string The URL path (e.g., '/user/profile.php') or empty string if not supported
+	 */
+	private function determineMoodleUrlPath(string $moduleName): string
+	{
+		// Map Moodle module names to their URL paths
+		$moduleUrlPaths = [
+			'users' => '/user/profile.php',
+			'courses' => '/course/view.php',
+		];
+
+		// Check if the module has a defined URL path
+		if (array_key_exists($moduleName, $moduleUrlPaths)) {
+			$urlPath = $moduleUrlPaths[$moduleName];
+		} else {
+			// For modules without specific URL paths, return empty string
+			$urlPath = '';
+		}
+
+		return $urlPath;
+	}
+
+
 }
