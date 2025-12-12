@@ -557,10 +557,20 @@ class airtable extends solution
 
         // Load metadata to get table mappings
         $metadataMappings = $this->loadAirtableMetadataMappings();
+
+        // if metadatamapping is an empty array or null, returns an empty string
+        if (empty($metadataMappings)) {
+            return '';
+        }
         $tableMapping = $metadataMappings['table_mapping'];
 
         // Get the table ID for this project and module
         $airtableTableId = $this->getAirtableTableId($tableMapping, $airtableProjectId, $moduleName);
+
+        // if airtableTableId is empty, returns an empty string
+        if (empty($airtableTableId)) {
+            return '';
+        }
 
         // Build the direct link URL to the Airtable record
         $directLink = $this->buildAirtableRecordUrl(
