@@ -838,6 +838,11 @@ class moodle extends solution
 		$moduleName = $moduleNameAndRecordId['module'];
 		$recordId = $moduleNameAndRecordId['record_id'];
 
+        if (empty($moduleName) || empty($recordId) || empty($moodleBaseUrl) || empty($connector)) {
+            // If module name or record ID is missing, return the base URL
+            return $moodleBaseUrl;
+        }
+
 		// Build and return the complete direct link based on the module type
 		$directLink = $this->buildMoodleRecordUrl($moodleBaseUrl, $moduleName, $recordId);
 
