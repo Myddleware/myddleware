@@ -95,8 +95,6 @@ class RuleSimulationService
 public function simulatePreview(array $requestData, ?string $ruleKey = null): array
 {
     // --- DEBUG POINT 1: Données d'entrée et ID de Règle ---
-    dump('--- DEBUG POINT 1: Entrée ---');
-    dump(['Request Data' => $requestData, 'Rule Key' => $ruleKey]);
 
     // 1. Parsing du Mapping
     $mapping = $this->parseMapping($requestData);
@@ -176,8 +174,6 @@ public function simulatePreview(array $requestData, ?string $ruleKey = null): ar
     }
 
     // --- DEBUG POINT 2: Paramètres finaux envoyés à readData ---
-    dump('--- DEBUG POINT 2: readData Params ---');
-    dump($readParams);
 
 
     // 4. Lecture des données source
@@ -185,23 +181,17 @@ public function simulatePreview(array $requestData, ?string $ruleKey = null): ar
         $sourceData = $solutionSource->readData($readParams);
         
         // --- DEBUG POINT 3: Résultat de readData (SI SANS ERREUR) ---
-        dump('--- DEBUG POINT 3: readData Result (Success) ---');
-        dump($sourceData);
 
     } catch (\Throwable $e) {
         $this->logger->error('Simulation Read Error: ' . $e->getMessage());
         
         // --- DEBUG POINT 3b: Erreur de lecture (SI EXCEPTION) ---
-        dump('--- DEBUG POINT 3b: readData Result (Exception) ---');
-        dump(['Exception Message' => $e->getMessage(), 'File' => $e->getFile(), 'Line' => $e->getLine()]);
         
         return ['error' => 'Read Error: ' . $e->getMessage()];
     }
 
     if (!empty($sourceData['error'])) {
         // --- DEBUG POINT 4: Erreur retournée par le connecteur dans le tableau de résultats ---
-        dump('--- DEBUG POINT 4: Erreur Moodle reçue ---');
-        dump($sourceData);
         
         return ['error' => $sourceData['error']];
     }
