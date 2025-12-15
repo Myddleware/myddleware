@@ -36,126 +36,188 @@ class RuleSimulationService
      */
     public function simulateCount(Rule $rule): int
     {
-        // ... (Code existant inchangé pour simulateCount)
-        // Note: Assurez-vous d'avoir aussi retiré 'offset' ici si ça plante aussi, 
-        // mais concentrons-nous sur le Preview qui pose problème.
-        
-        // Pour la cohérence, voici le début corrigé de simulateCount si vous voulez l'harmoniser :
-        $params = [
-            'date_ref' => $rule->getParamByName('datereference')?->getValue(),
-            'limit'    => $rule->getParamByName('limit')?->getValue(),
-            'module'   => (string) $rule->getModuleSource(),
-            'fields'   => [],
-            'ruleParams' => [],
-        ];
-        // ... (Remplissage params & fields inchangé) ...
-
-        $connectorSource = $rule->getConnectorSource();
-        $solutionInstance = $this->solutionManager->get($connectorSource->getSolution()->getName());
-        
-        $rawParams = $this->connectorService->resolveParams($connectorSource->getId());
-        $loginParams = $this->decryptParams($rawParams);
-        $solutionInstance->login($loginParams);
-
-        // ATTENTION : Je garde offset ici car il y était dans votre service original fourni au tout début
-        $params['offset'] = '0'; 
-        $params['call_type'] = 'read';
-
-        $result = $solutionInstance->readData($params);
-
-        if (!empty($result['error'])) {
-            throw new Exception('Reading Issue: ' . $result['error']);
-        }
-
-        return (int) ($result['count'] ?? 0);
-    }
-
-    /**
-     * Simulation 2 : Prévisualisation (Wizard)
-     * Correction : Suppression de 'offset' et Date en String
-     */
-    public function simulatePreview(array $requestData, ?string $ruleKey = null): array
-    {
-        // 1. Parsing
-        $mapping = $this->parseMapping($requestData);
-        if (empty($mapping)) return ['before' => [], 'after' => [], 'data_source' => false];
-
-        // 2. Connexion
-        $solutionSourceName = $requestData['src_solution_name'] 
-            ?? $this->solutionRepository->resolveName($requestData['src_solution_id'] ?? null);
-
-        if (empty($solutionSourceName)) return ['error' => 'Missing source solution.'];
-
         try {
-            $solutionSource = $this->solutionManager->get((string)$solutionSourceName);
-            $connectorId = $requestData['src_connector_id'] ?? null;
+            $params = [
+                'date_ref'   => $rule->getParamByName('datereference')?->getValue(),
+                'limit'      => $rule->getParamByName('limit')?->getValue(),
+                'module'     => (string) $rule->getModuleSource(),
+                'fields'     => [],
+                'ruleParams' => [],
+            ];
+
+            foreach ($rule->getParams() as $ruleParam) {
+                $params['ruleParams'][$ruleParam->getName()] = $ruleParam->getValue();
+            }
+
+            if (empty($params['ruleParams']['mode'])) {
+                $params['ruleParams']['mode'] = '0';
+            }
+
+            foreach ($rule->getFields() as $ruleField) {
+                $sources = explode(';', $ruleField->getSource());
+                foreach ($sources as $source) {
+                    if (!empty($source) && !in_array($source, $params['fields'])) {
+                        $params['fields'][] = trim($source);
+                    }
+                }
+            }
+
+            $connectorSource = $rule->getConnectorSource();
+            $solutionInstance = $this->solutionManager->get($connectorSource->getSolution()->getName());
             
-            $loginParam = $this->connectorService->resolveParams($connectorId);
-            if (empty($loginParam)) throw new Exception('Missing connection params');
+            $rawParams = $this->connectorService->resolveParams($connectorSource->getId());
+            $loginParams = $this->decryptParams($rawParams);
+            $solutionInstance->login($loginParams);
 
-            // Décryptage obligatoire
-            $decryptedLoginParam = $this->decryptParams($loginParam);
-            $solutionSource->login($decryptedLoginParam);
+            $params['offset'] = '0';
+            $params['call_type'] = 'read';
 
+            $result = $solutionInstance->readData($params);
+
+            if (!empty($result['error'])) {
+                throw new Exception('Reading Issue: ' . $result['error']);
+            }
+
+            return (int) ($result['count'] ?? 0);
         } catch (\Throwable $e) {
-            return ['error' => 'Connection failed: ' . $e->getMessage()];
-        }
-
-        // 3. Préparation Lecture
-        $sourceFields = [];
-        foreach ($mapping as $cfg) {
-            if (!empty($cfg['champs'])) $sourceFields = array_merge($sourceFields, $cfg['champs']);
-        }
-        $sourceFields = array_values(array_unique($sourceFields));
-
-        if (empty($sourceFields)) return ['before' => [], 'after' => [], 'data_source' => false];
-
-        $sourceModule = $requestData['src_module'] ?? '';
-        
-        // --- CONFIGURATION STRICTE (Conforme à l'ancien code) ---
-        $readParams = [
-            'module'     => (string) $sourceModule,
-            'fields'     => $sourceFields,
-            'date_ref'   => '1970-01-01 00:00:00', // String
-            'limit'      => 1,
-            'ruleParams' => ['mode' => '0'],
-            'call_type'  => 'simulation',
-            // OFFSET RETIRÉ ICI : C'était l'intrus !
-        ];
-
-        $queryVal = $requestData['query'] ?? null;
-        if (!empty($queryVal)) {
-            // Dans l'ancien code : (!empty($ruleParams['fieldId']) ? $ruleParams['fieldId'] : 'id')
-            // On peut supposer 'id' par défaut.
-            $readParams['query'] = ['id' => trim($queryVal)];
-        }
-
-        // 4. Lecture
-        try {
-            $sourceData = $solutionSource->readData($readParams);
-        } catch (\Throwable $e) {
-            // Si une exception remonte, c'est une vraie erreur, on l'affiche.
-            return ['error' => 'Read Error: ' . $e->getMessage()];
-        }
-
-        // Si le connecteur renvoie une erreur dans le tableau
-        if (!empty($sourceData['error'])) {
-            return ['error' => $sourceData['error']];
-        }
-
-        // 5. Transformation
-        $record = $sourceData['values'][0] ?? null;
-        
-        if (!$record) {
-             return [
-                 'before' => [], 'after' => [], 'data_source' => false, 
-                 'simulationQueryField' => $queryVal,
-                 'message' => 'No record found.'
-             ];
-        }
-
-        return $this->transformRecord($record, $mapping, $ruleKey, $queryVal);
+            $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
+            throw new Exception($e->getMessage());
     }
+
+/**
+ * Simulation 2 : Prévisualisation (Wizard)
+ * Récupère un enregistrement source et simule la transformation des données.
+ * @param array $requestData Données de la requête (champs, formules, src_module, src_connector_id, query, etc.)
+ * @param string|null $ruleKey ID de la règle persistée (si en édition)
+ * @return array
+ */
+public function simulatePreview(array $requestData, ?string $ruleKey = null): array
+{
+    // --- DEBUG POINT 1: Données d'entrée et ID de Règle ---
+    dump('--- DEBUG POINT 1: Entrée ---');
+    dump(['Request Data' => $requestData, 'Rule Key' => $ruleKey]);
+
+    // 1. Parsing du Mapping
+    $mapping = $this->parseMapping($requestData);
+    if (empty($mapping)) {
+        return ['before' => [], 'after' => [], 'data_source' => false];
+    }
+
+    // 2. Connexion à la Solution Source
+    $solutionSourceName = $requestData['src_solution_name']
+        ?? $this->solutionRepository->resolveName($requestData['src_solution_id'] ?? null);
+
+    if (empty($solutionSourceName)) {
+        return ['error' => 'Missing source solution.'];
+    }
+
+    try {
+        $solutionSource = $this->solutionManager->get((string)$solutionSourceName);
+        $connectorId = $requestData['src_connector_id'] ?? null;
+
+        $loginParam = $this->connectorService->resolveParams($connectorId);
+        if (empty($loginParam)) {
+            throw new Exception('Missing connection params');
+        }
+
+        // Décryptage obligatoire
+        $decryptedLoginParam = $this->decryptParams($loginParam);
+        $solutionSource->login($decryptedLoginParam);
+
+    } catch (\Throwable $e) {
+        $this->logger->error('Simulation Connection failed: ' . $e->getMessage());
+        return ['error' => 'Connection failed: ' . $e->getMessage()];
+    }
+
+    // 3. Préparation des paramètres de lecture
+
+    // a) Récupération des champs sources nécessaires pour la lecture
+    $sourceFields = [];
+    foreach ($mapping as $cfg) {
+        if (!empty($cfg['champs'])) {
+            $sourceFields = array_merge($sourceFields, $cfg['champs']);
+        }
+    }
+    $sourceFields = array_values(array_unique($sourceFields));
+
+    if (empty($sourceFields)) {
+        return ['before' => [], 'after' => [], 'data_source' => false];
+    }
+
+    $sourceModule = $requestData['src_module'] ?? '';
+    $ruleParams = ['mode' => '0']; // Mode par défaut
+
+    // b) Récupération des RuleParams existants (CRUCIAL pour 'fieldId' et autres)
+    if ($ruleKey) {
+        $ruleParamsResult = $this->entityManager->getRepository(\App\Entity\RuleParam::class)->findBy(['rule' => $ruleKey]);
+        foreach ($ruleParamsResult as $ruleParamsObj) {
+            $ruleParams[$ruleParamsObj->getName()] = $ruleParamsObj->getValue();
+        }
+        if (empty($ruleParams['mode'])) {
+            $ruleParams['mode'] = '0';
+        }
+    }
+
+    // c) Configuration des paramètres de lecture
+    $readParams = [
+        'module'     => (string) $sourceModule,
+        'fields'     => $sourceFields,
+        'date_ref'   => '1970-01-01 00:00:00',
+        'limit'      => 1,
+        'ruleParams' => $ruleParams,
+        'call_type'  => 'simulation',
+    ];
+
+    $queryVal = $requestData['query'] ?? null;
+    if (!empty($queryVal)) {
+        $fieldIdName = $ruleParams['fieldId'] ?? 'id';
+        $readParams['query'] = [$fieldIdName => trim($queryVal)];
+    }
+
+    // --- DEBUG POINT 2: Paramètres finaux envoyés à readData ---
+    dump('--- DEBUG POINT 2: readData Params ---');
+    dump($readParams);
+
+
+    // 4. Lecture des données source
+    try {
+        $sourceData = $solutionSource->readData($readParams);
+        
+        // --- DEBUG POINT 3: Résultat de readData (SI SANS ERREUR) ---
+        dump('--- DEBUG POINT 3: readData Result (Success) ---');
+        dump($sourceData);
+
+    } catch (\Throwable $e) {
+        $this->logger->error('Simulation Read Error: ' . $e->getMessage());
+        
+        // --- DEBUG POINT 3b: Erreur de lecture (SI EXCEPTION) ---
+        dump('--- DEBUG POINT 3b: readData Result (Exception) ---');
+        dump(['Exception Message' => $e->getMessage(), 'File' => $e->getFile(), 'Line' => $e->getLine()]);
+        
+        return ['error' => 'Read Error: ' . $e->getMessage()];
+    }
+
+    if (!empty($sourceData['error'])) {
+        // --- DEBUG POINT 4: Erreur retournée par le connecteur dans le tableau de résultats ---
+        dump('--- DEBUG POINT 4: Erreur Moodle reçue ---');
+        dump($sourceData);
+        
+        return ['error' => $sourceData['error']];
+    }
+
+    // 5. Transformation
+    $record = $sourceData['values'][0] ?? null;
+
+    if (!$record) {
+        return [
+            'before' => [], 'after' => [], 'data_source' => false,
+            'simulationQueryField' => $queryVal,
+            'message' => 'No record found.'
+        ];
+    }
+
+    return $this->transformRecord($record, $mapping, $ruleKey, $queryVal);
+}
 
     private function transformRecord(array $record, array $mapping, ?string $ruleKey, ?string $queryVal): array
     {
