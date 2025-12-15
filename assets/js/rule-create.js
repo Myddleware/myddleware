@@ -1,20 +1,24 @@
 // ============================================================
-// 1. UTILITIES
+// 1. UTILITIES (Helper functions for DOM and Selectize manipulation)
 // ============================================================
 const UI = {
+  // Shortcut for document.getElementById
   get: (id) => document.getElementById(id),
   
+  // Show or hide an element (and handle specific opacity for step-2)
   toggle: (el, show) => {
     if (!el) return;
     show ? el.classList.remove('d-none') : el.classList.add('d-none');
     if (show && el.id === 'step-2') el.style.opacity = '1'; 
   },
   
+  // Resets an HTML <select> and its Selectize instance if it exists
   resetSelect: (el, placeholder = '') => {
     if (!el) return;
     el.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
     el.disabled = true;
     
+    // Selectize reset (clear cache and disable)
     if (el.selectize) {
       el.selectize.clear();
       el.selectize.clearOptions();
@@ -26,12 +30,14 @@ const UI = {
     }
   },
   
+  // Re-enables a select (native + Selectize)
   enableSelect: (el) => {
     if (!el) return;
     el.disabled = false;
     if (el.selectize) el.selectize.enable();
   },
 
+  // Sets a value (useful for editing)
   setValue: (el, value) => {
       if (!el) return;
       el.value = String(value);
@@ -40,11 +46,14 @@ const UI = {
       }
   },
 
+  // Synchronizes native HTML options to the Selectize instance
+  // Selectize does not automatically detect .innerHTML changes
   syncSelectize: (el) => {
       if (el && el.selectize) {
           const selectize = el.selectize;
           selectize.clearOptions();
           
+          // Repopulate Selectize with DOM options
           Array.from(el.options).forEach(opt => {
               if (opt.value) {
                   selectize.addOption({
@@ -57,6 +66,7 @@ const UI = {
       }
   },
 
+  // Wrapper for fetch that handles HTTP errors and returns text/HTML
   fetchHtml: async (url, params = {}) => {
       const query = new URLSearchParams(params).toString();
       const target = query ? `${url}?${query}` : url;
@@ -64,7 +74,7 @@ const UI = {
           const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
           if (!res.ok) {
               const errorMsg = await res.text();
-              throw new Error(errorMsg || `Erreur HTTP ${res.status}`);
+              throw new Error(errorMsg || `HTTP Error ${res.status}`);
           }
           return await res.text();
       } catch (err) {
@@ -74,7 +84,7 @@ const UI = {
 };
 
 /* ============================================================
- * STEP 1 — NAME VALIDATION
+ * STEP 1 — NAME VALIDATION (Rule name verification)
  * ============================================================ */
 (function () {
   const isEdit       = !!window.__EDIT_MODE__;
@@ -91,6 +101,7 @@ const UI = {
 
   const toggleSpinner = (show) => UI.toggle(spinner, show);
 
+  // Displays validation status (green/red) under the input
   function setStatus(status, msg) {
     toggleSpinner(false);
     inputName.classList.remove('is-invalid', 'is-valid');
@@ -107,6 +118,7 @@ const UI = {
     feedback.textContent = msg || '';
   }
 
+  // Reveals the rest of the form (Step 2) with an animation
   function revealStep2() {
     if (step2Shown || !step2Section) return;
     step2Shown = true;
@@ -118,6 +130,7 @@ const UI = {
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
+  // Calls the server to check if the name is unique
   async function checkUniqueness(nameVal) {
     const url = inputName.getAttribute('data-check-url');
     if (!url) return setStatus('error', 'Validation URL missing.');
@@ -144,6 +157,7 @@ const UI = {
 
   if (isEdit) return;
 
+  // Validation on Enter key press
   inputName.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
       e.preventDefault();
@@ -155,6 +169,7 @@ const UI = {
     }
   });
 
+  // Validation on typing (with Debounce to avoid spamming the server)
   inputName.addEventListener('input', () => {
     clearTimeout(debounceTimer);
     setStatus('neutral');
@@ -184,6 +199,7 @@ const UI = {
 
 /* ============================================================
  * STEP 2 + 3 + 4 + 5 (CORE LOGIC & LOADERS)
+ * Managing cascading dropdowns (Solution -> Connector -> Module)
  * ============================================================ */
 (function () {
   const step2 = UI.get('step-2');
@@ -194,6 +210,7 @@ const UI = {
     modules: step2.getAttribute('data-path-module')
   };
 
+  // References to DOM elements for Source (src) and Target (tgt)
   const EL = {
     src: { sol: UI.get('source-solution'), conn: UI.get('source-connector'), mod: UI.get('source-module'), spin: UI.get('source-connector-spinner'), modSpin: UI.get('source-module-spinner'), feed: UI.get('source-connector-feedback') },
     tgt: { sol: UI.get('target-solution'), conn: UI.get('target-connector'), mod: UI.get('target-module'), spin: UI.get('target-connector-spinner'), modSpin: UI.get('target-module-spinner'), feed: UI.get('target-connector-feedback') },
@@ -207,6 +224,7 @@ const UI = {
   const step3ParamsPath = EL.step3 ? EL.step3.getAttribute('data-path-params') : null;
   let filtersLoaded = false;
 
+  // Loads data via AJAX and updates a select (with Selectize support)
   async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
     UI.resetSelect(targetSelect, 'Loading...');
     if (feedbackEl) {
@@ -222,10 +240,11 @@ const UI = {
       
       if (!response.ok) {
           const errorMsg = await response.text(); 
-          throw new Error(errorMsg || `Erreur ${response.status}`);
+          throw new Error(errorMsg || `Error ${response.status}`);
       }
       const html = await response.text();
       
+      // Update native HTML
       targetSelect.innerHTML = '';
       targetSelect.appendChild(new Option('', '', true, true));
       
@@ -235,11 +254,12 @@ const UI = {
         Array.from(temp.querySelectorAll('option')).forEach(opt => targetSelect.appendChild(opt));
       }
 
+      // synchronization with Selectize
       UI.syncSelectize(targetSelect);
       UI.enableSelect(targetSelect);
 
     } catch (e) {
-      console.warn("Erreur chargement:", e.message);
+      console.warn("Loading error:", e.message);
       UI.resetSelect(targetSelect, 'Error loading list');
       UI.enableSelect(targetSelect);
       
@@ -252,12 +272,14 @@ const UI = {
     }
   }
 
+  // Loads connectors for a given solution
   const loadConnectorsFor = (side, solutionId) => {
     if (!solutionId) return Promise.resolve();
     const group = side === 'source' ? EL.src : EL.tgt;
     return loadSelectData('connectors', PATHS.connectors, { solution_id: solutionId }, group.conn, group.spin, group.feed);
   };
 
+  // Loads modules for a given connector
   const loadModulesFor = (side, connectorId) => {
     if (!connectorId) return Promise.resolve();
     const group = side === 'source' ? EL.src : EL.tgt;
@@ -265,9 +287,11 @@ const UI = {
     return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, group.feed);
   };
 
+  // Loads specific Step 3 parameters (date fields, limit, etc.)
   async function loadStep3Params() {
     if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
     
+    // Check if everything is selected before loading
     const valSrcConn = EL.src.conn.value;
     const valTgtConn = EL.tgt.conn.value;
     const valSrcMod = EL.src.mod.value;
@@ -289,6 +313,7 @@ const UI = {
       const html = await UI.fetchHtml(step3ParamsPath, params);
       EL.paramsContainer.innerHTML = html;
 
+      // Handling dynamically loaded fields (Sync mode, Duplication)
       const modeSelect = UI.get('mode');
       if (modeSelect) {
         modeSelect.addEventListener('change', () => { if (step3IsComplete()) revealStep4and5(); });
@@ -304,7 +329,7 @@ const UI = {
         });
       }
     } catch (e) {
-      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Impossible de charger les paramètres. (' + e.message + ')</div>';
+      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Unable to load parameters. (' + e.message + ')</div>';
     }
     console.groupEnd();
   }
@@ -318,6 +343,7 @@ const UI = {
     return !!(EL.src.mod.value && EL.tgt.mod.value);
   }
 
+  // Progressive display of steps
   function revealStep3() {
     if (!EL.step3) return;
     UI.toggle(EL.step3, true);
@@ -332,6 +358,7 @@ const UI = {
     }
   }
 
+  // Reset lower steps if a parent module changes
   function resetStep3AndBelow() {
     if (EL.paramsContainer) EL.paramsContainer.innerHTML = '';
     if (EL.step4Body) EL.step4Body.innerHTML = '';
@@ -343,6 +370,7 @@ const UI = {
     UI.toggle(EL.step5, false);
   }
 
+  // Loads the Filters UI (Step 4)
   const loadFiltersUI = async () => {
     if (!EL.step4 || !EL.step4Body) return;
     const pathFilter = EL.step4.getAttribute('data-path-filters');
@@ -367,7 +395,7 @@ const UI = {
       if (window.initFiltersUI) window.initFiltersUI();
       if (window.initMappingUI) window.initMappingUI();
     } catch (e) {
-      EL.step4Body.innerHTML = '<p class="text-danger">Impossible de charger les filtres. (' + e.message + ')</p>';
+      EL.step4Body.innerHTML = '<p class="text-danger">Unable to load filters. (' + e.message + ')</p>';
     }
     console.groupEnd();
   };
@@ -388,6 +416,7 @@ const UI = {
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
+  // --- LISTENERS ---
   EL.src.sol?.addEventListener('change', () => {
     UI.resetSelect(EL.src.conn); UI.resetSelect(EL.src.mod);
     loadConnectorsFor('source', EL.src.sol.value);
@@ -404,6 +433,7 @@ const UI = {
   EL.src.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
   EL.tgt.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
 
+  // Expose globally for Edit mode
   window.loadConnectorsFor = loadConnectorsFor;
   window.loadModulesFor = loadModulesFor;
   window.tryRevealStep3 = tryRevealStep3;
@@ -414,12 +444,14 @@ const UI = {
  * FILTERS & MAPPING UI FUNCTIONS (Global)
  * ============================================================ */
 (function() {
+  // Retrieves JSON attributes (data-fields) from options
   const getJsonAttr = (el, attr) => {
     if (!el || !el.value) return null;
     const opt = el.options[el.selectedIndex];
     try { return JSON.parse(opt.getAttribute(attr)); } catch { return null; }
   };
 
+  // Builds the filter field select options
   window.buildFilterFieldOptions = function() {
     const filterSelect = UI.get('rule-filter-field');
     const srcMod = UI.get('source-module');
@@ -443,6 +475,7 @@ const UI = {
     addGroup('Target Fields', getJsonAttr(tgtMod, 'data-fields'));
   };
 
+  // Adds a visual row to the filter list
   window.addFilterRow = function(fieldVal, opVal, valueVal) {
       const listWrap = UI.get('rule-filters-list');
       const fieldSelect = UI.get('rule-filter-field');
@@ -473,7 +506,6 @@ const UI = {
 
       const li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center';
-      
       li.innerHTML = `<span><strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${valueVal}</span>`;
       
       const delBtn = document.createElement('button');
@@ -489,6 +521,7 @@ const UI = {
       ul.appendChild(li);
   };
 
+  // Initializes the add filter button
   window.initFiltersUI = function() {
     const addBtn = UI.get('rule-filter-add');
     if (!addBtn || addBtn.dataset.bound) return;
@@ -520,6 +553,7 @@ const UI = {
     return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   }
 
+  // Adds a row to the Mapping table (Step 5)
   window.addMappingRow = function(tbody) {
     const srcFields = getJsonAttr(UI.get('source-module'), 'data-fields');
     const tgtFields = getJsonAttr(UI.get('target-module'), 'data-fields');
@@ -530,18 +564,19 @@ const UI = {
     // Target Select
     const tdTgt = document.createElement('td');
     const tgtSel = createMappingSelect(tgtFields);
-    tgtSel.classList.add('rule-mapping-target', 'js-select-search');
+    tgtSel.classList.add('rule-mapping-target', 'js-select-search'); // Class for auto Selectize
     tdTgt.appendChild(tgtSel);
 
-    // Source Select + Badges
+    // Source Select + Badges (Multiple Source Fields)
     const tdSrc = document.createElement('td');
     const srcWrapper = document.createElement('div');
     srcWrapper.className = 'mapping-src-wrapper';
     const srcSel = createMappingSelect(srcFields);
-    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search');
+    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search'); // Class for auto Selectize
     const badgesDiv = document.createElement('div');
     badgesDiv.className = 'mapping-src-badges pt-1';
 
+    // Manage multiple addition (Badges)
     srcSel.addEventListener('change', () => {
       const val = srcSel.value;
       if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
@@ -560,7 +595,7 @@ const UI = {
     srcWrapper.append(srcSel, badgesDiv);
     tdSrc.appendChild(srcWrapper);
 
-    // Actions (Formula)
+    // Actions (Formula Button)
     const tdAct = document.createElement('td');
     tdAct.className = 'd-flex align-items-center';
     const slot = document.createElement('div');
@@ -578,6 +613,7 @@ const UI = {
 
     tdAct.append(slot, btn, hidden);
 
+    // Open formula modal with row context
     btn.onclick = () => {
       const container = UI.get('formula-selected-fields');
       const modal = UI.get('mapping-formula');
@@ -600,7 +636,7 @@ const UI = {
       }
     };
 
-    // Delete
+    // Delete Row
     const tdDel = document.createElement('td');
     tdDel.className = 'text-end';
     const delBtn = document.createElement('button');
@@ -625,6 +661,7 @@ const UI = {
     btn.addEventListener('click', () => window.addMappingRow(tbody));
   };
 
+  // Ensures a mapping row exists for the chosen duplicate field
   window.ensureDuplicateMappingRow = function(targetField) {
     const tbody = UI.get('rule-mapping-body');
     if (!tbody) return;
@@ -644,7 +681,7 @@ const UI = {
 })();
 
 /* ============================================================
- * EDIT
+ * EDIT MODE (Data hydration)
  * ============================================================ */
 (function () {
   const ruleData = window.initialRule || null;
@@ -656,6 +693,7 @@ const UI = {
   window.__EDIT_MODE__ = true;
   const nameInput = UI.get('rulename');
 
+  // Fills the form with JSON sent by the server
   async function hydrateEditFromJson() {
     try {
       if (nameInput) {
@@ -672,6 +710,7 @@ const UI = {
           }
       }
 
+      // Sequential filling and loading of dependent lists
       const srcSol = UI.get('source-solution');
       if (srcSol && ruleData.connection?.source?.solutionId) {
         UI.setValue(srcSol, ruleData.connection.source.solutionId);
@@ -706,13 +745,14 @@ const UI = {
         UI.setValue(tgtMod, ruleData.connection.target.module);
       }
 
+      // Disable structural fields in edit mode
       [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod].forEach(el => {
         if (!el) return;
         el.disabled = true;
         if (el.selectize) el.selectize.disable();
       });
 
-      // Step 3
+      // Step 3 Hydration
       const step3 = UI.get('step-3');
       if(step3) {
           UI.toggle(step3, true);
@@ -735,7 +775,7 @@ const UI = {
           }
       }
 
-      // Step 4
+      // Step 4 Hydration (Filters)
       const step4 = UI.get('step-4');
       if(step4) {
           UI.toggle(step4, true);
@@ -747,12 +787,12 @@ const UI = {
                       window.addFilterRow(f.field, f.operator, f.value);
                   });
               } else {
-                  console.error('Fonction addFilterRow introuvable');
+                  console.error('Function addFilterRow not found');
               }
           }
       }
 
-      // Step 5
+      // Step 5 Hydration (Mapping)
       const step5 = UI.get('step-5');
       if(step5) {
           UI.toggle(step5, true);
@@ -803,7 +843,7 @@ const UI = {
 })();
 
 /* ===========================================
- * FUNCTION WIZARD
+ * FUNCTION WIZARD (Formula Editor)
  * =========================================== */
 $(function () {
   const insertAtCursor = (el, text) => {
@@ -826,6 +866,7 @@ $(function () {
 
   let tooltipVisible = false;
 
+  // Click on a badge in the list -> Inserts {field}
   $('#formula-selected-fields').on('click', '.badge-formula', function () {
     const field = $(this).data('field') || $(this).text().trim();
     if (field) insertAtCursor(document.getElementById('area_insert'), `{${field}}`);
@@ -903,6 +944,7 @@ $(function () {
     insertAtCursor(document.getElementById('area_insert'), `lookup({${f.split(' (')[0]}}, "${r}", ${e1}, ${e2})`);
   });
 
+  // Saves the formula into the hidden field of the mapping row
   $('#mapping-formula-save').on('click', function () {
     const id = $('#mapping-formula').data('currentRowId');
     const tr = document.querySelector(`tr[data-row-id="${id}"]`);
@@ -917,7 +959,7 @@ $(function () {
 });
 
 /* ===========================================
- * SAVE
+ * SAVE (Final rule save)
  * =========================================== */
 (function () {
   const saveBtn = UI.get('rule-save');
@@ -1013,7 +1055,7 @@ $(function () {
 })();
 
 /* ===========================================
- * SIMULATION
+ * SIMULATION (Debug Version)
  * =========================================== */
 (function () {
   const modal = UI.get('mapping-simulation');
@@ -1032,10 +1074,19 @@ $(function () {
     EL.alert.classList.add('d-none');
     if (!endpoints.run) return showAlert('Missing endpoint');
 
+    console.group("🚀 [JS DEBUG] Lancement Simulation");
+    console.log("Mode Manuel ?", manual);
+
     const fd = new FormData();
     const getVal = (id) => UI.get(id)?.value || '';
     const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text?.trim().toLowerCase() || ''; };
     
+    // Log des valeurs brutes récupérées du DOM
+    console.log("Source Solution ID:", getVal('source-solution'));
+    console.log("Source Solution Name:", getTxt('source-solution'));
+    console.log("Source Connector ID:", getVal('source-connector'));
+    console.log("Source Module:", getVal('source-module'));
+
     fd.append('src_solution_id', getVal('source-solution'));
     fd.append('tgt_solution_id', getVal('target-solution'));
     fd.append('src_solution_name', getTxt('source-solution'));
@@ -1048,21 +1099,32 @@ $(function () {
     const pContainer = UI.get('step-3-params-container');
     if (pContainer) {
       pContainer.querySelectorAll('input, select').forEach(el => {
-        if(el.name) fd.append(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
+        if(el.name) {
+            console.log(`Param sup: ${el.name} = ${el.value}`);
+            fd.append(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
+        }
       });
     }
 
     const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
+    console.log(`Nombre de lignes mapping trouvées: ${rows.length}`);
+    
     rows.forEach(tr => {
         const tgt = tr.querySelector('.rule-mapping-target')?.value;
         if(!tgt) return;
-        Array.from(tr.querySelectorAll('.mapping-src-badge')).forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));
+        
+        const badges = Array.from(tr.querySelectorAll('.mapping-src-badge'));
+        console.log(`Mapping cible [${tgt}] -> ${badges.length} champs source`);
+        
+        badges.forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));
+        
         const form = tr.querySelector('.rule-mapping-formula-input')?.value;
         if(form) fd.append(`formules[${tgt}][]`, form);
     });
 
     if (manual) {
       const id = EL.input.value.trim();
+      console.log("ID Manuel saisi:", id);
       if (!id) return showAlert('ID required', 'warning');
       fd.append('query', id);
     }
@@ -1070,19 +1132,46 @@ $(function () {
     EL.res.innerHTML = '<div class="text-center">Loading...</div>';
     
     try {
+      console.log("📡 Envoi requête fetch vers:", endpoints.run);
+      
       const res = await fetch(endpoints.run, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });
-      const html = await res.text();
-      EL.res.innerHTML = html;
-    } catch {
+      console.log("Réponse HTTP status:", res.status);
+      
+      const text = await res.text();
+      console.log("Contenu réponse brute (premiers 500 chars):", text.substring(0, 500));
+
+      if (!res.ok) {
+          console.error("❌ Erreur HTTP détectée");
+          try {
+              const json = JSON.parse(text);
+              console.log("Erreur JSON parsée:", json);
+              showAlert(json.error || 'Simulation failed');
+          } catch {
+              console.log("Erreur non-JSON");
+              showAlert('Simulation failed: ' + text);
+          }
+          EL.res.innerHTML = '';
+          return;
+      }
+      
+      // Si on arrive ici, c'est un succès (HTML ou JSON interprété comme texte)
+      EL.res.innerHTML = text;
+      
+    } catch (e) {
+      console.error("💥 Exception JS:", e);
       EL.res.innerHTML = '';
       showAlert('Simulation network error');
+    } finally {
+        console.groupEnd();
     }
   }
 
   modal.querySelector('#sim-run-manual')?.addEventListener('click', () => runSim(true));
   modal.querySelector('#sim-run-simple')?.addEventListener('click', () => runSim(false));
 })();
-
+/* ===========================================
+ * SELECTIZE INIT (Global initialization)
+ * =========================================== */
 $(document).ready(function() {
     $('.js-select-search').selectize({
         sortField: 'text',
@@ -1090,14 +1179,14 @@ $(document).ready(function() {
         allowEmptyOption: true,
         onChange: function(value) {
             if(this.$input && this.$input[0]) {
-              //AV plus tard ..
+              // Trigger native change event if needed
             }
         }
     });
 });
 
 /* ===========================================
- * TEMPLATE LOGIC
+ * TEMPLATE LOGIC (Template management Step 1)
  * =========================================== */
 (function () {
   const switchEl = UI.get('template-mode-switch');
@@ -1129,6 +1218,7 @@ $(document).ready(function() {
   switchEl.addEventListener('change', () => {
     const isTpl = switchEl.checked;
     
+    // Toggle visibility between classic mode and template mode
     UI.toggle(UI.get('source-module-group'), !isTpl);
     UI.toggle(UI.get('target-module-group'), !isTpl);
     UI.toggle(UI.get('step-templates'), isTpl);
