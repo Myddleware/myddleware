@@ -840,7 +840,7 @@ class moodle extends solution
 
         if (empty($moduleName) || empty($recordId) || empty($moodleBaseUrl) || empty($connector)) {
             // If module name or record ID is missing, return the base URL
-            return $moodleBaseUrl;
+            return "";
         }
 
 		// Build and return the complete direct link based on the module type

@@ -997,7 +997,7 @@ class salesforce extends solution {
 
 		if (empty($moduleName) || empty($recordId) || empty($salesforceInstanceUrl) || empty($connector)) {
             // If module name or record ID is missing, return the base URL
-            return $salesforceInstanceUrl;
+            return "";
         }
 
 		// Build and return the complete direct link
