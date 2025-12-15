@@ -83,6 +83,7 @@ class RuleSimulationService
             $this->logger->error($e->getMessage().' ('.$e->getFile().' line '.$e->getLine());
             throw new Exception($e->getMessage());
     }
+}
 
 /**
  * Simulation 2 : Prévisualisation (Wizard)
