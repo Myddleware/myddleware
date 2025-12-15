@@ -207,7 +207,7 @@ public function simulatePreview(array $requestData, ?string $ruleKey = null): ar
     }
 
     // 5. Transformation
-    $record = $sourceData['values'][0] ?? null;
+    $record = $sourceData['values'][$queryVal] ?? null;
 
     if (!$record) {
         return [
