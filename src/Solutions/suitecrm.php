@@ -124,28 +124,35 @@ class suitecrm extends solution
             // Define Cache Key based on URL and Login
             $this->cacheKey = 'suitecrm_session_' . md5($this->paramConnexion['url'] . $this->paramConnexion['login']);
 
-            // Cache disabled - executing direct login
-            $login_paramaters = [
-                'user_auth' => [
-                    'user_name' => $this->paramConnexion['login'],
-                    'password' => md5($this->paramConnexion['password']),
-                    'version' => '.01',
-                ],
-                'application_name' => 'myddleware',
-            ];
+            // Instantiate FilesystemAdapter (using default location, often var/cache)
+            $cache = new FilesystemAdapter();
 
-            $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            $sessionId = $cache->get($this->cacheKey, function (ItemInterface $item) {
+                // Set Default TTL to 5 minutes
+                $item->expiresAfter(300);
 
-            if (false != $result) {
-                if (empty($result->id)) {
-                    throw new \Exception($result->description ?? 'Unknown Error');
+                $login_paramaters = [
+                    'user_auth' => [
+                        'user_name' => $this->paramConnexion['login'],
+                        'password' => md5($this->paramConnexion['password']),
+                        'version' => '.01',
+                    ],
+                    'application_name' => 'myddleware',
+                ];
+
+                $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+
+                if (false != $result) {
+                    if (empty($result->id)) {
+                        throw new \Exception($result->description ?? 'Unknown Error');
+                    }
+                    return $result->id;
+                } else {
+                    throw new \Exception('Please check url');
                 }
-                $sessionId = $result->id;
-            } else {
-                throw new \Exception('Please check url');
-            }
+            });
 
-            // Use the session ID from direct login
+            // Use the session ID from cache or fresh login
             $this->session = $sessionId;
             $this->connexion_valide = true;
 
