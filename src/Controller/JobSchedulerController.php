@@ -410,23 +410,9 @@ class JobSchedulerController extends AbstractController
             throw $this->createNotFoundException('Missing config "search_limit"');
         }
 
-        $searchLimit = (int) $searchLimitConfig->getValue();
-        // Pagination for cron_job_result
-        $query = $this->entityManager->createQuery(
-            'SELECT c FROM Shapecode\Bundle\CronBundle\Entity\CronJobResult c ORDER BY c.runAt DESC'
-        )->setMaxResults($searchLimit);
-        $limitedResults = $query->getResult();
-
-        $adapter = new \Pagerfanta\Adapter\ArrayAdapter($limitedResults);
-        $pager = new Pagerfanta($adapter);
-        $pager->setMaxPerPage(3);
-        $pager->setCurrentPage($page);
-
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
             'timezone' => $timezone,
-            'entitiesCron' => $entitiesCron,
-            'pager' => $pager,
         ]);
     }
 

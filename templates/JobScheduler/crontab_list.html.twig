@@ -10,23 +10,6 @@
 
 	<div class="text-center mt-5">
 		<h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
-		{% for entityCron in entitiesCron %}
-			{% if entityCron.value == true %}
-				<a href="{{path('massdisableCron')}}" class="btn btn-outline-danger ">
-					{{ 'crontab.disableCron'|trans }}
-				</a>
-				<a href="{{path('massenableCron')}}" class="btn btn-outline-success disabled">
-					{{ 'crontab.enableCron'|trans }}
-				</a>
-			{% else %}
-				<a href="{{path('massdisableCron')}}" class="btn btn-outline-danger disabled">
-					{{ 'crontab.disableCron'|trans }}
-				</a>
-				<a href="{{path('massenableCron')}}" class="btn btn-outline-success">
-					{{ 'crontab.enableCron'|trans }}
-				</a>
-			{% endif %}
-		{% endfor %}
 		<p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
 	</div>
 
@@ -150,79 +133,6 @@
 
 		<div class="container-fluid p-3">
 			<div id="cronjobresult_table">
-					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'jobscheduler_cron_list_page', 'routeParams': {'page': app.request.get('page', 1)}}) }}
-
-						<form id="pageForm" method="get" class="form-inline mt-3" onsubmit="updateFormAction(event)">
-							<div class="form-group" required style="width: 15em;">
-								<label for="page" class="sr-only">Page</label>
-								<input type="number" name="page" id="page" class="form-control" placeholder="{{ 'pagination.page_number'|trans }}" min="1" required>
-							</div>
-							<button type="submit" class="btn btn-primary ml-2" style="display: flex; margin: 1em;">{{ 'pagination.go_to_page'|trans }}</button>
-						</form>
-
-
-						<div id="terminalCommandForm" style="display: none;" class="mt-3">
-							<div class="form-group">
-								<input type="text" id="commandInput" class="form-control" placeholder="Enter command">
-							</div>
-							<button class="btn btn-primary mt-2" onclick="executeCommand()">Execute</button>
-							<div id="commandResult" class="mt-2 p-2 bg-light" style="display: none;"></div>
-						</div>
-
-						<script>
-							const maxPage = {{ pager.getNbPages() }};
-
-						function updateFormAction(event) {
-						event.preventDefault();
-						const page = document.getElementById('page').value;
-						if (page < 1 || page > maxPage) {
-						alert('Please enter a valid page number between 1 and ' + maxPage);
-						return;
-						}
-						const form = document.getElementById('pageForm');
-						const baseUrl = "{{ path('jobscheduler_cron_list_page', {'page': 1}) }}";
-						const action = baseUrl.replace('/page-1', '/page-' + page);
-						form.action = action;
-						form.submit();
-						}
-
-						function toggleTerminalForm() {
-							const form = document.getElementById('terminalCommandForm');
-							form.style.display = form.style.display === 'none' ? 'block' : 'none';
-						}
-
-						function executeCommand() {
-							const command = document.getElementById('commandInput').value;
-							const resultDiv = document.getElementById('commandResult');
-							resultDiv.style.display = 'block';
-							resultDiv.textContent = 'Executing command...';
-
-							fetch('{{ path('executeTerminalCommand') }}', {
-								method: 'POST',
-								headers: {
-									'Content-Type': 'application/x-www-form-urlencoded',
-								},
-								body: 'command=' + encodeURIComponent(command)
-							})
-							.then(response => response.json())
-							.then(data => {
-								if (data.error) {
-									resultDiv.textContent = 'Error: ' + data.error;
-								} else {
-									resultDiv.innerHTML = (data.result || 'No output').replace(/\n/g, '<br>');
-								}
-								resultDiv.style.display = 'block';
-							})
-							.catch(error => {
-								resultDiv.textContent = 'Error executing command: ' + error;
-								resultDiv.style.display = 'block';
-							});
-						}
-
-
-						</script>
-					{% endif %}
 				</div>
 			</div>
 
