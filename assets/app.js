@@ -4,6 +4,7 @@ require('./app.scss');
 let $ = require('jquery');// create global $ and jQuery variables
 global.$ = global.jQuery = $;
 
+require('selectize');
 // Import FOSJs routing
 const routes = require('../public/js/fos_js_routes.json');
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
@@ -31,6 +32,7 @@ require('./js/task.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/rule-group.js')
+require('./js/rule-create.js')
 require('./js/notifications.js')
 
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
