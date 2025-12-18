@@ -1,0 +1,83 @@
+<div class="card border-0 shadow-sm mb-4">
+  <div class="card-body">
+    <div class="row g-3 align-items-end">
+      <div class="col-12 col-md-4">
+        <label class="form-label">
+          {{ 'create_rule.step4.filters.field'|trans }}
+        </label>
+        <select id="rule-filter-field" class="form-select">
+          <option value="">
+            {{ 'create_rule.step4.filters.choose_field'|trans }}
+          </option>
+          {% for group, fields in fieldsGrouped %}
+            {% if fields is not empty %}
+              <optgroup label="{{ group }}">
+                {% for name, label in fields %}
+                  <option value="{{ name }}">{{ label }}</option>
+                {% endfor %}
+              </optgroup>
+            {% endif %}
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">
+          {{ 'create_rule.step4.filters.operator'|trans }}
+        </label>
+        <select id="rule-filter-operator" class="form-select">
+          <option value="">
+            {{ 'create_rule.step4.filters.choose_operator'|trans }}
+          </option>
+          {% for label, value in operators %}
+            <option value="{{ value }}">{{ label }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div class="col-12 col-md-3">
+        <label class="form-label">
+          {{ 'create_rule.step4.filters.value'|trans }}
+        </label>
+        <input id="rule-filter-value" type="text" class="form-control" placeholder="...">
+      </div>
+
+      <div class="col-12 col-md-2">
+        <button class="btn btn-primary" id="rule-filter-add" type="button">
+          <i class="fa-solid fa-plus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <h5 class="h6 fw-bold mb-3">
+      {{ 'create_rule.step4.filters.current'|trans }}
+    </h5>
+
+    <div id="rule-filters-list">
+      {% if filters is not empty %}
+        <ul class="list-group">
+          {% for f in filters %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span>
+                <strong>{{ f.field }}</strong>
+                <small class="text-muted">({{ f.operator }})</small>
+                = {{ f.value }}
+              </span>
+              <button class="btn btn-sm text-danger" data-filter-id="{{ f.id }}">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted mb-0">
+          {{ 'create_rule.step4.filters.empty' | trans }}
+        </p>
+      {% endif %}
+    </div>
+  </div>
+</div>

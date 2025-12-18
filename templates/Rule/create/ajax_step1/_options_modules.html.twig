@@ -1,0 +1,11 @@
+{% if modules is not empty %}
+  {% for name, label in modules %}
+    {% set fields = modulesFields[name] ?? {} %}
+    <option value="{{ name }}"
+            data-fields="{{ fields|json_encode|e('html_attr') }}">
+      {{ label }}
+    </option>
+  {% endfor %}
+{% else %}
+  <option value="" disabled selected></option>
+{% endif %}
