@@ -10,6 +10,23 @@
 
 	<div class="text-center mt-5">
 		<h3 class="display-4">{{ 'crontab.title_cron'|trans }}</h3>
+		{% for entityCron in entitiesCron %}
+			{% if entityCron.value == true %}
+				<a href="{{path('massdisableCron')}}" class="btn btn-outline-danger ">
+					{{ 'crontab.disableCron'|trans }}
+				</a>
+				<a href="{{path('massenableCron')}}" class="btn btn-outline-success disabled">
+					{{ 'crontab.enableCron'|trans }}
+				</a>
+			{% else %}
+				<a href="{{path('massdisableCron')}}" class="btn btn-outline-danger disabled">
+					{{ 'crontab.disableCron'|trans }}
+				</a>
+				<a href="{{path('massenableCron')}}" class="btn btn-outline-success">
+					{{ 'crontab.enableCron'|trans }}
+				</a>
+			{% endif %}
+		{% endfor %}
 		<p class="jobscheduler_text">{{'crontab.description_cron'|trans|raw}}</p>
 	</div>
 
