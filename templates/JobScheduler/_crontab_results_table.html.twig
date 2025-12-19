@@ -1,66 +1,44 @@
-<div class="crontab-results-fragment">
-    <h6 class="display-6 mb-4">{{ 'crontab.title_cronjobresult'|trans }}</h6>
-    <div class="table-wrapper">
-        <table class="listepager table" id="myTable">
-            <thead>
-                <tr>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_id'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_cronjob_id'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_run_at'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_run_time'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_status_code'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_output'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_created_at'|trans }}</label></th>
-                    <th scope="col" class="title text-center"><label>{{ 'crontab.column_updated_at'|trans }}</label></th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for result in pager.currentPageResults %}
+    <h6 class="display-6 mb-4">
+        <h6 class="display-6">{{ 'crontab.title_cronjobresult'|trans }}</h6>
+    </h6>
+    <div id="crontabList" >
+        <div class ="table-wrapper">
+            <table class="listepager table">
+                <thead>
                     <tr>
-                        <td class="value">{{ result.id }}</td>
-                        <td class="value">{{ result.cronJob.id }}</td>
-                        <td class="value">{{ result.runAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-                        <td class="value">{{ result.runTime }}</td>
-                        <td class="value">{{ result.statusCode }}</td>
-                        <td class="value">
-                            <div id="output-short-{{ result.id }}">
-                                ...
-                                <button onclick="
-                                    document.getElementById('output-short-{{ result.id }}').style.display='none';
-                                    document.getElementById('output-full-{{ result.id }}').style.display='block';
-                                ">Show more</button>
-                            </div>
-                            <div id="output-full-{{ result.id }}" style="display: none;">
-                                {{ result.output }}
-                                <button onclick="
-                                    document.getElementById('output-full-{{ result.id }}').style.display='none';
-                                    document.getElementById('output-short-{{ result.id }}').style.display='block';
-                                ">Show less</button>
-                            </div>
-                        </td>
-                        <td class="value">{{ result.createdAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
-                        <td class="value">{{ result.updatedAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_id'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_cronjob_id'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_run_at'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_run_time'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_status_code'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_output'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_created_at'|trans }}</label></th>
+                        <th scope="col" class="title"><label>{{ 'crontab.column_updated_at'|trans }}</label></th>
                     </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="8" class="text-center text-muted">
-                            {{ 'crontab.no_results'|trans }}
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
+                </thead>
+                <tbody>
+                    {% for result in pager.currentPageResults %}
+                        <tr>
+                            <td class="value">{{ result.id }}</td>
+                            <td class="value">{{ result.cronJob.id }}</td>
+                            <td class="value">{{ result.runAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
+                            <td class="value">{{ result.runTime }}</td>
+                            <td class="value">{{ result.statusCode }}</td>
+                            <td class="value">
+                                <div id="output-short-{{ result.id }}">
+                                    ...
+                                    <button onclick="document.getElementById('output-short-{{ result.id }}').style.display='none';document.getElementById('output-full-{{ result.id }}').style.display='block';">Show more</button>
+                                </div>
+                                <div id="output-full-{{ result.id }}" style="display: none;">
+                                    {{ result.output }}
+                                    <button onclick="document.getElementById('output-full-{{ result.id }}').style.display='none';document.getElementById('output-short-{{ result.id }}').style.display='block';">Show less</button>
+                                </div>
+                            </td>
+                            <td class="value">{{ result.createdAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
+                            <td class="value">{{ result.updatedAt|date(app.user.dateFormat ~ ' H:i:s', app.user.timezone) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
         </table>
     </div>
-
-    {% if pager.haveToPaginate %}
-        <div class="mt-3 text-center pagination">
-            {{ pagerfanta(pager, 'twitter_bootstrap4', {
-                'routeName': 'crontab_results_partial',
-                'routeParams': {'page': app.request.get('page', 1)},
-                'proximity': 2,
-                'prev_message': 'pagination.previous'|trans,
-                'next_message': 'pagination.next'|trans
-            })|raw }}
-        </div>
-    {% endif %}
-</div>
+</div
