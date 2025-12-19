@@ -54,7 +54,6 @@ panel:
         title: Documents history
     graph_job_histo:
         title: Jobs history
-    rule_deleted: This rule has been deleted. It cannot be used anymore
 edit_rule:
     success: Your rule has been successfully edited.
 create_rule:
@@ -282,7 +281,6 @@ rule:
     select_value: Select a value
 
 rulegroup:  
-  create: "Create a rule group"
   created_successfully: "Rule group created successfully."
   updated_successfully: "Rule group updated successfully."
   deleted_successfully: "Rule group deleted successfully."
@@ -307,7 +305,6 @@ rulegroup:
   list: "Rule groups"
   create_new: "Create a rule group"
   rulegroup_name : Rule Group Name
-  name_cannot_be_empty: "The name of the Rule group cannot be empty"
   table:
     id: "ID"
     name: "Name"
@@ -329,7 +326,6 @@ rulegroup:
     rules: "Rules"
     rule_removed_successfully: "Rule removed successfully"
     no_rules: "No rules in this group"
-    options: "Options"
     rule:
       name: "Name"
       module_source: "Source module"
@@ -372,11 +368,6 @@ list_rulegroup:
 
 actions: "Actions"
 
-pagination:
-    previous: Previous
-    next: Next
-    go_to_page: Go to page
-    page_number: Page number
 
 animate:
     template:
@@ -402,7 +393,7 @@ animate:
         description: Description 
         empty: No template for these solutions, if you want a template, please contact us via <a href="mailto:contact@myddleware.com">contact@myddleware.com</a>
     tutoriel:
-        link: https://myddleware.github.io/myddleware-docs/#/basic_usage
+        link: https://myddleware.github.io/myddleware/#/basic_usage
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
@@ -422,7 +413,6 @@ create_connector:
     upload_delete: Deleting file
     params_error: An error occurred while saving the settings
     form_error : Cannot get connector data (solution, fields & parent) 
-    duplicate_name: A connector already has that name.
 
 list_connector:
     empty: You do not have any connectors yet !
@@ -454,13 +444,7 @@ view_connector:
         help: Assistance
         link_help: Click here to have more information on this connector
     help:
-        link: https://myddleware.github.io/myddleware-docs/#/connectors_credentials?id=
-
-edit_connector:
-    saved_successfully: Connector saved successfully
-
-delete_connector:
-        success: Connector deleted successfully
+        link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
 
 list_flux:
     start: Start
@@ -616,7 +600,6 @@ view_flux:
 list_task:
     total: Total of tasks
     empty: No tasks
-    stop_all_tasks: Stop all the Tasks
     th:
         id: Id
         status: Status
@@ -725,8 +708,6 @@ view_workflow_action:
     back: Back to the workflow
     save: Save
     cancel: Cancel
-    updated_successfully: Workflow action updated successfully
-    created_successfully: Workflow action created successfully
 view_account:
     title: My information
     user_info: My Information
@@ -1006,9 +987,9 @@ help:
                 To change more parameters in your rule, go to the tab "parameter" on this page.
         mapping: >
                 On this page you will find all the fields of your source and target applications used in your rule. You will also find the formulas for data transformation. 
-                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
+                If you need help to create your formulas, go to our blog  at the following address : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">See the page on formulas</a>.
         relate: >
-                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
+                Here you will find all the relations to link data in your applications More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         param: >
                 The reference date shows which data will be read in your source system. Only data that were created or modified after that date will be read and sent to the target system.
                 Therefore if you want to migrate your old data, you need to take a date in the past. If you only want to transfer the new data, then leave the day's date.
@@ -1019,7 +1000,7 @@ help:
                 For example, you can choose to put the name of a Sugar contact in the name of a Salesforce account, 
                 for that, just drag the field "name" of your source module and drop it in the field "name" of your target solution. 
                 To delete a field that was already placed, just double click on it. 
-                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
+                You can also use formulas to transform your data. If you need assistance to create formulas, go to our blog at the following address: <a href="https://myddleware.github.io/myddleware/#/basic_usage?id=apply-formulae-to-transform-data-before-it-is-sent-to-the-target-app" target="_blank">See the page on formulas</a>.  
                 For more information or personalised assistance, feel free to contact us.
         simulate: >
                 Here you can simulate the result of the rules you have implemented in the previous stage. 
@@ -1027,11 +1008,11 @@ help:
         relate: >
                 This tab allows you to define the relations you want to implement in your interface. That way you can link several rules together. 
                 For example, it is possible to transfer the relation between a contact and an account so that they will also be linked in the target solution.
-                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
+                More information on relations at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">see the page on relations</a>
         filter: >
                 This tab allows you to filter the fields of your source application at play
                 For example, you can choose to take all the contacts whose country is "France".
-                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
+                More information on filters at the following address: <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">see the page on filters</a>
         validate: >
                 The last stage, if the target application of your rule allows it, you can choose a de-duplication key. To be used in de-duplication, a field must be selected in the tab "field"of the rule. 
                 For example, for a CRM application, you can de-duplicate all the contacts by their mail. Myddleware will check if the recording already exist in your target solution, before creating it. If it does not existe, Myddleware will create it.Otherwise it will just update it.
@@ -1140,7 +1121,7 @@ jobscheduler:
     view:
         show : View details
     description:
-        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware-docs/#/cron_jobs" target=_blank>More information here.</a>
+        top : Schedule your Myddleware tasks by creating or modifying this table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>More information here.</a>
         bottom : > 
                 Add this task in your Linux or Windows task scheduler : php bin/console myddleware:jobScheduler --env=background <BR>
                 For example with Linux, add this command in your crontab if you want to run Myddleware scheduler every 5 minutes : <BR>
@@ -1149,7 +1130,7 @@ management_smtp:
     submit :  Save SMTP config
     cancel: Cancel
     title : SMTP Management
-    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/6.4/mailer.html" target=_blank>https://symfony.com/doc/6.4/mailer.html</a>'
+    description : 'Here, you can configure email parameters. More info here : <a href="https://symfony.com/doc/4.4/email.html" target=_blank>https://symfony.com/doc/4.4/email.html</a>'
     sendtestmail: Send test mail
     success: SMTP config saved successfully
     error: Failed to save SMTP config
@@ -1215,13 +1196,12 @@ install:
     database_setup: Setting up your database
     test_button: Connect to database
     requirements_checker: Myddleware Requirements Checker
-    system_status_ready: Your system is ready to run Myddleware
+    system_status_ready: Your system is ready to run Myddleware 
     system_status_not_ready: Your system is not ready to run Myddleware yet
     user_setup: Create your Myddleware user login details
-    next_step: You can now go to the next page to set up your Myddleware user
+    next_step: You can now go to the next page to set up your Myddleware user 
     role_admin: Please note that these credentials will have administrator access rights to Myddleware
-    super_admin: Make this user a Super Admin
-    check_button: Check now
+    check_button: Check now 
     next: Next
     setup_database_button: Setup database
     previous: Previous
@@ -1334,7 +1314,6 @@ user_manager:
     create: Create user
     edit: Edit user
     password: Password
-    confirm_delete: Are you sure you want to delete this user?
 success_create_user: User created successfully.
 success_update_user: User updated successfully.
 success_deleted_user: User deleted successfully.
@@ -1365,126 +1344,3 @@ account:
   password:
     success: "Password updated successfully."
     danger: "An error occurred while updating the password."
-
-user_list_view:
-    edit: Edit
-    delete: Delete
-
-smtp_config:
-    "choose_transport": "- Choose transport -"
-    "choose_auth_mode": "- Choose auth mode -"
-    "choose_encryption": "- Choose encryption -"
-    "cram-md5": "Cram-md5"
-    "plain": "Plain"
-    "login": "Login"
-    "oauth": "OAuth"
-    "tls": "TLS"
-    "ssl": "SSL"
-    "transport": "Transport"
-    smtp: "SMTP"
-    gmail: "Gmail"
-    sendmail: "Sendmail"
-    sendinblue: "Sendinblue"
-    "host": "Host"
-    "api_key": "Api key"
-    "port": "Port"
-    "auth_mode": "Auth mode"
-    "encryption": "Encryption"
-    "user": "User"
-    "password": "Password"
-    "sender": "Sender"
-
-rule_list_view:
-    save: Save
-
-
-#rule detail
-rule_detail_view:
-    id: Id
-    edit: Edit
-rule_execute_by_id:
-    separate: separate the ids with comas, no space
-    id: id
-    edit: Edit
-
-new_workflow_view:
-    save: Save
-    created_successfully: Workflow created successfully.
-
-delete_workflow_view:
-    deleted_successfully: Workflow deleted successfully.
-
-#edit workflow
-view_edit_workflow:
-    create: Create workflow
-    workflow_name: Workflow name
-    Rule: Rule
-    Description: Description
-    Order: Order
-    Active: Active
-    Yes: Yes
-    No: No
-    Condition: Condition
-
-view_edit_workflow_action:
-    action_name: Action Name
-    workflow: Workflow
-    select_workflow: Select a workflow
-    description: Description
-    action: Action
-    select_action: Select an action
-    updateStatus: updateStatus
-    generateDocument: generateDocument
-    sendNotification: sendNotification
-    transformDocument: transformDocument
-    rerun: rerun
-    changeData: changeData
-    updateType: updateType
-    order: Order
-    multiple_runs: Multiple Runs
-    yes: Yes
-    no: No
-    status: Status
-    select_status: Select a status
-    new: New
-    predecessor_ok: Predecessor_OK
-    relate_ok: Relate_OK
-    transformed: Transformed
-    ready_to_send: Ready_to_send
-    filter_ok: Filter_OK
-    send: Send
-    filter: Filter
-    no_send: No_send
-    error_expected: Error_expected
-    cancel: Cancel
-    create_ko: Create_KO
-    filter_ko: Filter_KO
-    predecessor_ko: Predecessor_KO
-    relate_ko: Relate_KO
-    error_transformed: Error_transformed
-    error_checking: Error_checking
-    error_sending: Error_sending
-    found: Found
-    not_found: Not_found
-    active: Active
-    to: To
-    subject: Subject
-    message: Message
-    generating_rule: Generating Rule
-    select_rule: Select a rule
-    matching_field_from_generating_rule: Matching Field from Generating Rule
-    select_field: Select a field
-    my_value: my_value
-    name: Name
-    id: id
-    contacts_engages: contacts-engages
-    deleted: deleted
-    matching_field_from_current_rule: Matching Field from Current Rule
-    rerun_label: Rerun
-    document_type: Document Type
-    select_type: Select a type
-    type_c: C
-    type_u: U
-    type_d: D
-    type_s: S
-    target_field: Target Field
