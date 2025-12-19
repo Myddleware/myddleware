@@ -1093,4 +1093,33 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	gap: .5rem;
 }
 
+.mapping-src-badges {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .5rem;
+	min-height: 36px;
+	max-height: 36px;
+	overflow-x: auto;
+	overflow-y: hidden;
+}
+
+#rule-mapping-table .cell-actions .mapping-actions {
+	display: flex;
+	align-items: center;
+	gap: .5rem;
+	min-width: 220px;
+}
+
+.formula-slot {
+	flex: 1 1 auto;
+    max-width: 200px;
+	padding: .375rem .5rem;
+	border-radius: .5rem;
+	background: #f8fafc;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: .875rem;
+	color: #64748b;
+}
 }
