@@ -1025,3 +1025,17 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     word-wrap: break-word;
     max-width: 150px;
 }
+
+#step-2 { 
+	opacity: 0; 
+	transition: opacity .25s ease; 
+}
+#step-2:not(.d-none)[style=""] {
+	opacity: 1; 
+} 
+
+.section-create-rule {
+	padding-top: 1em;
+    border-top: #00000024 solid 0.5px;
+}
+}
