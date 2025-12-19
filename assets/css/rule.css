@@ -1122,4 +1122,47 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	font-size: .875rem;
 	color: #64748b;
 }
+
+.formula-slot.is-empty {
+	font-style: italic;
+	color: #94a3b8;
+}
+
+.mapping-src-badge,
+.badge-formula {
+	cursor: pointer;
+	position: relative;
+	font-size: smaller;
+	border: 2px dashed #05bfe6;
+	transition: transform .12s ease, box-shadow .12s ease;
+}
+
+.mapping-src-badge:hover,
+.badge-formula:hover {
+	box-shadow: 0 6px 12px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.08);
+	transform: translateY(-2px);
+}
+
+.mapping-src-badge:active,
+.badge-formula:active {
+	box-shadow: 0 2px 6px rgba(0,0,0,.10);
+	transform: translateY(0);
+}
+
+.mapping-src-badge:focus-visible,
+.badge-formula:focus-visible {
+	outline: 0;
+	box-shadow:
+		0 0 0 4px rgba(13,110,253,.2),
+		0 6px 12px rgba(0,0,0,.12),
+		0 2px 4px rgba(0,0,0,.08);
+	transform: translateY(-2px);
+}
+
+.mapping-src-badge-remove {
+	background-color: #fff;
+	border: 0;
+	line-height: 1;
+	border-radius: .25rem;
+}
 }
