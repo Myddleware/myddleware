@@ -12,21 +12,6 @@
 {% endblock titlesm %}
 
 {% block body %}
-	{# success message #}
-	{% for flash in app.flashes('success') %}
-		<div class="alert alert-success alert-dismissible fade show">
-			{{ flash }}
-		</div>
-	{% endfor %}
-
-	{# error message for permission denied #}
-	{% for flash in app.flashes('error-permission') %}
-		<div class="alert alert-danger alert-dismissible fade show">
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			{{ flash }}
-		</div>
-	{% endfor %}
-
 	<div id="variables">
 		<div>
 			<a href="{{ path('variable_create') }}" class="btn btn-primary mt-5 mb-5">{{ 'variable.create_new'|trans }}</a>
@@ -68,16 +53,11 @@
 												<i class="fa fa-pen" aria-hidden="true"></i>
 											</span>
 										</a>
-										<form method="post" action="{{ path('variable_delete', {'id': variable.id}) }}" style="display: inline;">
-											<button type="submit"
-													class="delete btn btn-sm btn-outline-danger"
-													onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');"
-													title="{{ 'variable.btn.delete'|trans }}">
-												<span class="btn-opt">
-													<i class="fa fa-trash" aria-hidden="true"></i>
-												</span>
-											</button>
-										</form>
+										<a class="delete btn btn-sm btn-outline-danger" href="{{ path('variable_delete', {'id': variable.id}) }}" onclick="return confirm('{{ 'variable.confirm_delete'|trans }}');">
+											<span class="btn-opt">
+												<i class="fa fa-trash" aria-hidden="true"></i>
+											</span>
+										</a>
 									</td>
 								</tr>
 							{% endfor %}
@@ -91,12 +71,7 @@
 		
 				<div class="d-flex justify-content-center mt-4">
 					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {
-							'routeName': 'variable_list_page',
-							'proximity': 2,
-							'prev_message': 'pagination.previous'|trans,
-							'next_message': 'pagination.next'|trans
-						})|raw }}
+						{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'variable_list_page'}) }}
 					{% endif %}
 				</div>
 	</div>

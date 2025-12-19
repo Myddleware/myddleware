@@ -36,7 +36,16 @@
 {% endblock titlesm %}
 {% block body %}
 
-{% include '_notifications.html.twig' with { filter_prefix: 'filter.' } %}
+
+{% for type, messages in app.flashes %}
+    {% if type != 'success_unlock' %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }}" role="alert">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endfor %}
 
 <!-- removeFilterFilter.html.twig -->
 <div class="px-5 mb-1 py-1 mt-5">
@@ -373,12 +382,7 @@
 	</div>
 	<div class="d-flex justify-content-center">
 		{% if pager.haveToPaginate %}
-			{{ pagerfanta(pager, 'twitter_bootstrap4', {
-				'routeName': 'document_list_page',
-				'proximity': 2,
-				'prev_message': 'pagination.previous'|trans,
-				'next_message': 'pagination.next'|trans
-			})|raw }}
+			{{ pagerfanta(pager, 'twitter_bootstrap4', {'routeName': 'document_list_page'}) }}
 		{% endif %}
 	</div>
 </section>
@@ -442,11 +446,6 @@ var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
         }
     });
 });
-
-// Clear localStorage storedFilters if the script is provided
-{% if clearStorageScript is not null and clearStorageScript is not empty %}
-    {{ clearStorageScript|raw }}
-{% endif %}
 	</script>
 {% endblock javascript %}{% endblock %}{% block cssin %}
 {{ encore_entry_link_tags('app') }}
