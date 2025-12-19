@@ -55,8 +55,12 @@ panel:
     graph_job_histo:
         title: Jobs history
     rule_deleted: This rule has been deleted. It cannot be used anymore
+edit_rule:
+    success: Your rule has been successfully edited.
 create_rule:
     error_name: A connector already has that name.
+    success: Your rule has been successfully created
+    loading: Loading rule...
     tabs:
         one: Connection
         two: Modules selection
@@ -95,6 +99,7 @@ create_rule:
         previous: Previous step
         next: Next step       
         syncdata:
+            title: Sync options
             label: Synchronization type
             create_modify: Create and update data
             create_only: Create data only
@@ -147,7 +152,27 @@ create_rule:
             yes: Yes
             no : No
             behavior: Behavior
-            
+    step4:
+        title: Filter
+        filters:
+            field: "Field"
+            choose_field: "Choose a field"
+            operator: "Operator"
+            choose_operator: "Choose an operator"
+            value: "Value"
+            current: "Current filters"
+            empty: "No filters have been defined yet."
+    step5:
+        back: back to list
+        simulation: Simulation
+        title: Mapping field    
+        formula:
+            title: Compose your formula
+            selected_field: Selected fields
+            fonctionw: Fonction Wizard
+            formula: Formule
+            close: Close
+            save: Save     
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization
@@ -354,7 +379,15 @@ pagination:
     page_number: Page number
 
 animate:
-    rulename: Name of your rule 
+    template:
+        title: Template
+        success: Your template worked successfully
+        rule: rules
+        other_rule: other rule
+        use: Use this template
+    ruleconnection: Rule connection
+    rulename: Name of your rule
+    title: Rule Details
     wait: Please wait...
     solution:
         source: Source
@@ -901,6 +934,7 @@ title:
         edit: Editing the rule
         list: Rules
         view: Rule
+        success_edit_params:
     connector:
         create: Creation of a connector
         edit: Editing the connector
