@@ -133,14 +133,6 @@
 #rule .vignette, #connector .vignette, #jobscheduler .vignette {
 	width: 50px;
 }
-
-/* relate */
-
-#rule_mapping #relation #relate input.title {
-	border: none;
-	min-width: 250px;
-}
-
 /*  fields mapping */
 
 .source { 
