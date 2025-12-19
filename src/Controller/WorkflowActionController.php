@@ -496,7 +496,7 @@ class WorkflowActionController extends AbstractController
                             'placeholder'=> 'view_edit_workflow_action.select_status',
                         ])
                         ->add('to', TextType::class, [
-                            'label'      => 'To',
+                            'label'      => 'view_edit_workflow_action.to',
                             'mapped'     => true,
                             'required'   => false,
                             'row_attr'   => [
@@ -510,7 +510,7 @@ class WorkflowActionController extends AbstractController
                             ],
                         ])
                         ->add('subject', TextType::class, [
-                            'label'      => 'Subject',
+                            'label'      => 'view_edit_workflow_action.subject',
                             'required'   => false,
                             'row_attr'   => [
                                 'class' => 'mb-3'
