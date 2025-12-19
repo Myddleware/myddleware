@@ -1165,4 +1165,34 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	line-height: 1;
 	border-radius: .25rem;
 }
+
+.mapping-src-badge-remove:hover,
+#toggle-tooltip{
+	color: #05bfe6 !important;
+	border-color: #05bfe6 !important;
+	background-color: #fff !important;
+}
+
+#sim-result { 
+	max-height: 60vh; 
+	overflow: auto; 
+}
+#sim-result .skeleton {
+  height: 12px; 
+  border-radius: 6px; 
+  background: linear-gradient(90deg,#f2f4f7,#e9eef5,#f2f4f7);
+  background-size: 200% 100%; 
+  animation: sk 1.2s ease-in-out infinite;
+}
+@keyframes sk { 
+	0%{background-position:200% 0} 100%{background-position:-200% 0} 
+}
+
+#rulename-spinner{
+	left: 225px;
+    bottom: -5px;
+}
+#rulename-spinner, #source-connector-spinner, #target-connector-spinner, #target-module-spinner, #source-module-spinner, .spinner-template{
+    color: #05bfe6;
+}
 }
