@@ -55,6 +55,8 @@ panel:
     graph_job_histo:
         title: Historique des jobs
     rule_deleted: Cette règle a été supprimée. Elle ne peut plus être utilisée.
+edit_rule:
+    success: Votre règle a été modifiée avec succès.
 create_rule:
     success: Votre règle a été créée avec succès
     error_name: Un connecteur porte déjà ce nom.
@@ -133,6 +135,7 @@ create_rule:
             select_field: Sélectionnez le champ associé
             select_field_title: Sélectionnez un champ pour la recherche
             toggle_tooltip: Afficher/Masquer la description de la fonction
+            error: Votre règle comporte une ou plusieurs erreurs de syntaxe
         confirm:
             success: Enregistrement avec succès
             error: Une erreur est survenue
@@ -600,7 +603,6 @@ view_flux:
         type: Type
         msg: Message
     workflow_log:
-        id: "ID"
         workflow: "Workflow"
         job: "Job"
         trigger_document: "Document déclencheur"
@@ -1221,7 +1223,7 @@ install:
     user_setup: Création de vos identifiants utilisateur Myddleware
     next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     role_admin: Ces identifiants Myddleware auront les droits administrateur
-    super_admin: Faire de cet utilisateur un Super Admin
+    system_status_ready: Votre système est prêt à utiliser Myddleware
     system_status_not_ready: Votre système n'est pas encore prêt à faire tourner Myddleware
     requirements_checker: Vérification des paramètres nécessaires pour installer Myddleware
     requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
