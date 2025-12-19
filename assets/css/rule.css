@@ -1038,4 +1038,31 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	padding-top: 1em;
     border-top: #00000024 solid 0.5px;
 }
+
+.section-chevron {
+	font-size: xxx-large;
+    color: #05bfe6;
+    margin-left: 310px;
+    padding: 50px 0px 50px 0px;
+}
+.rule-mapping-formula{
+    color: #05bfe6 !important;
+}
+#rule-mapping-add, #rule-filter-add, #create-rule-template{
+	border-color: #05bfe6 !important;
+	background-color: #05bfe6 !important;
+}
+
+.list-group-item-action:not(.active):hover{
+	color: #05bfe6 !important;
+    font-weight: 600;
+	background-color: #ffffff !important;
+}
+
+#nav-create-rule-detail.nav-create-rule, 
+#nav-create-rule-connection.nav-create-rule, 
+#nav-create-rule-sync.nav-create-rule, 
+#nav-create-rule-filter.nav-create-rule, 
+#nav-create-rule-mapping.nav-create-rule {
+	border-radius: 0px 60px 60px 0px !important;
 }
