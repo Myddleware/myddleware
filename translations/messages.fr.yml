@@ -56,7 +56,9 @@ panel:
         title: Historique des jobs
     rule_deleted: Cette règle a été supprimée. Elle ne peut plus être utilisée.
 create_rule:
+    success: Votre règle a été créée avec succès
     error_name: Un connecteur porte déjà ce nom.
+    loading: Chargement de la règle...
     tabs:
         one: Connexion
         two: Choix des modules
@@ -95,6 +97,7 @@ create_rule:
         previous: Etape précédente
         next: Etape suivante
         syncdata:
+            title: Options de synchronisation
             label: Type de synchronisation
             create_modify: Création et modification de données
             create_only: Création de données seulement
@@ -151,7 +154,28 @@ create_rule:
         params:
             duplicate: Champs pour éviter les doublons
             sync: Synchronisation bidirectionnelle
-        save_wait: Veuillez patienter...
+        save_wait: Veuillez patienter...         
+    step4:
+        title: "Filtres"
+        filters:
+            field: "Champ"
+            choose_field: "Choisir un champ"
+            operator: "Opérateur"
+            choose_operator: "Choisir un opérateur"
+            value: "Valeur"
+            current: "Filtres actuels"
+            empty: "Aucun filtre n'a encore été défini."
+    step5:
+        back: Retour à la liste
+        simulation: Simulation
+        title: Mappage des champs
+        formula:
+            title: Composer votre formule
+            selected_field: Champs sélectionnés
+            fonctionw: Fonction Wizard
+            formula: Formule
+            close: Fermer
+            save: Confirmer
 
 filter:
     content: contient
@@ -244,7 +268,7 @@ view_rule:
         simule: Simuler documents
         result: Nombre de documents estimé
         details: Représente le nombre de documents qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
-        daterefence: Date de la donnée dans l'application source
+        daterefence: Date de la donnée dans l’application source
 rule:
     source: Source
     target: Cible
@@ -269,7 +293,7 @@ rulegroup:
   confirm_transfer_text: "Cette règle appartient déjà à un autre groupe. Voulez-vous la transférer dans ce groupe ?"
   title_one: "Groupe de règles"
   back: "Retour à la liste"
-  edit: "Édition d'un groupe de règles"
+  edit: "Édition d’un groupe de règles"
   delete: "Supprimer"
   name: "Nom"
   create_by: "Créé par"
@@ -298,7 +322,7 @@ rulegroup:
     status: "Statut"
     create_by: "Créé par"
     delete: "Supprimer"
-    edit: "Édition d'un groupe de règles"
+    edit: "Édition d’un groupe de règles"
     updated_successfully: "Groupe de règles mis à jour avec succès"
     rules: "Règles"
     rule_removed_successfully: "Règle supprimée avec succès"
@@ -354,8 +378,16 @@ pagination:
     page_number: Numéro de page
 
 animate:
-    rulename: Nom de votre règle
+    template:
+        title: Template
+        success: Votre template a fonctionné avec succès
+        rule: règles
+        other_rule: autre règle
+        use: Utilisez ce template
+    ruleconnection: Règle connection
+    rulename: Nom de votre règle 
     wait: Veuillez patienter...
+    title: Détail de la règle
     solution:
         source: Source
         target: Cible
@@ -579,6 +611,7 @@ view_flux:
         message: "Message"
         action_name: "Nom de l'action"
         action_type: "Type d'action"
+        id: Id
 
 list_task:
     total: Total de tâches
@@ -777,10 +810,10 @@ function:
             ceil: "ceil($number) / Retourne le plus petit entier supérieur ou égal à un nombre. Exemple: ceil(3.14) retourne 4"
             abs: "abs($number) / Retourne la valeur absolue d'un nombre. Exemple: abs(-5) retourne 5"
         date:
-            date: "Set a date/local time (current date and time). Example: date() returns the current date and time"
-            microtime: "Return the current Unix timestamp with the microseconds. Example: microtime() returns the current Unix timestamp with the microseconds, such as 1717536000.123456"
-            changeTimeZone: "changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter. Example: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') returns '2024-01-01 00:00:00'"
-            changeFormatDate: "changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter. Example: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') returns '2024/01/01'"
+            date:  "Définit une date/heure (date et heure courante). Exemple: date() retourne la date et l'heure courante"
+            microtime:  "Retourne le timestamp Unix actuel avec les microsecondes. Exemple: microtime() retourne le timestamp Unix actuel avec les microsecondes, tel que 1717536000.123456"
+            changeTimeZone:  "Change le fuseau horaire de la date précédente. Exemple: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') retourne '2024-01-01 00:00:00'"
+            changeFormatDate:  "Convertit la date précédente dans le format spécifié. Exemple: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') retourne '2024/01/01'"
         constant:
             mdw_no_send_field: Ne pas envoyer le champ
             mdw_cancel_document: Annuler le document
@@ -798,19 +831,20 @@ solution:
         token: Jeton
         tokensecret: Secret jeton
         useraccesstoken: Token utilisateur
+        tokensecret: Secret jeton
         consumerkey: Clé consommateur
-        consumersecret: Secret consommateur
+        consumersecret: Secret consommateur 
         apikey: Clé api
         projectid: Projet id
         apiuser: Utilisateur api
         apikeysecret: Clé api secret
-        mail_gotomeeting: Mail GotoMeeting
+        mail_gotomeeting: Mail GotoMeeting 
         accountid: Identifiant de compte
         clientid: Client ID
         clientsecret: Client secret
         instance: Numéro d'instance (Entrez 0 si vous n'en avez pas)
         company: Company ID
-        user: User ID
+        user: User ID        
         sandbox: Sandbox (1 si oui, 0 sinon)
         wsdl: Fichier wsdl
         file: Fichier
@@ -828,13 +862,13 @@ solution:
         hashkey: Clé de hachage
         id_auth: Id auth
         authid: Id auth
-        user_custom_fields: User custom fields (shortname separated by coma)
-        course_custom_fields: Course custom fields (shortname separated by coma)
         tenant_id: Tenant ID
         client_id: Client ID
         client_secret: Client Secret
         environment: Environment
-    params:
+        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
+        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
+    params: 
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
         active: Activation
@@ -958,7 +992,7 @@ breadcrumb:
 menu_user:
     account: Mon compte
     jobscheduler: Planificateur de tâche
-    crontab: Crontab
+    crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration SMTP
     logout: Déconnexion
     user_manager: Gestion utilisateur
@@ -1097,6 +1131,7 @@ jobscheduler:
     paramValue1 : Paramètre valeur 1
     paramName2 : Paramètre 2
     paramValue2 : Paramètre valeur 2
+    total : Total
     actions: Action
     new: Création
     update: Mise à jour
@@ -1187,21 +1222,27 @@ install:
     next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     role_admin: Ces identifiants Myddleware auront les droits administrateur
     super_admin: Faire de cet utilisateur un Super Admin
+    system_status_not_ready: Votre système n'est pas encore prêt à faire tourner Myddleware
+    requirements_checker: Vérification des paramètres nécessaires pour installer Myddleware
+    requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
     check_button: Vérifier
     next: Suivant
     setup_database_button: Configurer la base de données
     previous: Précédent
-    requirements_info: Nous allons vérifier que votre installation est bien configurée pour Myddleware
+    next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     php_ini_error: ATTENTION ! Le fichier de configuration PHP (php.ini) n'a pas été trouvé!
-    php_ini_path_sentence:  PHP utilise le fichier php.ini suivant
+    php_ini_path_sentence:  PHP utilise le fichier php.ini suivant 
     php_version_not_found: ATTENTION ! Impossible de trouver votre version de PHP
     errors_to_do_message: Veuillez procéder à ces étapes avant de continuer
     recommendations_to_do_message: Recommendations optionnelles pour améliorer votre configuration
     note_message: Il est possible que l'invite de commande utilise un autre fichier php.ini que celui que vous utilisez pour votre serveur web. Par mesure de sécurité, veuillez vérifier les paramètres de votre serveur web en tapant la commande suivante depuis votre dossier Myddleware
     database_already_exists: Une base de données existe déjà dans le fichier .env.local. Veuillez la supprimer pour continuer l'installation.
+
 crontab:
     title: Planificateur de travaux avec crontab
     title_cron: Crontab
+    see_results: Résultats Crontab
+    hide_results: Fermer Crontab
     description_cron: Planifiez vos tâches Myddleware en créant votre crontab
     command: Commande
     period: Périodes
@@ -1209,11 +1250,14 @@ crontab:
     description: Description
     running: Instance en cours
     max_instance: Max instance
+    max_instances: Max instances
+    running_instances: Running instances
+    results: Résultats
     lastUse: Last use
     nextRun: Next run
     enable: Enable
     number: Nombres
-    success: Votre calendrier des tâches a bien été créé
+    success: Votre calendrier des tâches a bien été créé 
     incorrect: Une erreur s'est produite lors de la création de votre calendrier des tâches
     correct: Vos crontabs ont été désactivés
     disableAllCrons: Vos crontabs ont été désactivés
@@ -1226,8 +1270,8 @@ crontab:
     massenable: Activer toutes les tâches
     enableCron: On
     disableCron: Off
-    title_cronjobresult: Résultats Crontab
-    column_id: ID
+    title_cronjobresult: Résultats Crontab   
+    column_id: Identifiant
     column_cronjob_id: Tâche Cron
     column_run_at: Exécuté le
     column_run_time: Durée d'exécution
@@ -1239,9 +1283,9 @@ crontab:
     hide_results: Masquer les résultats Crontab
     period_help: Il s'agit de l'intervalle de temps correspondant à la fréquence d'exécution de votre tâche. Mais ici, la syntaxe à utiliser est précise, (*/5 * * * *, dans l'ordre d'écriture, minute, heure, jour du mois, jour de la semaine, exemple, */5 * * * * coresspond à 5 min)
     max_instance_help: Une limite d'instance maximale pour les nouvelles tâches
-    help:  >
-            Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:cronrun --env=background <BR>
-            Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
+    help: > 
+             Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:cronrun --env=background <BR>
+             Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
                */5 * * * * cd <myddleware_directory>; php bin/console myddleware:cronrun --env=background
 duplicate_rule:
     duplicate: Dupliquer
@@ -1258,8 +1302,8 @@ variable:
   name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
   edit: Modification de la variable
   back_to_list: Retour à la liste des variables
-  save: Enregistrer
   editing: Modification de la variable
+  save: Enregistrer
   total: Total des Variables
   btn:
     edit: Modifier
@@ -1273,13 +1317,13 @@ variable:
   table_headers:
     name: Nom
     value: Valeur
-    created_by: Créé par
     actions: Actions
+    created_by: Créé par
     description: Description
 premium:
     upgrade:
         title_main: "Passer à la version Premium"
-        title: "Débloquer les fonctionnalités exclusives"
+        title: "Débloquer les fonctionnalités exclusives et recevoir un support personnalisé"
         description: "Accédez à des fonctionnalités avancées et bénéficiez d'un support personnalisé en passant à la version Premium de Myddleware."
         button: "Acheter la version Premium"
         benefits:
@@ -1326,8 +1370,8 @@ account:
   profile:
     updated_successfully: "Profil mis à jour avec succès."
   twofa:
-    updated_successfully: "Paramètres de l'authentification à deux facteurs mis à jour avec succès."
-    smtp_required: "L'authentification à deux facteurs nécessite une configuration email. Merci de configurer un SMTP ou une clé API Brevo."
+    updated_successfully: "Paramètres de l’authentification à deux facteurs mis à jour avec succès."
+    smtp_required: "L’authentification à deux facteurs nécessite une configuration email. Merci de configurer un SMTP ou une clé API Brevo."
   password:
     success: "Mot de passe mis à jour avec succès."
     danger: "Une erreur est survenue lors de la mise à jour du mot de passe."
