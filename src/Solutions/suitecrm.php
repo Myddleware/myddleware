@@ -167,9 +167,7 @@ class suitecrm extends solution
     public function logout(): bool
     {
         try {
-            $logout_parameters = ['session' => $this->session];
-            $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
-
+            // Removed logout content to keep session in cache
             return true;
         } catch (\Exception $e) {
             $this->logger->critical('Error logout REST '.$e->getMessage());
