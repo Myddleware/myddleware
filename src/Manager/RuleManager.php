@@ -620,11 +620,7 @@ class RuleManager
                 }
                 // Logout (source solution)
                 if (!empty($this->solutionSource)) {
-                    if ($this->rule['solution_source_name'] == "suitecrm") {
-                        $loginResult = true;
-                    } else {
-                        $loginResult = $this->solutionSource->logout();
-                    }
+                    $loginResult = true;
                     if (!$loginResult) {
                         $this->dataSource['error'] .= 'Failed to logout from the source solution';
                     }
@@ -1014,11 +1010,7 @@ class RuleManager
         }
         // Logout target solution
         if (!empty($this->solutionTarget)) {
-            if ($this->rule['solution_target_name'] == "suitecrm") {
-                $loginResult['error'] = true;
-            } else {
-                $loginResult['error'] = $this->solutionTarget->logout();
-            }
+            $loginResult['error'] = true;
             if (!$loginResult) {
                 $sendTarget['error'] .= 'Failed to logout from the target solution';
             }
