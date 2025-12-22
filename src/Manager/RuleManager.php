@@ -620,7 +620,7 @@ class RuleManager
                 }
                 // Logout (source solution)
                 if (!empty($this->solutionSource)) {
-                    $loginResult = true;
+                    $loginResult = $this->solutionSource->logout();
                     if (!$loginResult) {
                         $this->dataSource['error'] .= 'Failed to logout from the source solution';
                     }
@@ -1010,7 +1010,7 @@ class RuleManager
         }
         // Logout target solution
         if (!empty($this->solutionTarget)) {
-            $loginResult['error'] = true;
+            $loginResult['error'] = $this->solutionTarget->logout();
             if (!$loginResult) {
                 $sendTarget['error'] .= 'Failed to logout from the target solution';
             }
