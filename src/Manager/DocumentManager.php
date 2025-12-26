@@ -1718,8 +1718,10 @@ class DocumentManager
 			}
             // Manage formula
             if (!empty($ruleField['formula'])) {
-                // -- -- -- Formula management
-
+                // Add the myddleware_element_id value if requested
+				if (str_contains($ruleField['source_field_name'],'Myddleware_element_id')) {
+					$source['Myddleware_element_id'] = $source['id'];
+				}
                 // Build variables
                 $r = explode(';', $ruleField['source_field_name']);
                 if (count($r) > 1) {
