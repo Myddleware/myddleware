@@ -1052,16 +1052,16 @@ class DocumentManager
 				if (array_search('mdw_error_transformed',$transformed, true) !== false) {
 					 throw new \Exception('The code mdw_error_transformed found in document'); 
 				}
-				// If the field Myddleware_element_id isn't empty, it means that the target ID is mapped in the rule field
+                // If the type of this document is Create and if the field Myddleware_element_id isn't empty,
+                // it means that the target ID is mapped in the rule field
                 // In this case, we force the document's type to Update because Myddleware will update the record into the target application
                 // using Myddleware_element_id as the target ID
-				$target = $this->getDocumentData('T');
-				if (!empty($target['Myddleware_element_id'])) {
-					// If target IDs are different (the one from predecessor calculation and the one from field mapping) 
-					if ($this->targetId != $target['Myddleware_element_id']) {
-						$this->targetId = $target['Myddleware_element_id'];
-						if ($this->updateTargetId($this->targetId)) {
-							$this->updateType('U');
+                if ('C' == $this->documentType) {
+                    $target = $this->getDocumentData('T');
+                    if (!empty($target['Myddleware_element_id'])) {
+                        $this->targetId = $target['Myddleware_element_id'];
+                        if ($this->updateTargetId($this->targetId)) {
+                            $this->updateType('U');
 							// Check compatibility between rule mode et document type
 							// A rule in create mode can't update data except for a child rule
 							if (
@@ -1076,11 +1076,11 @@ class DocumentManager
 									return false;
 								}
 							}
-						} else {
-							throw new \Exception('The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ');
-						}
-					}
-				}
+                        } else {
+                            throw new \Exception('The type of this document is Update. Failed to update the target id '.$this->targetId.' on this document. This document is queued. ');
+                        }
+                    }
+                }
                 // If the type of this document is Update and the id of the target is missing, we try to get this ID
                 // Except if the rule is a child (no target id is required, it will be send with the parent rule)
                 if (
@@ -1779,7 +1779,9 @@ class DocumentManager
 						$f = str_replace('lookup(', 'lookup($entityManager, $connection, $currentRule, $docId, $myddlewareUserId, $sourceFieldName, ', $f);
 					}
 					// Manage getRecord formula by adding parameters
-					if (strpos($f, 'getRecord') !== false ) {
+					if (strpos($f, 'getRecords') !== false ) {
+						$f = str_replace('getRecords(', 'getRecords($entityManager, $connection, $solutionManager, ', $f);
+					} elseif (strpos($f, 'getRecord') !== false ) {
 						$f = str_replace('getRecord(', 'getRecord($entityManager, $connection, $solutionManager, ', $f);
 					}
                     try {
@@ -1864,6 +1866,7 @@ class DocumentManager
 		if (
 				strpos($formula, 'lookup') !== false
 			 or strpos($formula, 'getRecord') !== false
+			 or strpos($formula, 'getRecords') !== false
 		) {
 			return true;
 		}
