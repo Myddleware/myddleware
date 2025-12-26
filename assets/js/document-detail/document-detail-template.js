@@ -160,6 +160,9 @@ export class DocumentDetailTemplate {
                 
                 // Update buttons based on document status and permissions
                 DocumentDetailTemplate.updateButtons(data);
+
+                // Update parent_id column (conditionally displayed)
+                DocumentDetailTemplate.updateParentId(data);
             });
         }, 100);
 
@@ -249,33 +252,105 @@ export class DocumentDetailTemplate {
                 attemptText += ` / ${attemptInfo.maxAttempts}`;
             }
             attemptElement.textContent = attemptText;
-// console.log('✅ Updated document attempts');
         }
     }
     
     static updateDocumentDates(dateInfo) {
         if (!dateInfo) {
-            // console.warn('⚠️ No date info available');
+            console.warn('No date info available');
             return;
         }
-        
+
         const referenceElement = document.getElementById('document-reference');
         const creationElement = document.getElementById('document-creation-date');
         const modificationElement = document.getElementById('document-modification-date');
-        
+
         if (referenceElement && dateInfo.reference) {
             referenceElement.textContent = dateInfo.reference;
         }
-        
+
         if (creationElement && dateInfo.creationDate) {
             creationElement.textContent = dateInfo.creationDate;
         }
-        
+
         if (modificationElement && dateInfo.modificationDate) {
             modificationElement.textContent = dateInfo.modificationDate;
         }
-        
-// console.log('✅ Updated document dates');
+
+    }
+
+    /**
+     * Updates the parent_id column - only displays if parent_id is not empty
+     * @param {Object} documentData - Complete document data from API
+     */
+    static updateParentId(documentData) {
+        const parentId = documentData?.parent_id;
+
+        // Only display parent_id if it's not empty
+        if (!parentId || parentId === '' || parentId === null) {
+            return;
+        }
+
+        // Find the table header and body
+        const table = document.getElementById('flux-table');
+        if (!table) {
+            console.error('Flux table not found');
+            return;
+        }
+
+        const headerRow = table.querySelector('thead tr');
+        const bodyRow = table.querySelector('tbody tr');
+
+        if (!headerRow || !bodyRow) {
+            console.error('Table header or body row not found');
+            return;
+        }
+
+        // Find the last header cell (Modification Date) to insert before it
+        const lastHeaderCell = headerRow.querySelector('.rounded-table-up-right');
+
+        // Create the Parent ID header cell
+        const parentIdHeader = document.createElement('th');
+        parentIdHeader.textContent = 'Parent ID';
+
+        // Insert before the last header cell (Modification Date stays as last with rounded corner)
+        if (lastHeaderCell) {
+            headerRow.insertBefore(parentIdHeader, lastHeaderCell);
+        } else {
+            headerRow.appendChild(parentIdHeader);
+        }
+
+        // Find the modification date cell (last cell) in the body to insert before it
+        const lastBodyCell = bodyRow.querySelector('#document-modification-date');
+
+        // Build proper URL for parent document link
+        const pathParts = window.location.pathname.split('/');
+        const publicIndex = pathParts.indexOf('public');
+        let baseUrl = window.location.origin;
+        if (publicIndex !== -1) {
+            const baseParts = pathParts.slice(0, publicIndex + 1);
+            baseUrl = window.location.origin + baseParts.join('/');
+            if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
+                baseUrl += '/index.php';
+            }
+        } else {
+            baseUrl = window.location.origin + '/index.php';
+        }
+
+        const parentDocUrl = `${baseUrl}/rule/flux/modern/${parentId}`;
+
+        // Create the Parent ID body cell with a link
+        const parentIdCell = document.createElement('td');
+        parentIdCell.id = 'document-parent-id';
+        parentIdCell.innerHTML = `<a href="${parentDocUrl}" style="color: #0F66A9; text-decoration: none;">${parentId}</a>`;
+
+        // Insert before the modification date cell
+        if (lastBodyCell) {
+            bodyRow.insertBefore(parentIdCell, lastBodyCell);
+        } else {
+            bodyRow.appendChild(parentIdCell);
+        }
+
     }
     
     static showErrorState() {
