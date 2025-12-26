@@ -112,27 +112,50 @@ class RuleStepService
 
         $direction = ($type === 'cible') ? 'target' : 'source';
         $modules = $solution->get_modules($direction) ?? [];
-        
-        $modulesFields = [];
-        foreach ($modules as $moduleName => $moduleLabel) {
-            try {
-                $fields = $solution->get_module_fields($moduleName, $direction);
-                $simpleFields = [];
-                if (is_array($fields)) {
-                    foreach ($fields as $fieldName => $def) {
-                        $simpleFields[$fieldName] = $def['label'] ?? $fieldName;
-                    }
-                }
-                $modulesFields[$moduleName] = $simpleFields;
-            } catch (\Throwable $e) {
-                $modulesFields[$moduleName] = [];
+
+        // Only return module names - fields are fetched lazily on demand
+        return [
+            'modules' => $modules,
+        ];
+    }
+
+    /**
+     * Récupère les champs d'un module spécifique (lazy loading).
+     */
+    public function getModuleFields(int $connectorId, string $moduleName, string $type): array
+    {
+        $connector = $this->connectorRepository->find($connectorId);
+
+        if (!$connector || !$connector->getSolution()) {
+            throw new \Exception('Connector not found');
+        }
+
+        $solutionName = $connector->getSolution()->getName();
+        $solution = $this->solutionManager->get(strtolower($solutionName));
+
+        // Récupération et tentative de connexion
+        $params = $this->connectorService->resolveParams($connectorId);
+
+        try {
+            $solution->login($params);
+            if (property_exists($solution, 'connexion_valide') && $solution->connexion_valide === false) {
+                throw new \Exception("Login failed");
+            }
+        } catch (\Throwable $e) {
+            throw new \Exception($e->getMessage());
+        }
+
+        $direction = ($type === 'cible') ? 'target' : 'source';
+
+        $fields = $solution->get_module_fields($moduleName, $direction);
+        $simpleFields = [];
+        if (is_array($fields)) {
+            foreach ($fields as $fieldName => $def) {
+                $simpleFields[$fieldName] = $def['label'] ?? $fieldName;
             }
         }
 
-        return [
-            'modules' => $modules,
-            'modulesFields' => $modulesFields
-        ];
+        return $simpleFields;
     }
 
     /**

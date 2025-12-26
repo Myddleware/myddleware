@@ -271,10 +271,24 @@ class RuleController extends AbstractController
             $data = $this->ruleStepService->getAvailableModules($request->query->getInt('id'), $request->query->get('type', 'source'));
             return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
                 'modules' => $data['modules'],
-                'modulesFields' => $data['modulesFields'],
             ]);
         } catch (\Throwable $e) {
             return new Response($e->getMessage(), 400);
+        }
+    }
+
+    #[Route('/create/module-fields', name: 'regle_module_fields', methods: ['GET'])]
+    public function getModuleFields(Request $request): JsonResponse
+    {
+        try {
+            $fields = $this->ruleStepService->getModuleFields(
+                $request->query->getInt('connector_id'),
+                $request->query->get('module'),
+                $request->query->get('type', 'source')
+            );
+            return new JsonResponse(['fields' => $fields]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 400);
         }
     }
 

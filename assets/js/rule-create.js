@@ -411,7 +411,7 @@ const UI = {
     }
     if (EL.step5) {
       UI.toggle(EL.step5, true);
-      if (window.initMappingUI) window.initMappingUI();
+      // initMappingUI is called from loadFiltersUI after fields are loaded
     }
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
@@ -453,7 +453,11 @@ const UI = {
 
   // Builds the filter field select options
   window.buildFilterFieldOptions = function() {
+    // Skip if filter select already has options (server-rendered)
     const filterSelect = UI.get('rule-filter-field');
+    if (filterSelect && filterSelect.querySelectorAll('optgroup').length > 0) {
+      return; // Options already populated by template
+    }
     const srcMod = UI.get('source-module');
     const tgtMod = UI.get('target-module');
     if (!filterSelect) return;
@@ -555,8 +559,16 @@ const UI = {
 
   // Adds a row to the Mapping table (Step 5)
   window.addMappingRow = function(tbody) {
-    const srcFields = getJsonAttr(UI.get('source-module'), 'data-fields');
-    const tgtFields = getJsonAttr(UI.get('target-module'), 'data-fields');
+    // Read fields from embedded JSON (from filter template)
+    let srcFields = null, tgtFields = null;
+    const fieldsDataEl = document.getElementById('rule-fields-data');
+    if (fieldsDataEl) {
+      try {
+        const data = JSON.parse(fieldsDataEl.textContent);
+        srcFields = data.source || {};
+        tgtFields = data.target || {};
+      } catch (e) { console.warn('Error parsing fields data:', e); }
+    }
 
     const tr = document.createElement('tr');
     tr.dataset.rowId = genRowId();

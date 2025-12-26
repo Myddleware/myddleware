@@ -1,3 +1,8 @@
+{# Embed fields as JSON for JavaScript mapping functionality #}
+<script id="rule-fields-data" type="application/json">
+{{ {source: fieldsGrouped['Source Fields']|default({}), target: fieldsGrouped['Target Fields']|default({})}|json_encode|raw }}
+</script>
+
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-body">
     <div class="row g-3 align-items-end">
