@@ -1465,11 +1465,9 @@ $result = [];
      */
     public function getDocumentData($id): JsonResponse {
         try {
-            $this->logger->critical("[DATE-FLOW-PHP-1] getDocumentData called with document ID: " . $id);
 
             // Validate the document ID
             if (empty($id)) {
-                $this->logger->critical("[DATE-FLOW-PHP-1] Empty document ID provided");
                 return new JsonResponse(['error' => 'Document ID is required'], 400);
             }
 
@@ -1482,13 +1480,6 @@ $result = [];
             }
 
             // Log raw date values from database
-            $this->logger->critical("[DATE-FLOW-PHP-1] Raw dates from database:");
-            $this->logger->critical("  - getDateCreated(): " . ($document->getDateCreated() ? $document->getDateCreated()->format('Y-m-d H:i:s T') : 'NULL'));
-            $this->logger->critical("  - getDateCreated() timezone: " . ($document->getDateCreated() ? $document->getDateCreated()->getTimezone()->getName() : 'N/A'));
-            $this->logger->critical("  - getDateModified(): " . ($document->getDateModified() ? $document->getDateModified()->format('Y-m-d H:i:s T') : 'NULL'));
-            $this->logger->critical("  - getDateModified() timezone: " . ($document->getDateModified() ? $document->getDateModified()->getTimezone()->getName() : 'N/A'));
-            $this->logger->critical("  - getSourceDateModified(): " . ($document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s T') : 'NULL'));
-            $this->logger->critical("  - getSourceDateModified() timezone: " . ($document->getSourceDateModified() ? $document->getSourceDateModified()->getTimezone()->getName() : 'N/A'));
 
             // Get the rule from the document
             $rule = $document->getRule();
@@ -1511,8 +1502,8 @@ $result = [];
             $targetDirectLink = null;
             try {
                 $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
-                $allowedSolutions = ['suitecrm', 'airtable', 'sugarcrm'];
-                
+                $allowedSolutions = ['suitecrm', 'airtable', 'sugarcrm', 'salesforce', 'moodle'];
+
                 if (in_array(strtolower($sourceSolutionName), $allowedSolutions)) {
                     $sourceSolution = $this->solutionManager->get($sourceSolutionName);
                     $sourceDirectLink = $sourceSolution->getDirectLink($rule, $document, 'source');
@@ -1606,14 +1597,7 @@ $result = [];
                 'job_lock' => $document->getJobLock()
             ];
 
-            $this->logger->critical("[DATE-FLOW-PHP-1] Prepared response data with dates:");
-            $this->logger->critical("  - creation_date: " . $responseData['creation_date']);
-            $this->logger->critical("  - modification_date: " . $responseData['modification_date']);
-            $this->logger->critical("  - reference: " . $responseData['reference']);
-            $this->logger->critical("  - user_timezone: " . $responseData['user_timezone']);
-            $this->logger->critical("  - user_date_format: " . $responseData['user_date_format']);
 
-            $this->logger->critical("[DATE-FLOW-PHP-1] Successfully retrieved comprehensive data for document ID: " . $id);
 
             return new JsonResponse([
                 'success' => true,
@@ -1634,10 +1618,6 @@ $result = [];
      */
     private function formatDateInUserTimezone(\DateTime $date): string {
         $userTimezone = $this->getUser()->getTimezone();
-        $this->logger->critical("[DATE-FLOW-PHP-2] formatDateInUserTimezone called:");
-        $this->logger->critical("  - Input date: " . $date->format('Y-m-d H:i:s T'));
-        $this->logger->critical("  - Input timezone: " . $date->getTimezone()->getName());
-        $this->logger->critical("  - User timezone: " . $userTimezone);
 
         // COMPENSATION FIX: Database stores dates in UTC, but Doctrine reads them with server timezone
         // We need to treat the date/time values as if they were always UTC
@@ -1647,18 +1627,14 @@ $result = [];
         // Step 2: Create a new DateTime object, explicitly setting it to UTC
         $dateInUtc = new \DateTime($dateString, new \DateTimeZone('UTC'));
 
-        $this->logger->critical("  - After UTC compensation: " . $dateInUtc->format('Y-m-d H:i:s T'));
 
         // Step 3: Now convert from UTC to user's timezone
         $dateInUserTz = clone $dateInUtc;
         $dateInUserTz->setTimezone(new \DateTimeZone($userTimezone));
 
-        $this->logger->critical("  - After conversion: " . $dateInUserTz->format('Y-m-d H:i:s T'));
-        $this->logger->critical("  - After conversion timezone: " . $dateInUserTz->getTimezone()->getName());
 
         // Return formatted string
         $result = $dateInUserTz->format('Y-m-d H:i:s');
-        $this->logger->critical("  - Final formatted result: " . $result);
 
         return $result;
     }

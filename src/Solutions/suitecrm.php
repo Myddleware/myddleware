@@ -27,11 +27,16 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Contracts\Cache\ItemInterface;
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
 
 class suitecrm extends solution
 {
     protected int $limitCall = 100;
     protected string $urlSuffix = '/service/v4_1/rest.php';
+    
+    // Store the cache key so we can invalidate it later if needed
+    protected string $cacheKey = '';
 
     // Enable to read deletion and to delete data
     protected bool $readDeletion = true;
@@ -110,34 +115,50 @@ class suitecrm extends solution
     {
         parent::login($paramConnexion);
         try {
-            $login_paramaters = [
-                'user_auth' => [
-                    'user_name' => $this->paramConnexion['login'],
-                    'password' => md5($this->paramConnexion['password']),
-                    'version' => '.01',
-                ],
-                'application_name' => 'myddleware',
-            ];
+
             // remove index.php in the url
             $this->paramConnexion['url'] = str_replace('index.php', '', $this->paramConnexion['url']);
             // Add the suffix with rest parameters to the url
             $this->paramConnexion['url'] .= $this->urlSuffix;
 
-            $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+            // Define Cache Key based on URL and Login
+            $this->cacheKey = 'suitecrm_session_' . md5($this->paramConnexion['url'] . $this->paramConnexion['login']);
 
-            if (false != $result) {
-                if (empty($result->id)) {
-                    throw new \Exception($result->description);
+            // Instantiate FilesystemAdapter (using default location, often var/cache)
+            $cache = new FilesystemAdapter();
+
+            $sessionId = $cache->get($this->cacheKey, function (ItemInterface $item) {
+                // Set Default TTL to 5 minutes
+                $item->expiresAfter(300);
+
+                $login_paramaters = [
+                    'user_auth' => [
+                        'user_name' => $this->paramConnexion['login'],
+                        'password' => md5($this->paramConnexion['password']),
+                        'version' => '.01',
+                    ],
+                    'application_name' => 'myddleware',
+                ];
+
+                $result = $this->call('login', $login_paramaters, $this->paramConnexion['url']);
+
+                if (false != $result) {
+                    if (empty($result->id)) {
+                        throw new \Exception($result->description ?? 'Unknown Error');
+                    }
+                    return $result->id;
+                } else {
+                    throw new \Exception('Please check url');
                 }
+            });
 
-                $this->session = $result->id;
-                $this->connexion_valide = true;
-            } else {
-                throw new \Exception('Please check url');
-            }
+            // Use the session ID from cache or fresh login
+            $this->session = $sessionId;
+            $this->connexion_valide = true;
+
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
+            $this->logger->critical($error);
 
             return ['error' => $error];
         }
@@ -146,12 +167,10 @@ class suitecrm extends solution
     public function logout(): bool
     {
         try {
-            $logout_parameters = ['session' => $this->session];
-            $this->call('logout', $logout_parameters, $this->paramConnexion['url']);
-
+            // Removed logout content to keep session in cache
             return true;
         } catch (\Exception $e) {
-            $this->logger->error('Error logout REST '.$e->getMessage());
+            $this->logger->critical('Error logout REST '.$e->getMessage());
 
             return false;
         }
@@ -966,6 +985,10 @@ class suitecrm extends solution
     //function to make cURL request
     protected function call($method, $parameters)
     {
+        if ($method == 'login') {
+            $this->logger->critical("using the regular login");
+        }
+
         try {
             ob_start();
             $curl_request = curl_init();

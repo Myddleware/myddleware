@@ -532,29 +532,201 @@ class airtable extends solution
         return $response;
     }
 
-        // Build the direct link to the record (used in data transfer view)
+    /**
+     * Build the direct link to a record in Airtable (used in document detail view)
+     *
+     * URL format: https://airtable.com/{projectId}/{tableId}/{recordId}?blocks=hide
+     *
+     * @param mixed $rule The rule object containing connector information
+     * @param mixed $document The document object containing record IDs
+     * @param string $type Either 'source' or 'target'
+     * @return string The complete direct link URL to the Airtable record
+     */
     public function getDirectLink($rule, $document, $type): string
     {
+        // Determine which connector to use based on the type (source or target)
+        $connector = $this->getConnectorBasedOnType($rule, $type);
 
-        include 'lib/airtable/metadata.php';
+        // Extract the Airtable project ID from connector parameters
+        $airtableProjectId = $this->getAirtableProjectId($connector);
 
-        // Get url, module and record ID depending on the type
-        if ('source' == $type) {
-            $url = "https://airtable.com";
-            $module = $rule->getModuleSource();
-            $projectID = $this->getConnectorParam($rule->getConnectorSource(), 'projectid');
-            $recordId = $document->getSource();
-        } else {
-            $url = "https://airtable.com";
-            $module = $rule->getModuleTarget();
-            $projectID = $this->getConnectorParam($rule->getConnectorTarget(), 'projectid');
-            $recordId = $document->gettarget();
+        // Extract the module name and record ID based on the type
+        $moduleNameAndRecordId = $this->extractModuleAndRecordId($rule, $document, $type);
+        $moduleName = $moduleNameAndRecordId['module'];
+        $recordId = $moduleNameAndRecordId['record_id'];
+
+        // Load metadata to get table mappings
+        $metadataMappings = $this->loadAirtableMetadataMappings();
+
+        // if metadatamapping is an empty array or null, returns an empty string
+        if (empty($metadataMappings)) {
+            return '';
+        }
+        $tableMapping = $metadataMappings['table_mapping'];
+
+        // Get the table ID for this project and module
+        $airtableTableId = $this->getAirtableTableId($tableMapping, $airtableProjectId, $moduleName);
+
+        // if airtableTableId is empty, returns an empty string
+        if (empty($airtableTableId)) {
+            return '';
         }
 
-        $table = $tableMapping[$projectID][$module] ?? "";
+        // Build the direct link URL to the Airtable record
+        $directLink = $this->buildAirtableRecordUrl(
+            $airtableProjectId,
+            $airtableTableId,
+            $recordId
+        );
 
-        // Build the URL (delete if exists / to be sure to not have 2 / in a row)
-        return $url. "/".$projectID."/".$table."/".$recordId;
+        return $directLink;
+    }
+
+    /**
+     * Get the appropriate connector (source or target) based on the type
+     *
+     * @param mixed $rule The rule object containing connector information
+     * @param string $type Either 'source' or 'target'
+     * @return mixed The connector object
+     */
+    private function getConnectorBasedOnType($rule, string $type)
+    {
+        if ($type === 'source') {
+            $connector = $rule->getConnectorSource();
+        } else {
+            $connector = $rule->getConnectorTarget();
+        }
+
+        return $connector;
+    }
+
+    /**
+     * Extract the Airtable project ID from connector parameters
+     *
+     * @param mixed $connector The connector object
+     * @return string The Airtable project ID (e.g., 'appA10A10A10A10A1')
+     */
+    private function getAirtableProjectId($connector): string
+    {
+        // Get the project ID from connector parameters
+        $projectId = $this->getConnectorParam($connector, 'projectid');
+
+        return $projectId;
+    }
+
+    /**
+     * Extract module name and record ID from the rule and document based on type
+     *
+     * @param mixed $rule The rule object
+     * @param mixed $document The document object
+     * @param string $type Either 'source' or 'target'
+     * @return array Array with 'module' and 'record_id' keys
+     */
+    private function extractModuleAndRecordId($rule, $document, string $type): array
+    {
+        if ($type === 'source') {
+            $moduleName = $rule->getModuleSource();
+            $recordId = $document->getSource();
+        } else {
+            $moduleName = $rule->getModuleTarget();
+            $recordId = $document->getTarget();
+        }
+
+        return [
+            'module' => $moduleName,
+            'record_id' => $recordId
+        ];
+    }
+
+    /**
+     * Load Airtable metadata mappings (table mappings) from metadata files
+     *
+     * The metadata files should define:
+     * - $tableMapping[$projectId][$moduleName] = 'tblT8T8T8T8T8T8T8'
+     *
+     * @return array Array with 'table_mapping' keys
+     */
+    private function loadAirtableMetadataMappings(): array
+    {
+        // Initialize empty mappings
+        $tableMapping = [];
+
+        // Include the main metadata file which loads the custom metadata files
+        include 'lib/airtable/metadata.php';
+
+        // The metadata.php file will have included the custom metadata files
+        // which should define $tableMapping if they exist
+
+        return [
+            'table_mapping' => $tableMapping,
+        ];
+    }
+
+    /**
+     * Get the Airtable table ID for a specific project and module
+     *
+     * @param array $tableMapping The table mapping array from metadata
+     * @param string $projectId The Airtable project ID
+     * @param string $moduleName The module name
+     * @return string The table ID or empty string if not found
+     */
+    private function getAirtableTableId(array $tableMapping, string $projectId, string $moduleName): string
+    {
+        // Check if the mapping exists for this project and module
+        if (isset($tableMapping[$projectId][$moduleName])) {
+            $tableId = $tableMapping[$projectId][$moduleName];
+        } else {
+            // If table mapping is not found, return empty string
+            // This will result in a base Airtable URL being returned
+            $tableId = '';
+        }
+
+        return $tableId;
+    }
+
+    /**
+     * Build the complete Airtable URL for a specific record
+     *
+     * URL format: https://airtable.com/{projectId}/{tableId}/{recordId}?blocks=hide
+     * If tableId is empty, returns the base Airtable URL for the project
+     *
+     * @param string $projectId The Airtable project ID (e.g., 'appP9P9P9P9P9P9P9')
+     * @param string $tableId The Airtable table ID (e.g., 'tblT8T8T8T8T8T8T8')
+     * @param string $recordId The Airtable record ID (e.g., 'recR7R7R7R7R7R7R7')
+     * @return string The complete direct link URL
+     */
+    private function buildAirtableRecordUrl(
+        string $projectId,
+        string $tableId,
+        string $recordId
+    ): string {
+        // Start with the base Airtable URL
+        $baseUrl = 'https://airtable.com';
+
+        // If we don't have a table ID, we can't build a complete URL
+        // Return base URL with project ID only
+        if (empty($tableId)) {
+            $directLinkUrl = $baseUrl . '/' . $projectId;
+            return $directLinkUrl;
+        }
+
+        // Build the URL components as an array for cleaner construction
+        $urlComponents = [
+            $baseUrl,
+            $projectId,
+            $tableId
+        ];
+
+        // Add record ID
+        $urlComponents[] = $recordId;
+
+        // Join all components with slashes
+        $directLinkUrl = implode('/', $urlComponents);
+
+        // Add the query parameter to hide blocks
+        $directLinkUrl .= '?blocks=hide';
+
+        return $directLinkUrl;
     }
 
     public function getDateRefName($moduleSource, $ruleMode): string

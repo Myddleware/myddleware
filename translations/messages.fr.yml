@@ -54,6 +54,7 @@ panel:
         title: Historique des documents
     graph_job_histo:
         title: Historique des jobs
+    rule_deleted: Cette règle a été supprimée. Elle ne peut plus être utilisée.
 create_rule:
     error_name: Un connecteur porte déjà ce nom.
     tabs:
@@ -368,7 +369,7 @@ animate:
         description: Description
         empty: "Pas de modèle établit pour ces solutions, si vous en désirez un, contactez-nous via <a href='mailto:contact@myddleware.com'>contact@myddleware.com</a>"
     tutoriel:
-        link: "https://myddleware.github.io/myddleware/#/basic_usage"
+        link: "https://myddleware.github.io/myddleware-docs/#/basic_usage"
         textlink: "Besoin d'aide ? Lisez notre tutoriel."
 
 create_connector:
@@ -420,7 +421,7 @@ view_connector:
         help: Aide
         link_help: Cliquez-ici pour avoir plus d'informations sur ce connecteur
     help:
-        link: https://myddleware.github.io/myddleware/#/connectors_credentials?id=
+        link: https://myddleware.github.io/myddleware-docs/#/connectors_credentials?id=
 
 edit_connector:
     saved_successfully: Connecteur enregistré avec succès
@@ -971,9 +972,9 @@ help:
                 Si vous souhaitez modifier plus de paramètres de votre règle, rendez-vous dans l'onglet paramètre de cette page.
         mapping: >
                 Dans cette page vous trouvez l'ensemble des champs de vos applications source et cible utilisés dans votre règle. Vous y trouvez également les formules de transformation de données.
-                Si vous souhaitez de l'aide pour la réalisation de formules, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
+                Si vous souhaitez de l'aide pour la réalisation de formules, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
         relate: >
-                Ici vous trouvez l'ensemble des relations permettant de lier des données dans vos applications. Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
+                Ici vous trouvez l'ensemble des relations permettant de lier des données dans vos applications. Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
         param: >
                 La date de référence indique quelles données vous allez lire dans votre système source. Seules les données ayant été créées ou modifiées après cette date seront lues et envoyées dans le système cible.
                 Donc si vous souhaitez migrer vos anciennes données, vous devez prendre une date dans le passé. Si vous souhaitez seulement transférer les nouvelles données alors laissez la date du jour.
@@ -984,7 +985,7 @@ help:
                 Par exemple, vous pouvez choisir de mettre le nom d'un contact Sugar dans le nom d'un compte Salesforce,
                 pour cela il vous suffit de prendre le champ "name" de votre module source et de le mettre dans le champ "name" de votre solution cible.
                 Pour supprimer un champ déjà placé, il vous suffit de double-cliquer dessus.
-                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formule, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
+                Pour pouvez également utiliser des formules afin de transformer vos données. Si vous souhaitez de l'aide pour la réalisation de formule, rendez-vous sur notre blog à l'adresse suivante : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=formulae" target="_blank">Voir la page sur les formules</a>.
                 Pour toute information complémentaire ou pour obtenir une aide personnalisée, n'hésitez pas à nous contacter.
         simulate: >
                 Ici vous pouvez simuler le résultat des règles que vous avez mises en oeuvre dans l'étape précédente.
@@ -992,11 +993,11 @@ help:
         relate: >
                 Cet onglet vous permet de définir les relations que vous souhaitez mettre en oeuvre dans votre interface. Vous pouvez ainsi lier plusieurs règles ensemble.
                 Par exemple, il vous est possible de transférer la relation entre un contact et un compte pour qu'ils soient aussi liés dans la solution cible.
-                Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
+                Plus d'informations sur les relations à l'adresse suivante : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=relationships" target="_blank">Voir la page sur les relations</a>
         filter: >
                 Cet onglet vous permet de filtrer les champs de votre application source à la lecture.
                 Par exemple, vous pouvez choisir de prendre tous les contacts dont le pays est égal à "France".
-                Plus d'informations sur les filtres à l'adresse suivante : <a href="https://myddleware.github.io/myddleware/#/advanced_usage?id=filters" target="_blank">Voir la page sur les filtres</a>
+                Plus d'informations sur les filtres à l'adresse suivante : <a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=filters" target="_blank">Voir la page sur les filtres</a>
         validate: >
                 Dernière étape, si l'application cible de votre règle le permet, vous pouvez choisir un clé de dé-doublonnage. Pour être utilisé en dé-doublonnage, un champ doit être choisi dans l'onglet "champ" de la règle.
                 Par exemple, pour une application CRM, vous pouvez dé-doublonner tous les contacts par leur mail. Ainsi Myddleware ira vérifier si l'enregistrement existe déjà dans votre solution cible avant de le créer. S'il n'existe pas, Myddleware le créera sinon il ne fera que le mettre à jour.
@@ -1105,7 +1106,7 @@ jobscheduler:
     view:
         show : Vue détaillée
     description:
-        top : Planifiez vos tâches Myddleware en créant ou modifiant cette table. <a href="https://myddleware.github.io/myddleware/#/cron_jobs" target=_blank>Plus d'information ici.</a>
+        top : Planifiez vos tâches Myddleware en créant ou modifiant cette table. <a href="https://myddleware.github.io/myddleware-docs/#/cron_jobs" target=_blank>Plus d'information ici.</a>
         bottom : >
                  Planifiez la tâche suivante dans votre planificateur de tâche Windows ou Linux : php bin/console myddleware:jobScheduler --env=background <BR>
                  Par exemple sous linux, ajoutez cette ligne dans votre crontab si vous souhaitez lancer le planificateur toutes les 5 minutes : <BR>
@@ -1185,6 +1186,7 @@ install:
     user_setup: Création de vos identifiants utilisateur Myddleware
     next_step: Vous pouvez maintenant passer à l'étape suivante et configurer votre utilisateur Myddleware
     role_admin: Ces identifiants Myddleware auront les droits administrateur
+    super_admin: Faire de cet utilisateur un Super Admin
     check_button: Vérifier
     next: Suivant
     setup_database_button: Configurer la base de données

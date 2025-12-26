@@ -31,7 +31,8 @@ $( function() {
 	// Get data from database
 	let isLoadingData = false;
 
-	$('#get_from_database').on('click', function(){
+	// Function to load and populate data from database
+	function loadConnectorData() {
 		// Prevent multiple simultaneous requests
 		if (isLoadingData) {
 			return false;
@@ -40,7 +41,18 @@ $( function() {
 		// Get the connector ID from the form action URL
 		const form = $('form[method="POST"]');
 		const actionUrl = form.attr('action');
-		const connectorId = actionUrl.match(/\/(\d+)$/)[1];
+
+		// If form or action URL is missing, exit early
+		if (!actionUrl) {
+			return false;
+		}
+
+		const connectorMatch = actionUrl.match(/\/(\d+)$/);
+		if (!connectorMatch) {
+			return false;
+		}
+
+		const connectorId = connectorMatch[1];
 
 		// get the window location
 		const windowLocation = window.location.href;
@@ -79,7 +91,9 @@ $( function() {
 			beforeSend: function() {
 				// Show loading state
 				isLoadingData = true;
-				$('#get_from_database').prop('disabled', true).text('Loading...');
+				if ($('#get_from_database').length) {
+					$('#get_from_database').prop('disabled', true).text('Loading...');
+				}
 			},
 			success: function(data){
 				if(data.success) {
@@ -110,11 +124,21 @@ $( function() {
 			complete: function() {
 				// Restore button state
 				isLoadingData = false;
-				$('#get_from_database').prop('disabled', false).text('Get from database');
+				if ($('#get_from_database').length) {
+					$('#get_from_database').prop('disabled', false).text('Get from database');
+				}
 			}
 		});
 
 		return false;
+	}
+
+	// Load data on page load
+	loadConnectorData();
+
+	// Keep button click handler for manual reload
+	$('#get_from_database').on('click', function(){
+		loadConnectorData();
 	});
 
 	// Test connexion

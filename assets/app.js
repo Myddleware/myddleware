@@ -28,16 +28,19 @@ require('./js/lib/d3.v2.js')
 require('./js/jcarousel.ajax.js')
 require('./js/animation.js')
 require('./js/task.js')
-require('./js/connector.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
-require('./js/historique.js')
 require('./js/rule-group.js')
 require('./js/notifications.js')
 
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
 require('./js/mappingRule.js')
 }
+
+if (!(window.location.href.includes('install')) && !(window.location.href.includes('register'))) {
+require('./js/historique.js')
+}
+
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
@@ -96,6 +99,19 @@ if (window.location.href.includes('rule/managementsmtp')) {
     require('./js/smtp.js')
 }
 
+if (
+    (
+        window.location.href.includes('rule/connector/create') ||
+        window.location.href.match(/rule\/connector\/\d+\/detail/)
+    )
+    && 
+    !(window.location.href.includes('install')) 
+    && 
+    !(window.location.href.includes('register'))
+) {
+    require('./js/connector.js')
+}
+
 if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
     require('./js/connector_detail.js')
 }
@@ -103,12 +119,6 @@ if (window.location.href.match(/rule\/connector\/(\d+\/detail|view\/\d+)/)) {
 if (window.location.href.includes('workflowAction/new') || window.location.href.includes('workflowAction/editWorkflowAction')) {
     require('./js/workflowActionSearchFields.js')
 }
-
-
-if (!(window.location.href.includes('install'))) {
-    require('./js/historique.js')
-}
-
 
 if (window.location.href.includes('flux')) {
     require('./js/imagemousehoverbutton.js')
