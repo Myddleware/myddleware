@@ -157,11 +157,11 @@
 								</td>
 							</tr>
 						{% endif %}
-						{% if duplicate_target is defined and duplicate_target is not empty %}
+						{% if params_suite.duplicate_fields is defined and params_suite.duplicate_fields is not empty %}
 							<tr>
 								<td class="title">{{ 'view_rule.infos.duplicate_fields' | trans }}</td>
 								<td class="value">
-									<a href="{{ path('regle_open', {'id': duplicate_target }) }}">{{ duplicate_target }}</a>
+									<span class="label label-default">{{ params_suite.duplicate_fields }}</span>
 								</td>
 							</tr>
 						{% endif %}

@@ -101,6 +101,8 @@ public function prepareDataForView(Rule $rule): array
                     $linkedRule = $this->entityManager->getRepository(Rule::class)->find($paramEntity->getValue());
                     $extraParams['bidirectional'] = $paramEntity->getValue();
                     $extraParams['bidirectionalName'] = $linkedRule ? $linkedRule->getName() : '';
+                } elseif ($paramEntity->getName() === 'duplicate_fields' && !empty($paramEntity->getValue())) {
+                    $extraParams['duplicate_fields'] = $paramEntity->getValue();
                 } else {
                     $extraParams['customParams'][] = [
                         'id' => $paramEntity->getId(), // Utile pour l'édition inline
