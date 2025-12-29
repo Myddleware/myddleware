@@ -1034,6 +1034,11 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	opacity: 1; 
 } 
 
+#template-rule-create {
+	font-family: var(--bs-font-sans-serif);
+	font-weight: 700;
+}
+
 .section-create-rule {
 	padding-top: 1em;
     border-top: #00000024 solid 0.5px;
