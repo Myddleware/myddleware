@@ -1225,6 +1225,7 @@ install:
     recommendations_to_do_message: Optional recommendations to improve your setup
     note_message: The command console could use a different php.ini file than the one used with your web server. To be on the safe side, please check the requirements from your web server using the command from your Myddleware directory
     database_already_exists: A database already exists in the .env.local file. Please remove it to continue the installation.
+    super_admin: Make this user a Super Admin
 crontab:
     title: Jobscheduler with crontab
     title_cron: Crontab
