@@ -370,7 +370,7 @@ actions: "Actions"
 
 animate:
     template:
-        title: Template
+        title: Utiliser un Template
         success: Votre template a fonctionné avec succès
         rule: règles
         other_rule: autre règle
