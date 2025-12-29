@@ -299,6 +299,24 @@ class suitecrm8 extends solution
         throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
+    // Build the direct link to the record (used in data transfer view)
+    public function getDirectLink($rule, $document, $type): string
+    {
+        // Get url, module and record ID depending on the type
+        if ('source' == $type) {
+            $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+            $module = $rule->getModuleSource();
+            $recordId = $document->getSource();
+        } else {
+            $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+            $module = $rule->getModuleTarget();
+            $recordId = $document->gettarget();
+        }
+
+        // Build the URL (delete if exists / to be sure to not have 2 / in a row)
+        return rtrim($url, '/').'/#/'.strtolower($module).'/record/'.$recordId;
+    }
+
 	// Convert date to Myddleware format
     // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
     /**
