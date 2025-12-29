@@ -196,6 +196,10 @@ public function simulatePreview(array $requestData, ?string $ruleKey = null): ar
         return ['error' => $sourceData['error']];
     }
 
+    if (empty($queryVal)) {
+        $queryVal = 1;
+    }
+
     // 5. Transformation
     $record = $sourceData['values'][$queryVal] ?? null;
 
