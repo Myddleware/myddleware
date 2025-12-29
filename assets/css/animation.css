@@ -754,3 +754,10 @@ label[for="update_password_oldPassword"] {
     background-size: 100% 1px;
     color: #337ab7;
 }
+
+
+/* section for the checkbox Super Admin in the install */
+#super-admin-p {
+    top: 278px;
+    position: absolute;
+}
