@@ -1,0 +1,70 @@
+<!-- Table Settings Section -->
+<div class="settings-section mt-4">
+    <h4>{{ 'settings.table_settings.title'|trans }}</h4>
+    <p class="text-muted">{{ 'settings.table_settings.description'|trans }}</p>
+
+    <form id="table-settings-form">
+        <div class="row mb-3">
+            <label for="rows-per-page" class="col-sm-4 col-form-label">
+                {{ 'settings.table_settings.rows_per_page'|trans }}
+            </label>
+            <div class="col-sm-8">
+                <input type="number"
+                       class="form-control"
+                       id="rows-per-page"
+                       name="rowsPerPage"
+                       min="1"
+                       max="100"
+                       value="20">
+            </div>
+        </div>
+        <div class="row mb-3">
+            <label for="maximum-results" class="col-sm-4 col-form-label">
+                {{ 'settings.table_settings.maximum_results'|trans }}
+            </label>
+            <div class="col-sm-8">
+                <input type="number"
+                       class="form-control"
+                       id="maximum-results"
+                       name="maximumResults"
+                       min="1"
+                       max="10000"
+                       value="1000">
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">
+            {{ 'settings.save'|trans }}
+        </button>
+    </form>
+</div>
+
+<hr class="my-4">
+
+<!-- Search Settings Section -->
+<div class="settings-section">
+    <h4>{{ 'settings.search_settings.title'|trans }}</h4>
+    <p class="text-muted">{{ 'settings.search_settings.description'|trans }}</p>
+
+    <form id="elasticsearch-form">
+        <div class="row mb-3 align-items-center">
+            <label class="col-sm-4 col-form-label">
+                {{ 'settings.search_settings.elasticsearch_label'|trans }}
+            </label>
+            <div class="col-sm-8">
+                <div class="form-check form-switch">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="elasticsearch-enabled"
+                           name="elasticsearchEnabled"
+                           role="switch">
+                    <label class="form-check-label" for="elasticsearch-enabled">
+                        {{ 'settings.search_settings.enable_elasticsearch'|trans }}
+                    </label>
+                </div>
+                <small class="text-muted d-block mt-1">
+                    {{ 'settings.search_settings.elasticsearch_hint'|trans }}
+                </small>
+            </div>
+        </div>
+    </form>
+</div>
