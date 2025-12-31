@@ -769,3 +769,4 @@ if (!window.__helpPopBound) {
         __show(btn, btn.getAttribute('data-help') || '');
     });
 }
+
