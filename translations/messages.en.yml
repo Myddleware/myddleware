@@ -354,15 +354,7 @@ pagination:
     page_number: Page number
 
 animate:
-    template:
-        title: Use a Template
-        success: Your template worked successfully
-        rule: rules
-        other_rule: other rule
-        use: Use this template
-    ruleconnection: Rule connection
-    rulename: Name of your rule
-    title: Rule Details
+    rulename: Name of your rule 
     wait: Please wait...
     solution:
         source: Source
