@@ -43,7 +43,7 @@ class RuleOrder
     /**
      * @ORM\Column(name="order", type="integer", length=3, nullable=false)
      */
-    private string $order;
+    private int $order;
 
     public function setOrder($order): self
     {
@@ -52,7 +52,7 @@ class RuleOrder
         return $this;
     }
 
-    public function getOrder(): string
+    public function getOrder(): int
     {
         return $this->order;
     }

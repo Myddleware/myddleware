@@ -69,13 +69,11 @@ export class DocumentDetailDirectLinks {
      */
     static addDirectLinkToSection(sectionSelector, directLinkUrl, idValue = 'id') {
         if (!this.shouldCreateDirectLink(directLinkUrl)) {
-            // console.log(`🔗 No direct link available for section: ${sectionSelector}`);
             return;
         }
 
         const section = document.querySelector(sectionSelector);
         if (!section) {
-            // console.warn(`⚠️ Section not found: ${sectionSelector}`);
             return;
         }
 
@@ -88,7 +86,6 @@ export class DocumentDetailDirectLinks {
         }
 
         if (!contentBody) {
-            // console.warn(`⚠️ Content body not found in section: ${sectionSelector}`);
             return;
         }
 
@@ -105,7 +102,6 @@ export class DocumentDetailDirectLinks {
         // since we're about to add a direct link which replaces the need for a regular ID field
         const existingRegularIdField = contentBody.querySelector(`#field-${sectionType}-id`);
         if (existingRegularIdField && existingRegularIdField.closest('.field-row')) {
-            // console.log(`🗑️ Removing redundant regular ID field for ${sectionType} (adding direct link)`);
             existingRegularIdField.closest('.field-row').remove();
         }
 
@@ -115,7 +111,6 @@ export class DocumentDetailDirectLinks {
         // Insert the direct link at the beginning of the content body
         contentBody.insertAdjacentHTML('afterbegin', directLinkHtml);
         
-        // console.log(`✅ Added direct link to content body in section: ${sectionSelector}`);
     }
 
     /**
@@ -136,18 +131,15 @@ export class DocumentDetailDirectLinks {
             
             // Add target direct link  
             if (documentData.target_direct_link) {
-                // console.log('fifi found target_direct_link:', documentData.target_direct_link);
                 const targetId = documentData.target_id || 'id';
                 this.addDirectLinkToSection('.target-data', documentData.target_direct_link, targetId);
-                // console.log('✅ Target direct link added:', documentData.target_direct_link);
             } else {
                 this.addDirectLinkToSection('.target-data', 'empty-id', documentData.target_id);
             }
             
-            // console.log('✅ Direct links update completed');
             
         } catch (error) {
-            console.error('❌ Error updating direct links:', error);
+            console.error(' Error updating direct links:', error);
         }
     }
 
@@ -162,7 +154,6 @@ export class DocumentDetailDirectLinks {
         // Basic URL validation - ensure it starts with http:// or https://
         const urlString = String(url).trim();
         if (!urlString.match(/^https?:\/\//)) {
-            // console.warn('⚠️ Direct link URL does not start with http:// or https://:', urlString);
             return '#'; // Return safe fallback
         }
         

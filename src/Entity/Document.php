@@ -147,7 +147,12 @@ class Document
      * @ORM\OneToMany(targetEntity="App\Entity\WorkflowLog", mappedBy="triggerDocument")
      */
     private $triggerDocuments;
-	
+
+	/**
+     * @ORM\OneToMany(targetEntity="App\Entity\WorkflowLog", mappedBy="generateDocument")
+     */
+    private $generateDocuments;
+
 	/**
      * @ORM\Column(name="job_lock", type="string", length=23, nullable=false)
      */
@@ -163,6 +168,7 @@ class Document
         $this->datas = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->triggerDocuments = new ArrayCollection();
+        $this->generateDocuments = new ArrayCollection();
     }
 
     public function setId($id): self
