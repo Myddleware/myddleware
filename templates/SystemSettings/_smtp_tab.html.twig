@@ -1,0 +1,107 @@
+<!-- SMTP Management Section -->
+<div class="settings-section mt-4">
+    <h4>{{ 'management_smtp.title'|trans }}</h4>
+    <p class="text-muted">{{ 'management_smtp.description'|trans|raw }}</p>
+
+    {{ form_start(smtpForm) }}
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_transport" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.transport) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.transport, { 'attr': {'class': 'form-select'} }) }}
+            {{ form_errors(smtpForm.transport) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_host" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.host) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.host, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(smtpForm.host) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_ApiKey" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.ApiKey) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.ApiKey, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(smtpForm.ApiKey) }}
+        </div>
+    </div>
+
+    <div class="row mb-2" id="smtp_port">
+        <label for="regle_bundlemanagement_smtp_port" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.port) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.port, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(smtpForm.port) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_auth_mode" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.auth_mode) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.auth_mode, { 'attr': {'class': 'form-select'} }) }}
+            {{ form_errors(smtpForm.auth_mode) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_encryption" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.encryption) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.encryption, { 'attr': {'class': 'form-select'} }) }}
+            {{ form_errors(smtpForm.encryption) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_user" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.user) }}
+        </label>
+        <div class="col-sm-10">
+            {{ form_widget(smtpForm.user, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(smtpForm.user) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_password" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.password) }}
+        </label>
+        <div class="col-sm-10 mb-5">
+            {{ form_widget(smtpForm.password, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(smtpForm.password) }}
+        </div>
+    </div>
+
+    <div class="row mb-2">
+        <label for="regle_bundlemanagement_smtp_sender" class="col-sm-2 col-form-label">
+            {{ form_label(smtpForm.sender) }}
+        </label>
+        <div class="col-sm-10 mb-5">
+            {{ form_widget(smtpForm.sender, { 'attr': {'class': 'form-control'} }) }}
+            {{ form_errors(smtpForm.sender) }}
+        </div>
+    </div>
+
+    <div class="d-grid">
+        {{ form_widget(smtpForm.submit) }}
+        {{ form_widget(smtpForm.submit_test) }}
+        <a id="link_button" role="button" class="btn btn-outline-danger" href="{{ path('regle_panel') }}">
+            {{ 'management_smtp.cancel'|trans }}
+        </a>
+    </div>
+
+    {{ form_end(smtpForm) }}
+</div>

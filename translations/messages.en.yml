@@ -962,6 +962,7 @@ menu_user:
     management_smtp: SMTP config
     logout: Logout
     user_manager: UserManager
+    settings: Settings
 
 help:
     title: Help
@@ -1121,9 +1122,34 @@ management_smtp:
     error: Failed to save SMTP config
     api_key_already_in_env: This API key is already in the .env file.
     api_key_too_short: The API key is too short. Are you sure it's an BREVO API key in the form ? Be careful about your browser autofilling.
+    api_key_required: API key is required for Brevo/Sendinblue.
+    sendtestmail_error: Failed to send test email
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
+
+settings:
+    title: System Settings
+    save: Save
+    tabs:
+        general: General
+        smtp: SMTP Management
+    table_settings:
+        title: Table Settings
+        description: Configure how tables display data across the application.
+        rows_per_page: Rows per page
+        maximum_results: Maximum search results
+    search_settings:
+        title: Search Settings
+        description: Configure search behavior and Elasticsearch integration.
+        elasticsearch_label: Elasticsearch Status
+        enable_elasticsearch: Enable Elasticsearch
+        elasticsearch_hint: Enable Elasticsearch for improved search performance. Requires ELASTICSEARCH_URL to be configured.
+    messages:
+        save_success: Settings saved successfully
+        save_error: Failed to save settings
+        elasticsearch_enabled: Elasticsearch has been enabled
+        elasticsearch_disabled: Elasticsearch has been disabled
 
 login:
     title: Connection

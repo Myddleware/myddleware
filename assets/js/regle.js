@@ -112,7 +112,7 @@ $(function () {
       
       if (typeof $.fn.tabs === 'function') {
         $("#tabs").tabs(onglets);
-        console.log('✅ Tabs initialized successfully');
+        console.log(' Tabs initialized successfully');
         return true; // Stop retrying
       } else {
         console.warn('$.fn.tabs is not a function - jQuery UI tabs plugin not loaded, retrying...');
@@ -793,10 +793,10 @@ $.fn.setCursorPosition = function(pos) {
 
 // Validation and form check
 $("#validation").on("click", function () {
-// console.log("[🔵 CLICK] Validation button clicked");
+// console.log("[ CLICK] Validation button clicked");
 
   let before = $("#validation").attr("value");
-// console.log("[ℹ️ BEFORE] Button value before request:", before);
+// console.log("[BEFORE] Button value before request:", before);
 
   // Call each validation function and log their results
   let isRequireValid = require();
@@ -804,10 +804,10 @@ $("#validation").on("click", function () {
   let isRelateValid = require_relate();
   let isDuplicateValid = duplicate_fields_error();
 
-// console.log("[✅ CHECK] require() →", isRequireValid);
-// console.log("[✅ CHECK] require_params() →", isParamsValid);
-// console.log("[✅ CHECK] require_relate() →", isRelateValid);
-// console.log("[✅ CHECK] duplicate_fields_error() →", isDuplicateValid);
+// console.log("[ CHECK] require() →", isRequireValid);
+// console.log("[ CHECK] require_params() →", isParamsValid);
+// console.log("[ CHECK] require_relate() →", isRelateValid);
+// console.log("[ CHECK] duplicate_fields_error() →", isDuplicateValid);
 
   if (isRequireValid && isParamsValid && isRelateValid && isDuplicateValid) {
     let champs = recup_champs();
@@ -840,7 +840,7 @@ $("#validation").on("click", function () {
         $("#validation").attr("value", save_wait);
       },
       success: function (data) {
-// console.log("[✅ SUCCESS] Response received:", data);
+// console.log("[ SUCCESS] Response received:", data);
 
         if (data.status == 1) {
 // console.log("[🎉 SUCCESS] Rule created! ID:", data.id);
@@ -863,7 +863,7 @@ $("#validation").on("click", function () {
 // console.log("[⚠️ SPECIFIC ERROR] Code 2:", data[1]);
           } else {
             alert(confirm_error);
-            console.error("[❌ ERROR] General form validation error");
+            console.error("[ ERROR] General form validation error");
           }
           $("#validation").attr("value", before);
         }
@@ -876,12 +876,12 @@ $("#validation").on("click", function () {
         },
       },
       error: function (jqXHR, textStatus, errorThrown) {
-        console.error("[❌ AJAX ERROR]", textStatus, errorThrown);
+        console.error("[ AJAX ERROR]", textStatus, errorThrown);
         $("#validation").attr("value", before);
       },
     });
   } else {
-    console.warn("[❌ VALIDATION FAILED] At least one requirement not met");
+    console.warn("[ VALIDATION FAILED] At least one requirement not met");
 
     $("#dialog").dialog({
       draggable: false,
@@ -1430,7 +1430,7 @@ function btn_action_fct() {
 
   // Final append to container
   divrule.append(loading);
-  // console.log('[✅ Complete] Loading overlay appended to container');
+  // console.log('[ Complete] Loading overlay appended to container');
   
   // Multiple event handlers for cleanup
   
@@ -1765,7 +1765,7 @@ function prepareDrag() {
         collapsible: true,
         heightStyle: "content",
       }); // liste des modules : source
-      // console.log('✅ Accordion initialized successfully');
+      // console.log(' Accordion initialized successfully');
       return true; // Stop retrying
     } else {
       console.warn('$.fn.accordion is not available, retrying...');

@@ -254,4 +254,37 @@
 .tab:active {
   transform: translateY(1px);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-} 
+}
+
+/* Settings page tabs - styled like Save button */
+#settingsTabs {
+  gap: 1rem;
+}
+
+#settingsTabs .nav-link {
+  border: none;
+  border-radius: 25px;
+  padding: 0.5rem 1.2rem;
+  background-color: #f0f0f0;
+  color: #4f4f4f;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+
+#settingsTabs .nav-link:hover {
+  transform: translateY(-2px);
+  box-shadow: rgba(164, 164, 164, 0.4) 0px 6px 16px,
+              rgba(65, 65, 65, 0.2) 0px 0px 8px 2px;
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+#settingsTabs .nav-link.active {
+  background-color: #198BCA;
+  color: #fff !important;
+}
+
+#settingsTabs .nav-link.active:hover {
+  background-color: #0F66A9;
+}
