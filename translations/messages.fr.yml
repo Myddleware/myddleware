@@ -993,7 +993,7 @@ breadcrumb:
 menu_user:
     account: Mon compte
     jobscheduler: Planificateur de tâche
-    crontab: Crontab
+    crontab: Planificateur de tâche avec crontab
     management_smtp: Configuration SMTP
     logout: Déconnexion
     user_manager: Gestion utilisateur
