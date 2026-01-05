@@ -1,0 +1,133 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com	
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+{# simulation.html.twig #}
+{% if data_source %}
+  <div class="row g-4 simulate-wrapper">
+
+    {# SOURCE #}
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm border-0 simulate-card">
+        <div class="card-header bg-transparent border-0 text-center pt-4">
+          <div class="simulate-logo mb-3">
+            <img
+              src="{{ asset('build/images/solution/' ~ params.source.solution ~ '.png') }}"
+              alt="{{ params.source.solution }}"
+            >
+          </div>
+          <div class="simulate-title d-flex align-items-center justify-content-center gap-2">
+            <span class="simulate-radio simulate-radio--source"></span>
+            <span class="h4 mb-0">{{ 'rule.source'|trans }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          {% if before %}
+            <ul class="list-unstyled mb-0 simulate-list">
+              {% for i, data in before %}
+                <li class="simulate-line">
+                  {% for field, value in data %}
+                    <span class="simulate-tag">
+                      <i class="fa-solid fa-tag me-1"></i>
+                      <span class="simulate-tag-name">{{ field }}</span>
+                      <span class="simulate-tag-value text-muted">
+                        {% if value is empty %}
+                          ( {{ 'create_rule.step3.empty_field_simulate'|trans }} )
+                        {% else %}
+                          ( {{ value }} )
+                        {% endif %}
+                      </span>
+                    </span>
+                  {% endfor %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted text-center mb-0 small">
+              {{ 'create_rule.step3.empty_field_simulate'|trans }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    {# TARGET #}
+    <div class="col-12 col-lg-6">
+      <div class="card h-100 shadow-sm border-0 simulate-card">
+        <div class="card-header bg-transparent border-0 text-center pt-4">
+          <div class="simulate-logo mb-3">
+            <img
+              src="{{ asset('build/images/solution/' ~ params.cible.solution ~ '.png') }}"
+              alt="{{ params.cible.solution }}"
+            >
+          </div>
+          <div class="simulate-title d-flex align-items-center justify-content-center gap-2">
+            <span class="simulate-radio simulate-radio--target"></span>
+            <span class="h4 mb-0">{{ 'rule.target'|trans }}</span>
+          </div>
+        </div>
+
+        <div class="card-body">
+          {% if after %}
+            <ul class="list-unstyled mb-0 simulate-list">
+              {% for i, data in after %}
+                <li class="simulate-line">
+                  {% for after_field, after_value in data %}
+                    <span class="simulate-tag">
+                      <i class="fa-solid fa-tag me-1"></i>
+                      <span class="simulate-tag-name">{{ after_field }}</span>
+
+                      <span class="simulate-arrow mx-1">
+                        <i class="fa-solid fa-arrow-right-long"></i>
+                      </span>
+
+                      <span class="simulate-tag-value">
+                        {% if after_value is empty %}
+                          <span class="text-muted">
+                            {{ 'create_rule.step3.empty_field_simulate'|trans }}
+                          </span>
+                        {% else %}
+                          {{ after_value }}
+                        {% endif %}
+                      </span>
+                    </span>
+                  {% endfor %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="text-muted text-center mb-0 small">
+              {{ 'create_rule.step3.empty_field_simulate'|trans }}
+            </p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+  </div>
+{% else %}
+  <div id="warning" class="alert alert-warning d-flex align-items-center gap-2" role="alert">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ 'create_rule.step3.empty_simulate'|trans }}</span>
+  </div>
+{% endif %}
