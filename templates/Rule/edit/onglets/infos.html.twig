@@ -22,21 +22,6 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #}
 {% block body %}
-	{# success message #}
-	{% for flash in app.flashes('success') %}
-		<div class="alert alert-success alert-dismissible fade show">
-			{{ flash }}
-		</div>
-	{% endfor %}
-
-	{# error message for permission denied #}
-	{% for flash in app.flashes('error-permission') %}
-		<div class="alert alert-danger alert-dismissible fade show">
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			{{ flash }}
-		</div>
-	{% endfor %}
-
 	<div class="link-help-view text-end">
 		<a href="#help-content-info">
 			<i class="fa fa-info-circle" aria-hidden="true"></i>
@@ -80,6 +65,7 @@
 		{% endif %}
 	</div>
 
+	{% include '_notifications.html.twig' with { filter_prefix: 'rule.' } %}
 	<div class="container-fluid px-4">
 		<div class="custom-row gx-4 gy-4 rule-panel-wrapper">
 			<div
@@ -95,20 +81,15 @@
 										{{ 'view_rule.title.rule' | trans }}
 									</p>
 									<div class="d-flex gap-2 mt-2 mt-md-0">	
-										<a href="{{ path('regle_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
+										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
 										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
 											{{ 'view_rule.action.duplic_rule' | trans }}
 										</a>
-										<form method="post" action="{{ path('regle_delete', {'id': rule.GetId }) }}" style="display: inline;">
-											<button type="submit"
-													class="btn btn-outline-danger btn-sm"
-													onclick="return confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}');"
-													title="{{'view_rule.action.delete_rule'|trans}}">
-												{{ 'view_rule.action.delete_rule' | trans }}
-											</button>
-										</form>
+										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
+											{{ 'view_rule.action.delete_rule' | trans }}
+										</a>
 									</div>
 								</div>
 							</th>
@@ -140,7 +121,7 @@
 									<input type="text" name="ruleName" class="form-control m-2" data-rule-id="{{ rule.id }}" value="{{ rule.GetName }}"/>
 									<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
 									<button type="submit" class="btn btn-success m-2">
-										{{ 'rule_list_view.save' | trans }}
+										{{ 'Save' | trans }}
 									</button>
 								</form>
 							</td>
@@ -181,11 +162,11 @@
 								</td>
 							</tr>
 						{% endif %}
-						{% if duplicate_target is defined and duplicate_target is not empty %}
+						{% if params_suite.duplicate_fields is defined and params_suite.duplicate_fields is not empty %}
 							<tr>
 								<td class="title">{{ 'view_rule.infos.duplicate_fields' | trans }}</td>
 								<td class="value">
-									<a href="{{ path('regle_open', {'id': duplicate_target }) }}">{{ duplicate_target }}</a>
+									<span class="label label-default">{{ params_suite.duplicate_fields }}</span>
 								</td>
 							</tr>
 						{% endif %}
@@ -218,7 +199,7 @@
 										{{ descriptionValue|nl2br }}
 									{% endif %}
 								</div>
-								<a href="#" class="edit-button-description me-2 mt-2 pt-2" title="{{ 'rule_detail_view.edit' | trans }}">
+								<a href="#" class="edit-button-description me-2 mt-2 pt-2" title="{{ 'Edit' | trans }}">
 									<i class="fa fa-pen" aria-hidden="true"></i>
 								</a>
 							</div>
@@ -229,7 +210,7 @@
 								</button>
 								<textarea name="description" class="form-control" data-rule-id="{{ rule.id }}">{{ descriptionValue }}</textarea>
 								<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-								<button type="submit" class="btn btn-success m-2">{{ 'rule_list_view.save' | trans }}</button>
+								<button type="submit" class="btn btn-success m-2">{{ 'Save' | trans }}</button>
 							</form>
 							<a href="#" id="read-more-link"	class="read-more-link {% if descriptionValue is empty %}d-none{% endif %}">
 								Read all description
