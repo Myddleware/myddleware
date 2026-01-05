@@ -27,7 +27,6 @@ require('./js/lib/jquery_myddleware/function.js')
 
 require('./js/lib/d3.v2.js')
 require('./js/jcarousel.ajax.js')
-require('./js/animation.js')
 require('./js/task.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
