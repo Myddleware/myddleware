@@ -55,8 +55,12 @@ panel:
     graph_job_histo:
         title: Historique des jobs
     rule_deleted: Cette règle a été supprimée. Elle ne peut plus être utilisée.
+edit_rule:
+    success: Votre règle a été modifiée avec succès.
 create_rule:
+    success: Votre règle a été créée avec succès
     error_name: Un connecteur porte déjà ce nom.
+    loading: Chargement de la règle...
     tabs:
         one: Connexion
         two: Choix des modules
@@ -95,6 +99,7 @@ create_rule:
         previous: Etape précédente
         next: Etape suivante
         syncdata:
+            title: Options de synchronisation
             label: Type de synchronisation
             create_modify: Création et modification de données
             create_only: Création de données seulement
