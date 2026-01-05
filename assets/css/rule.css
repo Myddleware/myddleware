@@ -1069,13 +1069,22 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 #nav-create-rule-sync.nav-create-rule, 
 #nav-create-rule-filter.nav-create-rule, 
 #nav-create-rule-mapping.nav-create-rule {
-	border-radius: 0px 60px 60px 0px !important;
+    border-radius: 0px 60px 60px 0px !important;
     position: absolute;
     left: 0px;
-	border-color: #05bfe6 !important;
+    border-color: #05bfe6 !important;
     color: #05bfe6 !important;
-    padding: 1rem 1.5rem 1rem 1rem;
-    font-size: x-large;
+    padding: 0.6rem 0.6rem 0.6rem 0.3rem !important;
+    font-size: 1rem !important;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+}
+
+.nav-create-rule svg {
+    width: 1em !important;
+    height: 1em !important;
+    margin: 0;
 }
 .nav-create-rule:hover[id^="nav-create-rule-"] {
 	border-color: #05bfe6 !important;
