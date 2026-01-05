@@ -25,10 +25,11 @@
 
 namespace App\Repository;
 
-use App\Entity\Connector;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
+use App\Entity\Solution;
+use App\Entity\Connector;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Connector|null find($id, $lockMode = null, $lockVersion = null)
@@ -92,5 +93,16 @@ class ConnectorRepository extends ServiceEntityRepository
             $qb->andWhere('c.id != :id')->setParameter('id', $excludeId);
         }
         return (bool) $qb->getQuery()->getOneOrNullResult();
+    }
+
+    public function findActiveBySolution(Solution $solution): array
+    {
+        return $this->createQueryBuilder('c')
+            ->andWhere('c.solution = :solution')
+            ->andWhere('c.deleted = 0')
+            ->setParameter('solution', $solution)
+            ->orderBy('c.name', 'ASC')
+            ->getQuery()
+            ->getResult();
     }
 }
