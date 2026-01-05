@@ -94,4 +94,16 @@ class SolutionRepository extends ServiceEntityRepository
         return $qb->getQuery()
                   ->getResult();
     }
+
+    public function resolveName($val): ?string
+    {
+        if (!$val) return null;
+        if (!is_numeric($val)) return (string) $val;
+        $solution = $this->find((int) $val); 
+        if ($solution && method_exists($solution, 'getName')) {
+            return (string) $solution->getName();
+        }
+        
+        return null;
+    }
 }
