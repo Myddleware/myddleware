@@ -270,7 +270,7 @@ view_rule:
         simule: Simuler documents
         result: Nombre de documents estimé
         details: Représente le nombre de documents qui vont être créés lors du prochain envoi de cette règle. Ce numbre ne peut pas être plus grand que le paramètre limit de votre règle que vous avez paramétrez (défaut 100) et que la limite de l'API de votre application source.
-        daterefence: Date de la donnée dans l'application source
+        daterefence: Date de la donnée dans l’application source
 rule:
     source: Source
     target: Cible
@@ -295,7 +295,7 @@ rulegroup:
   confirm_transfer_text: "Cette règle appartient déjà à un autre groupe. Voulez-vous la transférer dans ce groupe ?"
   title_one: "Groupe de règles"
   back: "Retour à la liste"
-  edit: "Édition d'un groupe de règles"
+  edit: "Édition d’un groupe de règles"
   delete: "Supprimer"
   name: "Nom"
   create_by: "Créé par"
@@ -307,7 +307,7 @@ rulegroup:
   remove_rule: "Retirer la règle du groupe"
   list: "Groupes de règles"
   create_new: "Créer un groupe de règles"
-  rulegroup_name : Nom du groupe de règles
+  rulegroup_name: Nom du groupe de règles
   table:
     id: "ID"
     name: "Nom"
@@ -324,7 +324,7 @@ rulegroup:
     status: "Statut"
     create_by: "Créé par"
     delete: "Supprimer"
-    edit: "Édition d'un groupe de règles"
+    edit: "Édition d’un groupe de règles"
     updated_successfully: "Groupe de règles mis à jour avec succès"
     rules: "Règles"
     rule_removed_successfully: "Règle supprimée avec succès"
@@ -380,8 +380,16 @@ pagination:
     page_number: Numéro de page
 
 animate:
-    rulename: Nom de votre règle
+    template:
+        title: Utiliser un Template
+        success: Votre template a fonctionné avec succès
+        rule: règles
+        other_rule: autre règle
+        use: Utilisez ce template
+    ruleconnection: Règle connection
+    rulename: Nom de votre règle 
     wait: Veuillez patienter...
+    title: Détail de la règle
     solution:
         source: Source
         target: Cible
@@ -467,9 +475,9 @@ list_flux:
         filter_delete: Supprimer les filtres de recherche
         cancel: Annuler les documents
         cancel_tooltip: Cela annule les documents, ils ne seront pas envoyés.
-        reloadcancel: Annuler et relancer les documents
         unlockall: Débloquer les documents
         mass_unlock_confirm: Débloquer les documents sélectionnés ?
+        reloadcancel: Annuler et relancer les documents
         mass_cancel_confirm: Annuler les documents sélectionnés ?
         reload: Relancer les documents
         reload_tooltip: Cela relance les documents avec les mêmes données et le même identifiant, rien ne change.
@@ -557,18 +565,18 @@ view_flux:
     history: Historique
     id: Identifiant
     nblogs: Nombre de logs
+    comment: Ajouter un journal
     nbChildDocuments: Tranferts fils
     nbParentDocuments: Tranferts parents
     nbHistoryDocuments: Historique des documents
     nbnbWorflowLogs: Logs workflow
     nbPostDocuments: Tranferts post
     direct_link: Lien direct
-    comment: Ajouter un journal
     unlocked_successfully: Document déverrouillé avec succès
     btn:
         reload: Relancer le document
-        cancel: Annuler le document
-        readrecord: Lancer la même donnée
+        cancel: Annuler le document 
+        readrecord: Lancer la même donnée 
         unlock: Débloquer le document
         tooltip:
             reload: Relancer la synchronisation de ce document
@@ -594,17 +602,18 @@ view_flux:
         type: Type
         msg: Message
     workflow_log:
-        id: "ID"
-        workflow: "Workflow"
-        job: "Job"
-        trigger_document: "Document déclencheur"
-        generate_document: "Document généré"
-        created_by: "Créé par"
-        status: "Statut"
-        date_created: "Date de création"
-        message: "Message"
-        action_name: "Nom de l'action"
-        action_type: "Type d'action"
+        id: Id
+        workflow: Workflow
+        job: Job
+        trigger_document: Document déclencheur
+        generate_document: Document généré
+        created_by: Créé par
+        status: Statut
+        date_created: Date de création
+        message: Message
+        action_name: Nom de l'action
+        action_type: Type d'action
+
 
 list_task:
     total: Total de tâches
@@ -626,23 +635,23 @@ list_task:
 
 
 view_task:
-    empty_log: Aucune log
+    empty_log: Aucune log  
     task_stop: ARRET DE LA TACHE
     refresh: RAFRAICHIR
-    nblogs: Nombre de logs
+    nblogs: Nombre de logs  
     header:
         id: Identifiant
         status: Statut
         begin: Date de début
         end: Date de fin
-        message: Message
+        message: Message   
     log:
         id: Id
         ref: Référence
         transfer: Document
         date_created: Date de création
         type: Type
-        msg: Message
+        msg: Message     
 
 list_workflow:
     total: Total des workflows
@@ -776,37 +785,37 @@ function:
         date: Date et heure
         constant: Constante
     description:
-        text:
-            trim: "trim($string) / Supprime les espaces (ou d'autres caractères) en début et fin de chaîne. Exemple: trim(' Hello World ') retourne 'Hello World'"
-            ltrim: "ltrim($string [, $characters]) / Supprime les espaces (ou d'autres caractères) en début de chaîne. Exemple: ltrim('   Hello') retourne 'Hello'"
-            rtrim: "rtrim($string [, $characters]) / Supprime les espaces (ou d'autres caractères) en fin de chaîne. Exemple: rtrim('Hello   ') retourne 'Hello'"
-            lower: "lower($string) / Met tous les caractères en minuscules. Exemple: lower('Hello World') retourne 'hello world'"
-            upper: "upper($string) / Met tous les caractères en majuscules. Exemple: upper('Hello World') retourne 'HELLO WORLD'"
-            substr: "substr($string, $start [, $length]) / Retourne un segment de chaîne. Exemple: substr('Hello World', 0, 5) retourne 'Hello'"
-            striptags: "striptags($string [, $allowable_tags]) / Supprime les balises HTML et PHP d'une chaîne. Exemple: striptags('<p>Hello</p>') retourne 'Hello'"
-            changeValue: "changeValue($var, $arrayKeyToValue) / Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple: changeValue({FIELD}, '('active':'1', 'inactive':'0')') convertit 'active' en '1'"
-            htmlEntityDecode: "htmlEntityDecode($string) / Convertit toutes les entités HTML en caractères normaux. Exemple: htmlEntityDecode('&amp;') retourne '&'"
-            replace: "replace($search, $replace, $subject) / Remplace toutes les occurrences dans une chaîne. Exemple: replace('world', 'there', 'Hello world') retourne 'Hello there'"
-            utf8encode: "utf8encode($string) / Encode une chaîne ISO-8859-1 en UTF-8. Exemple: utf8encode('Hello') convertit en UTF-8"
-            utf8decode: "utf8decode($string) / Décode une chaîne UTF-8 en ISO-8859-1. Exemple: utf8decode('Hello') convertit en ISO-8859-1"
-            htmlentities: "htmlentities($string) / Convertit les caractères spéciaux en entités HTML. Exemple: htmlentities('<') retourne '&lt;'"
-            htmlspecialchars: "htmlspecialchars($string) / Convertit les caractères spéciaux en entités HTML tout en conservant les entités HTML déjà encodées. Exemple: htmlspecialchars('A & B') retourne 'A &amp; B'"
-            strlen: "strlen($string) / Retourne la longueur d'une chaîne. Exemple: strlen('Hello') retourne 5"
-            urlencode: "urlencode($string) / Encode une chaîne pour l'utilisation dans une URL. Exemple: urlencode('Hello World') retourne 'Hello%20World'"
-            chr: "chr($ascii) / Retourne un caractère à partir de son code ASCII. Exemple: chr(65) retourne 'A'"
-            json_decode: "json_decode($string) / Décode une chaîne JSON en une valeur PHP. Exemple: json_decode('{\"name\":\"John\"}') retourne un objet avec la propriété 'name'"
-            json_encode: "json_encode($value) / Retourne la représentation JSON d'une valeur. Exemple: json_encode(['name' => 'John']) retourne '{\"name\":\"John\"}'"
-            getValueFromArray: "getValueFromArray($key, $array) / Retourne une valeur d'un tableau en utilisant une clé. Exemple: getValueFromArray('name', '{\"name\":\"John\"}') retourne 'John'"
+        text: 
+            trim:  "Supprime les espaces (ou d'autres caractères) en début et fin de chaîne. Exemple: trim('Hello World') retourne 'Hello World'"
+            ltrim:  "Supprime les espaces (ou d'autres caractères) en début de chaîne. Exemple: ltrim('   Hello') retourne 'Hello'"
+            rtrim:  "Supprime les espaces (ou d'autres caractères) en fin de chaîne. Exemple: rtrim('Hello   ') retourne 'Hello'"
+            lower:  "Met tous les caractères en minuscules. Exemple: lower('Hello World') retourne 'hello world'"
+            upper:  "Met tous les caractères en majuscules. Exemple: upper('Hello World') retourne 'HELLO WORLD'"
+            substr:  "Retourne un segment de chaîne. Exemple: substr('Hello World', 0, 5) retourne 'Hello'"
+            striptags:  "Supprime les balises HTML et PHP d'une chaîne. Exemple: striptags('<p>Hello</p>') retourne 'Hello'"
+            changeValue:  "Remplace la valeur de $var par la valeur correspondante du tableau $arrayKeyToValue. Exemple: changeValue({FIELD}, '('active':'1', 'inactive':'0')') convertit 'active' en '1'"
+            htmlEntityDecode:  "Convertit toutes les entités HTML en caractères normaux. Exemple: htmlEntityDecode('&amp;') retourne '&'"
+            replace:  "Remplace toutes les occurrences dans une chaîne. Exemple: replace('world', 'there', 'Hello world') retourne 'Hello there'"
+            utf8encode:  "Encode une chaîne ISO-8859-1 en UTF-8. Exemple: utf8encode('Hello') convertit en UTF-8"
+            utf8decode:  "Décode une chaîne UTF-8 en ISO-8859-1. Exemple: utf8decode('Hello') convertit en ISO-8859-1"
+            htmlentities:  "Convertit les caractères spéciaux en entités HTML. Exemple: htmlentities('<') retourne '&lt;'"
+            htmlspecialchars:  "Convertit les caractères spéciaux en entités HTML tout en conservant les entités HTML déjà encodées. Exemple: htmlspecialchars('A & B') retourne 'A &amp; B'"
+            strlen:  "Retourne la longueur d'une chaîne. Exemple: strlen('Hello') retourne 5"
+            urlencode:  "Encode une chaîne pour l'utilisation dans une URL. Exemple: urlencode('Hello World') retourne 'Hello%20World'"
+            chr:  "Retourne un caractère à partir de son code ASCII. Exemple: chr(65) retourne 'A'"
+            json_decode:  "Décode une chaîne JSON en une valeur PHP. Exemple: json_decode('{\"name\":\"John\"}') retourne un objet avec la propriété 'name'"
+            json_encode:  "Retourne la représentation JSON d'une valeur. Exemple: json_encode(['name' => 'John']) retourne '{\"name\":\"John\"}'"
+            getValueFromArray:  "Retourne une valeur d'un tableau en utilisant une clé. Exemple: getValueFromArray('name', '{\"name\":\"John\"}') retourne 'John'"
             lookup: "C'est ce que nous utilisons maintenant à la place de la relation de règle. Vous obtenez une certaine valeur d'un champ qui appartient à une autre règle. Exemple: lookup({name}, '677f9171e6851') retourne la valeur du champ name d'un document produit par la règle qui a un id de 677f9171e6851"
         mathematical:
-            round: "round($number [, $precision]) / Arrondit un nombre flottant à une précision spécifiée. Exemple: round(3.14159, 2) retourne 3.14"
-            ceil: "ceil($number) / Retourne le plus petit entier supérieur ou égal à un nombre. Exemple: ceil(3.14) retourne 4"
-            abs: "abs($number) / Retourne la valeur absolue d'un nombre. Exemple: abs(-5) retourne 5"
+            round:  "Arrondit un nombre flottant à une précision spécifiée. Exemple: round(3.14159, 2) retourne 3.14"
+            ceil:  "Retourne le plus petit entier supérieur ou égal à un nombre. Exemple: ceil(3.14) retourne 4"
+            abs:  "Retourne la valeur absolue d'un nombre. Exemple: abs(-5) retourne 5"
         date:
-            date: "Set a date/local time (current date and time). Example: date() returns the current date and time"
-            microtime: "Return the current Unix timestamp with the microseconds. Example: microtime() returns the current Unix timestamp with the microseconds, such as 1717536000.123456"
-            changeTimeZone: "changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone) / Change the timezone of the previous date in first parameter. Example: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') returns '2024-01-01 00:00:00'"
-            changeFormatDate: "changeFormatDate($dateToChange, $oldFormat, $newFormat) / Convert the previous date into first parameter in the previous format into second parameter. Example: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') returns '2024/01/01'"
+            date:  "Définit une date/heure (date et heure courante). Exemple: date() retourne la date et l'heure courante"
+            microtime:  "Retourne le timestamp Unix actuel avec les microsecondes. Exemple: microtime() retourne le timestamp Unix actuel avec les microsecondes, tel que 1717536000.123456"
+            changeTimeZone:  "Change le fuseau horaire de la date précédente. Exemple: changeTimeZone('2024-01-01', 'Europe/Paris', 'America/New_York') retourne '2024-01-01 00:00:00'"
+            changeFormatDate:  "Convertit la date précédente dans le format spécifié. Exemple: changeFormatDate('2024-01-01', 'Y-m-d', 'Y/m/d') retourne '2024/01/01'"
         constant:
             mdw_no_send_field: Ne pas envoyer le champ
             mdw_cancel_document: Annuler le document
@@ -822,21 +831,21 @@ solution:
         accesstoken: Jeton d'accès
         url: Url
         token: Jeton
-        tokensecret: Secret jeton
         useraccesstoken: Token utilisateur
+        tokensecret: Secret jeton
         consumerkey: Clé consommateur
-        consumersecret: Secret consommateur
+        consumersecret: Secret consommateur 
         apikey: Clé api
         projectid: Projet id
         apiuser: Utilisateur api
         apikeysecret: Clé api secret
-        mail_gotomeeting: Mail GotoMeeting
+        mail_gotomeeting: Mail GotoMeeting 
         accountid: Identifiant de compte
         clientid: Client ID
         clientsecret: Client secret
         instance: Numéro d'instance (Entrez 0 si vous n'en avez pas)
         company: Company ID
-        user: User ID
+        user: User ID        
         sandbox: Sandbox (1 si oui, 0 sinon)
         wsdl: Fichier wsdl
         file: Fichier
@@ -854,17 +863,17 @@ solution:
         hashkey: Clé de hachage
         id_auth: Id auth
         authid: Id auth
-        user_custom_fields: User custom fields (shortname separated by coma)
-        course_custom_fields: Course custom fields (shortname separated by coma)
         tenant_id: Tenant ID
         client_id: Client ID
         client_secret: Client Secret
         environment: Environment
     params:
+        user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
+        course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
         dateref: Référence (Les données seront lues à partir de ce paramètre)
         limit: Limite (Nombre de données lues maximum par appel)
         active: Activation
-        delete: Suppression de données (délais de suppression des documents dans Myddleware)
+        delete: Suppression de données (délais de suppression des documents dans Myddleware) 
         activate: Activé
         desactivate: Désactivé
         description: Description
@@ -903,7 +912,7 @@ error:
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
         delete_document: Impossible de supprimer la règle car au moins un document de données existe sur cette règle. Veuillez supprimer ces documents pour pouvoir supprimer cette règle.
         delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
-        update: Impossible d'éditer la règle.
+        update: Impossible d'éditer la règle. 
     account:
         language_change: "Impossible de modifier le langage :"
     template:
