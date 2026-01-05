@@ -163,7 +163,7 @@ public function prepareDataForView(Rule $rule): array
         $params = $rule->getParamsValues(); // Helper méthode supposée dans l'entité Rule
         $syncOptions = [
             'type'           => $params['mode']            ?? null,
-            'duplicateField' => $params['duplicate_field'] ?? null,
+            'duplicateField' => $params['duplicate_fields'] ?? null,
             'limit'          => $params['limit']           ?? null,
             'datereference'  => $params['datereference']   ?? null,
         ];

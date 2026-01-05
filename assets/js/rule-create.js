@@ -843,6 +843,11 @@ const UI = {
             }
           });
       }
+      if (ruleData.syncOptions?.duplicateField && typeof window.ensureDuplicateMappingRow === 'function') {
+          if(UI.get('rule-mapping-body')) {
+            window.ensureDuplicateMappingRow(ruleData.syncOptions.duplicateField);
+          }
+      }
 
     } catch (e) {
       console.error(e);
