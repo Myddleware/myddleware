@@ -550,55 +550,12 @@ h2 { margin-top: 50px;}
     margin-top: 35px;
 }
 
-.function-wizard-title {
-    margin-left: 1em;
-    font-weight: bold;
-}
-
-.function-wizard-select {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.function-wizard-title-function-select {
-    font-weight: bold;
-    margin-left: 1em;
-    margin-right: 1em;
-    margin-bottom: 0;
-}
-
-#function-select {
-    height: auto;
-    margin-bottom: 0;
-    margin-left: -0.5rem;
-    padding-right: .25rem;
-    width: 14em;
-}
-
-#lookup-rule, #lookup-field {
-    margin-left: 0.6rem;
-}
-
-#function-parameter {
-    margin-left: -3.5rem;
-    width: 14rem
-}
-
 #round-precision {
 margin-left: -0.5rem;
 }
 
-#insert-function-parameter {
-    margin-left: -3.5rem;
-}
-
 #round-precision-input {
     margin-left: -3rem;
-}
-
-#submit-lookup {
-    margin-left: 0.5rem;
 }
 
 .sourceIdOfDocument,
