@@ -53,7 +53,7 @@
         {{ form_errors(smtpForm.password) }}
     </div>
 
-    <div class="mb-3">
+    <div class="mb-5">
         {{ form_label(smtpForm.sender, null, {'label_attr': {'class': 'form-label'}}) }}
         {{ form_widget(smtpForm.sender, { 'attr': {'class': 'form-control'} }) }}
         {{ form_errors(smtpForm.sender) }}
