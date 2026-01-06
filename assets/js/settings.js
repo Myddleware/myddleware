@@ -188,13 +188,24 @@ class SettingsManager {
         `;
 
         // Find notification container
-        let container = document.querySelector('.container.p-5');
+        let container = document.querySelector('#settings-container .account-card');
+        if (!container) {
+            container = document.querySelector('.container.p-5');
+        }
         if (!container) {
             container = document.querySelector('.container');
         }
 
         if (container) {
             container.insertBefore(notification, container.firstChild);
+
+            // Add close button functionality
+            const closeButton = notification.querySelector('.mdw-alert__close');
+            if (closeButton) {
+                closeButton.addEventListener('click', () => {
+                    notification.remove();
+                });
+            }
 
             // Auto-dismiss after 5 seconds
             setTimeout(() => {
