@@ -83,12 +83,7 @@
 			</div>
 			<div class="d-flex justify-content-center mt-4">
 				{% if pager_workflow_list.haveToPaginate %}
-					{{ pagerfanta(pager_workflow_list, 'twitter_bootstrap4', {
-						'routeName': 'workflow_list_page',
-						'proximity': 2,
-						'prev_message': 'pagination.previous'|trans,
-						'next_message': 'pagination.next'|trans
-					})|raw }}
+					{% include '_pagination.html.twig' with {pager: pager_workflow_list,route: 'workflow_list_page'} %}
 				{% endif %}
 			</div>
 		{% else %}

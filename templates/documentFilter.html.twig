@@ -373,40 +373,9 @@
 			</tbody>
 		</table>
 	</div>
-	<div class="d-flex justify-content-center">
-		{% if pager.haveToPaginate %}
-			{{ pagerfanta(pager, 'twitter_bootstrap4', {
-				'routeName': 'document_list_page',
-				'proximity': 2,
-				'prev_message': 'pagination.previous'|trans,
-				'next_message': 'pagination.next'|trans
-			})|raw }}
-		{% endif %}
-	</div>
-
-	{# Go to page input #}
-	{% if pager.haveToPaginate %}
-    <div class="d-flex justify-content-center mt-2 mb-3">
-        <form id="go-to-page-form" 
-            class="d-flex align-items-center gap-2" 
-            data-url-template="{{ path('document_list_page', {'page': 1}) }}">
-            
-            <label for="go-to-page-input" class="form-label mb-0 text-muted">Go to page:</label>
-            <input
-                type="number"
-                id="go-to-page-input"
-                class="form-control form-control-sm"
-                style="width: 80px;"
-                min="1"
-                max="{{ pager.nbPages }}"
-                value="{{ pager.currentPage }}"
-                required
-            >
-            <span class="text-muted">/ {{ pager.nbPages }}</span>
-            <button type="submit" class="btn btn-sm btn-outline-primary">Go</button>
-        </form>
+    <div class="d-flex justify-content-center mt-4">
+        {% include '_pagination.html.twig' with {pager: pager} %}
     </div>
-    {% endif %}
 </section>
 
 {% block javascript %}

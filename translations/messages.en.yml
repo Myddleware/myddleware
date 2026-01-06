@@ -375,7 +375,7 @@ actions: "Actions"
 pagination:
     previous: Previous
     next: Next
-    go_to_page: Go to page
+    go_to_page: Go to
     page_number: Page number
 
 animate:
