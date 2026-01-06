@@ -1165,7 +1165,7 @@ settings:
     title: Parametres Systeme
     save: Enregistrer
     tabs:
-        general: General
+        general: Preferences
         smtp: Gestion SMTP
     table_settings:
         title: Parametres des tableaux
@@ -1176,8 +1176,8 @@ settings:
         title: Parametres de recherche
         description: Configurez le comportement de la recherche et l'integration Elasticsearch.
         elasticsearch_label: Statut Elasticsearch
-        enable_elasticsearch: Activer Elasticsearch
-        elasticsearch_hint: Activez Elasticsearch pour ameliorer les performances de recherche. Necessite la configuration de ELASTICSEARCH_URL.
+        enable_elasticsearch: Activer Elastic Search
+        elasticsearch_hint: Elasticsearch permet de meilleures performances lors de la recherche de chaines parmi de tres grandes quantites de documents (+100k)
     messages:
         save_success: Parametres enregistres avec succes
         save_error: Echec de l'enregistrement des parametres

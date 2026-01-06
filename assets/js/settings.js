@@ -357,9 +357,6 @@ class SettingsManager {
                 if (element.parentElement) {
                     element.parentElement.style.display = '';
                 }
-                if (element.parentElement?.parentElement) {
-                    element.parentElement.parentElement.style.display = '';
-                }
             }
         });
     }
@@ -371,9 +368,6 @@ class SettingsManager {
                 element.style.display = 'none';
                 if (element.parentElement) {
                     element.parentElement.style.display = 'none';
-                }
-                if (element.parentElement?.parentElement) {
-                    element.parentElement.parentElement.style.display = 'none';
                 }
             }
         });

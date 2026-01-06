@@ -35,7 +35,7 @@
                 <i class="fas fa-cog me-2"></i>{{ 'settings.tabs.general'|trans }}
             </button>
             <button class="tab {{ activeTab == 'smtp' ? 'active' : '' }}" data-tab="smtp">
-                <i class="fas fa-envelope me-2"></i>{{ 'settings.tabs.smtp'|trans }}
+                <i class="fas fa-shield-alt me-2"></i>{{ 'settings.tabs.smtp'|trans }}
             </button>
         </div>
 
@@ -132,12 +132,21 @@
     .account-card .form-control,
     .account-card .form-select {
         width: 100%;
-        padding: 0.6rem;
-        border: 2px solid #efefef;
-        border-radius: 8px;
-        font-size: 1rem;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.95rem;
         margin-bottom: 1rem;
         font-family: 'Inter', 'Roboto', sans-serif;
+        background-color: #fff;
+        transition: border-color 0.15s ease-in-out;
+    }
+
+    .account-card .form-control:focus,
+    .account-card .form-select:focus {
+        border-color: #198BCA;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(25, 139, 202, 0.1);
     }
 
     .account-card .form-label,

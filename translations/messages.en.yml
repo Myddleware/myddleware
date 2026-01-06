@@ -1166,19 +1166,19 @@ settings:
     title: System Settings
     save: Save
     tabs:
-        general: General
+        general: Preferences
         smtp: SMTP Management
     table_settings:
-        title: Table Settings
+        title: Table settings
         description: Configure how tables display data across the application.
         rows_per_page: Rows per page
-        maximum_results: Maximum search results
+        maximum_results: Maximum results
     search_settings:
         title: Search Settings
         description: Configure search behavior and Elasticsearch integration.
         elasticsearch_label: Elasticsearch Status
-        enable_elasticsearch: Enable Elasticsearch
-        elasticsearch_hint: Enable Elasticsearch for improved search performance. Requires ELASTICSEARCH_URL to be configured.
+        enable_elasticsearch: Enable Elastic Search
+        elasticsearch_hint: Elasticsearch enables greater performance when searching for strings among very large amounts of document (+100k)
     messages:
         save_success: Settings saved successfully
         save_error: Failed to save settings

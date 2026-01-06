@@ -1,36 +1,31 @@
 <!-- Table Settings Section -->
 <div class="settings-section mt-4">
     <h4>{{ 'settings.table_settings.title'|trans }}</h4>
-    <p class="text-muted">{{ 'settings.table_settings.description'|trans }}</p>
 
-    <form id="table-settings-form">
-        <div class="row mb-3">
-            <label for="rows-per-page" class="col-sm-4 col-form-label">
+    <form id="table-settings-form" class="mt-4">
+        <div class="mb-3">
+            <label for="rows-per-page" class="form-label">
                 {{ 'settings.table_settings.rows_per_page'|trans }}
             </label>
-            <div class="col-sm-8">
-                <input type="number"
-                       class="form-control"
-                       id="rows-per-page"
-                       name="rowsPerPage"
-                       min="1"
-                       max="1000"
-                       value="20">
-            </div>
+            <input type="number"
+                   class="form-control"
+                   id="rows-per-page"
+                   name="rowsPerPage"
+                   min="1"
+                   max="1000"
+                   value="20">
         </div>
-        <div class="row mb-3">
-            <label for="maximum-results" class="col-sm-4 col-form-label">
+        <div class="mb-3">
+            <label for="maximum-results" class="form-label">
                 {{ 'settings.table_settings.maximum_results'|trans }}
             </label>
-            <div class="col-sm-8">
-                <input type="number"
-                       class="form-control"
-                       id="maximum-results"
-                       name="maximumResults"
-                       min="1"
-                       max="10000000000"
-                       value="1000">
-            </div>
+            <input type="number"
+                   class="form-control"
+                   id="maximum-results"
+                   name="maximumResults"
+                   min="1"
+                   max="10000000000"
+                   value="1000">
         </div>
         <button type="submit" class="btn btn-primary">
             {{ 'settings.save'|trans }}
@@ -43,14 +38,10 @@
 <!-- Search Settings Section -->
 <div class="settings-section">
     <h4>{{ 'settings.search_settings.title'|trans }}</h4>
-    <p class="text-muted">{{ 'settings.search_settings.description'|trans }}</p>
 
     <form id="elasticsearch-form">
         <div class="row mb-3 align-items-center">
-            <label class="col-sm-4 col-form-label">
-                {{ 'settings.search_settings.elasticsearch_label'|trans }}
-            </label>
-            <div class="col-sm-8">
+            <div class="col-sm-12">
                 <div class="form-check form-switch">
                     <input class="form-check-input"
                            type="checkbox"
