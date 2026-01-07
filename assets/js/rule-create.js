@@ -657,7 +657,7 @@ const UI = {
 
     // Delete Row
     const tdDel = document.createElement('td');
-    tdDel.className = 'text-end';
+    tdDel.className = 'text-start';
     const delBtn = document.createElement('button');
     delBtn.className = 'btn btn-sm text-danger';
     delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';

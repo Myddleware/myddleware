@@ -1133,9 +1133,14 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .col-mapping-formula { width: 25%; }
 .col-mapping-delete { width: 5%; }
 
+#rule-mapping-table td {
+    border-color: white !important;
+    border-style: solid !important;
+    border-width: 0 0 1px 0 !important;
+}
+
 .formula-slot {
 	flex: 1 1 auto;
-    max-width: 200px;
 	padding: .375rem .5rem;
 	border-radius: .5rem;
 	background: #f8fafc;
