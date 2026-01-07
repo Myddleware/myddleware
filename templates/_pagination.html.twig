@@ -5,8 +5,6 @@
     {% set totalPages = pager.nbPages %}
     {% set proximity = 2 %}
     {% set is_ajax = ajax|default(false) %}
-
-    {# On génère le modèle d'URL correct selon votre route Symfony (ex: .../page-999999) #}
     {% set url_model = path(route, finalParams|merge({page: 999999})) %}
 
     <div class="pagination-container my-4">
@@ -61,34 +59,23 @@
         </div>
 
         <div class="d-flex justify-content-center">
-            <form class="d-flex align-items-center gap-2" 
-                  method="GET" 
-                  action="#"
-                  onsubmit="return handlePaginationGo(event, this)"
-                  data-url="{{ url_model }}"
-                  data-ajax="{{ is_ajax ? 'true' : 'false' }}">
-                
+            <form class="d-flex align-items-center gap-2" method="GET" action="#" onsubmit="return handlePaginationGo(event, this)" data-ajax="{{ is_ajax ? 'true' : 'false' }}">
                 <label class="form-label mb-0 fw-bold">Go to:</label>
                 <input type="number" name="page" class="form-control form-control-sm text-center" style="width: 60px;" min="1" max="{{ totalPages }}" value="{{ currentPage }}">
-                <button type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Go</button>
+                <button id="pagination-go" type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Go</button>
             </form>
         </div>
     </div>
 
     <script>
         function handlePaginationGo(e, form) {
-            // Si c'est AJAX (Logs), on laisse le script parent gérer
             if (form.dataset.ajax === 'true') {
                 return true; 
             }
-
-            // Sinon (Rule List, Workflow List...), on force la bonne URL
             e.preventDefault();
             
             var pageValue = form.querySelector('input[name="page"]').value;
             var urlModel = form.dataset.url;
-            
-            // On remplace 999999 par le chiffre saisi pour obtenir .../list/page-3
             var finalUrl = urlModel.replace('999999', pageValue);
             
             window.location.href = finalUrl;
