@@ -124,6 +124,7 @@ class RuleController extends AbstractController
 
         try {
             $this->rulePersistenceService->deleteRule($rule);
+            $this->addFlash('rule.delete.success', $this->translator->trans('rule.delete.success'));
             return $this->redirect($this->generateUrl('regle_list'));
         } catch (Exception $e) {
             $parts = explode('|', $e->getMessage());
