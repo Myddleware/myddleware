@@ -718,7 +718,12 @@ const UI = {
       if (nameInput) {
         nameInput.value = ruleData.name || '';
         nameInput.classList.add('is-valid');
-      }
+
+      }
+      const descInput = UI.get('ruledescription');
+      if (descInput && ruleData.params?.description) {
+        descInput.value = ruleData.params.description;
+      }
 
       if (typeof window.__revealStep2 === 'function') window.__revealStep2();
       else {
@@ -1035,6 +1040,7 @@ $(function () {
     const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text || ''; };
 
     add('name', getVal('rulename'));
+    add('description', getVal('ruledescription'));
     add('src_solution_id', getVal('source-solution'));
     add('tgt_solution_id', getVal('target-solution'));
     add('src_solution_name', getTxt('source-solution').toLowerCase());

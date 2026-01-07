@@ -168,6 +168,10 @@ public function prepareDataForView(Rule $rule): array
             'datereference'  => $params['datereference']   ?? null,
         ];
 
+        $ruleParams = [
+            'description' => $params['description'] ?? '',
+        ];
+
         // 3. Filtres
         $filters = [];
         foreach ($rule->getFilters() as $filter) {
@@ -196,6 +200,7 @@ public function prepareDataForView(Rule $rule): array
             'name'        => $rule->getName(),
             'connection'  => $connection,
             'syncOptions' => $syncOptions,
+            'params'      => $ruleParams,
             'filters'     => $filters,
             'mapping'     => $mapping,
         ];

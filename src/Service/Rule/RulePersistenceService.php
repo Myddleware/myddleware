@@ -52,6 +52,7 @@ class RulePersistenceService
         $isEdit = $ruleIdFromRequest !== '';
         $bidirectionalId = trim((string) ($data['bidirectional'] ?? ''));
         $duplicateField = trim((string) ($data['duplicate_field'] ?? ''));
+        $description = trim((string) ($data['description'] ?? ''));
 
         // Parsing des tableaux (champs et formules)
         $rawFields = $data['champs'] ?? [];
@@ -88,7 +89,7 @@ class RulePersistenceService
             $ruleId, $nowStr, $midnight, $userId, $name, $nameSlug,
             $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule,
             $rawFields, $rawFormulas, $filters, $syncMode, $isEdit,
-            $bidirectionalId, $duplicateField
+            $bidirectionalId, $duplicateField, $description
         ) {
             // A. Gestion de la table 'rule'
             if ($isEdit) {
@@ -174,6 +175,10 @@ class RulePersistenceService
             // Insertion du champ duplicate_fields si défini
             if ($duplicateField !== '') {
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'duplicate_fields', 'value' => $duplicateField]);
+            }
+
+            if ($description !== '') {
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'description', 'value' => $description]);
             }
 
             // E. Gestion Bidirectionnelle
