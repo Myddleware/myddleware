@@ -281,6 +281,8 @@ rule:
     help: Que dois-je faire ?
     select_group: Choisir un groupe
     select_value: Choisir une valeur
+    delete:
+    success: Règle supprimée avec succès
 
 rulegroup:
   create: "Créer un groupe de règles"
