@@ -510,6 +510,9 @@ const UI = {
 
       const li = document.createElement('li');
       li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      li.dataset.field = fieldVal;
+      li.dataset.operator = opVal;
+      li.dataset.value = valueVal;
       li.innerHTML = `<span><strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${valueVal}</span>`;
       
       const delBtn = document.createElement('button');
@@ -1010,9 +1013,13 @@ $(function () {
 
     const filters = [];
     document.querySelectorAll('#rule-filters-list li').forEach(li => {
-      const txt = li.innerText; 
-      const parts = txt.match(/^(.*?) \((.*?)\) = (.*)$/);
-      if (parts) filters.push({ field: parts[1], operator: parts[2], value: parts[3] });
+      if (li.dataset.field && li.dataset.operator) {
+        filters.push({
+          field: li.dataset.field,
+          operator: li.dataset.operator,
+          value: li.dataset.value || ''
+        });
+      }
     });
 
     return { mapping, filters };
