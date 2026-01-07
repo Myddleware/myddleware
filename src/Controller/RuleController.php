@@ -501,7 +501,7 @@ class RuleController extends AbstractController
      * CANCEL ALL TRANSFERS FOR ONE RULE.
      */
     #[Route('/view/cancel/documents/{id}', name: 'rule_cancel_all_transfers', methods: ['GET', 'POST'])]
-    public function cancelRuleTransfers(int $id): RedirectResponse
+    public function cancelRuleTransfers(string $id): RedirectResponse
     {
         try {
             $this->ruleManager->setRule($id);
@@ -519,7 +519,7 @@ class RuleController extends AbstractController
      * DELETE ALL TRANSFERS FOR ONE RULE.
      */
     #[Route('/view/delete/documents/{id}', name: 'rule_delete_all_transfers', methods: ['GET', 'POST'])]
-    public function deleteRuleTransfers(int $id): RedirectResponse
+    public function deleteRuleTransfers(string $id): RedirectResponse
     {
         try {
             $this->ruleManager->setRule($id);
