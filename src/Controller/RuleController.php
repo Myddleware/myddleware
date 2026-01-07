@@ -128,8 +128,8 @@ class RuleController extends AbstractController
         } catch (Exception $e) {
             $parts = explode('|', $e->getMessage());
             $msg = $this->translator->trans($parts[0]) . (isset($parts[1]) ? ' ' . $parts[1] : '');
-            $this->sessionService->getSession()->set('error', [$msg]);
-            return $this->redirect($this->generateUrl('regle_open', ['id' => $rule->getId()]));
+            $this->addFlash('rule.error', $msg);
+            return $this->redirect($this->generateUrl('regle_list'));
         }
     }
 
