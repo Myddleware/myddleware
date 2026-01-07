@@ -28,11 +28,13 @@ use App\Entity\Rule;
 use App\Entity\Workflow;
 use App\Entity\WorkflowAction;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 
 class RuleDuplicateService
 {
-    public function __construct(private EntityManagerInterface $entityManager)
+    public function __construct(private EntityManagerInterface $entityManager, private Security $security)
     {
+        $this->security = $security;
     }
 
     public function duplicateWorkflows($id, Rule $newRule)
@@ -56,8 +58,8 @@ class RuleDuplicateService
             $newWorkflow->setName($workflowName. "-duplicate-".$ruleName);
             $newWorkflow->setRule($newRule);
             $newWorkflow->setDeleted(false);
-            $newWorkflow->setCreatedBy($this->getUser());
-            $newWorkflow->setModifiedBy($this->getUser());
+            $newWorkflow->setCreatedBy($this->security->getUser());
+            $newWorkflow->setModifiedBy($this->security->getUser());
             $newWorkflow->setDateCreated(new \DateTime());
             $newWorkflow->setDateModified(new \DateTime());
             $newWorkflow->setCondition($workflow->getCondition());
@@ -80,8 +82,8 @@ class RuleDuplicateService
             $newAction = new WorkflowAction();
             $newAction->setId(uniqid());
             $newAction->setWorkflow($newWorkflow);
-            $newAction->setCreatedBy($this->getUser());
-            $newAction->setModifiedBy($this->getUser());
+            $newAction->setCreatedBy($this->security->getUser());
+            $newAction->setModifiedBy($this->security->getUser());
             $newAction->setDateCreated(new \DateTime());
             $newAction->setDateModified(new \DateTime());
             $newAction->setName($action->getName());
@@ -91,6 +93,7 @@ class RuleDuplicateService
             $newAction->setArguments($action->getArguments());
             $newAction->setDeleted(false);
             $newAction->setActive($action->getActive());
+            $newAction->setMultipleRuns(false);
             $this->entityManager->persist($newAction);
         }
 
