@@ -871,6 +871,19 @@ const UI = {
   }
 })();
 
+        document.addEventListener("DOMContentLoaded", function() {
+            setTimeout(() => {
+                const element = document.getElementById('step-5');
+                if (element) {
+                    // if url contains edit
+                    if (window.location.href.indexOf('edit') > -1) {
+                        element.scrollIntoView({ behavior: 'smooth' });
+                        return;
+                    }
+                }
+            }, 4000);
+        });
+
 /* ===========================================
  * FUNCTION WIZARD (Formula Editor)
  * =========================================== */
