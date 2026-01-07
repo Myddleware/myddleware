@@ -280,6 +280,8 @@ rule:
     help: What should I do ?
     select_group: Select a group
     select_value: Select a value
+    delete:
+        success: Rule deleted successfully
 
 rulegroup:  
   create: "Create a rule group"
