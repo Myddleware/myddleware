@@ -113,6 +113,8 @@ class RuleStepService
         $direction = ($type === 'cible') ? 'target' : 'source';
         $modules = $solution->get_modules($direction) ?? [];
 
+        asort($modules, SORT_STRING | SORT_FLAG_CASE);
+
         // Only return module names - fields are fetched lazily on demand
         return [
             'modules' => $modules,
@@ -215,6 +217,11 @@ class RuleStepService
         } catch (\Throwable $e) {
             $this->logger->error('Fatal error in getFieldsForFilters: ' . $e->getMessage());
         }
+
+        foreach ($fieldsGrouped as &$group) {
+            asort($group, SORT_STRING | SORT_FLAG_CASE);
+        }
+        unset($group); // Break the reference
 
         return $fieldsGrouped;
     }
