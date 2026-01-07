@@ -156,7 +156,7 @@
 				</div>
 			</div>
 			<div class="d-flex justify-content-center mt-4">
-				{% include '_pagination.html.twig' with {pager: pager} %}
+				{% include '_pagination.html.twig' with {pager: pager, route: "regle_list_page"} %}
 			</div>
 		{% else %}
 			<div class="d-grid justify-content-center pt-4">

@@ -413,6 +413,7 @@ class JobSchedulerController extends AbstractController
         return $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
             'timezone' => $timezone,
+            'entitiesCron' => $entitiesCron,
         ]);
     }
 
