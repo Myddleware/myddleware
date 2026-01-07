@@ -1112,7 +1112,6 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	flex-wrap: wrap;
 	gap: .5rem;
 	min-height: 36px;
-	max-height: 36px;
 	overflow-x: auto;
 	overflow-y: hidden;
 }
@@ -1135,27 +1134,29 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .col-mapping-delete { width: 5%; }
 
 .formula-slot {
-    flex: 1 1 auto;
-    width: 100%;
-    max-width: none;
-    min-height: 38px;
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    font-weight: 400;
-    line-height: 1.5;
-    color: #212529;
-    background-color: #fff;
-    background-clip: padding-box;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    display: flex;
-    align-items: center;
-    overflow: hidden;
+	flex: 1 1 auto;
+    max-width: 200px;
+	padding: .375rem .5rem;
+	border-radius: .5rem;
+	background: #f8fafc;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	font-size: .875rem;
+	color: #64748b;
 }
 
 .formula-slot.is-empty {
-    color: #6c757d;
-    font-style: italic;
+	font-style: italic;
+	color: #94a3b8;
+}
+
+.col-mapping-equal { 
+    width: 31%; 
+}
+
+.col-mapping-delete { 
+    width: 7%; 
 }
 
 #rule-mapping-table .cell-actions .d-flex {
