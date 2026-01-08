@@ -1,6 +1,14 @@
 {% extends 'base.html.twig' %}
 {% block title %}{{ parent() }} | {{ 'title.rule.create'|trans }}{% endblock %}
-{% block titlesm %}{{ 'title.rule.create'|trans }}{% endblock %}
+{% block titlesm %}
+    {% if 'create' in app.request.attributes.get('_route') %}
+        {{ 'title.rule.create'|trans }}
+    {% elseif 'edit' in app.request.attributes.get('_route') %}
+        {{ 'title.rule.edit'|trans }}
+    {% else %}
+        {{ 'title.rule.create'|trans }}
+    {% endif %}
+{% endblock titlesm %}
 
 {% block body %}
 
