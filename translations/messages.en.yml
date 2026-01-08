@@ -408,7 +408,7 @@ animate:
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
-    title: Creation of a connector
+    title: Creation connector
     save: Save the connection
     connexion: Name of the connection
     test: Test
@@ -932,14 +932,14 @@ title:
         btn: Start now !
     rule:
         create_name: Editing of the rule
-        create: Creation of a rule
-        edit: Editing the rule
+        create: Create rule
+        edit: Edit rule
         list: Rules
         view: Rule
         success_edit_params:
     connector:
-        create: Creation of a connector
-        edit: Editing the connector
+        create: Create connector
+        edit: Edit connector
         list: Connectors
     flux: 
         list: Documents
@@ -1318,10 +1318,10 @@ variable:
   updated_successfully: "Variable updated successfully."
   deleted_successfully: "Variable deleted successfully."
   name_already_exists: The name of the variable already exists. Please choose another name.
-  edit: Editing of a variable
+  edit: Edit variable
   back_to_list: Back to the list
   save: Save
-  editing: Editing of a variable
+  editing: Edit variable
   total: Total of Variables
   btn:
     edit: Edit
