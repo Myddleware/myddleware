@@ -34,6 +34,15 @@ require('./js/rule-group.js')
 require('./js/rule-create.js')
 require('./js/notifications.js')
 
+const path = window.location.pathname;
+const isEditRule = /\/rule\/[a-zA-Z0-9]{13}\/edit/.test(path);
+const isCreateRule = /\/rule\/[a-zA-Z0-9]{13}\/create/.test(path);
+
+
+if (isEditRule || isCreateRule) {
+    require('./js/rule-create.js');
+}
+
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
 require('./js/mappingRule.js')
 }
