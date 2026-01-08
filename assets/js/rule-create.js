@@ -887,7 +887,7 @@ const UI = {
 
                     setTimeout(() => {
                         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 1000);
+                    }, 1500);
                 } else if (++attempts >= maxAttempts) {
                     clearInterval(checkAndScroll);
                 }
