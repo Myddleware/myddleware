@@ -59,7 +59,7 @@
         </div>
 
         <div class="d-flex justify-content-center">
-            <form class="d-flex align-items-center gap-2" method="GET" action="#" onsubmit="return handlePaginationGo(event, this)" data-ajax="{{ is_ajax ? 'true' : 'false' }}">
+            <form class="d-flex align-items-center gap-2" method="GET" action="#" onsubmit="return handlePaginationGo(event, this)" data-ajax="{{ is_ajax ? 'true' : 'false' }}" data-url="{{ url_model }}">
                 <label class="form-label mb-0 fw-bold">Go to:</label>
                 <input type="number" name="page" class="form-control form-control-sm text-center" style="width: 60px;" min="1" max="{{ totalPages }}" value="{{ currentPage }}">
                 <button id="pagination-go" type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Go</button>
