@@ -1,6 +1,5 @@
 export class DocumentDetailFieldExpander {
     static init() {
-        // console.log('🔧 FluxFieldExpander initializing...');
         this.setupFieldClickHandlers();
         this.createPencilIcons();
         this.setupDataUpdateListener();
@@ -9,7 +8,6 @@ export class DocumentDetailFieldExpander {
     static setupDataUpdateListener() {
         // Listen for data updates from FluxDataSections
         document.addEventListener('fluxDataUpdated', (event) => {
-            // console.log('🔄 FluxFieldExpander received data update notification:', event.detail);
             // Re-initialize pencil icons for new content
             setTimeout(() => {
                 this.createPencilIcons();
@@ -44,7 +42,6 @@ export class DocumentDetailFieldExpander {
         const elementType = element.classList.contains('field-label') ? 'label' : 'value';
         const section = this.getDataSection(element);
         
-        // console.log(`📖 Field ${elementType} in ${section} section ${isExpanded ? 'expanded' : 'collapsed'}`);
     }
 
     static async togglePencilIcon(fieldValueElement) {
@@ -52,7 +49,6 @@ export class DocumentDetailFieldExpander {
             const icon = fieldValueElement.querySelector('.field-edit-icon');
             
             if (!icon) {
-                // console.warn('⚠️ No edit icon found for field value');
                 return;
             }
             
@@ -62,31 +58,26 @@ export class DocumentDetailFieldExpander {
                 await this.delay(200);
                 icon.classList.add('show');
                 icon.classList.remove('hide');
-                // console.log('✏️ Pencil icon shown');
             } else {
                 icon.classList.remove('show');
                 icon.classList.add('hide');
                 await this.delay(200);
                 setTimeout(() => icon.classList.remove('hide'), 400);
-                // console.log('✏️ Pencil icon hidden');
             }
         } catch (error) {
-            console.error('❌ Error toggling pencil icon:', error);
+            console.error(' Error toggling pencil icon:', error);
         }
     }
 
     static createPencilIcons() {
-        // console.log('✏️ Creating pencil icons for target data fields...');
         
         // Only create pencil icons for field values in target data section
         const targetDataContainer = document.querySelector('.target-data-content');
         if (!targetDataContainer) {
-            // console.warn('⚠️ Target data container not found, skipping pencil icon creation');
             return;
         }
         
         const fieldValues = targetDataContainer.querySelectorAll('.field-value');
-        // console.log(`📝 Found ${fieldValues.length} field values in target section`);
         
         fieldValues.forEach((fieldValue, index) => {
             try {
@@ -94,12 +85,10 @@ export class DocumentDetailFieldExpander {
                     // const icon = document.createElement('i');
                     // icon.className = 'fas fa-pencil-alt field-edit-icon';
                     // fieldValue.appendChild(icon);
-                    // console.log(`✅ Added pencil icon to field ${index + 1}`);
                 } else {
-                    // console.log(`📌 Field ${index + 1} already has pencil icon`);
                 }
             } catch (error) {
-                console.error(`❌ Error adding pencil icon to field ${index + 1}:`, error);
+                console.error(` Error adding pencil icon to field ${index + 1}:`, error);
             }
         });
     }

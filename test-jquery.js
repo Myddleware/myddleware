@@ -17,7 +17,7 @@ console.log('1. Checking package.json for jQuery dependencies...');
 try {
     const packageJson = JSON.parse(fs.readFileSync('package.json', 'utf8'));
     
-    console.log('✅ jQuery dependencies found:');
+    console.log(' jQuery dependencies found:');
     if (packageJson.dependencies.jquery) {
         console.log(`   - jquery: ${packageJson.dependencies.jquery}`);
     }
@@ -43,7 +43,7 @@ try {
         });
     }
 } catch (error) {
-    console.error('❌ Error reading package.json:', error.message);
+    console.error(' Error reading package.json:', error.message);
 }
 
 console.log('\n2. Checking webpack configuration for jQuery...');
@@ -56,10 +56,10 @@ try {
             console.log('⚠️  jQuery auto-provide is COMMENTED OUT in webpack config');
             console.log('   This is likely the cause of your jQuery plugin issues!');
         } else {
-            console.log('✅ jQuery auto-provide is enabled in webpack config');
+            console.log(' jQuery auto-provide is enabled in webpack config');
         }
     } else {
-        console.log('❌ jQuery auto-provide not found in webpack config');
+        console.log(' jQuery auto-provide not found in webpack config');
     }
     
     // Check for other jQuery configurations
@@ -68,7 +68,7 @@ try {
         // Would need more detailed parsing to check ProvidePlugin config
     }
 } catch (error) {
-    console.error('❌ Error reading webpack.config.js:', error.message);
+    console.error(' Error reading webpack.config.js:', error.message);
 }
 
 console.log('\n3. Analyzing the error from regle.js...');

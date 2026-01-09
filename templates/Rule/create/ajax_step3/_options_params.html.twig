@@ -1,0 +1,47 @@
+<div class="row g-4 align-items-start">
+    {% for param in rule_params %}
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label class="form-label" for="{{ param.id }}">
+                    {{ param.label }} {% if param.required %}*{% endif %}
+                </label>
+                
+                {% if param.type == 'option' %}
+                    <select id="{{ param.id }}" name="{{ param.name }}" class="form-select form-select-lg">
+                        <option value="" disabled {% if param.value|default(null) is empty %}selected{% endif %}>
+                        </option>
+
+                        {% for key, label in param.option %}
+                            <option value="{{ key }}" {% if param.value|default(null) == key %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                        {% endfor %}
+                    </select>
+
+                {% elseif param.type == 'text' %}
+                    <input type="text" id="{{ param.id }}" name="{{ param.name }}" class="form-control form-control-lg" value="{{ param.value}}">
+                {% endif %}
+                
+                {% if param.description is defined %}
+                    <div class="form-text">{{ param.description }}</div>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+
+    {% if duplicate_target is defined and duplicate_target is not empty %}
+        <div class="col-12 col-md-6">
+            <div class="form-group">
+                <label class="form-label" for="duplicate-field">
+                    {{ 'create_rule.step5.params.duplicate'|trans }}
+                </label>
+                <select id="duplicate-field" name="duplicate_field" class="form-select form-select-lg">
+                    <option value="" selected disabled></option>
+                    {% for key, label in duplicate_target %}
+                        <option value="{{ label }}">{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+    {% endif %}
+</div>

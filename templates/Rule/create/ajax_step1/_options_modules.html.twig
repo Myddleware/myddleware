@@ -1,0 +1,7 @@
+{% if modules is not empty %}
+  {% for name, label in modules %}
+    <option value="{{ name }}">{{ label }}</option>
+  {% endfor %}
+{% else %}
+  <option value="" disabled selected></option>
+{% endif %}

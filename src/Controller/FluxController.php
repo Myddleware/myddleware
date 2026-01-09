@@ -1502,7 +1502,7 @@ $result = [];
             $targetDirectLink = null;
             try {
                 $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
-                $allowedSolutions = ['suitecrm', 'airtable', 'sugarcrm', 'salesforce', 'moodle'];
+                $allowedSolutions = ['suitecrm', 'suitecrm8', 'airtable', 'sugarcrm', 'salesforce', 'moodle'];
 
                 if (in_array(strtolower($sourceSolutionName), $allowedSolutions)) {
                     $sourceSolution = $this->solutionManager->get($sourceSolutionName);
