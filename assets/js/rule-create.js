@@ -486,54 +486,85 @@ const UI = {
     addGroup('Target Fields', getJsonAttr(tgtMod, 'data-fields'));
   };
 
-  // Adds a visual row to the filter list
-  window.addFilterRow = function(fieldVal, opVal, valueVal) {
-      const listWrap = UI.get('rule-filters-list');
-      const fieldSelect = UI.get('rule-filter-field');
-      const opSelect = UI.get('rule-filter-operator');
-      
-      if (!listWrap || !fieldVal || !opVal) return;
-      let fieldLabel = fieldVal;
-      let opLabel = opVal;
+  // Adds a visual row to the filter list
+  window.addFilterRow = function(fieldVal, opVal, valueVal) {
+      const listWrap = UI.get('rule-filters-list');
+      const fieldSelect = UI.get('rule-filter-field');
+      const opSelect = UI.get('rule-filter-operator');
+      
+      if (!listWrap || !fieldVal || !opVal) return;
+      let fieldLabel = fieldVal;
+      let opLabel = opVal;
 
-      if (fieldSelect) {
-          const opt = Array.from(fieldSelect.querySelectorAll('option')).find(o => o.value === fieldVal);
-          if (opt) fieldLabel = opt.textContent;
-      }
-      if (opSelect) {
-          const opt = Array.from(opSelect.options).find(o => o.value === opVal);
-          if (opt) opLabel = opt.textContent;
-      }
+      if (fieldSelect) {
+          const opt = Array.from(fieldSelect.querySelectorAll('option')).find(o => o.value === fieldVal);
+          if (opt) fieldLabel = opt.textContent;
+      }
+      if (opSelect) {
+          const opt = Array.from(opSelect.options).find(o => o.value === opVal);
+          if (opt) opLabel = opt.textContent;
+      }
 
-      const emptyMsg = listWrap.querySelector('p.text-muted');
-      if (emptyMsg) emptyMsg.remove();
+      const emptyMsg = listWrap.querySelector('p.text-muted');
+      if (emptyMsg) emptyMsg.remove();
 
-      let ul = listWrap.querySelector('ul');
-      if (!ul) {
-        ul = document.createElement('ul');
-        ul.className = 'list-group';
-        listWrap.appendChild(ul);
-      }
+      let ul = listWrap.querySelector('ul');
+      if (!ul) {
+        ul = document.createElement('ul');
+        ul.className = 'list-group';
+        listWrap.appendChild(ul);
+      }
 
-      const li = document.createElement('li');
-      li.className = 'list-group-item d-flex justify-content-between align-items-center';
-      li.dataset.field = fieldVal;
-      li.dataset.operator = opVal;
-      li.dataset.value = valueVal;
-      li.innerHTML = `<span><strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${valueVal}</span>`;
-      
-      const delBtn = document.createElement('button');
-      delBtn.className = 'btn btn-sm text-danger';
-      delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-      delBtn.type = 'button';
-      delBtn.onclick = () => {
-        li.remove();
-        if (!ul.children.length) listWrap.innerHTML = '<p class="text-muted mb-0">No filters have been defined yet.</p>';
-      };
-      
-      li.appendChild(delBtn);
-      ul.appendChild(li);
-  };
+      const li = document.createElement('li');
+      li.className = 'list-group-item d-flex justify-content-between align-items-center';
+      li.dataset.field = fieldVal;
+      li.dataset.operator = opVal;
+      li.dataset.value = valueVal;
+      li.innerHTML = `<span><strong>${fieldLabel}</strong> <small class="text-muted">(${opLabel})</small> = ${valueVal}</span>`;
+
+      const btnGroup = document.createElement('div');
+      btnGroup.className = 'd-flex gap-1';
+
+      const editBtn = document.createElement('button');
+      editBtn.className = 'btn btn-sm text-primary';
+      editBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+      editBtn.type = 'button';
+      editBtn.title = 'Edit filter';
+      editBtn.onclick = () => {
+        const valInput = UI.get('rule-filter-value');
+
+        if (fieldSelect) {
+          fieldSelect.value = fieldVal;
+          if (fieldSelect.selectize) fieldSelect.selectize.setValue(fieldVal, false);
+        }
+        if (opSelect) {
+          opSelect.value = opVal;
+          if (opSelect.selectize) opSelect.selectize.setValue(opVal, false);
+        }
+        if (valInput) {
+          valInput.value = valueVal;
+          valInput.focus();
+        }
+
+        li.remove();
+        if (!ul.children.length) listWrap.innerHTML = '<p class="text-muted mb-0">No filters have been defined yet.</p>';
+      };
+
+      const delBtn = document.createElement('button');
+      delBtn.className = 'btn btn-sm text-danger';
+      delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+      delBtn.type = 'button';
+      delBtn.title = 'Delete filter';
+      delBtn.onclick = () => {
+        li.remove();
+        if (!ul.children.length) listWrap.innerHTML = '<p class="text-muted mb-0">No filters have been defined yet.</p>';
+      };
+
+      btnGroup.appendChild(editBtn);
+      btnGroup.appendChild(delBtn);
+      li.appendChild(btnGroup);
+      ul.appendChild(li);
+  };
 
   // Initializes the add filter button
   window.initFiltersUI = function() {
