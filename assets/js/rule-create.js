@@ -519,10 +519,11 @@ const UI = {
       btnGroup.className = 'd-flex gap-1';
 
       const editBtn = document.createElement('button');
-      editBtn.className = 'btn btn-sm text-primary';
+      editBtn.className = 'btn btn-sm text-primary myddleware-blue-pen';
       editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
       editBtn.type = 'button';
       editBtn.title = 'Edit filter';
+      editBtn.style.setProperty('color', '#05bfe6', 'important');
       editBtn.onclick = () => {
         const valInput = UI.get('rule-filter-value');
 

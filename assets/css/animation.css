@@ -761,3 +761,7 @@ label[for="update_password_oldPassword"] {
     top: 278px;
     position: absolute;
 }
+
+.myddleware-blue-pen {
+    color: #0d6efd !important;
+}
