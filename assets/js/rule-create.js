@@ -391,6 +391,13 @@ const UI = {
     try {
       const html = await UI.fetchHtml(pathFilter, params);
       EL.step4Body.innerHTML = html;
+
+      // Wait for DOM to be fully parsed (fixes Firefox timing issue)
+      await new Promise(resolve => {
+        requestAnimationFrame(() => {
+          requestAnimationFrame(resolve);
+        });
+      });
       if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
       if (window.initFiltersUI) window.initFiltersUI();
       if (window.initMappingUI) window.initMappingUI();
@@ -804,6 +811,13 @@ const UI = {
       if(step4) {
           UI.toggle(step4, true);
           await window.mydLoadRuleFilters();
+          
+          // Ensure DOM elements are accessible before adding filter rows (Firefox fix)
+          await new Promise(resolve => {
+            requestAnimationFrame(() => {
+              requestAnimationFrame(resolve);
+            });
+          });
           
           if (ruleData.filters && ruleData.filters.length > 0) {
               if (typeof window.addFilterRow === 'function') {
