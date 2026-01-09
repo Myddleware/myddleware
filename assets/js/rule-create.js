@@ -527,7 +527,7 @@ const UI = {
 
       const editBtn = document.createElement('button');
       editBtn.className = 'btn btn-sm text-primary';
-      editBtn.innerHTML = '<i class="fa-solid fa-pen-to-square"></i>';
+      editBtn.innerHTML = '<i class="fa-solid fa-pen"></i>';
       editBtn.type = 'button';
       editBtn.title = 'Edit filter';
       editBtn.onclick = () => {
