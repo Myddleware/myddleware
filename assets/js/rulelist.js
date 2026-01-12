@@ -14,8 +14,9 @@ $(function(){
 
   $("#rulenamesearchbar").on("submit", function (e) { e.preventDefault(); });
 
-  // save the initial table state somewhere accessible
+  // save the initial table state and pagination state
   var initialTableState = $("#tbody_rule_list").html();
+  var initialPaginationState = $("#pagination_container").html();
 
   var debounceTimer = null;
   var currentXhr = null;
@@ -30,6 +31,7 @@ $(function(){
       if (q.length === 0) {
         if (currentXhr) { currentXhr.abort(); currentXhr = null; }
         $("#tbody_rule_list").html(initialTableState);
+        $("#pagination_container").html(initialPaginationState);
         return;
       }
 
@@ -55,6 +57,12 @@ $(function(){
             $("#tbody_rule_list").html('<tr><td colspan="100%" class="text-center">No rules found</td></tr>');
           } else {
             $("#tbody_rule_list").html(html);
+          }
+
+          // Update pagination with filtered results
+          var $pagination = $resp.find("#pagination_container");
+          if ($pagination.length) {
+            $("#pagination_container").html($pagination.html());
           }
         },
         error: function (xhr, status) {
