@@ -57,6 +57,11 @@
     </div>
   </div>
 
+  <script>
+    var lookupgetrule = "{{ path('get_rules_for_lookup') }}";
+    var lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
+  </script>
+
   {# Offcanvas gauche (inchangé) #}
   <div class="offcanvas offcanvas-start" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="ruleCreateNav" aria-labelledby="ruleCreateNavLabel">
     <div class="offcanvas-header">
