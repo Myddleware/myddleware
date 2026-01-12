@@ -361,7 +361,14 @@ class TemplateManager
                         $fieldObject->setRule($ruleObject);
                         $fieldObject->setTarget($field['target']);
                         $fieldObject->setSource($field['source']);
-                        $fieldObject->setFormula($field['formula']);
+
+                        $formula = $field['formula'];
+                        if (!empty($formula) && strpos($formula, 'lookup(') !== false) {
+                            if (preg_match_all('/lookup\(\{[^}]+\},\s*"([^"]+)"/', $formula, $matches)) {
+                                foreach ($matches[1] as $ruleSlug) {
+                                    if (isset($this->ruleNameSlugArray[$ruleSlug])) {
+                                        $ruleId = $this->ruleNameSlugArray[$ruleSlug];
+                                        $formula = str_replace('"'.$ruleSlug.'"', '"'.$ruleId.'"', $formula);
                         $this->entityManager->persist($fieldObject);
                     }
                 }
