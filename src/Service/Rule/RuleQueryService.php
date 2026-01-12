@@ -170,6 +170,7 @@ public function prepareDataForView(Rule $rule): array
 
         $ruleParams = [
             'description' => $params['description'] ?? '',
+            'bidirectional' => $params['bidirectional'] ?? '',
         ];
 
         // 3. Filtres
