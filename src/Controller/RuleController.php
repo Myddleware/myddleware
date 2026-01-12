@@ -602,10 +602,21 @@ class RuleController extends AbstractController
     #[Route('/get-rules-for-lookup', name: 'get_rules_for_lookup', methods: ['GET'])]
     public function getRulesForLookup(Request $request): JsonResponse
     {
-        $rules = $this->entityManager->getRepository(Rule::class)->findBy([
+        $sourceConnector = $request->query->getInt('arg1', 0);
+        $targetConnector = $request->query->getInt('arg2', 0);
+
+        $rulesNormal = $this->entityManager->getRepository(Rule::class)->findBy([
+            'deleted' => 0,
+            'connectorSource' => $sourceConnector,
+            'connectorTarget' => $targetConnector
+        ]);
+
+        // Find rules with reversed connectors (target -> source) for reverse lookup
+        $rulesReversed = $this->entityManager->getRepository(Rule::class)->findBy([
             'deleted' => 0,
             'connectorSource' => $request->query->getInt('arg1', 0),
             'connectorTarget' => $request->query->getInt('arg2', 0)
+            'connectorSource' => $targetConnector,
         ]);
         return new JsonResponse(array_map(fn($r) => ['id' => $r->getId(), 'name' => $r->getName()], $rules));
     }
