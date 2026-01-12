@@ -837,49 +837,28 @@ window.ensureDuplicateMappingRow = function(targetField) {
         if (el.selectize) el.selectize.disable();
       });
 
-      // Step 3 Hydration
-      const step3 = UI.get('step-3');
-      if(step3) {
-          UI.toggle(step3, true);
-          await window.loadStep3Params();
+      // Step 3 Hydration
+      const step3 = UI.get('step-3');
+      if(step3) {
+          UI.toggle(step3, true);
+          await window.loadStep3Params();
 
-          // Re-initialize Selectize on dynamically loaded fields
-          if (typeof $ !== 'undefined' && $.fn.selectize) {
-              $('.js-select-search', '#step-3-params-container').each(function() {
-                  if (!this.selectize) {
-                      $(this).selectize({
-                          sortField: 'text',
-                          placeholder: 'Search...',
-                          allowEmptyOption: true
-                      });
-                  }
-              });
-          }
-
-          // Small delay to ensure Selectize is fully initialized
-          await new Promise(resolve => setTimeout(resolve, 100));
-
-          if (ruleData.syncOptions?.type) {
-             UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
-          }
-          if (ruleData.syncOptions?.duplicateField) {
-            const d = UI.get('duplicate-field');
-            if (d) {
-                d.disabled = false;
-                UI.setValue(d, ruleData.syncOptions.duplicateField);
-            }
-          }
-          if (ruleData.params) {
-            Object.entries(ruleData.params).forEach(([k, v]) => {
-              if (v) { // Only set non-empty values
-                const el = UI.get(k);
-                if (el) {
-                  UI.setValue(el, v);
-                }
-              }
-            });
-          }
-      }
+          if (ruleData.syncOptions?.type) {
+             UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
+          }
+          if (ruleData.syncOptions?.duplicateField) {
+            const d = UI.get('duplicate-field');
+            if (d) { 
+                d.disabled = false; 
+                UI.setValue(d, ruleData.syncOptions.duplicateField); 
+            }
+          }
+          if (ruleData.params) {
+            Object.entries(ruleData.params).forEach(([k, v]) => {
+              UI.setValue(UI.get(k), v);
+            });
+          }
+      }
 
       // Step 4 Hydration (Filters)
       const step4 = UI.get('step-4');
@@ -1027,8 +1006,8 @@ $(function () {
 
     if (isLookup && typeof lookupgetrule !== 'undefined') {
       $.get(lookupgetrule, { 
-        arg1: UI.get('source-connector')?.value || 0,
-        arg2: UI.get('target-connector')?.value || 0
+        arg1: (typeof connectorsourceidlookup !== 'undefined' ? connectorsourceidlookup : 0), 
+        arg2: (typeof connectortargetidlookup !== 'undefined' ? connectortargetidlookup : 0) 
       }, (res) => {
         UI_WIZ.lookupRule.empty().append(new Option('Select...', ''));
         res.forEach(r => UI_WIZ.lookupRule.append(new Option(r.name, r.id)));
@@ -1097,104 +1076,130 @@ $(function () {
 });
 
 /* ===========================================
- * SAVE (Final rule save)
- * =========================================== */
+ * SAVE (Final rule save)
+ * =========================================== */
 (function () {
-  const saveBtn = UI.get('rule-save');
-  if (!saveBtn) return;
+  const saveBtn = UI.get('rule-save');
+  if (!saveBtn) return;
 
-  function collectData() {
-    const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
-    const mapping = { fields: {}, formulas: {} };
-    
-    rows.forEach(tr => {
-      const tgt = tr.querySelector('.rule-mapping-target')?.value;
-      if (!tgt) return;
-      
-      const srcs = Array.from(tr.querySelectorAll('.mapping-src-badge')).map(b => b.dataset.field);
-      const form = tr.querySelector('.rule-mapping-formula-input')?.value?.trim();
+  function collectData() {
+    const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
+    const mapping = { fields: {}, formulas: {} };
+    
+    rows.forEach(tr => {
+      const tgt = tr.querySelector('.rule-mapping-target')?.value;
+      if (!tgt) return;
+      
+      const srcs = Array.from(tr.querySelectorAll('.mapping-src-badge')).map(b => b.dataset.field);
+      const form = tr.querySelector('.rule-mapping-formula-input')?.value?.trim();
 
-      if (!mapping.fields[tgt]) mapping.fields[tgt] = [];
-      if (!mapping.formulas[tgt]) mapping.formulas[tgt] = [];
+      if (!mapping.fields[tgt]) mapping.fields[tgt] = [];
+      if (!mapping.formulas[tgt]) mapping.formulas[tgt] = [];
 
-      if (srcs.length) mapping.fields[tgt].push(...srcs);
-      if (form) mapping.formulas[tgt].push(form);
-    });
+      if (srcs.length > 0) {
+          mapping.fields[tgt].push(...srcs);
+      } else {
+          mapping.fields[tgt].push('');
+      }
+      
+      if (form) mapping.formulas[tgt].push(form);
+    });
 
-    const filters = [];
-    document.querySelectorAll('#rule-filters-list li').forEach(li => {
-      if (li.dataset.field && li.dataset.operator) {
-        filters.push({
-          field: li.dataset.field,
-          operator: li.dataset.operator,
-          value: li.dataset.value || ''
-        });
-      }
-    });
+    const filters = [];
+    document.querySelectorAll('#rule-filters-list li').forEach(li => {
+      if (li.dataset.field && li.dataset.operator) {
+        filters.push({
+          field: li.dataset.field,
+          operator: li.dataset.operator,
+          value: li.dataset.value || ''
+        });
+      }
+    });
 
-    return { mapping, filters };
-  }
+    return { mapping, filters };
+  }
 
-  async function save() {
-    const url = saveBtn.getAttribute('data-path-save');
-    if (!url) return alert('Missing save endpoint');
+  async function save(e) {
+    if(e) e.preventDefault();
+    const url = saveBtn.getAttribute('data-path-save');
+    if (!url) return alert('Missing save endpoint');
 
-    const fd = new FormData();
-    const add = (k, v) => fd.append(k, v);
-    const getVal = (id) => UI.get(id)?.value || '';
-    const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text || ''; };
+    const fd = new FormData();
+    const add = (k, v) => fd.append(k, v);
+    const getVal = (id) => UI.get(id)?.value || '';
+    const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text || ''; };
 
-    add('name', getVal('rulename'));
+    add('name', getVal('rulename'));
     add('description', getVal('ruledescription'));
-    add('src_solution_id', getVal('source-solution'));
-    add('tgt_solution_id', getVal('target-solution'));
-    add('src_solution_name', getTxt('source-solution').toLowerCase());
-    add('tgt_solution_name', getTxt('target-solution').toLowerCase());
-    add('src_connector_id', getVal('source-connector'));
-    add('tgt_connector_id', getVal('target-connector'));
-    add('src_module', getVal('source-module'));
-    add('tgt_module', getVal('target-module'));
+    add('src_solution_id', getVal('source-solution'));
+    add('tgt_solution_id', getVal('target-solution'));
+    add('src_solution_name', getTxt('source-solution').toLowerCase());
+    add('tgt_solution_name', getTxt('target-solution').toLowerCase());
+    add('src_connector_id', getVal('source-connector'));
+    add('tgt_connector_id', getVal('target-connector'));
+    add('src_module', getVal('source-module'));
+    add('tgt_module', getVal('target-module'));
 
-    const pContainer = UI.get('step-3-params-container');
-    if (pContainer) {
-      pContainer.querySelectorAll('input, select, textarea').forEach(el => {
-        if (!el.name || el.disabled) return;
-        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
-        add(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
-      });
-    } else {
-        const mode = UI.get('mode') || UI.get('sync-mode');
-        if(mode) add('sync_mode', mode.value);
-    }
+    const pContainer = UI.get('step-3-params-container');
+    if (pContainer) {
+      pContainer.querySelectorAll('input, select, textarea').forEach(el => {
+        if (!el.name || el.disabled) return;
+        if ((el.type === 'checkbox' || el.type === 'radio') && !el.checked) return;
+        let name = el.name;
+        let value = el.value;
 
-    const { mapping, filters } = collectData();
-    add('filters', JSON.stringify(filters));
-    Object.entries(mapping.fields).forEach(([t, arr]) => arr.forEach(v => add(`champs[${t}][]`, v)));
-    Object.entries(mapping.formulas).forEach(([t, arr]) => arr.forEach(v => add(`formules[${t}][]`, v)));
+        if (el.id === 'duplicate-field' && el.multiple) {
+            let vals = [];
+            if (el.selectize) vals = el.selectize.getValue();
+            else vals = Array.from(el.selectedOptions).map(o => o.value);
 
-    if (window.initialRule?.mode === 'edit') add('rule_id', window.initialRule.id);
+            if (!Array.isArray(vals)) vals = [vals];
+            
+            value = vals.join(';');
+            name = name.replace('[]', '');
+        }
 
-    saveBtn.disabled = true;
-    const oldHtml = saveBtn.innerHTML;
-    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+        add(name === 'mode' ? 'sync_mode' : name, value);
+      });
+    } else {
+        const mode = UI.get('mode') || UI.get('sync-mode');
+        if(mode) add('sync_mode', mode.value);
+    }
 
-    try {
-      const res = await fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });
-      const text = await res.text();
-      if (!res.ok) throw new Error(text);
-      
-      const json = JSON.parse(text);
-      if (json.redirect) window.location.assign(json.redirect);
-      else alert('Rule saved.');
-    } catch (e) {
-      alert('Save failed: ' + e.message);
-    } finally {
-      saveBtn.disabled = false;
-      saveBtn.innerHTML = oldHtml;
-    }
-  }
+    const { mapping, filters } = collectData();
+    add('filters', JSON.stringify(filters));
+    Object.entries(mapping.fields).forEach(([t, arr]) => arr.forEach(v => add(`champs[${t}][]`, v)));
+    Object.entries(mapping.formulas).forEach(([t, arr]) => arr.forEach(v => add(`formules[${t}][]`, v)));
 
-  saveBtn.addEventListener('click', save);
+    if (window.initialRule?.mode === 'edit') add('rule_id', window.initialRule.id);
+
+    saveBtn.disabled = true;
+    const oldHtml = saveBtn.innerHTML;
+    saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
+
+    try {
+      const res = await fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });
+      const text = await res.text();    
+      if (!res.ok) throw new Error(text);
+      
+      let json;
+      try { json = JSON.parse(text); } catch(e) { throw new Error(text); }
+
+      if (json.error) throw new Error(json.error); // Gestion des erreurs renvoyées par le serveur
+      if (json.redirect) window.location.assign(json.redirect);
+      else alert('Rule saved.');
+    } catch (e) {
+      console.error(e);
+      let msg = e.message;
+      if (msg.includes('Array to string')) msg = 'Server Error: Format de données incorrect (Duplicate field).';
+      alert('Save failed: ' + msg);
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = oldHtml;
+    }
+  }
+
+  saveBtn.addEventListener('click', save);
 })();
 
 /* ===========================================
