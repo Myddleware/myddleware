@@ -614,11 +614,26 @@ class RuleController extends AbstractController
         // Find rules with reversed connectors (target -> source) for reverse lookup
         $rulesReversed = $this->entityManager->getRepository(Rule::class)->findBy([
             'deleted' => 0,
-            'connectorSource' => $request->query->getInt('arg1', 0),
-            'connectorTarget' => $request->query->getInt('arg2', 0)
             'connectorSource' => $targetConnector,
+            'connectorTarget' => $sourceConnector
         ]);
-        return new JsonResponse(array_map(fn($r) => ['id' => $r->getId(), 'name' => $r->getName()], $rules));
+
+        // Merge both results and remove duplicates
+        $allRules = array_merge($rulesNormal, $rulesReversed);
+
+        // exclude the current rule
+        $currentRuleId = null;
+        $referer = $request->headers->get('referer');
+        if ($referer) {
+            $parts = explode('/rule/', $referer);
+            if (isset($parts[1])) {
+                $subParts = explode('/', $parts[1]);
+                $currentRuleId = $subParts[0];
+            }
+        }
+        if ($currentRuleId) {
+            $allRules = array_filter($allRules, fn($r) => $r->getId() !== $currentRuleId);
+        }
     }
 
     #[Route('/get-fields-for-rule', name: 'rule_get_fields_for_rule', methods: ['GET'])]
