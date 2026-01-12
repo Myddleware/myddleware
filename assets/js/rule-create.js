@@ -808,6 +808,24 @@ const UI = {
         if (el.selectize) el.selectize.disable();
       });
 
+      // Step 3 Hydration
+      const step3 = UI.get('step-3');
+      if(step3) {
+          UI.toggle(step3, true);
+          await window.loadStep3Params();
+
+          // Re-initialize Selectize on dynamically loaded fields
+          if (typeof $ !== 'undefined' && $.fn.selectize) {
+              $('.js-select-search', '#step-3-params-container').each(function() {
+                  if (!this.selectize) {
+                      $(this).selectize({
+                          sortField: 'text',
+                          placeholder: 'Search...',
+                          allowEmptyOption: true
+                      });
+                  }
+              });
+          }
 
       // Step 4 Hydration (Filters)
       const step4 = UI.get('step-4');
