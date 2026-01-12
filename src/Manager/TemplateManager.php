@@ -369,6 +369,14 @@ class TemplateManager
                                     if (isset($this->ruleNameSlugArray[$ruleSlug])) {
                                         $ruleId = $this->ruleNameSlugArray[$ruleSlug];
                                         $formula = str_replace('"'.$ruleSlug.'"', '"'.$ruleId.'"', $formula);
+                                    } else {
+                                        throw new Exception('Rule with slug "'.$ruleSlug.'" referenced in lookup formula not found. Make sure the referenced rule is defined before this rule in the template.');
+                                    }
+                                }
+                            }
+                        }
+
+                        $fieldObject->setFormula($formula);
                         $this->entityManager->persist($fieldObject);
                     }
                 }
