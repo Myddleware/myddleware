@@ -1348,7 +1348,8 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	display: contents;
 }
 
-.badge-rule-template{	
+.badge-rule-template{
+	min-width: 60px;	
     font-size: smaller;
     border-radius: 20px;
     background-color: #fff;

@@ -312,22 +312,40 @@ const UI = {
       EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
       const html = await UI.fetchHtml(step3ParamsPath, params);
       EL.paramsContainer.innerHTML = html;
-
-      // Handling dynamically loaded fields (Sync mode, Duplication)
       const modeSelect = UI.get('mode');
       if (modeSelect) {
         modeSelect.addEventListener('change', () => { if (step3IsComplete()) revealStep4and5(); });
         if (modeSelect.value) revealStep4and5();
       }
 
-      const dupSelect = UI.get('duplicate-field');
-      if (dupSelect) {
-        dupSelect.addEventListener('change', () => {
-          if (step3IsComplete()) revealStep4and5();
-          const label = dupSelect.options[dupSelect.selectedIndex]?.textContent?.trim();
-          if (label && window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(label);
-        });
-      }
+     const dupSelect = UI.get('duplicate-field');
+      if (dupSelect) {
+        dupSelect.addEventListener('change', () => {
+          if (step3IsComplete()) revealStep4and5();
+          
+          const tbody = UI.get('rule-mapping-body');
+          if (tbody) {
+              tbody.querySelectorAll('button.text-danger').forEach(btn => {
+                  btn.disabled = false;
+                  btn.style.opacity = '1';
+                  btn.style.pointerEvents = 'auto';
+                  btn.title = '';
+              });
+          }
+          let selectedValues = [];
+          if (dupSelect.selectize) {
+              const val = dupSelect.selectize.getValue();
+              selectedValues = Array.isArray(val) ? val : (val ? [val] : []);
+          } else {
+              selectedValues = Array.from(dupSelect.selectedOptions).map(opt => opt.value);
+          }
+          if (window.ensureDuplicateMappingRow) {
+              selectedValues.forEach(val => {
+                  if(val) window.ensureDuplicateMappingRow(val);
+              });
+          }
+        });
+      }
     } catch (e) {
       EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Unable to load parameters. (' + e.message + ')</div>';
     }
@@ -712,23 +730,34 @@ const UI = {
     btn.addEventListener('click', () => window.addMappingRow(tbody));
   };
 
-  // Ensures a mapping row exists for the chosen duplicate field
-  window.ensureDuplicateMappingRow = function(targetField) {
-    const tbody = UI.get('rule-mapping-body');
-    if (!tbody) return;
-    window.initMappingUI();
+window.ensureDuplicateMappingRow = function(targetField) {
+    const tbody = UI.get('rule-mapping-body');
+    if (!tbody || !targetField) return;
+    let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
+        const sel = tr.querySelector('.rule-mapping-target');
+        return sel && (sel.value === targetField || (sel.options[sel.selectedIndex]?.text.trim() === targetField));
+    });
+    if (!row) {
+        window.addMappingRow(tbody); 
+        row = tbody.lastElementChild;
 
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    const exists = rows.some(tr => tr.querySelector('.rule-mapping-target')?.value === targetField);
-    if (exists) return;
-
-    let row = rows.find(tr => !tr.querySelector('.rule-mapping-target')?.value);
-    if (!row) { window.addMappingRow(tbody); row = tbody.lastElementChild; }
-    
-    const sel = row.querySelector('.rule-mapping-target');
-    const opt = Array.from(sel.options).find(o => o.value === targetField || o.text.trim() === targetField);
-    if (opt) sel.value = opt.value;
-  };
+        const sel = row.querySelector('.rule-mapping-target');
+        let opt = Array.from(sel.options).find(o => o.value === targetField || o.text.trim() === targetField);
+        if (opt) {
+            sel.value = opt.value;
+            if (sel.selectize) sel.selectize.setValue(opt.value);
+        }
+    }
+    if (row) {
+        const delBtn = row.querySelector('button.text-danger');
+        if (delBtn) {
+            delBtn.disabled = true;
+            delBtn.style.opacity = '0.3';
+            delBtn.style.pointerEvents = 'none';
+            delBtn.title = 'Champ obligatoire';
+        }
+    }
+  };
 })();
 
 /* ============================================================
@@ -1348,6 +1377,7 @@ $(document).ready(function() {
       if (!name || !tplName) return alert('Missing Name or Template selection');
 
       saveBtn.disabled = true;
+      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
       try {
         const res = await fetch(url, {
           method: 'POST',
