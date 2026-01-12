@@ -998,8 +998,8 @@ $(function () {
 
     if (isLookup && typeof lookupgetrule !== 'undefined') {
       $.get(lookupgetrule, { 
-        arg1: (typeof connectorsourceidlookup !== 'undefined' ? connectorsourceidlookup : 0), 
-        arg2: (typeof connectortargetidlookup !== 'undefined' ? connectortargetidlookup : 0) 
+        arg1: UI.get('source-connector')?.value || 0,
+        arg2: UI.get('target-connector')?.value || 0
       }, (res) => {
         UI_WIZ.lookupRule.empty().append(new Option('Select...', ''));
         res.forEach(r => UI_WIZ.lookupRule.append(new Option(r.name, r.id)));
