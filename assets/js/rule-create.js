@@ -827,6 +827,31 @@ const UI = {
               });
           }
 
+          // Small delay to ensure Selectize is fully initialized
+          await new Promise(resolve => setTimeout(resolve, 100));
+
+          if (ruleData.syncOptions?.type) {
+             UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
+          }
+          if (ruleData.syncOptions?.duplicateField) {
+            const d = UI.get('duplicate-field');
+            if (d) {
+                d.disabled = false;
+                UI.setValue(d, ruleData.syncOptions.duplicateField);
+            }
+          }
+          if (ruleData.params) {
+            Object.entries(ruleData.params).forEach(([k, v]) => {
+              if (v) { // Only set non-empty values
+                const el = UI.get(k);
+                if (el) {
+                  UI.setValue(el, v);
+                }
+              }
+            });
+          }
+      }
+
       // Step 4 Hydration (Filters)
       const step4 = UI.get('step-4');
       if(step4) {
