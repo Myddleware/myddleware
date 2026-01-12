@@ -808,28 +808,6 @@ const UI = {
         if (el.selectize) el.selectize.disable();
       });
 
-      // Step 3 Hydration
-      const step3 = UI.get('step-3');
-      if(step3) {
-          UI.toggle(step3, true);
-          await window.loadStep3Params();
-
-          if (ruleData.syncOptions?.type) {
-             UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
-          }
-          if (ruleData.syncOptions?.duplicateField) {
-            const d = UI.get('duplicate-field');
-            if (d) { 
-                d.disabled = false; 
-                UI.setValue(d, ruleData.syncOptions.duplicateField); 
-            }
-          }
-          if (ruleData.params) {
-            Object.entries(ruleData.params).forEach(([k, v]) => {
-              UI.setValue(UI.get(k), v);
-            });
-          }
-      }
 
       // Step 4 Hydration (Filters)
       const step4 = UI.get('step-4');
