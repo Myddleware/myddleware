@@ -634,6 +634,18 @@ class RuleController extends AbstractController
         if ($currentRuleId) {
             $allRules = array_filter($allRules, fn($r) => $r->getId() !== $currentRuleId);
         }
+
+        // Remove duplicates based on rule ID
+        $uniqueRules = [];
+        $seenIds = [];
+        foreach ($allRules as $rule) {
+            if (!in_array($rule->getId(), $seenIds)) {
+                $uniqueRules[] = $rule;
+                $seenIds[] = $rule->getId();
+            }
+        }
+
+        return new JsonResponse(array_map(fn($r) => ['id' => $r->getId(), 'name' => $r->getName()], $uniqueRules));
     }
 
     #[Route('/get-fields-for-rule', name: 'rule_get_fields_for_rule', methods: ['GET'])]
