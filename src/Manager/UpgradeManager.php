@@ -27,6 +27,7 @@ namespace App\Manager;
 
 use Exception;
 use App\Entity\Config;
+use App\Entity\RuleRelationShip;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Process\Process;
@@ -332,6 +333,25 @@ class UpgradeManager
     // Function to customize the update process
     protected function beforeUpdate($output)
     {
+        // Check for active relationships before upgrade
+        $activeRelationships = $this->entityManager
+            ->getRepository(RuleRelationShip::class)
+            ->createQueryBuilder('rr')
+            ->select('COUNT(rr.id)')
+            ->where('rr.deleted = :deleted')
+            ->setParameter('deleted', false)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($activeRelationships > 0) {
+            throw new \Exception(sprintf(
+                'Impossible de procéder à l\'upgrade : %d relation(s) active(s) détectée(s) dans la table rulerelationship. ' .
+                'Veuillez supprimer ou désactiver toutes les relations avant de lancer l\'upgrade.',
+                $activeRelationships
+            ));
+        }
+
+        $output->writeln('<info>Vérification des relations : OK (aucune relation active)</info>');
     }
 
     // Function to customize the update process
