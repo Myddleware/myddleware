@@ -83,6 +83,12 @@ $(function(){
     }, 200);
   });
 
+  $("#clear_rule_search").on("click", function () {
+    // Redirect to base rule list URL (removes all params including rule_name and page)
+    var baseUrl = $("#rule_name_searchbar").data("url");
+    window.location.href = baseUrl;
+  });
+
 // --For 'rule name' in the list view
 $('.edit-button-name-list').on('click', function () {        
     var field = $(this).closest('td'); 
