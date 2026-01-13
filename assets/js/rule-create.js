@@ -126,7 +126,6 @@ const UI = {
     step2Section.style.opacity = 0;
     step2Section.style.transition = 'opacity .25s ease';
     requestAnimationFrame(() => { step2Section.style.opacity = 1; });
-    step2Section.scrollIntoView({ behavior: 'smooth', block: 'start' });
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
@@ -931,29 +930,6 @@ window.ensureDuplicateMappingRow = function(targetField) {
     hydrateEditFromJson();
   }
 })();
-
-        document.addEventListener('DOMContentLoaded', function() {
-            if (window.location.href.indexOf('edit') === -1) {
-                return;
-            }
-
-            let attempts = 0;
-            const maxAttempts = 50; // 10 seconds total (50 * 200ms)
-
-            const checkAndScroll = setInterval(() => {
-                const element = document.getElementById('step-5');
-
-                if (element && !element.classList.contains('d-none')) {
-                    clearInterval(checkAndScroll);
-
-                    setTimeout(() => {
-                        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }, 1000);
-                } else if (++attempts >= maxAttempts) {
-                    clearInterval(checkAndScroll);
-                }
-            }, 200);
-        });
 
 /* ===========================================
  * FUNCTION WIZARD (Formula Editor)
