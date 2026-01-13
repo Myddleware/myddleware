@@ -21,7 +21,7 @@
       <div class="row g-3">
         <div class="col-12">
           <label class="form-label">Solution</label>
-          <select id="source-solution" class="form-select form-select-lg" required>
+          <select id="source-solution" class="js-select-search" required>
             <option value="" selected disabled></option>
             {% for sol in solutions|default([]) %}
               <option value="{{ sol.id }}" data-solution-slug="{{ sol.name|lower }}">{{ sol.name }}</option>
@@ -32,7 +32,7 @@
         <div class="col-12">
           <label class="form-label">Connector</label>
           <div class="position-relative">
-            <select id="source-connector" class="form-select form-select-lg" disabled required>
+            <select id="source-connector" class="js-select-search" disabled required>
               <option value="" selected disabled></option>
             </select>
             <div id="source-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-5 d-none">
@@ -45,7 +45,7 @@
         <div class="col-12" id="source-module-group">
           <label class="form-label">Module</label>
           <div class="position-relative">
-            <select id="source-module" class="form-select form-select-lg" disabled required>
+            <select id="source-module" class="js-select-search" disabled required>
               <option value="" disabled selected></option>
             </select>
             <div id="source-module-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-5 d-none">
@@ -64,7 +64,7 @@
       <div class="row g-3">
         <div class="col-12">
           <label class="form-label">Solution</label>
-          <select id="target-solution" class="form-select form-select-lg" required>
+          <select id="target-solution" class="js-select-search" required>
             <option value="" selected disabled></option>
             {% for sol in solutions|default([]) %}
               <option value="{{ sol.id }}" data-solution-slug="{{ sol.name|lower }}">{{ sol.name }}</option>
@@ -75,7 +75,7 @@
         <div class="col-12">
           <label class="form-label">Connector</label>
           <div class="position-relative">
-            <select id="target-connector" class="form-select form-select-lg" disabled required>
+            <select id="target-connector" class="js-select-search" disabled required>
               <option value="" selected disabled></option>
             </select>
             <div id="target-connector-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-5 d-none">
@@ -88,7 +88,7 @@
         <div class="col-12" id="target-module-group">
           <label class="form-label">Module</label>
           <div class="position-relative">
-            <select id="target-module" class="form-select form-select-lg" disabled required>
+            <select id="target-module" class="js-select-search" disabled required>
               <option value="" disabled selected></option>
             </select>
             <div id="target-module-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-5 d-none">

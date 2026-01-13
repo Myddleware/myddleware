@@ -29,19 +29,21 @@
         </div>
     {% endfor %}
 
-    {% if duplicate_target is defined and duplicate_target is not empty %}
-        <div class="col-12 col-md-6">
-            <div class="form-group">
-                <label class="form-label" for="duplicate-field">
-                    {{ 'create_rule.step5.params.duplicate'|trans }}
-                </label>
-                <select id="duplicate-field" name="duplicate_field[]" multiple class="form-select form-select-lg js-select-search">
-                    <option value="" selected disabled></option>
-                    {% for key, label in duplicate_target %}
-                        <option value="{{ label }}">{{ label }}</option>
-                    {% endfor %}
-                </select>
+{% if duplicate_target is defined and duplicate_target is not empty %}
+    <div class="col-12 col-md-6">
+        <div class="form-group">
+            <label class="form-label" for="duplicate-field">
+                {{ 'create_rule.step5.params.duplicate'|trans }}
+            </label>
+            <select id="duplicate-field" class="js-select-search" style="width: 100%;">
+                <option value="" selected disabled></option>
+                {% for key, label in duplicate_target %}
+                    <option value="{{ label }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+            <div id="duplicate-badges-container" class="mapping-src-badges pt-1">
             </div>
         </div>
-    {% endif %}
+    </div>
+{% endif %}
 </div>

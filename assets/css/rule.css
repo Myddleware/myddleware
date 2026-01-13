@@ -1141,7 +1141,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 .formula-slot {
 	flex: 1 1 auto;
-	padding: .375rem .5rem;
+    padding: .875rem .5rem;
 	border-radius: .5rem;
 	background: #f8fafc;
 	white-space: nowrap;
@@ -1382,4 +1382,34 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .js-template-choose:hover{
 	background-color: #05bfe6 !important;
 	color: #ffffff !important;
+}
+
+.selectize-control.js-select-search .selectize-input {
+    min-height: 48px !important;
+    padding: 0.5rem 1rem !important;
+    font-size: 1.25rem !important;
+    line-height: 1.5 !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.3rem !important;
+    background-color: #fff !important;
+    display: flex !important;
+    align-items: center !important;
+    box-shadow: none !important;
+    background-image: none !important;
+}
+
+.selectize-control.js-select-search .selectize-input.focus {
+    border-color: #86b7fe !important;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
+    outline: 0 !important;
+}
+
+.selectize-control.js-select-search .selectize-input input {
+    font-size: 1.25rem !important;
+    line-height: 1.5 !important;
+}
+
+.selectize-dropdown {
+    font-size: 1.25rem !important;
+    line-height: 1.5 !important;
 }
