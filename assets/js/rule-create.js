@@ -648,125 +648,146 @@ const UI = {
     return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   }
 
-  // Adds a row to the Mapping table (Step 5)
-  window.addMappingRow = function(tbody) {
+ // Adds a row to the Mapping table (Step 5)
+  window.addMappingRow = function(tbody) {
     // Read fields from embedded JSON (from filter template)
-    let srcFields = null, tgtFields = null;
-    const fieldsDataEl = document.getElementById('rule-fields-data');
-    if (fieldsDataEl) {
-      try {
-        const data = JSON.parse(fieldsDataEl.textContent);
-        srcFields = data.source || {};
-        tgtFields = data.target || {};
-      } catch (e) { console.warn('Error parsing fields data:', e); }
-    }
+    let srcFields = null, tgtFields = null;
+    const fieldsDataEl = document.getElementById('rule-fields-data');
+    if (fieldsDataEl) {
+      try {
+        const data = JSON.parse(fieldsDataEl.textContent);
+        srcFields = data.source || {};
+        tgtFields = data.target || {};
+      } catch (e) { console.warn('Error parsing fields data:', e); }
+    }
 
-    const tr = document.createElement('tr');
-    tr.dataset.rowId = genRowId();
+    const tr = document.createElement('tr');
+    tr.dataset.rowId = genRowId();
 
     // Target Select
-    const tdTgt = document.createElement('td');
-    const tgtSel = createMappingSelect(tgtFields);
-    tgtSel.classList.add('rule-mapping-target', 'js-select-search'); // Class for auto Selectize
-    tdTgt.appendChild(tgtSel);
+    const tdTgt = document.createElement('td');
+    const tgtSel = createMappingSelect(tgtFields);
+    tgtSel.classList.add('rule-mapping-target', 'js-select-search'); // Class for auto Selectize
+    tdTgt.appendChild(tgtSel);
 
-    // Source Select + Badges (Multiple Source Fields)
-    const tdSrc = document.createElement('td');
-    const srcWrapper = document.createElement('div');
-    srcWrapper.className = 'mapping-src-wrapper';
-    const srcSel = createMappingSelect(srcFields);
-    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search'); // Class for auto Selectize
-    const badgesDiv = document.createElement('div');
-    badgesDiv.className = 'mapping-src-badges pt-1';
+    // Source Select + Badges (Multiple Source Fields)
+    const tdSrc = document.createElement('td');
+    const srcWrapper = document.createElement('div');
+    srcWrapper.className = 'mapping-src-wrapper';
+    const srcSel = createMappingSelect(srcFields);
+    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search'); 
+    const badgesDiv = document.createElement('div');
+    badgesDiv.className = 'mapping-src-badges pt-1';
 
     // Manage multiple addition (Badges)
-    srcSel.addEventListener('change', () => {
-      const val = srcSel.value;
-      if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
-        srcSel.value = ''; return;
-      }
-      const txt = srcSel.options[srcSel.selectedIndex].text;
-      const badge = document.createElement('span');
-      badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-      badge.dataset.field = val;
-      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
-      badge.querySelector('button').onclick = () => badge.remove();
-      badgesDiv.appendChild(badge);
-      srcSel.value = '';
-    });
+    srcSel.addEventListener('change', () => {
+      const val = srcSel.value;    
+      if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
+        if(srcSel.selectize) srcSel.selectize.clear(true);
+        else srcSel.value = '';
+        return;
+      }
+      let txt = val;
+      if (srcSel.selectize) {
+          const item = srcSel.selectize.getItem(val);
+          if (item.length) txt = item.text();
+      } else if (srcSel.options[srcSel.selectedIndex]) {
+          txt = srcSel.options[srcSel.selectedIndex].text;
+      }
+      const badge = document.createElement('span');
+      badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
+      badge.dataset.field = val;
+      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;  
+      badge.querySelector('button').onclick = () => badge.remove();
+      badgesDiv.appendChild(badge);
+    
+      if (srcSel.selectize) {
+          srcSel.selectize.clear(true);
+      } else {
+          srcSel.value = '';
+      }
+    });
 
-    srcWrapper.append(srcSel, badgesDiv);
-    tdSrc.appendChild(srcWrapper);
+    srcWrapper.append(srcSel, badgesDiv);
+    tdSrc.appendChild(srcWrapper);
 
     // Actions (Formula Button)
-    const tdAct = document.createElement('td');
-    tdAct.className = 'd-flex align-items-center';
-    const slot = document.createElement('div');
-    slot.className = 'formula-slot is-empty';
-    slot.textContent = '...';
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-sm ms-2 rule-mapping-formula';
-    btn.innerHTML = '<i class="fa fa-code"></i>';
-    btn.type = 'button';
-    btn.setAttribute('data-bs-toggle', 'modal');
-    btn.setAttribute('data-bs-target', '#mapping-formula');
-    
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden'; 
+    const tdAct = document.createElement('td');
+    tdAct.className = 'd-flex align-items-center';
+    const slot = document.createElement('div');
+    slot.className = 'formula-slot is-empty';
+    slot.textContent = '...';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm ms-2 rule-mapping-formula';
+    btn.innerHTML = '<i class="fa fa-code"></i>';
+    btn.type = 'button';
+    btn.setAttribute('data-bs-toggle', 'modal');
+    btn.setAttribute('data-bs-target', '#mapping-formula');
+    
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden'; 
     hidden.className = 'rule-mapping-formula-input'; 
     hidden.name = 'mapping_formula[]';
     hidden.id = `formula-input-${tr.dataset.rowId}`; 
 
-    tdAct.append(slot, btn, hidden);
+    tdAct.append(slot, btn, hidden);
 
     // Open formula modal with row context
-    btn.onclick = () => {
-      const container = UI.get('formula-selected-fields');
-      const modal = UI.get('mapping-formula');
-      if (container && modal) {
-        container.innerHTML = '';
-        const badges = tr.querySelectorAll('.mapping-src-badge');
-        if (!badges.length) container.innerHTML = '<span class="text-muted">No field</span>';
-        
-        badges.forEach(b => {
-          const chip = document.createElement('span');
-          chip.className = 'badge-formula rounded-pill px-3 mb-3';
-          chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
-          chip.dataset.field = b.dataset.field;
-          container.appendChild(chip);
-        });
-        
-        modal.dataset.currentRowId = tr.dataset.rowId;
+    btn.onclick = () => {
+      const container = UI.get('formula-selected-fields');
+      const modal = UI.get('mapping-formula');
+      if (container && modal) {
+        container.innerHTML = '';
+        const badges = tr.querySelectorAll('.mapping-src-badge');
+        if (!badges.length) container.innerHTML = '<span class="text-muted">No field</span>';
+        
+        badges.forEach(b => {
+          const chip = document.createElement('span');
+          chip.className = 'badge-formula rounded-pill px-3 mb-3';
+          chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
+          chip.dataset.field = b.dataset.field;
+          container.appendChild(chip);
+        });
+        
+        modal.dataset.currentRowId = tr.dataset.rowId;
         modal.dataset.currentFormulaInputId = hidden.id;
-        const area = UI.get('area_insert');
-        if (area) area.value = hidden.value || '';
-      }
-    };
+        const area = UI.get('area_insert');
+        if (area) area.value = hidden.value || '';
+      }
+    };
 
     // Delete Row
-    const tdDel = document.createElement('td');
-    tdDel.className = 'text-start';
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-sm text-danger pt-3';
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.type = 'button';
-    delBtn.onclick = () => tr.remove();
-    tdDel.appendChild(delBtn);
+    const tdDel = document.createElement('td');
+    tdDel.className = 'text-start';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm text-danger mt-2';
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.type = 'button';
+    delBtn.onclick = () => tr.remove();
+    tdDel.appendChild(delBtn);
 
-    tr.append(tdTgt, tdSrc, tdAct, tdDel);
-    tbody.appendChild(tr);
-$(tgtSel).selectize({
+    tr.append(tdTgt, tdSrc, tdAct, tdDel);
+    tbody.appendChild(tr);
+    $(tgtSel).selectize({
         sortField: 'text',
         placeholder: 'Search Target...',
-        allowEmptyOption: true
+        allowEmptyOption: true,
+        dropdownParent: 'body',
     });
     
     $(srcSel).selectize({
         sortField: 'text',
         placeholder: 'Search Source...',
-        allowEmptyOption: true
+        allowEmptyOption: true,
+        dropdownParent: 'body',
+        onChange: function(value) {
+            if(value && this.$input && this.$input[0]) {
+                 var event = new Event('change', { bubbles: true });
+                 this.$input[0].dispatchEvent(event);
+            }
+        }
     });
-  };
+  };
 
   window.initMappingUI = function() {
     const btn = UI.get('rule-mapping-add');
@@ -945,30 +966,43 @@ window.ensureDuplicateMappingRow = function(targetField) {
           if (tbody) tbody.innerHTML = ''; 
 
           (ruleData.mapping || []).forEach(row => {
-            window.addMappingRow(tbody);
-            const tr = tbody.lastElementChild;
-            if(!tr) return;
-            
-            const tSel = tr.querySelector('.rule-mapping-target');
-            if (tSel && row.target) tSel.value = row.target;
+            window.addMappingRow(tbody);
+            const tr = tbody.lastElementChild;
+            if(!tr) return;
+            
+            const tSel = tr.querySelector('.rule-mapping-target');
+            if (tSel && row.target) {
+                if (tSel.selectize) {
+                    tSel.selectize.setValue(row.target);
+                } else if ($(tSel)[0] && $(tSel)[0].selectize) {
+                    $(tSel)[0].selectize.setValue(row.target);
+                } else {
+                    tSel.value = row.target;
+                }
+            }
+            const sSel = tr.querySelector('.rule-mapping-source-picker');
+            if (sSel && row.source) {
+              const srcs = Array.isArray(row.source) ? row.source : row.source.split(';');         
+              srcs.filter(Boolean).forEach(s => {
+                if (sSel.selectize) {
+                    sSel.selectize.setValue(s.trim()); 
+                } else if ($(sSel)[0] && $(sSel)[0].selectize) {
+                    $(sSel)[0].selectize.setValue(s.trim());
+                } else {
+                    sSel.value = s.trim();
+                    sSel.dispatchEvent(new Event('change'));
+                }
+              });
+            }
 
-            const sSel = tr.querySelector('.rule-mapping-source-picker');
-            if (sSel && row.source) {
-              const srcs = Array.isArray(row.source) ? row.source : row.source.split(';');
-              srcs.filter(Boolean).forEach(s => {
-                sSel.value = s.trim();
-                sSel.dispatchEvent(new Event('change'));
-              });
-            }
-
-            const hidden = tr.querySelector('.rule-mapping-formula-input');
-            const slot = tr.querySelector('.formula-slot');
-            if (row.formula && hidden) {
-              hidden.value = row.formula;
-              slot.textContent = row.formula;
-              slot.classList.remove('is-empty');
-            }
-          });
+            const hidden = tr.querySelector('.rule-mapping-formula-input');
+            const slot = tr.querySelector('.formula-slot');
+            if (row.formula && hidden) {
+              hidden.value = row.formula;
+              slot.textContent = row.formula;
+              slot.classList.remove('is-empty');
+            }
+          });
       }
     if (ruleData.syncOptions?.duplicateField && typeof window.ensureDuplicateMappingRow === 'function') {
           let raw = ruleData.syncOptions.duplicateField;
