@@ -222,8 +222,6 @@ const UI = {
 
   const step3ParamsPath = EL.step3 ? EL.step3.getAttribute('data-path-params') : null;
   let filtersLoaded = false;
-
-  // Loads data via AJAX and updates a select (with Selectize support)
   async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
     UI.resetSelect(targetSelect, 'Loading...');
     if (feedbackEl) {
@@ -252,6 +250,12 @@ const UI = {
         temp.innerHTML = html;
         Array.from(temp.querySelectorAll('option')).forEach(opt => targetSelect.appendChild(opt));
       }
+
+      if (targetSelect.selectize) {
+          // On force le placeholder à revenir à la normale
+          targetSelect.selectize.settings.placeholder = 'Search...';
+          targetSelect.selectize.updatePlaceholder();
+      }
 
       // synchronization with Selectize
       UI.syncSelectize(targetSelect);
@@ -286,70 +290,106 @@ const UI = {
     return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, group.feed);
   };
 
-  // Loads specific Step 3 parameters (date fields, limit, etc.)
-  async function loadStep3Params() {
-    if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
-    
-    // Check if everything is selected before loading
-    const valSrcConn = EL.src.conn.value;
-    const valTgtConn = EL.tgt.conn.value;
-    const valSrcMod = EL.src.mod.value;
-    const valTgtMod = EL.tgt.mod.value;
-    if (!valSrcConn || !valTgtConn || !valSrcMod || !valTgtMod) {
-        EL.paramsContainer.innerHTML = '';
-        console.groupEnd();
-        return;
-    }
+// Loads specific Step 3 parameters (date fields, limit, etc.)
+  async function loadStep3Params() {
+    if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
+    
+    const valSrcConn = EL.src.conn.value;
+    const valTgtConn = EL.tgt.conn.value;
+    const valSrcMod = EL.src.mod.value;
+    const valTgtMod = EL.tgt.mod.value;
 
-    const params = {
-      src_connector: valSrcConn,
-      tgt_connector: valTgtConn,
-      src_module: valSrcMod,
-      tgt_module: valTgtMod
-    };
-    try {
-      EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
-      const html = await UI.fetchHtml(step3ParamsPath, params);
-      EL.paramsContainer.innerHTML = html;
-      const modeSelect = UI.get('mode');
-      if (modeSelect) {
-        modeSelect.addEventListener('change', () => { if (step3IsComplete()) revealStep4and5(); });
-        if (modeSelect.value) revealStep4and5();
-      }
+    if (!valSrcConn || !valTgtConn || !valSrcMod || !valTgtMod) {
+        EL.paramsContainer.innerHTML = '';
+        return;
+    }
 
-     const dupSelect = UI.get('duplicate-field');
-      if (dupSelect) {
-        dupSelect.addEventListener('change', () => {
-          if (step3IsComplete()) revealStep4and5();
-          
-          const tbody = UI.get('rule-mapping-body');
-          if (tbody) {
-              tbody.querySelectorAll('button.text-danger').forEach(btn => {
-                  btn.disabled = false;
-                  btn.style.opacity = '1';
-                  btn.style.pointerEvents = 'auto';
-                  btn.title = '';
-              });
+    const params = {
+      src_connector: valSrcConn,
+      tgt_connector: valTgtConn,
+      src_module: valSrcMod,
+      tgt_module: valTgtMod
+    };
+
+    try {
+      EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
+      
+      const html = await UI.fetchHtml(step3ParamsPath, params);
+      EL.paramsContainer.innerHTML = html;
+
+      $('.js-select-search', EL.paramsContainer).selectize({
+          sortField: 'text',
+          placeholder: 'Search...',
+          allowEmptyOption: true
+      });
+
+      const dupSelect = UI.get('duplicate-field');
+      const badgesContainer = UI.get('duplicate-badges-container');
+
+      if (dupSelect && badgesContainer) {
+    
+          const addBadge = (val, label) => {
+              // Anti-doublon
+              if (badgesContainer.querySelector(`[data-field="${CSS.escape(val)}"]`)) return;
+
+              const badge = document.createElement('span');
+              badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
+              // badge.style.cssText = "background-color: #f8f9fa; border: 1px solid #ced4da; margin-right:5px; font-size: 0.9em;";
+              badge.dataset.field = val;
+              badge.innerHTML = `<span class="mapping-src-badge-label">${label}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
+
+              badge.querySelector('button').onclick = () => {
+                  badge.remove();
+                  const tbody = UI.get('rule-mapping-body');
+                  if(tbody) {
+                      tbody.querySelectorAll('button.text-danger').forEach(b => {
+                          b.disabled = false; b.style.opacity = '1'; b.style.pointerEvents = 'auto';
+                      });
+                      Array.from(badgesContainer.querySelectorAll('.mapping-src-badge')).forEach(b => {
+                          if(window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(b.dataset.field);
+                      });
+                  }
+              };
+              
+              badgesContainer.appendChild(badge);
+              if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(val);
+          };
+          $(dupSelect).on('change', function() {
+              const val = $(this).val();
+              if (!val) return;
+
+              let text = val;
+              if (this.selectize) {
+                  const item = this.selectize.getItem(val);
+                  if(item.length) text = item.text();
+                  this.selectize.clear(true);
+              } else {
+                  text = this.options[this.selectedIndex].text;
+                  this.value = '';
+              }
+
+              addBadge(val, text);
+              if (step3IsComplete()) revealStep4and5();
+          });
+          if (window.initialRule && window.initialRule.syncOptions?.duplicateField) {
+               const raw = window.initialRule.syncOptions.duplicateField;
+               const vals = raw.split(';');
+               vals.forEach(v => {
+                   if(v) addBadge(v, v);
+               });
           }
-          let selectedValues = [];
-          if (dupSelect.selectize) {
-              const val = dupSelect.selectize.getValue();
-              selectedValues = Array.isArray(val) ? val : (val ? [val] : []);
-          } else {
-              selectedValues = Array.from(dupSelect.selectedOptions).map(opt => opt.value);
-          }
-          if (window.ensureDuplicateMappingRow) {
-              selectedValues.forEach(val => {
-                  if(val) window.ensureDuplicateMappingRow(val);
-              });
-          }
-        });
       }
-    } catch (e) {
-      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Unable to load parameters. (' + e.message + ')</div>';
-    }
-    console.groupEnd();
-  }
+      const modeSelect = UI.get('mode');
+      if (modeSelect) {
+        modeSelect.addEventListener('change', () => { if (step3IsComplete()) revealStep4and5(); });
+        if (modeSelect.value) revealStep4and5();
+      }
+
+    } catch (e) {
+      console.error(e);
+      EL.paramsContainer.innerHTML = '<div class="alert alert-danger">Unable to load parameters. (' + e.message + ')</div>';
+    }
+  }
 
   function step3IsComplete() {
     const modeEl = UI.get('mode');
@@ -599,7 +639,6 @@ const UI = {
 
   function createMappingSelect(fields) {
     const sel = document.createElement('select');
-    sel.className = 'form-select';
     sel.appendChild(new Option('', '', true, true));
     if (fields) Object.entries(fields).forEach(([v, t]) => sel.appendChild(new Option(v, v)));
     return sel;
@@ -609,114 +648,146 @@ const UI = {
     return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   }
 
-  // Adds a row to the Mapping table (Step 5)
-  window.addMappingRow = function(tbody) {
+ // Adds a row to the Mapping table (Step 5)
+  window.addMappingRow = function(tbody) {
     // Read fields from embedded JSON (from filter template)
-    let srcFields = null, tgtFields = null;
-    const fieldsDataEl = document.getElementById('rule-fields-data');
-    if (fieldsDataEl) {
-      try {
-        const data = JSON.parse(fieldsDataEl.textContent);
-        srcFields = data.source || {};
-        tgtFields = data.target || {};
-      } catch (e) { console.warn('Error parsing fields data:', e); }
-    }
+    let srcFields = null, tgtFields = null;
+    const fieldsDataEl = document.getElementById('rule-fields-data');
+    if (fieldsDataEl) {
+      try {
+        const data = JSON.parse(fieldsDataEl.textContent);
+        srcFields = data.source || {};
+        tgtFields = data.target || {};
+      } catch (e) { console.warn('Error parsing fields data:', e); }
+    }
 
-    const tr = document.createElement('tr');
-    tr.dataset.rowId = genRowId();
+    const tr = document.createElement('tr');
+    tr.dataset.rowId = genRowId();
 
     // Target Select
-    const tdTgt = document.createElement('td');
-    const tgtSel = createMappingSelect(tgtFields);
-    tgtSel.classList.add('rule-mapping-target', 'js-select-search'); // Class for auto Selectize
-    tdTgt.appendChild(tgtSel);
+    const tdTgt = document.createElement('td');
+    const tgtSel = createMappingSelect(tgtFields);
+    tgtSel.classList.add('rule-mapping-target', 'js-select-search'); // Class for auto Selectize
+    tdTgt.appendChild(tgtSel);
 
-    // Source Select + Badges (Multiple Source Fields)
-    const tdSrc = document.createElement('td');
-    const srcWrapper = document.createElement('div');
-    srcWrapper.className = 'mapping-src-wrapper';
-    const srcSel = createMappingSelect(srcFields);
-    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search'); // Class for auto Selectize
-    const badgesDiv = document.createElement('div');
-    badgesDiv.className = 'mapping-src-badges pt-1';
+    // Source Select + Badges (Multiple Source Fields)
+    const tdSrc = document.createElement('td');
+    const srcWrapper = document.createElement('div');
+    srcWrapper.className = 'mapping-src-wrapper';
+    const srcSel = createMappingSelect(srcFields);
+    srcSel.classList.add('rule-mapping-source-picker', 'js-select-search'); 
+    const badgesDiv = document.createElement('div');
+    badgesDiv.className = 'mapping-src-badges pt-1';
 
     // Manage multiple addition (Badges)
-    srcSel.addEventListener('change', () => {
-      const val = srcSel.value;
-      if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
-        srcSel.value = ''; return;
-      }
-      const txt = srcSel.options[srcSel.selectedIndex].text;
-      const badge = document.createElement('span');
-      badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-      badge.dataset.field = val;
-      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
-      badge.querySelector('button').onclick = () => badge.remove();
-      badgesDiv.appendChild(badge);
-      srcSel.value = '';
-    });
+    srcSel.addEventListener('change', () => {
+      const val = srcSel.value;    
+      if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
+        if(srcSel.selectize) srcSel.selectize.clear(true);
+        else srcSel.value = '';
+        return;
+      }
+      let txt = val;
+      if (srcSel.selectize) {
+          const item = srcSel.selectize.getItem(val);
+          if (item.length) txt = item.text();
+      } else if (srcSel.options[srcSel.selectedIndex]) {
+          txt = srcSel.options[srcSel.selectedIndex].text;
+      }
+      const badge = document.createElement('span');
+      badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
+      badge.dataset.field = val;
+      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;  
+      badge.querySelector('button').onclick = () => badge.remove();
+      badgesDiv.appendChild(badge);
+    
+      if (srcSel.selectize) {
+          srcSel.selectize.clear(true);
+      } else {
+          srcSel.value = '';
+      }
+    });
 
-    srcWrapper.append(srcSel, badgesDiv);
-    tdSrc.appendChild(srcWrapper);
+    srcWrapper.append(srcSel, badgesDiv);
+    tdSrc.appendChild(srcWrapper);
 
     // Actions (Formula Button)
-    const tdAct = document.createElement('td');
-    tdAct.className = 'd-flex align-items-center';
-    const slot = document.createElement('div');
-    slot.className = 'formula-slot is-empty';
-    slot.textContent = '...';
-    const btn = document.createElement('button');
-    btn.className = 'btn btn-sm ms-2 rule-mapping-formula';
-    btn.innerHTML = '<i class="fa fa-code"></i>';
-    btn.type = 'button';
-    btn.setAttribute('data-bs-toggle', 'modal');
-    btn.setAttribute('data-bs-target', '#mapping-formula');
-    
-    const hidden = document.createElement('input');
-    hidden.type = 'hidden'; 
+    const tdAct = document.createElement('td');
+    tdAct.className = 'd-flex align-items-center';
+    const slot = document.createElement('div');
+    slot.className = 'formula-slot is-empty';
+    slot.textContent = '...';
+    const btn = document.createElement('button');
+    btn.className = 'btn btn-sm ms-2 rule-mapping-formula';
+    btn.innerHTML = '<i class="fa fa-code"></i>';
+    btn.type = 'button';
+    btn.setAttribute('data-bs-toggle', 'modal');
+    btn.setAttribute('data-bs-target', '#mapping-formula');
+    
+    const hidden = document.createElement('input');
+    hidden.type = 'hidden'; 
     hidden.className = 'rule-mapping-formula-input'; 
     hidden.name = 'mapping_formula[]';
     hidden.id = `formula-input-${tr.dataset.rowId}`; 
 
-    tdAct.append(slot, btn, hidden);
+    tdAct.append(slot, btn, hidden);
 
     // Open formula modal with row context
-    btn.onclick = () => {
-      const container = UI.get('formula-selected-fields');
-      const modal = UI.get('mapping-formula');
-      if (container && modal) {
-        container.innerHTML = '';
-        const badges = tr.querySelectorAll('.mapping-src-badge');
-        if (!badges.length) container.innerHTML = '<span class="text-muted">No field</span>';
-        
-        badges.forEach(b => {
-          const chip = document.createElement('span');
-          chip.className = 'badge-formula rounded-pill px-3 mb-3';
-          chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
-          chip.dataset.field = b.dataset.field;
-          container.appendChild(chip);
-        });
-        
-        modal.dataset.currentRowId = tr.dataset.rowId;
+    btn.onclick = () => {
+      const container = UI.get('formula-selected-fields');
+      const modal = UI.get('mapping-formula');
+      if (container && modal) {
+        container.innerHTML = '';
+        const badges = tr.querySelectorAll('.mapping-src-badge');
+        if (!badges.length) container.innerHTML = '<span class="text-muted">No field</span>';
+        
+        badges.forEach(b => {
+          const chip = document.createElement('span');
+          chip.className = 'badge-formula rounded-pill px-3 mb-3';
+          chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
+          chip.dataset.field = b.dataset.field;
+          container.appendChild(chip);
+        });
+        
+        modal.dataset.currentRowId = tr.dataset.rowId;
         modal.dataset.currentFormulaInputId = hidden.id;
-        const area = UI.get('area_insert');
-        if (area) area.value = hidden.value || '';
-      }
-    };
+        const area = UI.get('area_insert');
+        if (area) area.value = hidden.value || '';
+      }
+    };
 
     // Delete Row
-    const tdDel = document.createElement('td');
-    tdDel.className = 'text-start';
-    const delBtn = document.createElement('button');
-    delBtn.className = 'btn btn-sm text-danger';
-    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-    delBtn.type = 'button';
-    delBtn.onclick = () => tr.remove();
-    tdDel.appendChild(delBtn);
+    const tdDel = document.createElement('td');
+    tdDel.className = 'text-start';
+    const delBtn = document.createElement('button');
+    delBtn.className = 'btn btn-sm text-danger mt-2';
+    delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
+    delBtn.type = 'button';
+    delBtn.onclick = () => tr.remove();
+    tdDel.appendChild(delBtn);
 
-    tr.append(tdTgt, tdSrc, tdAct, tdDel);
-    tbody.appendChild(tr);
-  };
+    tr.append(tdTgt, tdSrc, tdAct, tdDel);
+    tbody.appendChild(tr);
+    $(tgtSel).selectize({
+        sortField: 'text',
+        placeholder: 'Search Target...',
+        allowEmptyOption: true,
+        dropdownParent: 'body',
+    });
+    
+    $(srcSel).selectize({
+        sortField: 'text',
+        placeholder: 'Search Source...',
+        allowEmptyOption: true,
+        dropdownParent: 'body',
+        onChange: function(value) {
+            if(value && this.$input && this.$input[0]) {
+                 var event = new Event('change', { bubbles: true });
+                 this.$input[0].dispatchEvent(event);
+            }
+        }
+    });
+  };
 
   window.initMappingUI = function() {
     const btn = UI.get('rule-mapping-add');
@@ -729,22 +800,31 @@ const UI = {
     btn.addEventListener('click', () => window.addMappingRow(tbody));
   };
 
+// Ensures a mapping row exists for the chosen duplicate field
 window.ensureDuplicateMappingRow = function(targetField) {
     const tbody = UI.get('rule-mapping-body');
     if (!tbody || !targetField) return;
     let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
         const sel = tr.querySelector('.rule-mapping-target');
-        return sel && (sel.value === targetField || (sel.options[sel.selectedIndex]?.text.trim() === targetField));
+        if (!sel) return false;
+        return sel.value === targetField || (sel.options[sel.selectedIndex]?.text.trim() === targetField);
     });
     if (!row) {
         window.addMappingRow(tbody); 
         row = tbody.lastElementChild;
 
         const sel = row.querySelector('.rule-mapping-target');
-        let opt = Array.from(sel.options).find(o => o.value === targetField || o.text.trim() === targetField);
-        if (opt) {
-            sel.value = opt.value;
-            if (sel.selectize) sel.selectize.setValue(opt.value);
+        let matchVal = targetField;
+        let opt = Array.from(sel.options).find(o => o.value === targetField);
+        if (!opt) opt = Array.from(sel.options).find(o => o.text.trim() === targetField);
+        
+        if (opt) matchVal = opt.value;
+        sel.value = matchVal;
+
+        if (sel.selectize) {
+            sel.selectize.setValue(matchVal);
+        } else if ($(sel)[0] && $(sel)[0].selectize) {
+            $(sel)[0].selectize.setValue(matchVal);
         }
     }
     if (row) {
@@ -753,7 +833,7 @@ window.ensureDuplicateMappingRow = function(targetField) {
             delBtn.disabled = true;
             delBtn.style.opacity = '0.3';
             delBtn.style.pointerEvents = 'none';
-            delBtn.title = 'Champ obligatoire';
+            delBtn.title = 'Champ obligatoire (Duplicate)';
         }
     }
   };
@@ -886,35 +966,54 @@ window.ensureDuplicateMappingRow = function(targetField) {
           if (tbody) tbody.innerHTML = ''; 
 
           (ruleData.mapping || []).forEach(row => {
-            window.addMappingRow(tbody);
-            const tr = tbody.lastElementChild;
-            if(!tr) return;
-            
-            const tSel = tr.querySelector('.rule-mapping-target');
-            if (tSel && row.target) tSel.value = row.target;
+            window.addMappingRow(tbody);
+            const tr = tbody.lastElementChild;
+            if(!tr) return;
+            
+            const tSel = tr.querySelector('.rule-mapping-target');
+            if (tSel && row.target) {
+                if (tSel.selectize) {
+                    tSel.selectize.setValue(row.target);
+                } else if ($(tSel)[0] && $(tSel)[0].selectize) {
+                    $(tSel)[0].selectize.setValue(row.target);
+                } else {
+                    tSel.value = row.target;
+                }
+            }
+            const sSel = tr.querySelector('.rule-mapping-source-picker');
+            if (sSel && row.source) {
+              const srcs = Array.isArray(row.source) ? row.source : row.source.split(';');         
+              srcs.filter(Boolean).forEach(s => {
+                if (sSel.selectize) {
+                    sSel.selectize.setValue(s.trim()); 
+                } else if ($(sSel)[0] && $(sSel)[0].selectize) {
+                    $(sSel)[0].selectize.setValue(s.trim());
+                } else {
+                    sSel.value = s.trim();
+                    sSel.dispatchEvent(new Event('change'));
+                }
+              });
+            }
 
-            const sSel = tr.querySelector('.rule-mapping-source-picker');
-            if (sSel && row.source) {
-              const srcs = Array.isArray(row.source) ? row.source : row.source.split(';');
-              srcs.filter(Boolean).forEach(s => {
-                sSel.value = s.trim();
-                sSel.dispatchEvent(new Event('change'));
-              });
-            }
-
-            const hidden = tr.querySelector('.rule-mapping-formula-input');
-            const slot = tr.querySelector('.formula-slot');
-            if (row.formula && hidden) {
-              hidden.value = row.formula;
-              slot.textContent = row.formula;
-              slot.classList.remove('is-empty');
-            }
-          });
+            const hidden = tr.querySelector('.rule-mapping-formula-input');
+            const slot = tr.querySelector('.formula-slot');
+            if (row.formula && hidden) {
+              hidden.value = row.formula;
+              slot.textContent = row.formula;
+              slot.classList.remove('is-empty');
+            }
+          });
       }
-      if (ruleData.syncOptions?.duplicateField && typeof window.ensureDuplicateMappingRow === 'function') {
-          if(UI.get('rule-mapping-body')) {
-            window.ensureDuplicateMappingRow(ruleData.syncOptions.duplicateField);
-          }
+    if (ruleData.syncOptions?.duplicateField && typeof window.ensureDuplicateMappingRow === 'function') {
+          let raw = ruleData.syncOptions.duplicateField;
+          let values = [];
+          
+          if (Array.isArray(raw)) values = raw;
+          else if (typeof raw === 'string') values = raw.split(';');
+        
+          values.forEach(v => {
+              if(v && v.trim() !== '') window.ensureDuplicateMappingRow(v.trim());
+          });
       }
 
     } catch (e) {
@@ -1198,18 +1297,9 @@ $(function () {
     EL.alert.classList.add('d-none');
     if (!endpoints.run) return showAlert('Missing endpoint');
 
-    console.group("🚀 [JS DEBUG] Lancement Simulation");
-    console.log("Mode Manuel ?", manual);
-
     const fd = new FormData();
     const getVal = (id) => UI.get(id)?.value || '';
     const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text?.trim().toLowerCase() || ''; };
-    
-    // Log des valeurs brutes récupérées du DOM
-    console.log("Source Solution ID:", getVal('source-solution'));
-    console.log("Source Solution Name:", getTxt('source-solution'));
-    console.log("Source Connector ID:", getVal('source-connector'));
-    console.log("Source Module:", getVal('source-module'));
 
     fd.append('src_solution_id', getVal('source-solution'));
     fd.append('tgt_solution_id', getVal('target-solution'));
@@ -1224,65 +1314,36 @@ $(function () {
     if (pContainer) {
       pContainer.querySelectorAll('input, select').forEach(el => {
         if(el.name) {
-            console.log(`Param sup: ${el.name} = ${el.value}`);
             fd.append(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
         }
       });
     }
 
     const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
-    console.log(`Nombre de lignes mapping trouvées: ${rows.length}`);
     
     rows.forEach(tr => {
         const tgt = tr.querySelector('.rule-mapping-target')?.value;
         if(!tgt) return;
         
         const badges = Array.from(tr.querySelectorAll('.mapping-src-badge'));
-        console.log(`Mapping cible [${tgt}] -> ${badges.length} champs source`);
-        
-        badges.forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));
-        
+        badges.forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));  
         const form = tr.querySelector('.rule-mapping-formula-input')?.value;
         if(form) fd.append(`formules[${tgt}][]`, form);
     });
 
     if (manual) {
       const id = EL.input.value.trim();
-      console.log("ID Manuel saisi:", id);
       if (!id) return showAlert('ID required', 'warning');
       fd.append('query', id);
     }
-
-    EL.res.innerHTML = '<div class="text-center">Loading...</div>';
     
     try {
-      console.log("📡 Envoi requête fetch vers:", endpoints.run);
       
-      const res = await fetch(endpoints.run, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });
-      console.log("Réponse HTTP status:", res.status);
-      
+      const res = await fetch(endpoints.run, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });      
       const text = await res.text();
-      console.log("Contenu réponse brute (premiers 500 chars):", text.substring(0, 500));
-
-      if (!res.ok) {
-          console.error("❌ Erreur HTTP détectée");
-          try {
-              const json = JSON.parse(text);
-              console.log("Erreur JSON parsée:", json);
-              showAlert(json.error || 'Simulation failed');
-          } catch {
-              console.log("Erreur non-JSON");
-              showAlert('Simulation failed: ' + text);
-          }
-          EL.res.innerHTML = '';
-          return;
-      }
-      
-      // Si on arrive ici, c'est un succès (HTML ou JSON interprété comme texte)
       EL.res.innerHTML = text;
       
     } catch (e) {
-      console.error("💥 Exception JS:", e);
       EL.res.innerHTML = '';
       showAlert('Simulation network error');
     } finally {
@@ -1297,16 +1358,55 @@ $(function () {
  * SELECTIZE INIT (Global initialization)
  * =========================================== */
 $(document).ready(function() {
-    $('.js-select-search').selectize({
-        sortField: 'text',
-        placeholder: 'Search...',
-        allowEmptyOption: true,
-        onChange: function(value) {
-            if(this.$input && this.$input[0]) {
-              // Trigger native change event if needed
-            }
-        }
-    });
+    var renderSolution = function(item, escape) {
+        var label = item.text || '';
+        if (label) label = label.charAt(0).toUpperCase() + label.slice(1);
+        
+        var slug = (item.slug || item.text || '').toLowerCase().trim();
+        var pathPrefix = '';
+        if (window.location.pathname.indexOf('/myddleware') === 0) pathPrefix = '/myddleware';
+        var imgPath = pathPrefix + '/assets/images/solution/' + escape(slug) + '.png';
+
+        return '<div class="d-flex align-items-center" style="display: flex; align-items: center; padding: 5px;">' +
+               '<img src="' + imgPath + '" style="width: 24px; height: 24px; object-fit: contain; margin-right: 10px;" onerror="this.style.display=\'none\'" />' + 
+               '<span>' + escape(label) + '</span>' +
+               '</div>';
+    };
+    $('select').each(function() {
+        var $el = $(this);
+        var id = $el.attr('id');
+        if ($el[0].selectize) return;
+        var options = {
+            sortField: 'text',
+            placeholder: 'Search...',
+            allowEmptyOption: true,
+            onChange: function(value) {
+                if(this.$input && this.$input[0]) {
+                     var event = new Event('change', { bubbles: true });
+                     this.$input[0].dispatchEvent(event);
+                }
+            }
+        };
+        if (id === 'source-solution' || id === 'target-solution') {
+            options.valueField = 'value';
+            options.labelField = 'text';
+            options.searchField = ['text'];
+            options.render = { option: renderSolution, item: renderSolution };
+            
+            var selectizeOpts = [];
+            $el.find('option').each(function() {
+                if($(this).val()) {
+                    selectizeOpts.push({
+                        value: $(this).val(),
+                        text: $(this).text(),
+                        slug: $(this).text().toLowerCase().trim()
+                    });
+                }
+            });
+        }
+
+        $el.selectize(options);
+    });
 });
 
 /* ===========================================
