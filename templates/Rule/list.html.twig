@@ -46,6 +46,11 @@
 						<input type="text" id="rule_name_searchbar" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
 					</form>
 				</div>
+				<div class="col-auto text-center">
+					<button id="clear_rule_search" class="btn btn-link text-danger p-0" style="font-size: 1.5rem; line-height: 1; display: none;" title="Clear search">
+						<i class="fa fa-times-circle"></i>
+					</button>
+				</div>
 				<div class="col-auto text-center me-5">
 					<a id="exec_all" class="btn btn-outline-success" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
 						{{'view_rule.action.exec_all'|trans}}
