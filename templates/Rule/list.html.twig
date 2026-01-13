@@ -42,8 +42,11 @@
 		{% if nb_rule > 0 %}
 			<div class="row justify-content-center align-items-center my-4 me-5 mt-5">
 				<div id="rulesearchbarcontainer" class="col-auto me-5">
-					<form id="rulenamesearchbar" class="d-flex" action="{{ path('regle_list') }}" method="get">
-						<input type="text" id="rule_name_searchbar" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
+					<form id="rulenamesearchbar" class="d-flex position-relative" action="{{ path('regle_list') }}" method="get">
+						<input type="text" id="rule_name_searchbar" data-url="{{ path('regle_list') }}" class="form-control pe-5" placeholder="Search by rule name">
+						<button id="clear_rule_search" class="btn btn-link text-danger p-0 position-absolute" style="font-size: 1.5rem; line-height: 1; display: none; right: 8px; top: 50%; transform: translateY(-50%); z-index: 10;" title="Clear search" type="button">
+							<i class="fa fa-times-circle"></i>
+						</button>
 					</form>
 				</div>
 				<div class="col-auto text-center">
