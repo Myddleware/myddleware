@@ -25,6 +25,12 @@ $(function(){
     var q = $.trim($(this).val());
     var url = $(this).data("url");
 
+    if (q.length > 0) {
+      $("#clear_rule_search").show();
+    } else {
+      $("#clear_rule_search").hide();
+    }
+
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(function () {
 
