@@ -44,8 +44,9 @@ $(function(){
 
       if (q.length === 0) {
         if (currentXhr) { currentXhr.abort(); currentXhr = null; }
-        $("#tbody_rule_list").html(initialTableState);
-        $("#pagination_container").html(initialPaginationState);
+        // Redirect to base URL to clear all params (rule_name, page, etc.)
+        var baseUrl = $("#rule_name_searchbar").data("url");
+        window.location.href = baseUrl;
         return;
       }
 
