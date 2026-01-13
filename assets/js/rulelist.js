@@ -44,6 +44,8 @@ $(function(){
 
       if (q.length === 0) {
         if (currentXhr) { currentXhr.abort(); currentXhr = null; }
+        // Show loader before redirect
+        $("#tbody_rule_list").html('<tr><td colspan="100%" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> Loading…</td></tr>');
         // Redirect to base URL to clear all params (rule_name, page, etc.)
         var baseUrl = $("#rule_name_searchbar").data("url");
         window.location.href = baseUrl;
@@ -93,6 +95,8 @@ $(function(){
   });
 
   $("#clear_rule_search").on("click", function () {
+    // Show loader before redirect
+    $("#tbody_rule_list").html('<tr><td colspan="100%" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> Loading…</td></tr>');
     // Redirect to base rule list URL (removes all params including rule_name and page)
     var baseUrl = $("#rule_name_searchbar").data("url");
     window.location.href = baseUrl;
