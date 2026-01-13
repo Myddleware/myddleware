@@ -21,6 +21,14 @@ $(function(){
   var debounceTimer = null;
   var currentXhr = null;
 
+  // On page load, check if there's a rule_name parameter in the URL
+  var urlParams = new URLSearchParams(window.location.search);
+  var ruleNameParam = urlParams.get('rule_name');
+  if (ruleNameParam) {
+    $("#rule_name_searchbar").val(ruleNameParam);
+    $("#clear_rule_search").show();
+  }
+
   $("#rule_name_searchbar").on("input", function () {
     var q = $.trim($(this).val());
     var url = $(this).data("url");
