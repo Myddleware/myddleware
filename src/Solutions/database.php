@@ -292,7 +292,12 @@ class database extends solution
                             $queryKey = $param['ruleParams']['fieldId'];
                         }
                     }
-                    $query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' ";
+					// Manage null value
+					if ($queryValue == 'null') {
+						$query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose. " IS NULL";
+					} else {
+						$query['where'] .= $this->stringSeparatorOpen.$queryKey.$this->stringSeparatorClose." = '".$this->escape($queryValue)."' ";
+					}
                     --$nbFilter;
                     if ($nbFilter > 0) {
                         $query['where'] .= ' AND ';
