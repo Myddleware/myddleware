@@ -320,7 +320,6 @@ const UI = {
       $('.js-select-search', EL.paramsContainer).selectize({
           sortField: 'text',
           placeholder: 'Search...',
-          allowEmptyOption: true
       });
 
       const dupSelect = UI.get('duplicate-field');
@@ -771,14 +770,12 @@ const UI = {
     $(tgtSel).selectize({
         sortField: 'text',
         placeholder: 'Search Target...',
-        allowEmptyOption: true,
         dropdownParent: 'body',
     });
     
     $(srcSel).selectize({
         sortField: 'text',
         placeholder: 'Search Source...',
-        allowEmptyOption: true,
         dropdownParent: 'body',
         onChange: function(value) {
             if(value && this.$input && this.$input[0]) {
@@ -1379,7 +1376,6 @@ $(document).ready(function() {
         var options = {
             sortField: 'text',
             placeholder: 'Search...',
-            allowEmptyOption: true,
             onChange: function(value) {
                 if(this.$input && this.$input[0]) {
                      var event = new Event('change', { bubbles: true });
