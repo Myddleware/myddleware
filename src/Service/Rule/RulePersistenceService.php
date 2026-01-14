@@ -51,7 +51,7 @@ class RulePersistenceService
         
         $isEdit = $ruleIdFromRequest !== '';
         $bidirectionalId = trim((string) ($data['bidirectional'] ?? ''));
-        $duplicateField = trim((string) ($data['duplicate_field'] ?? ''));
+        $duplicateField = trim((string) ($data['duplicate_fields'] ?? ''));
         $description = trim((string) ($data['description'] ?? ''));
 
         // Parsing des tableaux (champs et formules)
