@@ -1037,6 +1037,12 @@ window.ensureDuplicateMappingRow = function(targetField) {
           });
       }
 
+      const step5El = UI.get('step-5');
+      if (step5El && !step5El.classList.contains('d-none')) {
+          setTimeout(() => {
+              step5El.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }, 300);
+      }
     } catch (e) {
       console.error(e);
     } finally {
