@@ -1413,3 +1413,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     font-size: 1.25rem !important;
     line-height: 1.5 !important;
 }
+
+.selectize-control.me-2.single{
+	min-width: 250px !important;
+}

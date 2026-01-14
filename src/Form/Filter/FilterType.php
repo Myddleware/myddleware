@@ -16,8 +16,9 @@ class FilterType extends AbstractType
         $builder
            ->add('filter', Filters\ChoiceFilterType::class, [
                 'label' => 'document.filters.label',
+                'placeholder' => 'document.filters.default',
+                'required' => false,
                 'choices' => [
-                    'document.filters.default' => 'default',
                     'document.filters.reference' => 'reference',
                     'document.filters.date_modif_start' => 'date_modif_start',
                     'document.filters.date_modif_end' => 'date_modif_end',
