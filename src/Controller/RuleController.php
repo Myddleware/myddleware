@@ -57,6 +57,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -717,5 +718,13 @@ class RuleController extends AbstractController
             }
         }
         return new JsonResponse($fieldInfo);
+    }
+
+    #[Route('/assets/solution-icon/{slug}', name: 'rule_solution_icon', methods: ['GET'])]
+    public function getSolutionIcon(string $slug): Response
+    {
+        $projectDir = $this->getParameter('kernel.project_dir');
+        $filePath = $projectDir . '/assets/images/solution/' . $slug . '.png';
+        return new BinaryFileResponse($filePath);
     }
 }
