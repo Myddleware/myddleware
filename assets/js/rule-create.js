@@ -1237,7 +1237,7 @@ $(function () {
     insertAtCursor(document.getElementById('area_insert'), call);
     UI_WIZ.param.val('');
   });
-  
+
 
    // Saves the formula into the hidden field of the mapping row
   $('#mapping-formula-save').on('click', function () {
@@ -1328,15 +1328,22 @@ $(document).ready(function() {
              const badgeEls = tr.querySelectorAll('.mapping-src-badge');
              let srcs = [];
              badgeEls.forEach(b => srcs.push(b.dataset.field));
-             
              const form = tr.querySelector('.rule-mapping-formula-input')?.value;
+             const hasFormula = form && form.trim() !== '';
+             const hasSource = srcs.length > 0;
+             if (!hasSource && !hasFormula) {
+                 return; 
+             }
              if (!mapping.fields[tgt]) mapping.fields[tgt] = [];
              if (!mapping.formulas[tgt]) mapping.formulas[tgt] = [];
-             
-             if(srcs.length > 0) mapping.fields[tgt].push(...srcs); 
-             else mapping.fields[tgt].push('');
-             
-             if(form) mapping.formulas[tgt].push(form);
+             if(hasSource) {
+                 mapping.fields[tgt].push(...srcs); 
+             } else {
+                 mapping.fields[tgt].push('');
+             }
+             if(hasFormula) {
+                 mapping.formulas[tgt].push(form);
+             }
         });
         
         const filters = [];
@@ -1349,7 +1356,6 @@ $(document).ready(function() {
         Object.entries(mapping.formulas).forEach(([t, arr]) => arr.forEach(v => add(`formules[${t}][]`, v)));
 
         if (window.initialRule?.mode === 'edit') add('rule_id', window.initialRule.id);
-
         const oldHtml = saveBtn.innerHTML;
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
