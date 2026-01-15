@@ -60,6 +60,7 @@
   <script>
     var lookupgetrule = "{{ path('get_rules_for_lookup') }}";
     var lookupgetfieldroute = "{{ path('rule_get_fields_for_rule') }}";
+    window.LOOKUP_ENDPOINT = "{{ path('get_rules_for_lookup') }}";
   </script>
 
   {# Offcanvas gauche (inchangé) #}
@@ -170,5 +171,12 @@
         }
       });
     });
+  </script>
+  <script>
+    window.FUNCTION_TOOLTIPS = {
+        {% for t, v in lst_functions %}
+            "{{ v.getName }}": "{{ ('function.description.' ~ v.getCategoryId.getName|lower ~ '.' ~ v.getName ) |trans|e('js') }}",
+        {% endfor %}
+    };
   </script>
 {% endblock %}

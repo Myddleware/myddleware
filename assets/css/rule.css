@@ -1072,6 +1072,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     border-radius: 0px 60px 60px 0px !important;
     position: absolute;
     left: 0px;
+	margin-top: 20px;
     border-color: #05bfe6 !important;
     color: #05bfe6 !important;
     padding: 0.6rem 0.6rem 0.6rem 0.3rem !important;
@@ -1083,7 +1084,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 .nav-create-rule svg {
     width: 1em !important;
-    height: 1em !important;
+    height: 2em !important;
     margin: 0;
 }
 .nav-create-rule:hover[id^="nav-create-rule-"] {
@@ -1385,7 +1386,6 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 }
 
 .selectize-control.js-select-search .selectize-input {
-    min-height: 48px !important;
     padding: 0.5rem 1rem !important;
     font-size: 1.25rem !important;
     line-height: 1.5 !important;
@@ -1416,4 +1416,13 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 
 .selectize-control.me-2.single{
 	min-width: 250px !important;
+}
+
+#source-solution + .selectize-control .selectize-input, #target-solution + .selectize-control .selectize-input {
+    min-height: 58px !important;
+}
+
+#rule-filter-field + .selectize-control .selectize-input {
+    min-height: 37px;
+    border-color: #dee2e6;
 }

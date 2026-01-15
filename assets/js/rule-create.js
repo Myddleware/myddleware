@@ -523,9 +523,17 @@ const UI = {
   window.buildFilterFieldOptions = function() {
     // Skip if filter select already has options (server-rendered)
     const filterSelect = UI.get('rule-filter-field');
-    if (filterSelect && filterSelect.querySelectorAll('optgroup').length > 0) {
-      return; // Options already populated by template
-    }
+   if (filterSelect) {
+        if (filterSelect.selectize) {
+             UI.syncSelectize(filterSelect);
+        } else {
+             $(filterSelect).selectize({
+                 sortField: 'text',
+                 placeholder: 'Choose a field...',
+                 dropdownParent: 'body'
+             });
+        }
+    }
     const srcMod = UI.get('source-module');
     const tgtMod = UI.get('target-module');
     if (!filterSelect) return;
@@ -628,25 +636,28 @@ const UI = {
       ul.appendChild(li);
   };
 
-  // Initializes the add filter button
-  window.initFiltersUI = function() {
-    const addBtn = UI.get('rule-filter-add');
-    if (!addBtn || addBtn.dataset.bound) return;
-    addBtn.dataset.bound = '1';
-
-    addBtn.addEventListener('click', () => {
-      const fieldSel = UI.get('rule-filter-field');
-      const opSel = UI.get('rule-filter-operator');
-      const valInput = UI.get('rule-filter-value');
-
-      if (!fieldSel.value || !opSel.value || !valInput.value.trim()) return;
-
-      window.addFilterRow(fieldSel.value, opSel.value, valInput.value.trim());
-      fieldSel.value = ''; 
-      opSel.value = ''; 
-      valInput.value = '';
-    });
-  };
+// Initializes the add filter button
+  window.initFiltersUI = function() {
+    const addBtn = UI.get('rule-filter-add');
+    if (!addBtn || addBtn.dataset.bound) return;
+    addBtn.dataset.bound = '1';
+    addBtn.addEventListener('click', () => {
+      const fieldSel = UI.get('rule-filter-field');
+      const opSel = UI.get('rule-filter-operator');
+      const valInput = UI.get('rule-filter-value');
+      let fieldVal = fieldSel.value;
+      if (fieldSel.selectize) fieldVal = fieldSel.selectize.getValue();
+      if (!fieldVal || !opSel.value || !valInput.value.trim()) return;
+      window.addFilterRow(fieldVal, opSel.value, valInput.value.trim());
+      if (fieldSel.selectize) {
+          fieldSel.selectize.clear();
+      } else {
+          fieldSel.value = ''; 
+      }
+      opSel.value = ''; 
+      valInput.value = '';
+    });
+  };
 
   function createMappingSelect(fields) {
     const sel = document.createElement('select');
@@ -1061,120 +1072,200 @@ window.ensureDuplicateMappingRow = function(targetField) {
  * FUNCTION WIZARD (Formula Editor)
  * =========================================== */
 $(function () {
-  const insertAtCursor = (el, text) => {
-    if (!el) return;
-    const [start, end] = [el.selectionStart, el.selectionEnd];
-    el.value = el.value.substring(0, start) + text + el.value.substring(end);
-    el.selectionStart = el.selectionEnd = start + text.length;
-    el.focus();
-  };
+  const insertAtCursor = (el, text) => {
+    if (!el) return;
+    const [start, end] = [el.selectionStart, el.selectionEnd];
+    el.value = el.value.substring(0, start) + text + el.value.substring(end);
+    el.selectionStart = el.selectionEnd = start + text.length;
+    el.focus();
+  };
 
-  const UI_WIZ = {
-    sel: $('#function-select'),
-    lookupOpts: $('#lookup-options'),
-    lookupRule: $('#lookup-rule'),
-    lookupField: $('#lookup-field'),
-    param: $('#function-parameter'),
-    tooltip: $('#function-tooltip'),
-    prec: $('#round-precision')
-  };
+  const UI_WIZ = {
+    sel: $('#function-select'),
+    lookupOpts: $('#lookup-options'),
+    lookupRule: $('#lookup-rule'),
+    lookupField: $('#lookup-field'),
+    param: $('#function-parameter'),
+    tooltip: $('#function-tooltip'),
+    prec: $('#round-precision')
+  };
 
-  let tooltipVisible = false;
+  let tooltipVisible = false;
 
-  // Click on a badge in the list -> Inserts {field}
-  $('#formula-selected-fields').on('click', '.badge-formula', function () {
-    const field = $(this).data('field') || $(this).text().trim();
-    if (field) insertAtCursor(document.getElementById('area_insert'), `{${field}}`);
-  });
+ // Click on a badge in the list -> Inserts {field}
+  $('#toggle-tooltip').on('click', function () {
+    tooltipVisible = !tooltipVisible;
+    if (tooltipVisible) {
+        updateTooltipContent();
+        UI_WIZ.tooltip.show();
+    } else {
+        UI_WIZ.tooltip.hide();
+    }
+  });
+  function updateTooltipContent() {
+      const $select = $('#function-select');
+      let val = $select.val();
+      if ($select[0] && $select[0].selectize) {
+          val = $select[0].selectize.getValue();
+      }
+      let tip = "";
+      if (val && window.FUNCTION_TOOLTIPS && window.FUNCTION_TOOLTIPS[val]) {
+          tip = window.FUNCTION_TOOLTIPS[val];
+      } else if (val) {
+          tip = "No description available.";
+      } else {
+          tip = "Please select a function first.";
+      }
+      UI_WIZ.tooltip.html(tip);
+  }
 
-  $('#toggle-tooltip').on('click', function () {
-    tooltipVisible = !tooltipVisible;
-    $(this).find('i').toggleClass('fa-question fa-question-circle');
-    const tip = UI_WIZ.sel.find(':selected').data('tooltip');
-    if (tooltipVisible && tip) UI_WIZ.tooltip.text(tip).show();
-    else UI_WIZ.tooltip.hide();
-  });
+  UI_WIZ.sel.off('change').on('change', function () {
+    const val = $(this).val();
+    const isMdw = val.startsWith('mdw_');
+    const isRound = val === 'round';
+    const isLookup = val === 'lookup';
 
-  UI_WIZ.sel.on('change', function () {
-    const val = $(this).val();
-    const isMdw = val.startsWith('mdw_');
-    const isRound = val === 'round';
-    const isLookup = val === 'lookup';
+    $('#function-parameter-input').toggle(!isLookup);
+    UI_WIZ.param.toggle(!isMdw);
+    $('#round-precision-input').toggle(isRound);
+    UI_WIZ.lookupOpts.toggle(isLookup); 
+    
+    if (tooltipVisible) updateTooltipContent();
+    if (isLookup) {
+        const srcSelect = document.getElementById('source-connector');
+        const tgtSelect = document.getElementById('target-connector');
+        const srcId = srcSelect ? srcSelect.value : 0;
+        const tgtId = tgtSelect ? tgtSelect.value : 0;
+        const endpoint = window.LOOKUP_ENDPOINT || (typeof lookupgetrule !== 'undefined' ? lookupgetrule : null);
 
-    $('#function-parameter-input').toggle(!isLookup);
-    UI_WIZ.param.toggle(!isMdw);
-    $('#round-precision-input').toggle(isRound);
-    UI_WIZ.lookupOpts.toggle(isLookup);
+        if (endpoint && srcId && tgtId) {
+            UI_WIZ.lookupRule.empty().append(new Option('Loading...', ''));
+            UI_WIZ.lookupRule.prop('disabled', true);
+            if(UI_WIZ.lookupRule[0].selectize) UI_WIZ.lookupRule[0].selectize.disable();
 
-    if (isLookup && typeof lookupgetrule !== 'undefined') {
-      $.get(lookupgetrule, { 
-        arg1: (typeof connectorsourceidlookup !== 'undefined' ? connectorsourceidlookup : 0), 
-        arg2: (typeof connectortargetidlookup !== 'undefined' ? connectortargetidlookup : 0) 
-      }, (res) => {
-        UI_WIZ.lookupRule.empty().append(new Option('Select...', ''));
-        res.forEach(r => UI_WIZ.lookupRule.append(new Option(r.name, r.id)));
-        UI_WIZ.lookupRule.prop('disabled', false);
-      });
-    }
-  });
+            $.get(endpoint, { arg1: srcId, arg2: tgtId }, (res) => {
+                UI_WIZ.lookupRule.empty().append(new Option('Select a rule...', ''));
+                const selectize = UI_WIZ.lookupRule[0].selectize;
+                if(selectize) { selectize.clear(); selectize.clearOptions(); }
 
-  $('#insert-function-parameter').on('click', function () {
-    const func = UI_WIZ.sel.val();
-    if (!func) return;
-    const cat = UI_WIZ.sel.find(':selected').data('type');
-    const val = UI_WIZ.param.val().trim();
-    let call = `${func}()`;
+                if (Array.isArray(res) && res.length > 0) {
+                    res.forEach(r => {
+                        UI_WIZ.lookupRule.append(new Option(r.name, r.id));
+                        if(selectize) selectize.addOption({value: r.id, text: r.name});
+                    });
+                } else {
+                    UI_WIZ.lookupRule.append(new Option('No matching rules found', ''));
+                }
+                
+                UI_WIZ.lookupRule.prop('disabled', false);
+                if(selectize) { selectize.enable(); selectize.refreshOptions(false); }
+            });
+        } else {
+             UI_WIZ.lookupRule.empty().append(new Option('Please select connectors first', ''));
+        }
+    }
+  });
 
-    if (func === 'round') {
-      const p = parseInt(UI_WIZ.prec.val());
-      if (isNaN(p)) return UI_WIZ.prec.addClass('is-invalid');
-      UI_WIZ.prec.removeClass('is-invalid');
-      call = `round(${val}, ${p})`;
-    } else if (func.startsWith('mdw_')) {
-      call = `"${func}"`;
-    } else if (val) {
-      call = (cat === 1 || cat === 4) ? `${func}(${val})` : `${func}("${val}")`;
-    }
+  UI_WIZ.lookupRule.off('change').on('change', function() {
+      let selectedRuleId = $(this).val();
+      if (this.selectize) selectedRuleId = this.selectize.getValue();
+      selectedRuleId = parseInt(selectedRuleId);
+      const fieldSelect = UI_WIZ.lookupField;
+      const selectize = fieldSelect[0].selectize;
 
-    insertAtCursor(document.getElementById('area_insert'), call);
-    UI_WIZ.param.val('');
-  });
+      fieldSelect.empty().append(new Option('Loading fields...', ''));
+      fieldSelect.prop('disabled', true);
+      if(selectize) { selectize.clear(); selectize.clearOptions(); selectize.disable(); }
 
-  UI_WIZ.lookupRule.on('change', function() {
-    if (!this.value) return UI_WIZ.lookupField.prop('disabled', true);
-    UI_WIZ.lookupField.empty().append(new Option('Select Field', ''));
-    $('#formula-selected-fields .badge-formula').each(function() {
-      const t = $(this).data('field') || $(this).text().trim();
-      UI_WIZ.lookupField.append(new Option(t, t));
-    });
-    UI_WIZ.lookupField.prop('disabled', false);
-  });
+      if (!selectedRuleId) {
+          fieldSelect.empty().append(new Option('', ''));
+          return;
+      }
 
-  $('#submit-lookup').on('click', function() {
-    const f = UI_WIZ.lookupField.val();
-    if (!f) return;
-    const r = UI_WIZ.lookupRule.val();
-    const e1 = $('#lookup-error-empty').is(':checked') ? 1 : 0;
-    const e2 = $('#lookup-error-not-found').is(':checked') ? 1 : 0;
-    insertAtCursor(document.getElementById('area_insert'), `lookup({${f.split(' (')[0]}}, "${r}", ${e1}, ${e2})`);
-  });
+      const endpoint = window.lookupgetfieldroute || "{{ path('rule_get_fields_for_rule') }}";
 
-  // Saves the formula into the hidden field of the mapping row
+      $.get(endpoint, function(data) {
+          fieldSelect.empty().append(new Option('Select a field...', ''));
+          
+          if (Array.isArray(data) && data.length > 0) {
+              
+              const filteredFields = data.filter(function(item) {
+                  return item.rule_id === selectedRuleId;
+              });
+
+              if (filteredFields.length > 0) {
+                  filteredFields.forEach(function(item) {
+                      fieldSelect.append(new Option(item.name, item.name));
+                      if(selectize) selectize.addOption({value: item.name, text: item.name});
+                  });
+                  
+                  fieldSelect.prop('disabled', false);
+                  if(selectize) { selectize.enable(); selectize.refreshOptions(false); }
+              } else {
+                  fieldSelect.empty().append(new Option('No fields found for this rule', ''));
+              }
+          } else {
+              fieldSelect.empty().append(new Option('No fields in DB', ''));
+          }
+      });
+  });
+
+  $('#submit-lookup').on('click', function() {
+    let f = UI_WIZ.lookupField.val();
+    if(UI_WIZ.lookupField[0].selectize) f = UI_WIZ.lookupField[0].selectize.getValue();
+    
+    let r = UI_WIZ.lookupRule.val();
+    if(UI_WIZ.lookupRule[0].selectize) r = UI_WIZ.lookupRule[0].selectize.getValue();
+
+    if (!f || !r) return;
+    
+    const e1 = $('#lookup-error-empty').is(':checked') ? 1 : 0;
+    const e2 = $('#lookup-error-not-found').is(':checked') ? 1 : 0;
+    
+    insertAtCursor(document.getElementById('area_insert'), `lookup({${f}}, "${r}", ${e1}, ${e2})`);
+  });
+  $('#formula-selected-fields').on('click', '.badge-formula', function () {
+    const field = $(this).data('field') || $(this).text().trim();
+    if (field) insertAtCursor(document.getElementById('area_insert'), `{${field}}`);
+  });
+  $('#insert-function-parameter').on('click', function () {
+    const func = UI_WIZ.sel.val();
+    if (!func) return;
+    const selectedOption = UI_WIZ.sel.find('option:selected'); 
+    const cat = selectedOption.data('type');
+    const val = UI_WIZ.param.val().trim();
+    let call = `${func}()`;
+
+    if (func === 'round') {
+      const p = parseInt(UI_WIZ.prec.val());
+      call = `round(${val}, ${isNaN(p) ? 0 : p})`;
+    } else if (func.startsWith('mdw_')) {
+      call = `"${func}"`;
+    } else if (val) {
+      call = (cat === 1 || cat === 4) ? `${func}(${val})` : `${func}("${val}")`;
+    }
+
+    insertAtCursor(document.getElementById('area_insert'), call);
+    UI_WIZ.param.val('');
+  });
+
+
+   // Saves the formula into the hidden field of the mapping row
   $('#mapping-formula-save').on('click', function () {
-    const modal = UI.get('mapping-formula');
-    const id = modal.dataset.currentRowId;
-    const inputId = modal.dataset.currentFormulaInputId;
-    if (!id || !inputId) return;
-    const tr = document.querySelector(`tr[data-row-id="${id}"]`);
-    if (tr) {
-      const val = $('#area_insert').val().trim();
-      const hidden = UI.get(inputId);
-      if (hidden) hidden.value = val;
-      const slot = tr.querySelector('.formula-slot');
-      slot.textContent = val;
-      slot.classList.toggle('is-empty', !val);
-    }
-  });
+    const modal = document.getElementById('mapping-formula');
+    const id = modal.dataset.currentRowId;
+    const inputId = modal.dataset.currentFormulaInputId;
+    if (!id || !inputId) return;
+    const tr = document.querySelector(`tr[data-row-id="${id}"]`);
+    if (tr) {
+      const val = $('#area_insert').val().trim();
+      const hidden = document.getElementById(inputId);
+      if (hidden) hidden.value = val;
+      const slot = tr.querySelector('.formula-slot');
+      slot.textContent = val;
+      slot.classList.toggle('is-empty', !val);
+    }
+  });
 });
 
 /* ===========================================
@@ -1248,15 +1339,22 @@ $(document).ready(function() {
              const badgeEls = tr.querySelectorAll('.mapping-src-badge');
              let srcs = [];
              badgeEls.forEach(b => srcs.push(b.dataset.field));
-             
              const form = tr.querySelector('.rule-mapping-formula-input')?.value;
+             const hasFormula = form && form.trim() !== '';
+             const hasSource = srcs.length > 0;
+             if (!hasSource && !hasFormula) {
+                 return; 
+             }
              if (!mapping.fields[tgt]) mapping.fields[tgt] = [];
              if (!mapping.formulas[tgt]) mapping.formulas[tgt] = [];
-             
-             if(srcs.length > 0) mapping.fields[tgt].push(...srcs); 
-             else mapping.fields[tgt].push('');
-             
-             if(form) mapping.formulas[tgt].push(form);
+             if(hasSource) {
+                 mapping.fields[tgt].push(...srcs); 
+             } else {
+                 mapping.fields[tgt].push('');
+             }
+             if(hasFormula) {
+                 mapping.formulas[tgt].push(form);
+             }
         });
         
         const filters = [];
@@ -1269,7 +1367,6 @@ $(document).ready(function() {
         Object.entries(mapping.formulas).forEach(([t, arr]) => arr.forEach(v => add(`formules[${t}][]`, v)));
 
         if (window.initialRule?.mode === 'edit') add('rule_id', window.initialRule.id);
-
         const oldHtml = saveBtn.innerHTML;
         saveBtn.disabled = true;
         saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Saving...';
