@@ -1421,3 +1421,8 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 #source-solution + .selectize-control .selectize-input, #target-solution + .selectize-control .selectize-input {
     min-height: 58px !important;
 }
+
+#rule-filter-field + .selectize-control .selectize-input {
+    min-height: 37px;
+    border-color: #dee2e6;
+}

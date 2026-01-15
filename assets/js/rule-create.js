@@ -523,9 +523,17 @@ const UI = {
   window.buildFilterFieldOptions = function() {
     // Skip if filter select already has options (server-rendered)
     const filterSelect = UI.get('rule-filter-field');
-    if (filterSelect && filterSelect.querySelectorAll('optgroup').length > 0) {
-      return; // Options already populated by template
-    }
+   if (filterSelect) {
+        if (filterSelect.selectize) {
+             UI.syncSelectize(filterSelect);
+        } else {
+             $(filterSelect).selectize({
+                 sortField: 'text',
+                 placeholder: 'Choose a field...',
+                 dropdownParent: 'body'
+             });
+        }
+    }
     const srcMod = UI.get('source-module');
     const tgtMod = UI.get('target-module');
     if (!filterSelect) return;
@@ -628,25 +636,28 @@ const UI = {
       ul.appendChild(li);
   };
 
-  // Initializes the add filter button
-  window.initFiltersUI = function() {
-    const addBtn = UI.get('rule-filter-add');
-    if (!addBtn || addBtn.dataset.bound) return;
-    addBtn.dataset.bound = '1';
-
-    addBtn.addEventListener('click', () => {
-      const fieldSel = UI.get('rule-filter-field');
-      const opSel = UI.get('rule-filter-operator');
-      const valInput = UI.get('rule-filter-value');
-
-      if (!fieldSel.value || !opSel.value || !valInput.value.trim()) return;
-
-      window.addFilterRow(fieldSel.value, opSel.value, valInput.value.trim());
-      fieldSel.value = ''; 
-      opSel.value = ''; 
-      valInput.value = '';
-    });
-  };
+// Initializes the add filter button
+  window.initFiltersUI = function() {
+    const addBtn = UI.get('rule-filter-add');
+    if (!addBtn || addBtn.dataset.bound) return;
+    addBtn.dataset.bound = '1';
+    addBtn.addEventListener('click', () => {
+      const fieldSel = UI.get('rule-filter-field');
+      const opSel = UI.get('rule-filter-operator');
+      const valInput = UI.get('rule-filter-value');
+      let fieldVal = fieldSel.value;
+      if (fieldSel.selectize) fieldVal = fieldSel.selectize.getValue();
+      if (!fieldVal || !opSel.value || !valInput.value.trim()) return;
+      window.addFilterRow(fieldVal, opSel.value, valInput.value.trim());
+      if (fieldSel.selectize) {
+          fieldSel.selectize.clear();
+      } else {
+          fieldSel.value = ''; 
+      }
+      opSel.value = ''; 
+      valInput.value = '';
+    });
+  };
 
   function createMappingSelect(fields) {
     const sel = document.createElement('select');
