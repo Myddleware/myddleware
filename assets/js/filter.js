@@ -235,6 +235,8 @@ $(function () {
         localStorage.clear();
       }
     });
+    // Reset dropdown to default so the same filter can be re-selected
+    $("#item_filter_filter").val($("#item_filter_filter option:first").val());
     rearrangeFilters();
   });
 });

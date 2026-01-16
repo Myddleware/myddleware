@@ -1,0 +1,52 @@
+fos_elastica:
+    clients:
+        default:
+            hosts: ['%env(string:ELASTICSEARCH_URL)%']
+            # SSL certificate for Elasticsearch
+            client_options:
+                cafile: '%kernel.project_dir%/config/certs/http_ca.crt'
+
+    indexes:
+        document:
+            properties:
+                id:
+                    type: keyword
+                rule_id:
+                    type: keyword
+                rule_name:
+                    type: keyword
+                status:
+                    type: keyword
+                global_status:
+                    type: keyword
+                source_id:
+                    type: keyword
+                target_id:
+                    type: keyword
+                date_created:
+                    type: date
+                    format: 'yyyy-MM-dd HH:mm:ss'
+                date_modified:
+                    type: date
+                    format: 'yyyy-MM-dd HH:mm:ss'
+                source_date_modified:
+                    type: date
+                    format: 'yyyy-MM-dd HH:mm:ss'
+                type:
+                    type: keyword
+                mode:
+                    type: keyword
+                attempt:
+                    type: integer
+                module_source:
+                    type: keyword
+                module_target:
+                    type: keyword
+                source_content:
+                    type: text
+                    analyzer: standard
+                target_content:
+                    type: text
+                    analyzer: standard
+                deleted:
+                    type: boolean

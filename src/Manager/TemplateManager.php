@@ -361,7 +361,22 @@ class TemplateManager
                         $fieldObject->setRule($ruleObject);
                         $fieldObject->setTarget($field['target']);
                         $fieldObject->setSource($field['source']);
-                        $fieldObject->setFormula($field['formula']);
+
+                        $formula = $field['formula'];
+                        if (!empty($formula) && strpos($formula, 'lookup(') !== false) {
+                            if (preg_match_all('/lookup\(\{[^}]+\},\s*"([^"]+)"/', $formula, $matches)) {
+                                foreach ($matches[1] as $ruleSlug) {
+                                    if (isset($this->ruleNameSlugArray[$ruleSlug])) {
+                                        $ruleId = $this->ruleNameSlugArray[$ruleSlug];
+                                        $formula = str_replace('"'.$ruleSlug.'"', '"'.$ruleId.'"', $formula);
+                                    } else {
+                                        throw new Exception('Rule with slug "'.$ruleSlug.'" referenced in lookup formula not found. Make sure the referenced rule is defined before this rule in the template.');
+                                    }
+                                }
+                            }
+                        }
+
+                        $fieldObject->setFormula($formula);
                         $this->entityManager->persist($fieldObject);
                     }
                 }

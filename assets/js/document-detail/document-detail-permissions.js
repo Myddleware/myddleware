@@ -1,3 +1,5 @@
+import { getBaseUrl } from './document-detail-url-utils.js';
+
 /**
  * DocumentDetailPermissions - Handles user permission detection
  */
@@ -14,31 +16,27 @@ export class DocumentDetailPermissions {
             // 1. Try from API endpoint (primary source)
             const apiPermissions = await this.getPermissionsFromAPI();
             if (apiPermissions) {
-                // console.log('✅ Got permissions from API');
                 return apiPermissions;
             }
             
             // 2. Try from HTML meta tags (fallback)
             const metaPermissions = this.getPermissionsFromMeta();
             if (metaPermissions) {
-                // console.log('✅ Got permissions from meta tags');
                 return metaPermissions;
             }
             
             // 3. Try from global JavaScript variables (fallback)
             const globalPermissions = this.getPermissionsFromGlobals();
             if (globalPermissions) {
-                // console.log('✅ Got permissions from global variables');
                 return globalPermissions;
             }
             
             // 4. Final fallback to checking URL patterns or other indicators
             const urlPermissions = this.getPermissionsFromContext();
-            // console.log('⚠️ Using fallback permission detection');
             return urlPermissions;
             
         } catch (error) {
-            console.error('❌ Error getting user permissions:', error);
+            console.error(' Error getting user permissions:', error);
             return { role: 'ROLE_USER', is_super_admin: false };
         }
     }
@@ -65,13 +63,11 @@ export class DocumentDetailPermissions {
                 try {
                     return JSON.parse(userPermsMeta.getAttribute('content'));
                 } catch (e) {
-                    // console.warn('⚠️ Could not parse permissions from meta tag');
                 }
             }
             
             return null;
         } catch (error) {
-            // console.warn('⚠️ Error getting permissions from meta tags:', error.message);
             return null;
         }
     }
@@ -101,7 +97,6 @@ export class DocumentDetailPermissions {
             
             return null;
         } catch (error) {
-            // console.warn('⚠️ Error getting permissions from globals:', error.message);
             return null;
         }
     }
@@ -116,7 +111,6 @@ export class DocumentDetailPermissions {
             const baseUrl = this.getBaseUrl();
             const apiUrl = `${baseUrl}/rule/api/flux/user-permissions`;
             
-            // console.log('🔐 Requesting permissions from API:', apiUrl);
             
             const response = await fetch(apiUrl, {
                 method: 'GET',
@@ -128,22 +122,18 @@ export class DocumentDetailPermissions {
             });
             
             if (!response.ok) {
-                // console.warn(`⚠️ API permissions request failed: ${response.status}`);
                 return null;
             }
             
             const data = await response.json();
             
             if (!data.success) {
-                // console.warn('⚠️ API permissions request failed:', data.error);
                 return null;
             }
             
-            // console.log('🔐 API permissions response:', data.permissions);
             return data.permissions;
             
         } catch (error) {
-            // console.warn('⚠️ Error getting permissions from API:', error.message);
             return null;
         }
     }
@@ -175,7 +165,6 @@ export class DocumentDetailPermissions {
             return basicPermissions;
             
         } catch (error) {
-            // console.warn('⚠️ Error getting permissions from context:', error.message);
             return { role: 'ROLE_USER', is_super_admin: false, roles: ['ROLE_USER'] };
         }
     }
@@ -185,14 +174,6 @@ export class DocumentDetailPermissions {
      * @returns {string} Base URL
      */
     static getBaseUrl() {
-        const pathParts = window.location.pathname.split('/');
-        const publicIndex = pathParts.indexOf('public');
-        
-        if (publicIndex !== -1) {
-            const baseParts = pathParts.slice(0, publicIndex + 1);
-            return window.location.origin + baseParts.join('/');
-        } else {
-            return window.location.origin + "/index.php";
-        }
+        return getBaseUrl();
     }
 }

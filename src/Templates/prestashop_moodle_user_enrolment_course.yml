@@ -47,8 +47,8 @@ rules:
         targetSolution: moodle
         sourceModule: orders
         targetModule: users
-        relationships:
-            - { fieldNameSource: id_customer, fieldNameTarget: Myddleware_element_id, fieldId: users, parent: false }
+        fields:
+            - { target: Myddleware_element_id, source: id_customer, formula: 'lookup({id_customer}, "users", 0, 1)' }
         params:
             - { name: delete, value: '60' }
             - { name: datereference, value: '1970-01-01 00:00:00' }
@@ -64,9 +64,8 @@ rules:
         targetModule: manual_enrol_users
         fields:
             - { target: roleid, source: my_value, formula: '"5"' }
-        relationships:
-            - { fieldNameSource: product_id, fieldNameTarget: courseid, fieldId: course, parent: false }
-            - { fieldNameSource: id_order, fieldNameTarget: userid, fieldId: order, parent: false }
+            - { target: courseid, source: product_id, formula: 'lookup({product_id}, "course", 0, 1)' }
+            - { target: userid, source: id_order, formula: 'lookup({id_order}, "order", 0, 1)' }
         params:
             - { name: delete, value: '60' }
             - { name: datereference, value: 0 }
