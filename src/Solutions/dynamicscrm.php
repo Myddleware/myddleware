@@ -368,7 +368,6 @@ class dynamicscrm extends solution
         }
 
         // Add ordering by modifiedon
-        // $url .= (strpos($url, '?') !== false ? '&' : '?') . '$orderby=modifiedon asc';
         $url .= (strpos($url, '?') !== false ? '&' : '?') . '$orderby=modifiedon%20asc';
 
         try {
