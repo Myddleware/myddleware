@@ -1434,3 +1434,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     min-height: 37px;
     border-color: #dee2e6;
 }
+
+#rule-filter-operator, #rule-filter-value{
+	margin-bottom: 5px !important;
+}
