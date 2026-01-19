@@ -7,7 +7,7 @@
                 </label>
                 
                 {% if param.type == 'option' %}
-                    <select id="{{ param.id }}" name="{{ param.name }}" class="form-select form-select-lg">
+                    <select id="{{ param.id }}" name="{{ param.name }}" class="form-select">
                         <option value="" disabled {% if param.value|default(null) is empty %}selected{% endif %}>
                         </option>
 
