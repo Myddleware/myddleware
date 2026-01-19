@@ -18,7 +18,7 @@
             {% if fields is not empty %}
               <optgroup label="{{ group }}">
                 {% for name, label in fields %}
-                  <option value="{{ name }}">{{ label }}</option>
+                  <option value="{{ name }}">{{ name }}</option>
                 {% endfor %}
               </optgroup>
             {% endif %}

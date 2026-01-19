@@ -56,12 +56,7 @@
 								</div>
 							{% endif %}
 						{% else %}
-							<select
-								data-id="{{ p.id_bdd }}"
-								{{ p.required ? 'class="require params form-select"' : 'class="params form-select"' }}
-								name="{{ p.name }}"
-								id="{{ p.name }}"
-							>
+							<select data-id="{{ p.id_bdd }}" class="params {{ p.required ? 'require' }} {{ p.name != 'delete' ? 'form-select' }}" name="{{ p.name }}" id="{{ p.name }}">
 								{% for opt_value, opt_name in p.option %}
 									<option value="{{ opt_value }}" {{ opt_value == p.value_bdd ? 'selected' : '' }}>
 										{{ opt_name|trans }}
