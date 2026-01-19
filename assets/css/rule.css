@@ -1072,7 +1072,6 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     border-radius: 0px 60px 60px 0px !important;
     position: absolute;
     left: 0px;
-	margin-top: 20px;
     border-color: #05bfe6 !important;
     color: #05bfe6 !important;
     padding: 0.6rem 0.6rem 0.6rem 0.3rem !important;
@@ -1081,7 +1080,16 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     display: flex;
     align-items: center;
 }
+#nav-create-rule-detail.nav-create-rule {
+	margin-top: -9px;
 
+}
+#nav-create-rule-connection.nav-create-rule, 
+#nav-create-rule-sync.nav-create-rule, 
+#nav-create-rule-filter.nav-create-rule, 
+#nav-create-rule-mapping.nav-create-rule {
+	margin-top: 21px;
+}
 .nav-create-rule svg {
     width: 1em !important;
     height: 2em !important;
@@ -1384,38 +1392,40 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	background-color: #05bfe6 !important;
 	color: #ffffff !important;
 }
-
-.selectize-control.js-select-search .selectize-input {
-    padding: 0.5rem 1rem !important;
-    font-size: 1.25rem !important;
-    line-height: 1.5 !important;
-    border: 1px solid #ced4da !important;
-    border-radius: 0.3rem !important;
-    background-color: #fff !important;
+html body .selectize-control .selectize-input {
+    min-height: 48px !important;
+    padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
     display: flex !important;
     align-items: center !important;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.375rem !important;
+    line-height: 1.5 !important;
     box-shadow: none !important;
-    background-image: none !important;
+    background-color: #fff !important;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e") !important;
+    background-repeat: no-repeat !important;
+    background-position: right 0.75rem center !important;
+    background-size: 16px 12px !important;
 }
 
-.selectize-control.js-select-search .selectize-input.focus {
+html body .selectize-control .selectize-input::after {
+    display: none !important;
+    content: none !important;
+}
+
+html body .selectize-control.single .selectize-input.focus {
     border-color: #86b7fe !important;
     box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25) !important;
     outline: 0 !important;
 }
 
-.selectize-control.js-select-search .selectize-input input {
-    font-size: 1.25rem !important;
-    line-height: 1.5 !important;
-}
-
 .selectize-dropdown {
-    font-size: 1.25rem !important;
+    font-size: 1rem !important;
     line-height: 1.5 !important;
 }
 
-.selectize-control.me-2.single{
-	min-width: 250px !important;
+.selectize-control.me-2.single {
+    min-width: 250px !important;
 }
 
 #source-solution + .selectize-control .selectize-input, #target-solution + .selectize-control .selectize-input {
@@ -1425,4 +1435,9 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 #rule-filter-field + .selectize-control .selectize-input {
     min-height: 37px;
     border-color: #dee2e6;
+}
+
+#rule-filter-operator, #rule-filter-value, #mode{
+	border-color: #ced4da;
+    min-height: 48px;
 }

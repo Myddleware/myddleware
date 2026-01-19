@@ -512,7 +512,7 @@ const UI = {
  * FILTERS & MAPPING UI FUNCTIONS (Global)
  * ============================================================ */
 (function() {
-  // Retrieves JSON attributes (data-fields) from options
+// Retrieves JSON attributes (data-fields) from options
   const getJsonAttr = (el, attr) => {
     if (!el || !el.value) return null;
     const opt = el.options[el.selectedIndex];
@@ -1166,46 +1166,60 @@ $(function () {
     }
   });
 
-  UI_WIZ.lookupRule.off('change').on('change', function() {
-      let selectedRuleId = $(this).val();
-      if (this.selectize) selectedRuleId = this.selectize.getValue();
-      selectedRuleId = parseInt(selectedRuleId);
-      const fieldSelect = UI_WIZ.lookupField;
-      const selectize = fieldSelect[0].selectize;
+  // --- LOOKUP ---
+UI_WIZ.lookupRule.off('change').on('change', function() {
+      let ruleId = $(this).val();
+      if (this.selectize) ruleId = this.selectize.getValue();
 
-      fieldSelect.empty().append(new Option('Loading fields...', ''));
-      fieldSelect.prop('disabled', true);
-      if(selectize) { selectize.clear(); selectize.clearOptions(); selectize.disable(); }
+      const $field = UI_WIZ.lookupField;
+      const selectize = $field[0].selectize;
+      $field.empty();
+      $field.prop('disabled', true); 
+      if (selectize) {
+          selectize.clear();
+          selectize.clearOptions();
+          selectize.disable();
+          selectize.settings.placeholder = 'Loading...'; 
+          selectize.updatePlaceholder();
+      }
 
-      if (!selectedRuleId) {
-          fieldSelect.empty().append(new Option('', ''));
+      if (!ruleId) {
+        if (selectize) {
+              selectize.settings.placeholder = 'Select a field...';
+              selectize.updatePlaceholder();
+          }
+          $field.append(new Option('', ''));
           return;
       }
 
       const endpoint = window.lookupgetfieldroute || "{{ path('rule_get_fields_for_rule') }}";
 
       $.get(endpoint, function(data) {
-          fieldSelect.empty().append(new Option('Select a field...', ''));
+          $field.empty().append(new Option('Select a field...', '')); // Reset natif
           
-          if (Array.isArray(data) && data.length > 0) {
-              
-              const filteredFields = data.filter(function(item) {
-                  return item.rule_id === selectedRuleId;
-              });
+          if (Array.isArray(data)) {
+              const fields = data.filter(f => f.rule_id == ruleId);
 
-              if (filteredFields.length > 0) {
-                  filteredFields.forEach(function(item) {
-                      fieldSelect.append(new Option(item.name, item.name));
-                      if(selectize) selectize.addOption({value: item.name, text: item.name});
+              if (fields.length > 0) {
+                  fields.forEach(f => {
+                      $field.append(new Option(f.name, f.name));
+                      if (selectize) selectize.addOption({value: f.name, text: f.name});
                   });
                   
-                  fieldSelect.prop('disabled', false);
-                  if(selectize) { selectize.enable(); selectize.refreshOptions(false); }
+                  $field.prop('disabled', false);
+                  if (selectize) {
+                      selectize.enable();
+                      selectize.settings.placeholder = 'Select a field...';
+                      selectize.updatePlaceholder();
+                      selectize.refreshOptions(false);
+                  }
               } else {
-                  fieldSelect.empty().append(new Option('No fields found for this rule', ''));
+                  $field.append(new Option('No fields mapped', ''));
+                  if (selectize) {
+                       selectize.settings.placeholder = 'No fields mapped';
+                       selectize.updatePlaceholder();
+                  }
               }
-          } else {
-              fieldSelect.empty().append(new Option('No fields in DB', ''));
           }
       });
   });
@@ -1265,6 +1279,11 @@ $(function () {
       slot.textContent = val;
       slot.classList.toggle('is-empty', !val);
     }
+  });
+  $('#mapping-formula').on('hidden.bs.modal', function () {
+      UI_WIZ.tooltip.hide();
+      tooltipVisible = false;
+      UI_WIZ.sel[0].selectize.clear();
   });
 });
 

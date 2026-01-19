@@ -31,7 +31,6 @@ require('./js/task.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/rule-group.js')
-require('./js/rule-create.js')
 require('./js/notifications.js')
 
 const path = window.location.pathname;
@@ -54,6 +53,10 @@ require('./js/historique.js')
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
+}
+
+if (window.location.href.includes('rule/')) {
+    require('./js/rule-create.js')
 }
 
 if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
