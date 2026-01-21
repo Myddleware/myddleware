@@ -89,7 +89,7 @@
         <div class="col-md-4 global-status-reduced-width" id="globalStatus" hidden="true">
             {{ form_label(form.document.globalStatus, 'list_flux.filter.global_status'|trans) }}
             <div class="input-group">
-                 {{ form_widget(form.document.globalStatus, {'required': false, 'attr': {'class': 'select2'}}) }}
+                 {{ form_widget(form.document.globalStatus, {'required': false }) }}
             </div>
         </div>
 
@@ -386,9 +386,6 @@
 	{{ encore_entry_script_tags('app') }}
 	{{ encore_entry_script_tags('filter') }}
 
-	<!-- Script pour Select2 -->
-	<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
 	<!-- Scripts personnalisés -->
 	<script type="text/javascript">
 		var path_remove_filter = "{{ path('remove_filter') }}";
@@ -403,7 +400,7 @@ var mass_run = "{{ path('flux_mass_run') }}";
 var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
 var csvdocumentids = "{{ csvdocumentids }}";
 
-// Initialisation du date & time picker pour les filtres de date de modification
+    // Initialisation du date & time picker pour les filtres de date de modification
     // Initialize date & time pickers only if elements exist
     if (document.getElementById('form_date_modif_end')) {
         start = new dtsel.DTS('#form_date_modif_end', {showTime: true});
@@ -412,17 +409,16 @@ var csvdocumentids = "{{ csvdocumentids }}";
         end = new dtsel.DTS('#form_date_modif_start', {showTime: true});
     }
 
+    var $globalStatusField = $('#globalStatus select');
 
-// Initialisation de Select2 et autres scripts après le chargement du document
-$(document).ready(function () { // Initialisation de Select2 sur le champ globalStatus
-$('#globalStatus .select2').select2({
-    placeholder: "Select Global Status", 
-    allowClear: true, 
-    width: '300px'
-});
-
+    if ($globalStatusField[0].selectize) {
+        $globalStatusField[0].selectize.destroy();
+    }
+    $globalStatusField.selectize({
+        placeholder: "Select Global Status", 
+        plugins: ['remove_button'],
+        dropdownParent: 'body'
     });
-// Script pour récupérer et afficher les messages d'erreur liés aux documents
 $('.get-log-msg').click(function () {
 var docId = $(this).data('doc-id');
 var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
@@ -476,5 +472,4 @@ var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
 {% endblock javascript %}{% endblock %}{% block cssin %}
 {{ encore_entry_link_tags('app') }}
 {{ encore_entry_link_tags('filter') }}
-<!-- Styles pour Select2 -->
-<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet"/>{% endblock cssin %}
+{% endblock cssin %}

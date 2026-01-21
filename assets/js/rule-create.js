@@ -1223,7 +1223,7 @@ UI_WIZ.lookupRule.off('change').on('change', function() {
           }
       });
   });
-
+  
   $('#submit-lookup').on('click', function() {
     let f = UI_WIZ.lookupField.val();
     if(UI_WIZ.lookupField[0].selectize) f = UI_WIZ.lookupField[0].selectize.getValue();
@@ -1547,95 +1547,117 @@ $(document).ready(function() {
 });
 
 /* ===========================================
- * TEMPLATE LOGIC (Template management Step 1)
- * =========================================== */
+ * TEMPLATE LOGIC (Template management Step 1)
+ * =========================================== */
 (function () {
-  const switchEl = UI.get('template-mode-switch');
-  const zone = UI.get('rule-template-zone');
-  const path = UI.get('step-2')?.getAttribute('data-path-templates');
-  const saveBtn = UI.get('rule-save-template');
-  
-  const sSelect = UI.get('source-solution');
-  const tSelect = UI.get('target-solution');
+  const $switchEl = $('#template-mode-switch');
+  const zone = document.getElementById('rule-template-zone');
+  const step2 = document.getElementById('step-2');
+  if (!step2 || !zone) return;
 
-  if (!switchEl) return;
+  const path = step2.getAttribute('data-path-templates');
+  const solutionsMap = {};
+  $('#source-solution option, #target-solution option').each(function() {
+      const id = $(this).val();
+      const slug = $(this).attr('data-solution-slug');
+      if (id && slug) {
+          solutionsMap[id] = slug;
+      }
+  });
 
-  const loadTemplates = () => {
-    if (!switchEl.checked) return;
+  const loadTemplates = () => {
+    if ($switchEl.length && !$switchEl.is(':checked')) return;
 
-    if (path) {
-      const sSlug = sSelect.options[sSelect.selectedIndex]?.getAttribute('data-solution-slug');
-      const tSlug = tSelect.options[tSelect.selectedIndex]?.getAttribute('data-solution-slug');
-      
-      if (sSlug && tSlug) {
-        zone.innerHTML = '<div class="text-center py-4"><div class="spinner-border"></div></div>';
-        UI.fetchHtml(path, { src_solution: sSlug, tgt_solution: tSlug })
-          .then(html => zone.innerHTML = html || '<p>No templates found for this pair.</p>')
-          .catch(() => zone.innerHTML = '<p class="text-danger">Error loading templates.</p>');
-      }
-    }
-  };
+    const sId = $('#source-solution').val();
+    const tId = $('#target-solution').val();
+    const sSlug = solutionsMap[sId];
+    const tSlug = solutionsMap[tId];
 
-  switchEl.addEventListener('change', () => {
-    const isTpl = switchEl.checked;
-    
-    // Toggle visibility between classic mode and template mode
-    UI.toggle(UI.get('source-module-group'), !isTpl);
-    UI.toggle(UI.get('target-module-group'), !isTpl);
-    UI.toggle(UI.get('step-templates'), isTpl);
-    [3,4,5].forEach(i => UI.toggle(UI.get(`step-${i}`), false));
+    if (sSlug && tSlug) {
+      zone.innerHTML = '<div class="text-center py-4"><div class="spinner-border text-primary"></div></div>';
+      
+      if (typeof UI !== 'undefined' && UI.fetchHtml) {
+        UI.fetchHtml(path, { src_solution: sSlug, tgt_solution: tSlug })
+          .then(html => zone.innerHTML = html || '<p class="text-center text-muted">No templates found.</p>')
+          .catch(() => zone.innerHTML = '<p class="text-danger text-center">Error loading templates.</p>');
+      } else {
+        $.get(path, { src_solution: sSlug, tgt_solution: tSlug })
+         .done(html => zone.innerHTML = html)
+         .fail(() => zone.innerHTML = '<p class="text-danger">Error.</p>');
+      }
+    }
+  };
+  
+  $switchEl.on('change', function() {
+    const isTpl = $(this).is(':checked');
+    
+    $('#source-module-group, #target-module-group').toggleClass('d-none', isTpl);
+    $('#step-templates').toggleClass('d-none', !isTpl);
+    
+    if(isTpl) {
+        $('#step-3, #step-4, #step-5').addClass('d-none');
+        loadTemplates();
+    }
+  });
 
-    loadTemplates();
-  });
+  $('#source-solution, #target-solution').on('change', function() {
+      setTimeout(loadTemplates, 50); 
+  });
 
-  if (sSelect) sSelect.addEventListener('change', loadTemplates);
-  if (tSelect) tSelect.addEventListener('change', loadTemplates);
-  document.addEventListener('click', e => {
-    const btn = e.target.closest('.js-template-choose');
-    if (!btn) return;
-    
-    document.querySelectorAll('.template-card.is-selected').forEach(c => c.classList.remove('is-selected'));
-    btn.closest('.template-card').classList.add('is-selected');
-    
-    let inp = UI.get('selected-template-name');
-    if (!inp) {
-        inp = document.createElement('input'); 
-        inp.type='hidden'; inp.id='selected-template-name'; 
-        UI.get('step-1').appendChild(inp);
-    }
-    inp.value = btn.dataset.templateName;
-  });
+  $(document).on('click', '.js-template-choose', function(e) {
+    const btn = e.target.closest('.js-template-choose');
+    if (!btn) return;
+    
+    $('.template-card').removeClass('is-selected border-primary shadow');
+    $(btn).closest('.template-card').addClass('is-selected border-primary shadow');
+    
+    let inp = document.getElementById('selected-template-name');
+    if (!inp) {
+        inp = document.createElement('input'); 
+        inp.type='hidden'; 
+        inp.id='selected-template-name'; 
+        document.getElementById('step-1').appendChild(inp);
+    }
+    inp.value = btn.getAttribute('data-template-name');
+  });
 
-  if (saveBtn) {
-    saveBtn.addEventListener('click', async (e) => {
-      e.preventDefault();
-      const url = saveBtn.getAttribute('data-path-template-apply');
-      const tplName = UI.get('selected-template-name')?.value;
-      const name = UI.get('rulename')?.value;
-      
-      if (!name || !tplName) return alert('Missing Name or Template selection');
+  $('#rule-save-template').on('click', async function(e) {
+      e.preventDefault();
+      const $btn = $(this);
+      const url = $btn.attr('data-path-template-apply');
+      const tplName = $('#selected-template-name').val();
+      const ruleName = $('#rulename').val();
+      
+      if (!ruleName || !tplName) {
+          alert('Please enter a rule name and select a template.');
+          return;
+      }
 
-      saveBtn.disabled = true;
-      saveBtn.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Saving...';
-      try {
-        const res = await fetch(url, {
-          method: 'POST',
-          headers: {'Content-Type': 'application/json'},
-          body: JSON.stringify({
-            ruleName: name,
-            templateName: tplName,
-            connectorSourceId: UI.get('source-connector').value,
-            connectorTargetId: UI.get('target-connector').value
-          })
-        });
-        const json = await res.json();
-        if (json.redirect) window.location.assign(json.redirect);
-        else alert('Error: ' + (json.message || 'Unknown'));
-      } catch (e) {
-        alert('Network Error');
-      } finally {
-        saveBtn.disabled = false;
-      }
-    });
-  }
+      $btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> Saving...');
+
+      try {
+        const response = await fetch(url, {
+             method: 'POST',
+             headers: {'Content-Type': 'application/json'},
+             body: JSON.stringify({
+               ruleName: ruleName,
+               templateName: tplName,
+               connectorSourceId: $('#source-connector').val(),
+               connectorTargetId: $('#target-connector').val()
+             })
+        });
+        const json = await response.json();
+        
+        if (json.redirect) window.location.assign(json.redirect);
+        else {
+            alert('Error: ' + (json.message || 'Unknown error'));
+            $btn.prop('disabled', false).text('Save');
+        }
+      } catch (err) {
+        console.error(err);
+        alert('Network Error');
+        $btn.prop('disabled', false).text('Save');
+      }
+  });
+
 })();
