@@ -56,6 +56,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'suitecrm8',       	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'acton',           	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'dynamicsbusiness',	'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'dynamicscrm',	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'iomad',	'active' => 1, 'source' => 1, 'target' => 1]
     ];
 

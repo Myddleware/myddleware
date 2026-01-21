@@ -61,6 +61,7 @@ use App\Solutions\wordpress;
 use App\Solutions\yousign;
 use App\Solutions\zuora;
 use App\Solutions\dynamicsbusiness;
+use App\Solutions\dynamicscrm;
 use App\Solutions\iomad;
 use Exception;
 
@@ -96,6 +97,7 @@ class SolutionManager
 							'brevo',
 							'acton',
 							'dynamicsbusiness',
+							'dynamicscrm',
 							'iomad'
 						];
 
@@ -124,6 +126,7 @@ class SolutionManager
         brevo $brevo,
         acton $acton,
         dynamicsbusiness $dynamicsbusiness,
+        dynamicscrm $dynamicscrm,
         iomad $iomad
     ) {
 		// Load the solution classes
