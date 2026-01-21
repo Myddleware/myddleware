@@ -820,55 +820,78 @@ const UI = {
     btn.addEventListener('click', () => window.addMappingRow(tbody));
   };
 
-// Ensures a mapping row exists for the chosen duplicate field
-window.ensureDuplicateMappingRow = function(targetField) {
-    const tbody = UI.get('rule-mapping-body');
-    if (!tbody || !targetField) return;
-    let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
-        const sel = tr.querySelector('.rule-mapping-target');
-        if (!sel) return false;
-        return sel.value === targetField || (sel.options[sel.selectedIndex]?.text.trim() === targetField);
-    });
+  // Ensures a mapping row exists for the chosen duplicate field
+  window.ensureDuplicateMappingRow = function(targetField) {
+      const tbody = UI.get('rule-mapping-body');
+      if (!tbody || !targetField) return;
+      let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
+          const sel = tr.querySelector('.rule-mapping-target');
+          if (!sel) return false;
+          
+          let currentVal = sel.value;
+          if (sel.selectize) currentVal = sel.selectize.getValue();
+          else if ($(sel)[0] && $(sel)[0].selectize) currentVal = $(sel)[0].selectize.getValue();
 
-    if (!row) {
-        row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
-            const tgtSel = tr.querySelector('.rule-mapping-target');
-            const hasTarget = tgtSel && tgtSel.value !== '';
-            const hasSource = tr.querySelectorAll('.mapping-src-badge').length > 0;
-            
-            return !hasTarget && !hasSource;
-        });
-    }
+          if (currentVal === targetField) return true;
+          if (sel.options && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex].text.trim() === targetField) return true;
+          
+          return false;
+      });
 
-    if (!row) {
-        window.addMappingRow(tbody); 
-        row = tbody.lastElementChild;
-    }
+      if (!row) {
+          row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
+              const tgtSel = tr.querySelector('.rule-mapping-target');
+              let val = tgtSel.value;
+              if (tgtSel.selectize) val = tgtSel.selectize.getValue();
+              else if ($(tgtSel)[0] && $(tgtSel)[0].selectize) val = $(tgtSel)[0].selectize.getValue();
 
-    if (row) {
-        const sel = row.querySelector('.rule-mapping-target');
-        if (sel.value !== targetField) {
-            let matchVal = targetField;
-            let opt = Array.from(sel.options).find(o => o.value === targetField);
-            if (!opt) opt = Array.from(sel.options).find(o => o.text.trim() === targetField);
-            if (opt) matchVal = opt.value;
+              const hasSource = tr.querySelectorAll('.mapping-src-badge').length > 0;
+              return !val && !hasSource;
+          });
+      }
 
-            sel.value = matchVal;
-            if (sel.selectize) {
-                sel.selectize.setValue(matchVal);
-            } else if ($(sel)[0] && $(sel)[0].selectize) {
-                $(sel)[0].selectize.setValue(matchVal);
-            }
-        }
-        const delBtn = row.querySelector('button.text-danger');
-        if (delBtn) {
-            delBtn.disabled = true;
-            delBtn.style.opacity = '0.3';
-            delBtn.style.pointerEvents = 'none';
-            delBtn.title = 'Champ obligatoire (Duplicate)';
-        }
-    }
-};
+      if (!row) {
+          window.addMappingRow(tbody); 
+          row = tbody.lastElementChild;
+      }
+
+      if (row) {
+          const sel = row.querySelector('.rule-mapping-target');
+          const selectize = sel.selectize || ($(sel)[0] ? $(sel)[0].selectize : null);
+
+          if (selectize) {
+              if (selectize.getValue() !== targetField) {
+                  let existingOptionValue = null;
+                  
+                  for (const key in selectize.options) {
+                      const opt = selectize.options[key];
+                      if (opt.value == targetField || opt.text.toLowerCase() == targetField.toLowerCase()) {
+                          existingOptionValue = opt.value;
+                          break;
+                      }
+                  }
+
+                  if (existingOptionValue) {
+                      selectize.setValue(existingOptionValue);
+                  } 
+                  else {
+                      selectize.addOption({value: targetField, text: targetField});
+                      selectize.addItem(targetField);
+                  }
+              }
+          } else {
+              sel.value = targetField;
+          }
+          const delBtn = row.querySelector('button.text-danger');
+          if (delBtn) {
+              delBtn.disabled = true;
+              delBtn.style.opacity = '0.3';
+              delBtn.style.pointerEvents = 'none';
+              delBtn.title = 'Required Field (Duplicate Check)';
+              delBtn.onclick = null; 
+          }
+      }
+  };
 })();
 
 /* ============================================================
@@ -1588,15 +1611,18 @@ $(document).ready(function() {
     }
   };
   
-  $switchEl.on('change', function() {
+$switchEl.on('change', function() {
     const isTpl = $(this).is(':checked');
-    
     $('#source-module-group, #target-module-group').toggleClass('d-none', isTpl);
     $('#step-templates').toggleClass('d-none', !isTpl);
     
     if(isTpl) {
         $('#step-3, #step-4, #step-5').addClass('d-none');
         loadTemplates();
+    } else {
+        if (typeof window.tryRevealStep3 === 'function') {
+            window.tryRevealStep3(); 
+        }
     }
   });
 
