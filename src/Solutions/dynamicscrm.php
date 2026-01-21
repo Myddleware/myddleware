@@ -400,7 +400,13 @@ class dynamicscrm extends solution
                         if (isset($record[$field])) {
                             $result[$field] = $record[$field];
                         } else {
-                            $result[$field] = null;
+                            // Handle lookup fields: Dynamics CRM returns them as _fieldname_value
+                            $lookupField = "_{$field}_value";
+                            if (isset($record[$lookupField])) {
+                                $result[$field] = $record[$lookupField];
+                            } else {
+                                $result[$field] = null;
+                            }
                         }
                     }
 
