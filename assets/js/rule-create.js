@@ -636,27 +636,28 @@ const UI = {
       ul.appendChild(li);
   };
 
-// Initializes the add filter button
+  // Initializes the add filter button
   window.initFiltersUI = function() {
-    const addBtn = UI.get('rule-filter-add');
-    if (!addBtn || addBtn.dataset.bound) return;
-    addBtn.dataset.bound = '1';
-    addBtn.addEventListener('click', () => {
-      const fieldSel = UI.get('rule-filter-field');
-      const opSel = UI.get('rule-filter-operator');
-      const valInput = UI.get('rule-filter-value');
-      let fieldVal = fieldSel.value;
-      if (fieldSel.selectize) fieldVal = fieldSel.selectize.getValue();
-      if (!fieldVal || !opSel.value || !valInput.value.trim()) return;
-      window.addFilterRow(fieldVal, opSel.value, valInput.value.trim());
-      if (fieldSel.selectize) {
-          fieldSel.selectize.clear();
-      } else {
-          fieldSel.value = ''; 
-      }
-      opSel.value = ''; 
-      valInput.value = '';
-    });
+      const addBtn = UI.get('rule-filter-add');
+      if (!addBtn || addBtn.dataset.bound) return;
+      addBtn.dataset.bound = '1';      
+      addBtn.addEventListener('click', () => {
+        const fieldSel = UI.get('rule-filter-field');
+        const opSel = UI.get('rule-filter-operator');
+        const valInput = UI.get('rule-filter-value');        
+        let fieldVal = fieldSel.value;
+        if (fieldSel.selectize) fieldVal = fieldSel.selectize.getValue();
+        if (!fieldVal || !opSel.value) return; 
+        window.addFilterRow(fieldVal, opSel.value, valInput.value.trim());
+        
+        if (fieldSel.selectize) {
+            fieldSel.selectize.clear();
+        } else {
+            fieldSel.value = ''; 
+        }
+        opSel.value = ''; 
+        valInput.value = '';
+      });
   };
 
   function createMappingSelect(fields) {

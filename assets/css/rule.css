@@ -1430,7 +1430,7 @@ html body .selectize-control.single .selectize-input.focus {
     border-color: #dee2e6;
 }
 
-#rule-filter-operator, #rule-filter-value, #mode{
+#rule-filter-operator, #rule-filter-value, #mode, #bidirectional{
 	border-color: #ced4da;
     min-height: 48px;
 }
