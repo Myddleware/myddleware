@@ -270,10 +270,6 @@
 	text-decoration:none;
 }
 
-#formule #filter {
-	height: 30px;
-}
-
 #formule #area_insert, #formule #area_color {
 	height: 225px;
 	padding: 10px;
@@ -313,9 +309,6 @@
 	line-height: 2.5em;
 	text-align: center;
 }
-/* #validation{
-	color: red;
-} */
 
 #simulation #simulation_tab li {
     border-bottom: 1px solid #ccc;
@@ -1357,13 +1350,13 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	display: contents;
 }
 
-.badge-rule-template{
-	min-width: 60px;	
-    font-size: smaller;
-    border-radius: 20px;
-    background-color: #fff;
-    color: #000000;
-    border: 2px dashed #03c4eb;
+.badge-rule-template, .selectize-control.multi .selectize-input > div.item, .selectize-control.multi .selectize-input > div.item.active{
+	min-width: 60px !important;
+    font-size: smaller !important;
+    border-radius: 20px !important;
+    background-color: #fff !important; 
+    border: 2px dashed #03c4eb !important;
+    color: #000000 !important;
 }
 
 .template-card {
@@ -1437,7 +1430,7 @@ html body .selectize-control.single .selectize-input.focus {
     border-color: #dee2e6;
 }
 
-#rule-filter-operator, #rule-filter-value, #mode{
+#rule-filter-operator, #rule-filter-value, #mode, #bidirectional{
 	border-color: #ced4da;
     min-height: 48px;
 }

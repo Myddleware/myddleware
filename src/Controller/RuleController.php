@@ -423,7 +423,7 @@ class RuleController extends AbstractController
 
         $viewData = $this->ruleQueryService->prepareDataForView($rule);
 
-        return $this->render('Rule/edit/fiche.html.twig', array_merge([
+        return $this->render('Rule/detail/fiche.html.twig', array_merge([
             'rule' => $rule,
             'id'   => $rule->getId(),
         ], $viewData));
