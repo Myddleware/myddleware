@@ -12,9 +12,8 @@
 
 {% block body %}
 
-  {# --- OVERLAY DE CHARGEMENT (utilisé surtout en mode EDIT) --- #}
-  <div id="rule-loading-overlay"
-       class="rule-loading-overlay {% if initialRuleJson is not defined %}d-none{% endif %}">
+  {# --- OVERLAY DE CHARGEMENT --- #}
+  <div id="rule-loading-overlay" class="rule-loading-overlay {% if initialRuleJson is not defined %}d-none{% endif %}">
     <div class="rule-loading-overlay__content">
       <div class="spinner-border" role="status">
         <span class="visually-hidden">Loading…</span>
@@ -25,7 +24,7 @@
     </div>
   </div>
 
-  <div class="container py-4" id="rule-create">
+    <div class="container py-4" id="rule-create">
     {# On cache le builder en EDIT tant que tout n’est pas prêt #}
     <div id="rule-builder"
          class="{% if initialRuleJson is defined %}d-none{% endif %}">
@@ -45,14 +44,10 @@
       {# --- SECTION 5 : Mapping --- #}
       {% include 'Rule/create/_mapping.html.twig' %}
 
-      <div id="rule-page"
-          data-mode="{{ initialRuleJson is defined ? 'edit' : 'create' }}">
-      </div>
+      <div id="rule-page" data-mode="{{ initialRuleJson is defined ? 'edit' : 'create' }}"></div>
 
       {% if initialRuleJson is defined %}
-        <script>
-          window.initialRule = {{ initialRuleJson|raw }};
-        </script>
+        <script>window.initialRule = {{ initialRuleJson|raw }};</script>
       {% endif %}
     </div>
   </div>
@@ -63,120 +58,176 @@
     window.LOOKUP_ENDPOINT = "{{ path('get_rules_for_lookup') }}";
   </script>
 
-  {# Offcanvas gauche (inchangé) #}
+  {# Offcanvas gauche #}
   <div class="offcanvas offcanvas-start" data-bs-backdrop="false" data-bs-scroll="true" tabindex="-1" id="ruleCreateNav" aria-labelledby="ruleCreateNavLabel">
     <div class="offcanvas-header">
       <h5 class="offcanvas-title" id="ruleCreateNavLabel">{{ 'title.rule.create'|trans }}</h5>
-      <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Fermer"></button>
+      <button type="button" class="btn-close" aria-label="Fermer"></button>
     </div>
     <div class="offcanvas-body p-0">
-
-      <!-- Menu -->
       <nav class="list-group list-group-flush">
-        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-1" data-bs-dismiss="offcanvas">
+        <div class="list-group-item list-group-item-action rule-nav-link" style="cursor: pointer;" data-target="#step-1">
           {{ 'animate.rulename'| trans }}
-        </a>
-        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-2" data-bs-dismiss="offcanvas">
+        </div>
+        <div class="list-group-item list-group-item-action rule-nav-link" style="cursor: pointer;" data-target="#step-2">
           {{ 'animate.ruleconnection'| trans }}
-        </a>
-        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-3" data-bs-dismiss="offcanvas">
+        </div>
+        <div class="list-group-item list-group-item-action rule-nav-link" style="cursor: pointer;" data-target="#step-3">
           {{ 'create_rule.step3.syncdata.title' | trans }}
-        </a>
-        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-4" data-bs-dismiss="offcanvas">
+        </div>
+        <div class="list-group-item list-group-item-action rule-nav-link" style="cursor: pointer;" data-target="#step-4">
           {{ 'create_rule.step4.title' | trans }}
-        </a>
-        <a class="list-group-item list-group-item-action rule-nav-link" href="#step-5" data-bs-dismiss="offcanvas">
+        </div>
+        <div class="list-group-item list-group-item-action rule-nav-link" style="cursor: pointer;" data-target="#step-5">
           {{ 'create_rule.step5.title' | trans }}
-        </a>
+        </div>
       </nav>
     </div>
   </div>
 
-  <script>
-    // Hook global pour ton JS : tu l’appelles quand TOUT est prêt
-    window.ruleInitDone = function () {
-      const overlay = document.getElementById('rule-loading-overlay');
-      const builder = document.getElementById('rule-builder');
+<script>
+  window.ruleInitDone = function () {
+    const overlay = document.getElementById('rule-loading-overlay');
+    const builder = document.getElementById('rule-builder');
+    if (overlay) overlay.classList.add('d-none');
+    if (builder) builder.classList.remove('d-none');
+    if (typeof window.updateRuleNavLinks === 'function') window.updateRuleNavLinks();
+  };
 
-      if (overlay) {
-        overlay.classList.add('d-none');
-      }
-      if (builder) {
-        builder.classList.remove('d-none');
-      }
+  document.addEventListener('DOMContentLoaded', function () {
+    const offcanvasEl = document.getElementById('ruleCreateNav');
+    if (!offcanvasEl) return;
 
-      // On met aussi à jour l’état des liens du menu
-      if (typeof window.updateRuleNavLinks === 'function') {
-        window.updateRuleNavLinks();
-      }
-    };
+    let bsOffcanvas = new bootstrap.Offcanvas(offcanvasEl);
+    let backdrop = document.getElementById('my-safe-backdrop');
+    if (!backdrop) {
+        backdrop = document.createElement('div');
+        backdrop.id = 'my-safe-backdrop';
+        backdrop.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.5); z-index:1040; display:none; opacity:0; transition:opacity 0.3s;';
+        document.body.appendChild(backdrop);
+        backdrop.addEventListener('click', closeMenu);
+    }
 
-    document.addEventListener('DOMContentLoaded', function () {
-      const offcanvasEl  = document.getElementById('ruleCreateNav');
-      const bsOffcanvas  = offcanvasEl ? bootstrap.Offcanvas.getOrCreateInstance(offcanvasEl) : null;
-
-      function updateRuleNavLinks() {
-        const links = document.querySelectorAll('.rule-nav-link');
-
-        links.forEach(link => {
-          const targetSelector = link.getAttribute('href');
-          if (!targetSelector || !targetSelector.startsWith('#')) return;
-
-          const section = document.querySelector(targetSelector);
-          if (!section) return;
-
-          const isHidden = section.classList.contains('d-none');
-
-          if (isHidden) {
-            link.classList.add('disabled');
-            link.setAttribute('aria-disabled', 'true');
-            link.setAttribute('tabindex', '-1');
-          } else {
-            link.classList.remove('disabled');
-            link.removeAttribute('aria-disabled');
-            link.removeAttribute('tabindex');
-          }
-        });
-      }
-
-      window.updateRuleNavLinks = updateRuleNavLinks;
-      updateRuleNavLinks();
-
-      document.addEventListener('click', function (e) {
-        const link = e.target.closest('a[href^="#"]');
-        if (!link) return;
-
-        if (link.classList.contains('disabled')) {
-          e.preventDefault();
-          return;
+    function openMenu() {
+        if (document.activeElement && document.activeElement !== document.body) {
+            document.activeElement.blur();
         }
+        document.body.classList.add('menu-is-open');
+        backdrop.style.display = 'block';
+        setTimeout(() => { backdrop.style.opacity = '1'; }, 10);
+        bsOffcanvas.show();
+    }
 
-        const targetSelector = link.getAttribute('href');
-        const target = document.querySelector(targetSelector);
-        if (!target) return;
+    function closeMenu() {
+        document.body.classList.remove('menu-is-open');
+        backdrop.style.opacity = '0';
+        setTimeout(() => { backdrop.style.display = 'none'; }, 300);
+        bsOffcanvas.hide();
+        if (document.activeElement) document.activeElement.blur();
+    }
 
-        const isInsideOffcanvas = link.closest('.offcanvas') !== null;
-
-        e.preventDefault();
-
-        if (isInsideOffcanvas && bsOffcanvas) {
-          const handleHidden = function () {
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            offcanvasEl.removeEventListener('hidden.bs.offcanvas', handleHidden);
-          };
-          offcanvasEl.addEventListener('hidden.bs.offcanvas', handleHidden);
-          bsOffcanvas.hide();
+    function toggleMenu() {
+        if (offcanvasEl.classList.contains('show')) {
+            closeMenu();
         } else {
-          target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            openMenu();
+        }
+    }
+
+    const triggers = document.querySelectorAll('[data-bs-target="#ruleCreateNav"], [aria-controls="ruleCreateNav"]');
+    triggers.forEach(btn => {
+        const newBtn = btn.cloneNode(true);
+        newBtn.removeAttribute('data-bs-toggle'); 
+        btn.parentNode.replaceChild(newBtn, btn);
+
+        newBtn.addEventListener('click', (e) => {
+            e.preventDefault(); 
+            e.stopPropagation();
+            newBtn.blur();
+            toggleMenu();
+        });
+    });
+
+    const closeBtns = offcanvasEl.querySelectorAll('.btn-close');
+    closeBtns.forEach(btn => {
+        btn.removeAttribute('data-bs-dismiss');
+        const newBtn = btn.cloneNode(true);
+        btn.parentNode.replaceChild(newBtn, btn);
+        newBtn.addEventListener('click', (e) => {
+             e.preventDefault(); 
+             closeMenu();
+        });
+    });
+
+    const navLinks = offcanvasEl.querySelectorAll('.rule-nav-link');
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            const targetId = this.getAttribute('data-target');
+            if (this.classList.contains('disabled')) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+
+            if (!targetId) return;
+            const targetSection = document.querySelector(targetId);
+            if (!targetSection) return;
+
+            closeMenu();
+
+            setTimeout(() => {
+                const headerOffset = 100; 
+                const elementPosition = targetSection.getBoundingClientRect().top + window.scrollY;
+                const offsetPosition = elementPosition - headerOffset;
+
+                // Ancrage temporaire pour le scroll
+                targetSection.setAttribute('tabindex', '-1');
+                targetSection.style.outline = 'none';
+                targetSection.focus({preventScroll: true}); 
+
+                window.scrollTo({
+                    top: offsetPosition,
+                    behavior: "smooth"
+                });
+
+                // Nettoyage après scroll pour éviter l'effet "aimant" au prochain menu
+                setTimeout(() => {
+                    targetSection.blur();
+                    targetSection.removeAttribute('tabindex');
+                }, 1000);
+
+            }, 350); 
+        });
+    });
+
+    // 6. Update liens actifs/inactifs
+    window.updateRuleNavLinks = function() {
+      const links = document.querySelectorAll('.rule-nav-link');
+      links.forEach(link => {
+        const t = link.getAttribute('data-target');
+        if(!t) return;
+        const s = document.querySelector(t);
+        
+        if(s && s.classList.contains('d-none')) {
+            link.classList.add('disabled');
+            link.style.opacity = '0.5';
+            link.style.pointerEvents = 'none';
+        } else {
+            link.classList.remove('disabled');
+            link.style.opacity = '1';
+            link.style.pointerEvents = 'auto';
         }
       });
-    });
-  </script>
-  <script>
-    window.FUNCTION_TOOLTIPS = {
-        {% for t, v in lst_functions %}
-            "{{ v.getName }}": "{{ ('function.description.' ~ v.getCategoryId.getName|lower ~ '.' ~ v.getName ) |trans|e('js') }}",
-        {% endfor %}
     };
-  </script>
+    
+    window.updateRuleNavLinks();
+  });
+</script>
+
+<script>
+  window.FUNCTION_TOOLTIPS = {
+      {% for t, v in lst_functions %}
+          "{{ v.getName }}": "{{ ('function.description.' ~ v.getCategoryId.getName|lower ~ '.' ~ v.getName ) |trans|e('js') }}",
+      {% endfor %}
+  };
+</script>
 {% endblock %}
