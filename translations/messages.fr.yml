@@ -869,6 +869,7 @@ solution:
         client_id: Client ID
         client_secret: Client Secret
         environment: Environment
+        org_url: Url de l’organisation
     params:
         user_custom_fields: User - champs personalisés (shortname séparés par des virgules)
         course_custom_fields: Course - champs personalisés (shortname séparés par des virgules)
