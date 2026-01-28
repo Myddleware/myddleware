@@ -1093,8 +1093,8 @@ const UI = {
 })();
 
 /* ===========================================
- * FUNCTION WIZARD (Formula Editor)
- * =========================================== */
+ * FUNCTION WIZARD (Formula Editor)
+ * =========================================== */
 $(function () {
   const insertAtCursor = (el, text) => {
     if (!el) return;
@@ -1116,7 +1116,7 @@ $(function () {
 
   let tooltipVisible = false;
 
- // Click on a badge in the list -> Inserts {field}
+   // Click on a badge in the list -> Inserts {field}
   $('#toggle-tooltip').on('click', function () {
     tooltipVisible = !tooltipVisible;
     if (tooltipVisible) {
@@ -1128,19 +1128,44 @@ $(function () {
   });
   function updateTooltipContent() {
       const $select = $('#function-select');
-      let val = $select.val();
-      if ($select[0] && $select[0].selectize) {
-          val = $select[0].selectize.getValue();
-      }
-      let tip = "";
-      if (val && window.FUNCTION_TOOLTIPS && window.FUNCTION_TOOLTIPS[val]) {
-          tip = window.FUNCTION_TOOLTIPS[val];
-      } else if (val) {
-          tip = "No description available.";
-      } else {
-          tip = "Please select a function first.";
-      }
+      let val = $select[0]?.selectize ? $select[0].selectize.getValue() : $select.val();
+      let tip = (val && window.FUNCTION_TOOLTIPS && window.FUNCTION_TOOLTIPS[val]) ? window.FUNCTION_TOOLTIPS[val] : "No description available.";
       UI_WIZ.tooltip.html(tip);
+  }
+
+  function populateLookupFieldFromBadges() {
+      const $field = UI_WIZ.lookupField;
+      const selectize = $field[0].selectize;
+      
+      $field.empty();
+      if (selectize) {
+          selectize.clear();
+          selectize.clearOptions();
+          selectize.disable();
+          selectize.settings.placeholder = 'Select a rule first...';
+          selectize.updatePlaceholder();
+      }
+
+      const $badges = $('#formula-selected-fields .badge-formula');
+      
+      if ($badges.length > 0) {
+          $badges.each(function() {
+              const val = $(this).data('field');
+              const txt = $(this).text().trim();
+              
+              $field.append(new Option(txt, val));
+              if (selectize) selectize.addOption({value: val, text: txt});
+          });
+          
+          if (selectize) selectize.refreshOptions(false);
+      } else {
+           const msg = 'No source field selected';
+           $field.append(new Option(msg, ''));
+           if (selectize) {
+               selectize.settings.placeholder = msg;
+               selectize.updatePlaceholder();
+           }
+      }
   }
 
   UI_WIZ.sel.off('change').on('change', function () {
@@ -1154,35 +1179,41 @@ $(function () {
     $('#round-precision-input').toggle(isRound);
     UI_WIZ.lookupOpts.toggle(isLookup); 
     
-    if (tooltipVisible) updateTooltipContent();
+    if (tooltipVisible) updateTooltipContent();  
     if (isLookup) {
+        populateLookupFieldFromBadges();
+
         const srcSelect = document.getElementById('source-connector');
         const tgtSelect = document.getElementById('target-connector');
         const srcId = srcSelect ? srcSelect.value : 0;
         const tgtId = tgtSelect ? tgtSelect.value : 0;
         const endpoint = window.LOOKUP_ENDPOINT || (typeof lookupgetrule !== 'undefined' ? lookupgetrule : null);
+        const selectizeRule = UI_WIZ.lookupRule[0].selectize;
+        if(selectizeRule) { 
+            selectizeRule.clear();
+            selectizeRule.clearOptions();
+            selectizeRule.settings.placeholder = 'Loading rules...';
+            selectizeRule.updatePlaceholder();
+            selectizeRule.disable();
+        }
 
         if (endpoint && srcId && tgtId) {
-            UI_WIZ.lookupRule.empty().append(new Option('Loading...', ''));
-            UI_WIZ.lookupRule.prop('disabled', true);
-            if(UI_WIZ.lookupRule[0].selectize) UI_WIZ.lookupRule[0].selectize.disable();
-
             $.get(endpoint, { arg1: srcId, arg2: tgtId }, (res) => {
                 UI_WIZ.lookupRule.empty().append(new Option('Select a rule...', ''));
-                const selectize = UI_WIZ.lookupRule[0].selectize;
-                if(selectize) { selectize.clear(); selectize.clearOptions(); }
+                if(selectizeRule) { 
+                    selectizeRule.settings.placeholder = 'Select a rule...';
+                    selectizeRule.updatePlaceholder();
+                }
 
                 if (Array.isArray(res) && res.length > 0) {
                     res.forEach(r => {
                         UI_WIZ.lookupRule.append(new Option(r.name, r.id));
-                        if(selectize) selectize.addOption({value: r.id, text: r.name});
+                        if(selectizeRule) selectizeRule.addOption({value: r.id, text: r.name});
                     });
+                    if(selectizeRule) selectizeRule.enable();
                 } else {
                     UI_WIZ.lookupRule.append(new Option('No matching rules found', ''));
                 }
-                
-                UI_WIZ.lookupRule.prop('disabled', false);
-                if(selectize) { selectize.enable(); selectize.refreshOptions(false); }
             });
         } else {
              UI_WIZ.lookupRule.empty().append(new Option('Please select connectors first', ''));
@@ -1191,61 +1222,28 @@ $(function () {
   });
 
   // --- LOOKUP ---
-UI_WIZ.lookupRule.off('change').on('change', function() {
-      let ruleId = $(this).val();
-      if (this.selectize) ruleId = this.selectize.getValue();
+  UI_WIZ.lookupRule.off('change').on('change', function() {
+      const ruleId = this.selectize ? this.selectize.getValue() : $(this).val();
+      const selectizeField = UI_WIZ.lookupField[0].selectize;
 
-      const $field = UI_WIZ.lookupField;
-      const selectize = $field[0].selectize;
-      $field.empty();
-      $field.prop('disabled', true); 
-      if (selectize) {
-          selectize.clear();
-          selectize.clearOptions();
-          selectize.disable();
-          selectize.settings.placeholder = 'Loading...'; 
-          selectize.updatePlaceholder();
+      if (!selectizeField) return;
+
+      if (ruleId) {
+          selectizeField.enable();
+          selectizeField.settings.placeholder = 'Select...';
+          selectizeField.updatePlaceholder();
+      } else {
+          selectizeField.disable();
+          selectizeField.settings.placeholder = 'Select...';
+          selectizeField.updatePlaceholder();
       }
+  });
 
-      if (!ruleId) {
-        if (selectize) {
-              selectize.settings.placeholder = 'Select a field...';
-              selectize.updatePlaceholder();
-          }
-          $field.append(new Option('', ''));
-          return;
+  $('#mapping-formula').on('shown.bs.modal', function () {
+      if (UI_WIZ.sel.val() === 'lookup') {
+          populateLookupFieldFromBadges();
+          UI_WIZ.lookupRule.trigger('change');
       }
-
-      const endpoint = window.lookupgetfieldroute || "{{ path('rule_get_fields_for_rule') }}";
-
-      $.get(endpoint, function(data) {
-          $field.empty().append(new Option('Select a field...', '')); // Reset natif
-          
-          if (Array.isArray(data)) {
-              const fields = data.filter(f => f.rule_id == ruleId);
-
-              if (fields.length > 0) {
-                  fields.forEach(f => {
-                      $field.append(new Option(f.name, f.name));
-                      if (selectize) selectize.addOption({value: f.name, text: f.name});
-                  });
-                  
-                  $field.prop('disabled', false);
-                  if (selectize) {
-                      selectize.enable();
-                      selectize.settings.placeholder = 'Select a field...';
-                      selectize.updatePlaceholder();
-                      selectize.refreshOptions(false);
-                  }
-              } else {
-                  $field.append(new Option('No fields mapped', ''));
-                  if (selectize) {
-                       selectize.settings.placeholder = 'No fields mapped';
-                       selectize.updatePlaceholder();
-                  }
-              }
-          }
-      });
   });
   
   $('#submit-lookup').on('click', function() {
@@ -1269,8 +1267,6 @@ UI_WIZ.lookupRule.off('change').on('change', function() {
   $('#insert-function-parameter').on('click', function () {
     const func = UI_WIZ.sel.val();
     if (!func) return;
-    const selectedOption = UI_WIZ.sel.find('option:selected'); 
-    const cat = selectedOption.data('type');
     const val = UI_WIZ.param.val().trim();
     let call = `${func}()`;
 
@@ -1280,6 +1276,8 @@ UI_WIZ.lookupRule.off('change').on('change', function() {
     } else if (func.startsWith('mdw_')) {
       call = `"${func}"`;
     } else if (val) {
+      const selectedOption = UI_WIZ.sel.find('option:selected');
+      const cat = selectedOption.data('type'); 
       call = (cat === 1 || cat === 4) ? `${func}(${val})` : `${func}("${val}")`;
     }
 
@@ -1287,8 +1285,7 @@ UI_WIZ.lookupRule.off('change').on('change', function() {
     UI_WIZ.param.val('');
   });
 
-
-   // Saves the formula into the hidden field of the mapping row
+  // Saves the formula into the hidden field of the mapping row
   $('#mapping-formula-save').on('click', function () {
     const modal = document.getElementById('mapping-formula');
     const id = modal.dataset.currentRowId;
@@ -1297,17 +1294,16 @@ UI_WIZ.lookupRule.off('change').on('change', function() {
     const tr = document.querySelector(`tr[data-row-id="${id}"]`);
     if (tr) {
       const val = $('#area_insert').val().trim();
-      const hidden = document.getElementById(inputId);
-      if (hidden) hidden.value = val;
+      document.getElementById(inputId).value = val;
       const slot = tr.querySelector('.formula-slot');
       slot.textContent = val;
       slot.classList.toggle('is-empty', !val);
     }
   });
-  $('#mapping-formula').on('hidden.bs.modal', function () {
+    $('#mapping-formula').on('hidden.bs.modal', function () {
       UI_WIZ.tooltip.hide();
       tooltipVisible = false;
-      UI_WIZ.sel[0].selectize.clear();
+      if(UI_WIZ.sel[0].selectize) UI_WIZ.sel[0].selectize.clear();
   });
 });
 
