@@ -1434,3 +1434,39 @@ html body .selectize-control.single .selectize-input.focus {
 	border-color: #ced4da;
     min-height: 48px;
 }
+
+#my-safe-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1040;
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity 0.3s ease;
+    }
+
+#ruleCreateNav {
+	z-index: 1050;
+	transform: translateX(-100%);
+	visibility: hidden;
+	transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), visibility 0.3s;
+}
+
+body.menu-is-open #my-safe-backdrop {
+	opacity: 1;
+	visibility: visible;
+	pointer-events: auto;
+}
+
+body.menu-is-open #ruleCreateNav {
+	transform: translateX(0) !important;
+	visibility: visible !important;
+}
+
+body.menu-is-open {
+	overflow: hidden; 
+}
