@@ -36,6 +36,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'sugarcrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'vtigercrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'salesforce',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'salesforce_v2',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'prestashop',		'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'suitecrm',			'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'mailchimp',			'active' => 0, 'source' => 0, 'target' => 1],
@@ -56,8 +57,8 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'suitecrm8',       	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'acton',           	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'dynamicsbusiness',	'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'dynamicscrm',	'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'iomad',	'active' => 1, 'source' => 1, 'target' => 1]
+        ['name' => 'dynamicscrm',		'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'iomad',				'active' => 1, 'source' => 1, 'target' => 1]
     ];
 
     public function load(ObjectManager $manager)
