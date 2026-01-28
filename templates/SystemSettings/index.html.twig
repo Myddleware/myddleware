@@ -1,0 +1,219 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ parent() }} | {{ 'settings.title'|trans }}
+{% endblock %}
+
+{% block titlesm %}
+    {{ 'settings.title'|trans }}
+{% endblock titlesm %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    {{ encore_entry_link_tags('settings') }}
+    <link rel="stylesheet" href="{{ asset('assets/css/toggle-switch.css') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/account-card.css') }}">
+{% endblock %}
+
+{% block body %}
+<div id="settings-container">
+    <div class="account-card">
+        <!-- Header -->
+        <div class="account-header">
+            <h1 class="text-center mb-4">{{ 'settings.title'|trans }}</h1>
+        </div>
+
+        <!-- Notifications -->
+        <div class="flash-messages">
+            {% include '_notifications.html.twig' with { filter_prefix: 'settings.' } %}
+            {% include '_notifications.html.twig' with { filter_prefix: 'smtp.' } %}
+        </div>
+
+        <!-- Tabbed Navigation -->
+        <div class="tab-group">
+            <button class="tab {{ activeTab == 'general' ? 'active' : '' }}" data-tab="general">
+                <i class="fas fa-cog me-2"></i>{{ 'settings.tabs.general'|trans }}
+            </button>
+            <button class="tab {{ activeTab == 'smtp' ? 'active' : '' }}" data-tab="smtp">
+                <i class="fas fa-shield-alt me-2"></i>{{ 'settings.tabs.smtp'|trans }}
+            </button>
+        </div>
+
+        <!-- Tab Content Container -->
+        <div class="tab-content-container">
+            <!-- General Tab -->
+            <div id="general-tab" class="tab-content {{ activeTab == 'general' ? 'active' : '' }}" style="display: {{ activeTab == 'general' ? 'block' : 'none' }};">
+                {% include 'SystemSettings/_general_tab.html.twig' %}
+            </div>
+
+            <!-- SMTP Tab -->
+            <div id="smtp-tab" class="tab-content {{ activeTab == 'smtp' ? 'active' : '' }}" style="display: {{ activeTab == 'smtp' ? 'block' : 'none' }};">
+                {% include 'SystemSettings/_smtp_tab.html.twig' %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Override account-card styles for settings page */
+    #settings-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        background-color: #f5f5f5;
+        padding: 2rem;
+    }
+
+    /* Active tab styling - blue background like account page */
+    #settings-container .tab-group .tab.active {
+        background-color: #198BCA;
+        color: #fff;
+    }
+
+    /* Settings-specific form overrides */
+    .account-card .settings-section {
+        margin-bottom: 2rem;
+    }
+
+    .account-card .settings-section h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .account-card .settings-section p.text-muted {
+        font-size: 0.9rem;
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+
+    /* Form layout adjustments for Bootstrap grid */
+    .account-card .row {
+        display: flex;
+        flex-wrap: wrap;
+        margin: 0 -0.5rem;
+    }
+
+    .account-card .col-sm-4,
+    .account-card .col-sm-8,
+    .account-card .col-sm-2,
+    .account-card .col-sm-10 {
+        padding: 0 0.5rem;
+    }
+
+    .account-card .col-sm-4,
+    .account-card .col-sm-2 {
+        flex: 0 0 auto;
+    }
+
+    .account-card .col-sm-8,
+    .account-card .col-sm-10 {
+        flex: 0 0 auto;
+    }
+
+    @media (min-width: 576px) {
+        .account-card .col-sm-2 {
+            flex: 0 0 calc(16.666667% - 1rem);
+        }
+        .account-card .col-sm-4 {
+            flex: 0 0 calc(33.333333% - 1rem);
+        }
+        .account-card .col-sm-8 {
+            flex: 0 0 calc(66.666667% - 1rem);
+        }
+        .account-card .col-sm-10 {
+            flex: 0 0 calc(83.333333% - 1rem);
+        }
+    }
+
+    /* Form controls */
+    .account-card .form-control,
+    .account-card .form-select {
+        width: 100%;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        font-size: 0.95rem;
+        margin-bottom: 1rem;
+        font-family: 'Inter', 'Roboto', sans-serif;
+        background-color: #fff;
+        transition: border-color 0.15s ease-in-out;
+    }
+
+    .account-card .form-control:focus,
+    .account-card .form-select:focus {
+        border-color: #198BCA;
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(25, 139, 202, 0.1);
+    }
+
+    .account-card .form-label,
+    .account-card .col-form-label {
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    /* Button styling */
+    .account-card .btn {
+        padding: 0.6rem 1.2rem;
+        border-radius: 8px;
+        font-weight: 500;
+        font-family: 'Inter', 'Roboto', sans-serif;
+    }
+
+    .account-card .d-grid {
+        display: grid;
+        gap: 0.5rem;
+    }
+
+    .account-card .d-grid .btn {
+        width: 100%;
+    }
+
+    /* Spacing adjustments */
+    .account-card .mb-3 {
+        margin-bottom: 1rem !important;
+    }
+
+    .account-card .mb-2 {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .account-card hr {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        border: none;
+        border-top: 1px solid #e5e5e5;
+    }
+</style>
+{% endblock body %}
+
+{% block js %}
+    {{ parent() }}
+    {{ encore_entry_script_tags('settings') }}
+    <script>
+        // Tab switching functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabs = document.querySelectorAll('.tab-group .tab');
+            const tabContents = document.querySelectorAll('.tab-content-container .tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Remove active class from all tabs and hide all content
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(content => content.style.display = 'none');
+
+                    // Add active class to clicked tab and show its content
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    const targetTab = document.getElementById(tabId + '-tab');
+                    if (targetTab) {
+                        targetTab.style.display = 'block';
+                    }
+                });
+            });
+        });
+    </script>
+{% endblock js %}

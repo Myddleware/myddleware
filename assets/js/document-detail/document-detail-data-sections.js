@@ -1,7 +1,7 @@
-// console.log('flux-data-sections.js loaded');
 
 import { DocumentDetailLookupLinks } from './document-detail-lookup-links.js';
 import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
+import { getBaseUrl } from './document-detail-url-utils.js';
 
 export class DocumentDetailDataSections {
     /**
@@ -12,7 +12,6 @@ export class DocumentDetailDataSections {
      * @returns {string} HTML string for all data sections
      */
     static generateDataSections(sourceImagePath, targetImagePath, historyImagePath) {
-// console.log('🏗️ Generating data sections with placeholder containers');
         
         try {
             return `
@@ -23,7 +22,7 @@ export class DocumentDetailDataSections {
                 </div>
             `;
         } catch (error) {
-            console.error('❌ Error generating data sections:', error);
+            console.error(' Error generating data sections:', error);
             return this.generateErrorSection('Failed to generate data sections');
         }
     }
@@ -116,20 +115,7 @@ export class DocumentDetailDataSections {
             const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
 
             // Build proper URLs
-            const pathParts = window.location.pathname.split('/');
-            const publicIndex = pathParts.indexOf('public');
-            let baseUrl = window.location.origin;
-            if (publicIndex !== -1) {
-                const baseParts = pathParts.slice(0, publicIndex + 1);
-                baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                    baseUrl += "/index.php";
-                }
-            } else {
-                baseUrl = window.location.origin + "/index.php";
-            }
-
+            const baseUrl = getBaseUrl();
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
@@ -237,20 +223,7 @@ export class DocumentDetailDataSections {
             const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
 
             // Build proper URLs
-            const pathParts = window.location.pathname.split('/');
-            const publicIndex = pathParts.indexOf('public');
-            let baseUrl = window.location.origin;
-            if (publicIndex !== -1) {
-                const baseParts = pathParts.slice(0, publicIndex + 1);
-                baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                    baseUrl += "/index.php";
-                }
-            } else {
-                baseUrl = window.location.origin + "/index.php";
-            }
-
+            const baseUrl = getBaseUrl();
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
@@ -344,20 +317,7 @@ export class DocumentDetailDataSections {
             const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
 
             // Build proper URLs
-            const pathParts = window.location.pathname.split('/');
-            const publicIndex = pathParts.indexOf('public');
-            let baseUrl = window.location.origin;
-            if (publicIndex !== -1) {
-                const baseParts = pathParts.slice(0, publicIndex + 1);
-                baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                    baseUrl += "/index.php";
-                }
-            } else {
-                baseUrl = window.location.origin + "/index.php";
-            }
-
+            const baseUrl = getBaseUrl();
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
@@ -451,20 +411,7 @@ export class DocumentDetailDataSections {
             const formattedModificationDate = DocumentDetailDateFormatter.formatWithUserPreferences(modificationDate);
 
             // Build proper URLs
-            const pathParts = window.location.pathname.split('/');
-            const publicIndex = pathParts.indexOf('public');
-            let baseUrl = window.location.origin;
-            if (publicIndex !== -1) {
-                const baseParts = pathParts.slice(0, publicIndex + 1);
-                baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                    baseUrl += "/index.php";
-                }
-            } else {
-                baseUrl = window.location.origin + "/index.php";
-            }
-
+            const baseUrl = getBaseUrl();
             const documentUrl = `${baseUrl}/rule/flux/modern/${docId}`;
             const ruleUrl = `${baseUrl}/rule/view/${ruleId}`;
 
@@ -551,13 +498,9 @@ export class DocumentDetailDataSections {
             `;
         }
 
-        // console.log('🔍 generateWorkflowLogsSection: Processing', rows.length, 'workflow log rows');
-        // console.log('🔍 Sample workflow log data:', rows[0]);
-        // console.log('🔍 All available fields in first row:', Object.keys(rows[0] || {}));
 
         const body = rows
         .map(({ id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, status, dateCreated, message, workflowId, jobId, actionId }, index) => {
-            // console.log(`🔍 Row ${index}:`, { id, workflowName, jobName, triggerDocument, generateDocument, createdBy, actionName, actionType, workflowId, jobId, actionId });
 
             // Format date created using user preferences
             const formattedDateCreated = DocumentDetailDateFormatter.formatWithUserPreferences(dateCreated);
@@ -571,39 +514,21 @@ export class DocumentDetailDataSections {
             }
 
             // Build proper URLs
-            const pathParts = window.location.pathname.split('/');
-            const publicIndex = pathParts.indexOf('public');
-            let baseUrl = window.location.origin;
-            if (publicIndex !== -1) {
-                const baseParts = pathParts.slice(0, publicIndex + 1);
-                baseUrl = window.location.origin + baseParts.join('/');
-                // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                    baseUrl += "/index.php";
-                }
-            } else {
-                baseUrl = window.location.origin + "/index.php";
-            }
-
-            // console.log('🔍 Base URL:', baseUrl);
+            const baseUrl = getBaseUrl();
 
             // Create clickable links for workflow, job, and action if IDs are available
             let workflowLink = this.sanitizeString(workflowName);
             if (workflowId) {
                 const workflowUrl = `${baseUrl}/workflow/show/${workflowId}`;
                 workflowLink = `<a href="${workflowUrl}" class="workflow-link single-line-detected">${this.sanitizeString(workflowName)}</a>`;
-                // console.log('🔗 Created workflow link:', workflowLink);
             } else {
-                // console.log('❌ No workflowId for workflow:', workflowName);
             }
 
             let jobLink = this.sanitizeString(jobName);
             if (jobId) {
                 const jobUrl = `${baseUrl}/rule/task/view/${jobId}/log`;
                 jobLink = `<a href="${jobUrl}" class="job-link single-line-detected">${this.sanitizeString(jobName)}</a>`;
-                // console.log('🔗 Created job link:', jobLink);
             } else {
-                // console.log('❌ No jobId for job:', jobName);
             }
 
             // Create clickable link for trigger document if it exists
@@ -624,9 +549,7 @@ export class DocumentDetailDataSections {
             if (actionId) {
                 const actionUrl = `${baseUrl}/workflowAction/showAction/${actionId}`;
                 actionLink = `<a href="${actionUrl}" class="action-link single-line-detected">${this.sanitizeString(actionName)}</a>`;
-                // console.log('🔗 Created action link:', actionLink);
             } else {
-                // console.log('❌ No actionId for action:', actionName);
             }
 
             return `
@@ -719,21 +642,7 @@ export class DocumentDetailDataSections {
             // Build proper URL for reference link if reference exists
             let referenceLink = reference;
             if (reference && reference !== '' && reference.trim() !== '') {
-                // Build proper URLs
-                const pathParts = window.location.pathname.split('/');
-                const publicIndex = pathParts.indexOf('public');
-                let baseUrl = window.location.origin;
-                if (publicIndex !== -1) {
-                    const baseParts = pathParts.slice(0, publicIndex + 1);
-                    baseUrl = window.location.origin + baseParts.join('/');
-                    // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                    if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                        baseUrl += "/index.php";
-                    }
-                } else {
-                    baseUrl = window.location.origin + "/index.php";
-                }
-
+                const baseUrl = getBaseUrl();
                 const referenceUrl = `${baseUrl}/rule/flux/modern/${reference}`;
                 referenceLink = `<a href="${referenceUrl}" class="log-reference" style="color: #0F66A9; text-decoration: none;">${reference}</a>`;
             }
@@ -741,21 +650,7 @@ export class DocumentDetailDataSections {
             // Build proper URL for job link if job exists
             let jobLink = job;
             if (job && job !== '' && job.trim() !== '') {
-                // Build proper URLs
-                const pathParts = window.location.pathname.split('/');
-                const publicIndex = pathParts.indexOf('public');
-                let baseUrl = window.location.origin;
-                if (publicIndex !== -1) {
-                    const baseParts = pathParts.slice(0, publicIndex + 1);
-                    baseUrl = window.location.origin + baseParts.join('/');
-                    // add the index.php if needed because this is for docker, but only if index.php is not already in the path
-                    if (publicIndex > 0 && pathParts[publicIndex - 1] !== 'index.php') {
-                        baseUrl += "/index.php";
-                    }
-                } else {
-                    baseUrl = window.location.origin + "/index.php";
-                }
-
+                const baseUrl = getBaseUrl();
                 const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
@@ -868,7 +763,6 @@ export class DocumentDetailDataSections {
      * @param {Object|null} sourceData - Source data object from API
      */
     static updateSourceData(sourceData) {
-// console.log('📊 Updating source data section');
         this.updateDataSection('source', sourceData, 'Source');
     }
 
@@ -877,7 +771,6 @@ export class DocumentDetailDataSections {
      * @param {Object|null} targetData - Target data object from API
      */
     static updateTargetData(targetData) {
-// console.log('🎯 Updating target data section');
         this.updateDataSection('target', targetData, 'Target');
     }
 
@@ -886,7 +779,6 @@ export class DocumentDetailDataSections {
      * @param {Object|null} historyData - History data object from API
      */
     static updateHistoryData(historyData) {
-// console.log('📜 Updating history data section');
         this.updateDataSection('history', historyData, 'History');
     }
 
@@ -901,14 +793,13 @@ export class DocumentDetailDataSections {
         const sectionElement = document.getElementById(sectionBodyId);
 
         if (!sectionElement) {
-            console.error(`❌ ${sectionName} section element not found:`, sectionBodyId);
+            console.error(` ${sectionName} section element not found:`, sectionBodyId);
             return;
         }
 
         try {
             if (!sectionData || Object.keys(sectionData).length === 0) {
                 sectionElement.innerHTML = this.generateEmptyDataMessage(sectionName);
-                // console.warn(`⚠️ No ${sectionName.toLowerCase()} data available`);
                 return;
             }
 
@@ -921,10 +812,9 @@ export class DocumentDetailDataSections {
             // Add click handlers for field expansion
             this.addFieldClickHandlers(sectionElement);
 
-// console.log(`✅ ${sectionName} data updated successfully`);
 
         } catch (error) {
-            console.error(`❌ Error updating ${sectionName.toLowerCase()} data:`, error);
+            console.error(` Error updating ${sectionName.toLowerCase()} data:`, error);
             sectionElement.innerHTML = this.generateErrorMessage(`Failed to load ${sectionName.toLowerCase()} data`);
         }
     }
@@ -937,7 +827,6 @@ export class DocumentDetailDataSections {
      */
     static generateDataFields(fieldData, sectionType) {
         if (!fieldData || typeof fieldData !== 'object') {
-            // console.warn('⚠️ Invalid field data provided:', fieldData);
             return this.generateEmptyDataMessage('data');
         }
 
@@ -953,7 +842,6 @@ export class DocumentDetailDataSections {
                 if (fieldName.toLowerCase() === 'id') {
                     const hasDirectLink = this.willHaveDirectLink(sectionType);
                     if (hasDirectLink) {
-                        // console.log(`✅ Filtering out redundant '${fieldName}' field for ${sectionType} (direct link available)`);
                         return false;
                     }
                 }
@@ -1060,7 +948,6 @@ export class DocumentDetailDataSections {
 
         // If we couldn't get the ID from API data, skip adding the field
         if (!idValue) {
-            // console.log(`ℹ️ No ${sectionType} ID available to display`);
             return;
         }
 
@@ -1070,7 +957,6 @@ export class DocumentDetailDataSections {
         // Insert the ID field at the beginning of the section
         sectionElement.insertAdjacentHTML('afterbegin', idFieldHtml);
 
-        // console.log(`✅ Added ID field to ${sectionType} section:`, idValue);
     }
 
     /**
@@ -1091,7 +977,6 @@ export class DocumentDetailDataSections {
             }
             return null;
         } catch (error) {
-            // console.warn(`⚠️ Error getting ${sectionType} ID from API data:`, error);
             return null;
         }
     }
@@ -1112,7 +997,6 @@ export class DocumentDetailDataSections {
             }
             return false;
         } catch (error) {
-            // console.warn(`⚠️ Error checking direct link for ${sectionType}:`, error);
             return false;
         }
     }
@@ -1129,7 +1013,6 @@ export class DocumentDetailDataSections {
             }
         });
         document.dispatchEvent(event);
-// console.log('📢 Notified FluxFieldExpanner of new content');
     }
 
     /**
@@ -1185,7 +1068,6 @@ export class DocumentDetailDataSections {
                 DocumentDetailDataSections.cancelHistoryDocuments();
             });
             cancelButton.setAttribute('data-listener-attached', 'true');
-            // console.log('✅ Cancel history button event listener attached');
         }
     }
 
@@ -1197,7 +1079,7 @@ export class DocumentDetailDataSections {
             // Get all document IDs from the history table
             const historyTable = document.querySelector('.custom-table tbody');
             if (!historyTable) {
-                console.error('❌ History table not found');
+                console.error(' History table not found');
                 return;
             }
 
@@ -1231,21 +1113,9 @@ export class DocumentDetailDataSections {
                 return;
             }
 
-            console.log('📋 Found document IDs to cancel:', documentIds);
-
             // Get base URL for the API call
-            const pathParts = window.location.pathname.split('/');
-            const publicIndex = pathParts.indexOf('public');
-            let baseUrl = window.location.origin;
-            if (publicIndex !== -1) {
-                const baseParts = pathParts.slice(0, publicIndex + 1);
-                baseUrl = window.location.origin + baseParts.join('/');
-            } else {
-                baseUrl = window.location.origin + "/index.php";
-            }
-
+            const baseUrl = getBaseUrl();
             const apiUrl = `${baseUrl}/rule/flux/masscancel`;
-            console.log('test 870 7:', apiUrl);
 
             // Prepare the payload for mass cancel (form data format)
             const formData = new FormData();
@@ -1260,7 +1130,6 @@ export class DocumentDetailDataSections {
         }
 
 
-            // console.log('🚀 Calling mass cancel API:', apiUrl, 'with', documentIds.length, 'document IDs');
 
             // Make the API call
             fetch(apiUrl, {
@@ -1275,12 +1144,10 @@ export class DocumentDetailDataSections {
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                // console.log('test 870 2 ✅ Mass cancel API response OK:', response);
 
                 // Check if response has content before trying to parse JSON
                 const text = await response.text();
                 if (!text || text.trim() === '') {
-                    // console.log('test 870 3 Mass cancel completed (empty response - task created without ID)');
                     return { taskId: null };
                 }
 
@@ -1292,26 +1159,23 @@ export class DocumentDetailDataSections {
                 }
             })
             .then(data => {
-                // console.log('test 870 3 Mass cancel completed successfully');
 
                 // Extract the task ID from the JSON response (might be null)
                 const taskId = data.taskId || null;
                 if (taskId) {
-                    // console.log('📋 Task ID:', taskId);
                 } else {
-                    // console.log('⚠️ No task ID returned (backend may not support task ID in response)');
                 }
 
                 // Show styled notification (works with or without task ID)
                 this.showTaskNotification(documentIds.length, taskId, baseUrl);
             })
             .catch(error => {
-                console.error('❌ Error 4 calling mass action API:', error);
+                console.error(' Error 4 calling mass action API:', error);
                 this.showErrorNotification('Error initiating mass cancel action. Please try again.');
             });
 
         } catch (error) {
-            console.error('❌ Error 5 in cancelHistoryDocuments:', error);
+            console.error(' Error 5 in cancelHistoryDocuments:', error);
             this.showErrorNotification('Error initiating mass cancel action. Please check the console for details.');
         }
     }

@@ -1,8 +1,9 @@
 // Additional functions for parent and child document fetching
 
+import { getBaseUrl } from './document-detail-url-utils.js';
+
 // ===== DOCUMENT PARENTS FETCHER =====
 export function getDocumentParents(documentId, callback) {
-// console.log('getDocumentParents called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -17,43 +18,28 @@ export function getDocumentParents(documentId, callback) {
     }
     
     // Build URL for document parents
-    const pathParts = window.location.pathname.split('/');
-    const publicIndex = pathParts.indexOf('public');
-    let baseUrl;
-    
-    if (publicIndex !== -1) {
-        const baseParts = pathParts.slice(0, publicIndex + 1);
-        baseUrl = window.location.origin + baseParts.join('/');
-    } else {
-        baseUrl = window.location.origin;
-        baseUrl += '/index.php';
-    }
-    
+    const baseUrl = getBaseUrl();
     const url = `${baseUrl}/rule/api/flux/document-parents/${documentId}`;
-// console.log('🚀 Fetching document parents from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-// console.log('📡 Sending request for document parents...');
         },
         success: function(response) {
-// console.log('✅ Document parents request successful!');
-// console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
             } else if (response && response.error) {
-                console.error('❌ Server returned error:', response.error);
+                console.error(' Server returned error:', response.error);
                 callback(null, response.error);
             } else {
-                console.error('❌ Unexpected response format');
+                console.error(' Unexpected response format');
                 callback(null, 'Unexpected response format');
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Document parents request failed!');
+            console.error(' Document parents request failed!');
             console.error('Status:', status, 'Error:', error);
             
             let errorMessage = `AJAX Error: ${status} - ${error}`;
@@ -72,7 +58,6 @@ export function getDocumentParents(documentId, callback) {
 
 // ===== DOCUMENT CHILDREN FETCHER =====
 export function getDocumentChildren(documentId, callback) {
-// console.log('getDocumentChildren called with documentId:', documentId);
     
     // Validate parameters
     if (!documentId) {
@@ -87,43 +72,28 @@ export function getDocumentChildren(documentId, callback) {
     }
     
     // Build URL for document children
-    const pathParts = window.location.pathname.split('/');
-    const publicIndex = pathParts.indexOf('public');
-    let baseUrl;
-    
-    if (publicIndex !== -1) {
-        const baseParts = pathParts.slice(0, publicIndex + 1);
-        baseUrl = window.location.origin + baseParts.join('/');
-    } else {
-        baseUrl = window.location.origin;
-        baseUrl += '/index.php';
-    }
-    
+    const baseUrl = getBaseUrl();
     const url = `${baseUrl}/rule/api/flux/document-children/${documentId}`;
-// console.log('🚀 Fetching document children from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-// console.log('📡 Sending request for document children...');
         },
         success: function(response) {
-// console.log('✅ Document children request successful!');
-// console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
             } else if (response && response.error) {
-                console.error('❌ Server returned error:', response.error);
+                console.error(' Server returned error:', response.error);
                 callback(null, response.error);
             } else {
-                console.error('❌ Unexpected response format');
+                console.error(' Unexpected response format');
                 callback(null, 'Unexpected response format');
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Document children request failed!');
+            console.error(' Document children request failed!');
             console.error('Status:', status, 'Error:', error);
 
             let errorMessage = `AJAX Error: ${status} - ${error}`;
@@ -142,7 +112,6 @@ export function getDocumentChildren(documentId, callback) {
 
 // ===== DOCUMENT POSTS FETCHER =====
 export function getDocumentPosts(documentId, callback) {
-// console.log('getDocumentPosts called with documentId:', documentId);
 
     // Validate parameters
     if (!documentId) {
@@ -157,43 +126,28 @@ export function getDocumentPosts(documentId, callback) {
     }
 
     // Build URL for document posts
-    const pathParts = window.location.pathname.split('/');
-    const publicIndex = pathParts.indexOf('public');
-    let baseUrl;
-
-    if (publicIndex !== -1) {
-        const baseParts = pathParts.slice(0, publicIndex + 1);
-        baseUrl = window.location.origin + baseParts.join('/');
-    } else {
-        baseUrl = window.location.origin;
-        baseUrl += '/index.php';
-    }
-
+    const baseUrl = getBaseUrl();
     const url = `${baseUrl}/rule/api/flux/document-posts/${documentId}`;
-// console.log('🚀 Fetching document posts from:', url);
 
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-// console.log('📡 Sending request for document posts...');
         },
         success: function(response) {
-// console.log('✅ Document posts request successful!');
-// console.log('Response:', response);
 
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
             } else if (response && response.error) {
-                console.error('❌ Server returned error:', response.error);
+                console.error(' Server returned error:', response.error);
                 callback(null, response.error);
             } else {
-                console.error('❌ Unexpected response format');
+                console.error(' Unexpected response format');
                 callback(null, 'Unexpected response format');
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Document posts request failed!');
+            console.error(' Document posts request failed!');
             console.error('Status:', status, 'Error:', error);
 
             let errorMessage = `AJAX Error: ${status} - ${error}`;

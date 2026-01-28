@@ -49,9 +49,9 @@ rules:
         targetSolution: suitecrm
         sourceModule: get_enrolments_by_date
         targetModule: fp_events_contacts
-        relationships:
-            - { fieldNameSource: userid, fieldNameTarget: fp_events_contactscontacts_idb, fieldId: contacts, parent: false }
-            - { fieldNameSource: courseid, fieldNameTarget: fp_events_contactsfp_events_ida, fieldId: courses, parent: false }
+        fields:
+            - { target: fp_events_contactscontacts_idb, source: userid, formula: 'lookup({userid}, "contacts", 0, 1)' }
+            - { target: fp_events_contactsfp_events_ida, source: courseid, formula: 'lookup({courseid}, "courses", 0, 1)' }
         params:
             - { name: description, value: '' }
             - { name: limit, value: '100' }

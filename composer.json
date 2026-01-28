@@ -31,6 +31,7 @@
     "doctrine/doctrine-bundle": "^2.7",
     "doctrine/doctrine-migrations-bundle": "^3.2",
     "doctrine/orm": "^2.13",
+    "friendsofsymfony/elastica-bundle": "^7.0",
     "friendsofsymfony/jsrouting-bundle": "^3.2",
     "getbrevo/brevo-php": "^2.0",
     "google/cloud-bigquery": "^1.34",
@@ -117,7 +118,8 @@
         "allow-plugins": {
       "composer/package-versions-deprecated": true,
       "symfony/flex": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "php-http/discovery": true
     },
         "preferred-install": {
           "*": "dist"

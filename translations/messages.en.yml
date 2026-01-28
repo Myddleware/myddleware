@@ -55,8 +55,12 @@ panel:
     graph_job_histo:
         title: Jobs history
     rule_deleted: This rule has been deleted. It cannot be used anymore
+edit_rule:
+    success: Your rule has been successfully edited.
 create_rule:
     error_name: A connector already has that name.
+    success: Your rule has been successfully created
+    loading: Loading rule...
     tabs:
         one: Connection
         two: Modules selection
@@ -95,6 +99,7 @@ create_rule:
         previous: Previous step
         next: Next step       
         syncdata:
+            title: Sync options
             label: Synchronization type
             create_modify: Create and update data
             create_only: Create data only
@@ -147,7 +152,27 @@ create_rule:
             yes: Yes
             no : No
             behavior: Behavior
-            
+    step4:
+        title: Filter
+        filters:
+            field: "Field"
+            choose_field: "Choose a field"
+            operator: "Operator"
+            choose_operator: "Choose an operator"
+            value: "Value"
+            current: "Current filters"
+            empty: "No filters have been defined yet."
+    step5:
+        back: back to list
+        simulation: Simulation
+        title: Mapping field    
+        formula:
+            title: Compose your formula
+            selected_field: Selected fields
+            fonctionw: Fonction Wizard
+            formula: Formule
+            close: Close
+            save: Save     
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization
@@ -255,6 +280,8 @@ rule:
     help: What should I do ?
     select_group: Select a group
     select_value: Select a value
+    delete:
+        success: Rule deleted successfully
 
 rulegroup:  
   create: "Create a rule group"
@@ -350,11 +377,19 @@ actions: "Actions"
 pagination:
     previous: Previous
     next: Next
-    go_to_page: Go to page
+    go_to_page: Go to
     page_number: Page number
 
 animate:
-    rulename: Name of your rule 
+    template:
+        title: Use a Template
+        success: Your template worked successfully
+        rule: rules
+        other_rule: other rule
+        use: Use this template
+    ruleconnection: Rule connection
+    rulename: Name of your rule
+    title: Rule Details
     wait: Please wait...
     solution:
         source: Source
@@ -373,7 +408,7 @@ animate:
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
-    title: Creation of a connector
+    title: Creation connector
     save: Save the connection
     connexion: Name of the connection
     test: Test
@@ -834,6 +869,7 @@ solution:
         client_id: Client ID
         client_secret: Client Secret
         environment: Environment
+        org_url: Organization URL
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -897,13 +933,14 @@ title:
         btn: Start now !
     rule:
         create_name: Editing of the rule
-        create: Creation of a rule
-        edit: Editing the rule
+        create: Create rule
+        edit: Edit rule
         list: Rules
         view: Rule
+        success_edit_params:
     connector:
-        create: Creation of a connector
-        edit: Editing the connector
+        create: Create connector
+        edit: Edit connector
         list: Connectors
     flux: 
         list: Documents
@@ -962,6 +999,7 @@ menu_user:
     management_smtp: SMTP config
     logout: Logout
     user_manager: UserManager
+    settings: Settings
 
 help:
     title: Help
@@ -1121,9 +1159,34 @@ management_smtp:
     error: Failed to save SMTP config
     api_key_already_in_env: This API key is already in the .env file.
     api_key_too_short: The API key is too short. Are you sure it's an BREVO API key in the form ? Be careful about your browser autofilling.
+    api_key_required: API key is required for Brevo/Sendinblue.
+    sendtestmail_error: Failed to send test email
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
+
+settings:
+    title: System Settings
+    save: Save
+    tabs:
+        general: Preferences
+        smtp: SMTP Management
+    table_settings:
+        title: Table settings
+        description: Configure how tables display data across the application.
+        rows_per_page: Rows per page
+        maximum_results: Maximum results
+    search_settings:
+        title: Search Settings
+        description: Configure search behavior and Elasticsearch integration.
+        elasticsearch_label: Elasticsearch Status
+        enable_elasticsearch: Enable Elastic Search
+        elasticsearch_hint: Elasticsearch enables greater performance when searching for strings among very large amounts of document (+100k)
+    messages:
+        save_success: Settings saved successfully
+        save_error: Failed to save settings
+        elasticsearch_enabled: Elasticsearch has been enabled
+        elasticsearch_disabled: Elasticsearch has been disabled
 
 login:
     title: Connection
@@ -1256,10 +1319,10 @@ variable:
   updated_successfully: "Variable updated successfully."
   deleted_successfully: "Variable deleted successfully."
   name_already_exists: The name of the variable already exists. Please choose another name.
-  edit: Editing of a variable
+  edit: Edit variable
   back_to_list: Back to the list
   save: Save
-  editing: Editing of a variable
+  editing: Edit variable
   total: Total of Variables
   btn:
     edit: Edit

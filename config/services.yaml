@@ -83,3 +83,25 @@ services:
       $cacheDir: '%kernel.cache_dir%'
     tags:
       - kernel.cache_warmer
+
+  # Elasticsearch service for document search
+  # This service is optional - if ELASTICSEARCH_URL is not set or ES is unavailable,
+  # the application will fall back to SQL queries
+  App\Service\DocumentElasticsearchService:
+    arguments:
+      $elasticsearchUrl: '%env(default::ELASTICSEARCH_URL)%'
+
+  # Make Elasticsearch service nullable for FilterController
+  App\Controller\FilterController:
+    arguments:
+      $elasticsearchService: '@?App\Service\DocumentElasticsearchService'
+
+  # Elasticsearch event subscriber for real-time document sync
+  App\EventSubscribers\DocumentElasticsearchSubscriber:
+    arguments:
+      $elasticsearchService: '@?App\Service\DocumentElasticsearchService'
+
+  # DocumentManager needs EventDispatcher for Elasticsearch sync
+  App\Manager\DocumentManager:
+    arguments:
+      $eventDispatcher: '@?event_dispatcher'

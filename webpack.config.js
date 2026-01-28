@@ -30,6 +30,7 @@ Encore
     .addEntry('crontab', './assets/js/crontab.js')
     .addEntry('account', './assets/js/account.js')
     .addEntry('flux', './assets/flux.js')
+    .addEntry('settings', './assets/js/settings.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()
@@ -94,7 +95,7 @@ Encore
   Encore.configureTerserPlugin((options) => {
     options.terserOptions = options.terserOptions || {};
     options.terserOptions.compress = options.terserOptions.compress || {};
-    options.terserOptions.compress.drop_console = true;
+    options.terserOptions.compress.drop_console = false;
   });
 
 module.exports = Encore.getWebpackConfig();

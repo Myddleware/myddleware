@@ -1,0 +1,61 @@
+<!-- Table Settings Section -->
+<div class="settings-section mt-4">
+    <h4>{{ 'settings.table_settings.title'|trans }}</h4>
+
+    <form id="table-settings-form" class="mt-4">
+        <div class="mb-3">
+            <label for="rows-per-page" class="form-label">
+                {{ 'settings.table_settings.rows_per_page'|trans }}
+            </label>
+            <input type="number"
+                   class="form-control"
+                   id="rows-per-page"
+                   name="rowsPerPage"
+                   min="1"
+                   max="1000"
+                   value="20">
+        </div>
+        <div class="mb-3">
+            <label for="maximum-results" class="form-label">
+                {{ 'settings.table_settings.maximum_results'|trans }}
+            </label>
+            <input type="number"
+                   class="form-control"
+                   id="maximum-results"
+                   name="maximumResults"
+                   min="1"
+                   max="10000000000"
+                   value="1000">
+        </div>
+        <button type="submit" class="btn btn-primary">
+            {{ 'settings.save'|trans }}
+        </button>
+    </form>
+</div>
+
+<hr class="my-4">
+
+<!-- Search Settings Section -->
+<div class="settings-section">
+    <h4>{{ 'settings.search_settings.title'|trans }}</h4>
+
+    <form id="elasticsearch-form">
+        <div class="row mb-3 align-items-center">
+            <div class="col-sm-12">
+                <div class="form-check form-switch">
+                    <input class="form-check-input"
+                           type="checkbox"
+                           id="elasticsearch-enabled"
+                           name="elasticsearchEnabled"
+                           role="switch">
+                    <label class="form-check-label" for="elasticsearch-enabled">
+                        {{ 'settings.search_settings.enable_elasticsearch'|trans }}
+                    </label>
+                </div>
+                <small class="text-muted d-block mt-1">
+                    {{ 'settings.search_settings.elasticsearch_hint'|trans }}
+                </small>
+            </div>
+        </div>
+    </form>
+</div>

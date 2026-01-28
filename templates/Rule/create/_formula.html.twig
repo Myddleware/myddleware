@@ -1,0 +1,131 @@
+<div class="modal fade" id="mapping-formula" tabindex="-1" aria-labelledby="mappingFormulaLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title fs-5" id="mappingFormulaLabel">
+          {{ 'create_rule.step5.formula.title'|trans }}
+        </h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="mb-4">
+          <p class="mb-1">{{ 'create_rule.step5.formula.selected_field'|trans }}</p>
+          <div id="formula-selected-fields" class="d-flex flex-wrap gap-2">
+          </div>
+        </div>
+
+        {# 2) FUNCTION WIZARD (Lookup / etc.) #}
+        <div id="function-wizard" class="mb-4 mp">
+          <p class="">{{ 'create_rule.step3.formula.function_wizard'|trans }}</p>
+
+          {# Select "Function" + bouton ? #}
+          <div class="d-flex align-items-center mb-2">
+            <select id="function-select" class="me-2">
+              <option value="">
+                {{ 'create_rule.step3.formula.select_function'|trans }}
+              </option>
+              {% for t, v in lst_functions %}
+                <option value="{{ v.getName }}"
+                        data-type="{{ v.getCategoryId.getId }}"
+                        data-tooltip="{{ ('function.description.' ~ v.getCategoryId.getName ~ '.' ~ v.getName ) |trans }}">
+                  {{ v.getName }}
+                </option>
+              {% endfor %}
+            </select>
+
+            <button id="toggle-tooltip" type="button" title="{{ 'create_rule.step3.formula.toggle_tooltip'|trans }}">
+              <i class="fas fa-question-circle"></i>
+            </button>
+          </div>
+
+          <div id="function-tooltip" class="tooltip-box mb-3 small" style="display:none; padding:10px; background:#f9f9f9; border:1px solid #ddd; border-radius:4px;">
+          </div>
+
+          <div id="function-parameter-input" class="mb-3">
+            <textarea id="function-parameter"
+                      class="form-control mb-2"
+                      rows="3"
+                      placeholder="Enter parameter value"></textarea>
+
+            <div id="round-precision-input" class="mb-2" style="display:none;">
+              <label for="round-precision" class="form-label">Precision (1-100):</label>
+              <input type="number"
+                     id="round-precision"
+                     class="form-control"
+                     min="1"
+                     max="100"
+                     placeholder="Enter precision (1-100)"
+                     style="width:150px;">
+              <div id="precision-error" class="invalid-feedback">
+                Please enter a number between 1 and 100
+              </div>
+            </div>
+
+            <button id="insert-function-parameter" type="button" class="btn btn-primary">
+              OK
+            </button>
+          </div>
+
+          <div id="lookup-options" style="display:none;">
+            <div class="mb-2">
+              <select id="lookup-rule" class="mb-2" style="min-width:140px;">
+                <option value="">
+                  {{ 'create_rule.step3.formula.select_rule'|trans }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-2">
+              <select id="lookup-field" class="mb-2" style="min-width:140px;">
+                <option value="">
+                  {{ 'create_rule.step3.formula.select_field'|trans }}
+                </option>
+              </select>
+            </div>
+
+            <div class="mb-3 d-flex align-items-center">
+              <div class="form-check me-3">
+                <input class="form-check-input" type="checkbox" id="lookup-error-empty">
+                <label class="form-check-label" for="lookup-error-empty">
+                  Error if empty
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="lookup-error-not-found" checked>
+                <label class="form-check-label" for="lookup-error-not-found">
+                  Error if notFound
+                </label>
+              </div>
+            </div>
+
+            <button id="submit-lookup" type="button" class="btn btn-primary">
+              Submit lookup
+            </button>
+          </div>
+        </div>
+        
+        <div class="step5-formula">
+          <p class="mb-2">{{ 'create_rule.step5.formula.formula'|trans }}</p>
+
+          <div class="row">
+            <div>
+              <textarea id="area_insert" class="form-control" rows="8"></textarea>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          {{ 'create_rule.step5.formula.close'|trans }}
+        </button>
+        <button type="button" class="btn btn-primary" id="mapping-formula-save" data-bs-dismiss="modal">
+          {{ 'create_rule.step5.formula.save'|trans }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -131,6 +131,7 @@ $(function () {
 
   // Show a filter when the corresponding option is selected
   $("#item_filter_filter").on("change", function () {
+    var $select = $(this);
     var selectedValue = $(this).val();
     $("#" + selectedValue).removeAttr("hidden");
     if (
@@ -154,6 +155,7 @@ $(function () {
       }
     }
     rearrangeFilters();
+    $select[0].selectize.clear(true); 
   });
 
   // Save filters to localStorage
@@ -235,6 +237,8 @@ $(function () {
         localStorage.clear();
       }
     });
+    // Reset dropdown to default so the same filter can be re-selected
+    $("#item_filter_filter").val($("#item_filter_filter option:first").val());
     rearrangeFilters();
   });
 });
@@ -247,11 +251,6 @@ function rearrangeFilters() {
 }
 
 $(document).ready(function() {
-  $('#globalStatus select').select2({
-      placeholder: "Select Global Status",
-      allowClear: true,
-      width: 'resolve' 
-  });
 
     let pop=null; 
     const close=()=>{ if(pop){ pop.remove(); pop=null; } };

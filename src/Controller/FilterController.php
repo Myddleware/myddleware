@@ -40,6 +40,7 @@ use App\Form\Filter\FilterType;
 use App\Service\SessionService;
 use App\Repository\RuleRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
+use App\Pagerfanta\ArrayAdapterWithCount;
 use App\Form\Type\DocumentCommentType;
 use App\Repository\DocumentRepository;
 use App\Form\Filter\CombinedFilterType;
@@ -55,12 +56,33 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Service\DocumentElasticsearchService;
 
 /**
  * @Route("/rule")
  */
 class FilterController extends AbstractController
 {
+    private const FILTER_MAP = [
+        'reference' => 'FluxFilterReference',
+        'operators' => 'FluxFilterOperators',
+        'customWhere' => 'FluxFilterWhere',
+        'source_content' => 'FluxFilterSourceContent',
+        'target_content' => 'FluxFilterTargetContent',
+        'date_modif_start' => 'FluxFilterDateModifStart',
+        'date_modif_end' => 'FluxFilterDateModifEnd',
+        'rule' => 'FluxFilterRuleName',
+        'status' => 'FluxFilterStatus',
+        'gblstatus' => 'FluxFilterGlobalStatus',
+        'type' => 'FluxFilterType',
+        'target_id' => 'FluxFilterTargetId',
+        'source_id' => 'FluxFilterSourceId',
+        'module_source' => 'FluxFilterModuleSource',
+        'module_target' => 'FluxFilterModuleTarget',
+        'sort_field' => 'FluxFilterSortField',
+        'sort_order' => 'FluxFilterSortOrder',
+    ];
+
     /**
      * @var ToolsManager
      */
@@ -97,7 +119,8 @@ class FilterController extends AbstractController
 
     private DocumentRepository $documentRepository;
     private SessionService $sessionService;
-    
+    private ?DocumentElasticsearchService $elasticsearchService = null;
+
     public function __construct(
         SessionService $sessionService,
         KernelInterface $kernel,
@@ -107,6 +130,7 @@ class FilterController extends AbstractController
         ToolsManager $toolsManager,
         AlertBootstrapInterface $alert,
         DocumentRepository $documentRepository,
+        ?DocumentElasticsearchService $elasticsearchService = null,
     ) {
         $this->sessionService = $sessionService;
         $this->kernel = $kernel;
@@ -117,6 +141,7 @@ class FilterController extends AbstractController
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
         $this->documentRepository = $documentRepository;
+        $this->elasticsearchService = $elasticsearchService;
 
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
@@ -139,7 +164,7 @@ public function emptySearchAction(Request $request): Response
     ]);
 
     // set the timezone
-    $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
+    $timezone = $this->getUser()?->getTimezone() ?: 'UTC';
 
     // Return an empty array so that there will be no documents to display
     $documents = array();
@@ -181,7 +206,6 @@ public function removeFilter(Request $request): JsonResponse
     return new JsonResponse(['status' => 'error', 'message' => 'No filter name provided']);
 }
 
-
     // Function to disylay the documents with filters
 
     /**
@@ -203,7 +227,7 @@ public function removeFilter(Request $request): JsonResponse
 
         // this is the case where the user clicks on a lookup link, we only keep the rule name and the source id
         if ($request->query->has('lookup-field-rule')){
-            
+
             // empty all the other filters
             $this->sessionService->removeFluxFilterReference();
             $this->sessionService->removeFluxFilterOperators();
@@ -230,14 +254,14 @@ public function removeFilter(Request $request): JsonResponse
         $form = $this->createForm(CombinedFilterType::class, null, [
             'entityManager' => $this->entityManager,
         ]);
-        
+
         $conditions = 0;
 
         // set the timezone
-        $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
+        $timezone = $this->getUser()?->getTimezone() ?: 'UTC';
 
         if (($request->isMethod('POST') || $page !== 1 || ($request->isMethod('GET') && $this->verifyIfEmptyFilters() === false)) || $page == 1) {
-           
+
             $form->handleRequest($request);
             $data = [];
             $operators = $request->request->all();
@@ -245,14 +269,14 @@ public function removeFilter(Request $request): JsonResponse
             if (!empty($this->sessionService->getFluxFilterWhere())) {
                 $data['customWhere'] = $this->sessionService->getFluxFilterWhere();
             }
-    
+
             // Get the limit parameter
             $configRepository = $this->entityManager->getRepository(Config::class);
             $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
             if (!empty($searchLimit)) {
                 $limit = $searchLimit->getValue();
             }
-            
+
             $conditions = 0;
             $doNotSearch = false;
             if ($form->isSubmitted() && $form->isValid()) {
@@ -268,7 +292,6 @@ public function removeFilter(Request $request): JsonResponse
 
                     $data = $this->getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators);
 
-
                     // Remove the null values
                     foreach ($data as $key => $value) {
                         if (is_null($value)) {
@@ -276,30 +299,12 @@ public function removeFilter(Request $request): JsonResponse
                         }
                     }
                 } // end form data not null
-                
+
                 if ($page === 1) {
 
                     // If the form is submitted and the form is valid, we save the filters in the session
-                    $filterMap = [
-                        'reference' => 'FluxFilterReference',
-                        'operators' => 'FluxFilterOperators',
-                        'customWhere' => 'FluxFilterWhere',
-                        'source_content' => 'FluxFilterSourceContent',
-                        'target_content' => 'FluxFilterTargetContent',
-                        'date_modif_start' => 'FluxFilterDateModifStart',
-                        'date_modif_end' => 'FluxFilterDateModifEnd',
-                        'rule' => 'FluxFilterRuleName',
-                        'status' => 'FluxFilterStatus',
-                        'gblstatus' => 'FluxFilterGlobalStatus',
-                        'type' => 'FluxFilterType',
-                        'target_id' => 'FluxFilterTargetId',
-                        'source_id' => 'FluxFilterSourceId',
-                        'module_source' => 'FluxFilterModuleSource',
-                        'module_target' => 'FluxFilterModuleTarget',
-                        'sort_field' => 'FluxFilterSortField',
-                        'sort_order' => 'FluxFilterSortOrder',
-                        ];
-                        
+                    $filterMap = self::FILTER_MAP;
+
                     // Save the filters in the session using the session service and the filter map
                     foreach ($filterMap as $dataKey => $filterName) {
                         if (!empty($data[$dataKey])) {
@@ -319,7 +324,7 @@ public function removeFilter(Request $request): JsonResponse
             if ($doNotSearch) {
                 $documents = array();
             }
-            
+
             // If the form is valid, we prepare the search
             if (!$doNotSearch) {
                 // if there is query source_id in the request, then replace any existing source_id in the data with the new one
@@ -328,19 +333,21 @@ public function removeFilter(Request $request): JsonResponse
                 }
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
                 $documents = $searchParameters['documents'];
-                // if $sortField, $sortOrder not null, then sort the documents accordingly
-                // if ($sortField && $sortOrder) {
-                //     $documents = $this->sortDocuments($documents, $sortField, $sortOrder);
-                // }
+                $totalCount = $searchParameters['total'];
                 $page = $searchParameters['page'];
                 $limit = $searchParameters['limit'];
+
+                // Pre-generate URLs before pagination (avoids 2000+ path() calls in Twig)
+                $documents = $this->addDocumentUrls($documents);
             }
-    
+
             try {
+                // Use optimized pagination with known total count
                 $compact = $this->nav_pagination([
                     'adapter_em_repository' => $documents,
                     'maxPerPage' => $this->params['pager'] ?? 25,
                     'page' => $page,
+                    'total' => $totalCount ?? count($documents),
                 ], false);
             } catch (\Throwable $th) {
                 // redirect to the list page
@@ -348,7 +355,7 @@ public function removeFilter(Request $request): JsonResponse
                 $this->addFlash('filter.document.danger', 'Pagination error, return to page 1');
                 return $this->redirectToRoute('document_empty_search');
             }
-            
+
             // If everything is ok with the pagination
             if ($compact) {
                 // If no rule
@@ -373,12 +380,10 @@ public function removeFilter(Request $request): JsonResponse
         // get the id of every document that will be return in the search results, and put them in a string where they are separated by a comma
         $csvdocumentids = '';
         $nbDocuments = count($documents);
-        foreach ($documents as $documentForCsv) {
-            $csvdocumentids .= $documentForCsv['id'].',';
+        foreach ($documents as $document) {
+            $csvdocumentids .= $document['id'].',';
         }
 
-        
-        
         return $this->render('documentFilter.html.twig', [
             'form' => $form->createView(),
             'formFilter'=> $formFilter->createView(),
@@ -400,7 +405,7 @@ public function removeFilter(Request $request): JsonResponse
     public function getLatestLogMsg($docId)
     {
         $uniqueDocument = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $docId]);
-    
+
         $latestLog = $this->entityManager->getRepository(Log::class)->findOneBy(['document' => $uniqueDocument, 'type' => 'E'], ['created' => 'DESC']);
         if ($latestLog) {
             return new Response($latestLog->getMessage());
@@ -442,7 +447,7 @@ public function removeFilter(Request $request): JsonResponse
         return new Response('', Response::HTTP_OK);
     }
 
-    // // function to sort the documents
+    
     public function sortDocuments(array $documents, string $sortField, string $sortOrder){
         // Sort the arrray of documents according to the sortField and sortOrder
         $sort = array();
@@ -461,25 +466,7 @@ public function removeFilter(Request $request): JsonResponse
     // Verify if each filter is empty, and return true if all filters are empty
     public function verifyIfEmptyFilters()
     {
-        $filterMap = [
-            'reference' => 'FluxFilterReference',
-            'operators' => 'FluxFilterOperators',
-            'customWhere' => 'FluxFilterWhere',
-            'source_content' => 'FluxFilterSourceContent',
-            'target_content' => 'FluxFilterTargetContent',
-            'date_modif_start' => 'FluxFilterDateModifStart',
-            'date_modif_end' => 'FluxFilterDateModifEnd',
-            'rule' => 'FluxFilterRuleName',
-            'status' => 'FluxFilterStatus',
-            'gblstatus' => 'FluxFilterGlobalStatus',
-            'type' => 'FluxFilterType',
-            'target_id' => 'FluxFilterTargetId',
-            'source_id' => 'FluxFilterSourceId',
-            'module_source' => 'FluxFilterModuleSource',
-            'module_target' => 'FluxFilterModuleTarget',
-            'sort_field' => 'FluxFilterSortField',
-            'sort_order' => 'FluxFilterSortOrder',
-        ];
+        $filterMap = self::FILTER_MAP;
 
         foreach ($filterMap as $dataKey => $filterName) {
             $value = $this->sessionService->{'get' . $filterName}();
@@ -494,35 +481,16 @@ public function removeFilter(Request $request): JsonResponse
     // Get the data from the session service and return an array
     public function getFluxFilterData() {
         $data = [];
-    
-        $filterMap = [
-            'reference' => 'FluxFilterReference',
-            'operators' => 'FluxFilterOperators',
-            'customWhere' => 'FluxFilterWhere',
-            'source_content' => 'FluxFilterSourceContent',
-            'target_content' => 'FluxFilterTargetContent',
-            'date_modif_start' => 'FluxFilterDateModifStart',
-            'date_modif_end' => 'FluxFilterDateModifEnd',
-            'rule' => 'FluxFilterRuleName',
-            'status' => 'FluxFilterStatus',
-            'gblstatus' => 'FluxFilterGlobalStatus',
-            'type' => 'FluxFilterType',
-            'target_id' => 'FluxFilterTargetId',
-            'source_id' => 'FluxFilterSourceId',
-            'module_source' => 'FluxFilterModuleSource',
-            'module_target' => 'FluxFilterModuleTarget',
-            'sort_field' => 'FluxFilterSortField',
-            'sort_order' => 'FluxFilterSortOrder',
-        ];
-    
+        $filterMap = self::FILTER_MAP;
+
         foreach ($filterMap as $dataKey => $filterName) {
             $value = $this->sessionService->{'get'.$filterName}();
                 $data[$dataKey] = $value;
         }
-    
+
         return $data;
     }
-    
+
     // Get the data from the form and return an array
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators)
     {
@@ -546,8 +514,7 @@ public function removeFilter(Request $request): JsonResponse
                 'sort_field' => $documentFormData['sort_field'] ?? null,
                 'sort_order' => $documentFormData['sort_order'] ?? null,
             ];
-            
-            
+
             return $data;
         } catch (\Exception $e) {
             throw new \Exception('Failed to create data from form: ' . $e->getMessage());
@@ -588,7 +555,7 @@ public function removeFilter(Request $request): JsonResponse
             'flux.status.found' => 'Found',
             'flux.status.not_found' => 'Not_found',
         ];
-        
+
         return $statuses[$statusIndex];
     }
 
@@ -666,21 +633,95 @@ public function removeFilter(Request $request): JsonResponse
         if (empty($cleanData) && $page === 1) {
             return [
                 'documents' => [],
+                'total' => 0,
                 'page' => $page,
                 'limit' => $limit,
             ];
         }
-        $documents = $this->searchDocuments($cleanData, $page, $limit);
+        $searchResult = $this->searchDocuments($cleanData, $page, $limit);
         return [
-            'documents' => $documents,
-            'page' => $page,
+            'documents' => $searchResult['results'],
+            'total' => $searchResult['total'],
+            'page' => $searchResult['page'],
             'limit' => $limit,
         ];
     }
 
-    // Search the documents using a query
+    // Search the documents using Elasticsearch or fallback to SQL
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
+        // Check if Elasticsearch is enabled in database config
+        $elasticsearchEnabled = ($this->params['elasticsearch_enabled'] ?? '0') === '1';
 
+        // Try Elasticsearch first if available and enabled
+        if ($elasticsearchEnabled && $this->elasticsearchService !== null) {
+            try {
+                if ($this->elasticsearchService->isAvailable()) {
+                    $this->logger->info('Using Elasticsearch for document search');
+                    return $this->searchDocumentsWithElasticsearch($data, $page);
+                }
+            } catch (\Exception $e) {
+                $this->logger->warning('Elasticsearch search failed, falling back to SQL: ' . $e->getMessage());
+            }
+        }
+
+        // Fallback to SQL
+        $this->logger->info('Using SQL for document search');
+        return $this->searchDocumentsWithSql($data, $page, $limit);
+    }
+
+    /**
+     * Search documents using Elasticsearch
+     */
+    protected function searchDocumentsWithElasticsearch(array $data, int $page = 1): array
+    {
+        $perPage = $this->params['pager'] ?? 25;
+        $from = ($page - 1) * $perPage;
+
+        // Prepare filters for Elasticsearch
+        $filters = $data;
+
+        // Handle rule name to get rule_id if needed
+        if (!empty($data['rule'])) {
+            // Elasticsearch service expects rule name directly
+            $filters['rule'] = $data['rule'];
+        }
+
+        $searchResult = $this->elasticsearchService->searchDocuments($filters, $from, $perPage);
+
+        // Transform Elasticsearch results to match SQL format
+        $results = [];
+        foreach ($searchResult['hits'] as $hit) {
+            $results[] = [
+                'id' => $hit['id'],
+                'date_created' => $hit['date_created'] ?? null,
+                'date_modified' => $hit['date_modified'] ?? null,
+                'status' => $hit['status'] ?? null,
+                'source_id' => $hit['source_id'] ?? null,
+                'target_id' => $hit['target_id'] ?? null,
+                'source_date_modified' => $hit['source_date_modified'] ?? null,
+                'mode' => $hit['mode'] ?? null,
+                'type' => $hit['type'] ?? null,
+                'attempt' => $hit['attempt'] ?? 0,
+                'global_status' => $hit['global_status'] ?? null,
+                'rule_name' => $hit['rule_name'] ?? null,
+                'module_source' => $hit['module_source'] ?? null,
+                'module_target' => $hit['module_target'] ?? null,
+                'rule_id' => $hit['rule_id'] ?? null,
+            ];
+        }
+
+        return [
+            'results' => $results,
+            'total' => $searchResult['total'],
+            'page' => $page,
+            'perPage' => $perPage
+        ];
+    }
+
+    /**
+     * Search documents using SQL (original implementation)
+     */
+    protected function searchDocumentsWithSql($data, $page = 1, $limit = 1000) {
 
         $join = '';
         $where = '';
@@ -709,7 +750,7 @@ public function removeFilter(Request $request): JsonResponse
 
         // Reference
         if (!empty($data['reference'])
-            OR !empty($data['customWhere']['reference'])) {
+            || !empty($data['customWhere']['reference'])) {
             if (isset($data['operators']['reference'])) {
 
                 $where .= " AND document.source_date_modified <= :reference ";
@@ -721,14 +762,14 @@ public function removeFilter(Request $request): JsonResponse
         // Rule
         if (
                 !empty($data['rule'])
-            OR !empty($data['customWhere']['rule'])
+            || !empty($data['customWhere']['rule'])
         ) {
 
             $singleRuleId = $this->getSingleRuleIdFromRuleName($data['rule'] ?? $data['customWhere']['rule']);
 
             if (isset($data['operators']['name'])) {
                     $where .= " AND rule.id != :ruleId ";
-                
+
             } else {
                 $where .= " AND rule.id = :ruleId ";
             }
@@ -771,7 +812,6 @@ public function removeFilter(Request $request): JsonResponse
             }
         }
 
-
         // Document type
         if (
             !empty($data['type'])
@@ -797,7 +837,6 @@ public function removeFilter(Request $request): JsonResponse
             $where .= " AND document.global_status = :gblstatus ";
         }
 
-        
         // Target ID
         if (!empty($data['target_id'])) {
             $where .= " AND document.target_id LIKE :target_id ";
@@ -820,39 +859,39 @@ public function removeFilter(Request $request): JsonResponse
         } else {
             $orderBy .= " DESC";
         }
-        
 
-        // if not empty 
+        // Calculate pagination offset
+        $perPage = $this->params['pager'] ?? 25;
+        $offset = ($page - 1) * $perPage;
 
         // Build query
         $query = "
-            SELECT 
-                document.id, 
-                document.date_created, 
-                document.date_modified, 
-                document.status, 
-                document.source_id, 
-                document.target_id, 
-                document.source_date_modified, 
-                document.mode, 
-                document.type, 
-                document.attempt, 
-                document.global_status, 
-                rule.name as rule_name, 
+            SELECT
+                document.id,
+                document.date_created,
+                document.date_modified,
+                document.status,
+                document.source_id,
+                document.target_id,
+                document.source_date_modified,
+                document.mode,
+                document.type,
+                document.attempt,
+                document.global_status,
+                rule.name as rule_name,
                 rule.module_source,
                 rule.module_target,
-                rule.id as rule_id 
-            FROM document 
-                INNER JOIN rule	
+                rule.id as rule_id
+            FROM document
+                INNER JOIN rule
                     ON document.rule_id = rule.id "
-                .$join. 
-            " WHERE 
+                .$join.
+            " WHERE
                     document.deleted = 0 "
                     .$where.
             $orderBy
-            ." LIMIT ". $limit;
-            
-        
+            ." LIMIT ". $perPage . " OFFSET " . $offset;
+
         $stmt = $this->entityManager->getConnection()->prepare($query);
         // Add parameters to the query
         // Source content
@@ -880,7 +919,7 @@ public function removeFilter(Request $request): JsonResponse
         // Rule
         if (
                 !empty($data['rule'])
-             OR !empty($data['customWhere']['rule'])
+             || !empty($data['customWhere']['rule'])
          ) {
             $stmt->bindValue(':ruleId', $singleRuleId);
         }
@@ -918,14 +957,157 @@ public function removeFilter(Request $request): JsonResponse
         if (!empty($data['source_id'])) {
             $stmt->bindValue(':source_id', $data['source_id']);
         }
-        // Run the query and return the results
-        return $stmt->executeQuery()->fetchAllAssociative();
+        // Run the query and get the results
+        $results = $stmt->executeQuery()->fetchAllAssociative();
+
+        // Get total count for pagination (without LIMIT/OFFSET)
+        // Optimize count query: avoid joins when not needed
+        $needsRuleJoin = !empty($data['rule'])
+                      || !empty($data['customWhere']['rule'])
+                      || !empty($data['module_source'])
+                      || !empty($data['customWhere']['module_source'])
+                      || !empty($data['module_target'])
+                      || !empty($data['customWhere']['module_target']);
+
+        // For simple queries with no filters, use a faster count without joins
+        if (empty($where) && empty($join)) {
+            $countQuery = "SELECT COUNT(*) as total FROM document WHERE deleted = 0";
+        } else {
+            $countQuery = "
+                SELECT COUNT(" . ($join ? "DISTINCT document.id" : "*") . ") as total
+                FROM document "
+                    . ($needsRuleJoin ? "INNER JOIN rule ON document.rule_id = rule.id" : "")
+                    . $join .
+                " WHERE
+                        document.deleted = 0 "
+                        .$where;
+        }
+
+        $countStmt = $this->entityManager->getConnection()->prepare($countQuery);
+
+        // Bind the same parameters for count query (only if we have filters)
+        if (!empty($where) || !empty($join)) {
+            if (!empty($data['source_content'])) {
+                $countStmt->bindValue(':source_content', "%".$data['source_content']."%");
+            }
+            if (!empty($data['target_content'])) {
+                $countStmt->bindValue(':target_content', "%".$data['target_content']."%");
+            }
+            if (!empty($data['date_modif_start'])) {
+                $countStmt->bindValue(':dateModifiedStart', str_replace(',','',$data['date_modif_start']));
+            }
+            if (!empty($data['date_modif_end'])) {
+                $countStmt->bindValue(':dateModifiedEnd', $data['date_modif_end']);
+            }
+            if (!empty($data['reference'])) {
+                $countStmt->bindValue(':reference', $data['reference']);
+            }
+            if (!empty($data['rule']) || !empty($data['customWhere']['rule'])) {
+                $countStmt->bindValue(':ruleId', $singleRuleId);
+            }
+            if (!empty($data['status'])) {
+                $countStmt->bindValue(':status', $data['status']);
+            }
+            if (!empty($data['module_source'])) {
+                $countStmt->bindValue(':module_source', $data['module_source']);
+            }
+            if (!empty($data['module_target'])) {
+                $countStmt->bindValue(':module_target', $data['module_target']);
+            }
+            if (!empty($data['customWhere']['gblstatus'])) {
+                $i = 0;
+                foreach($data['customWhere']['gblstatus'] as $gblstatus) {
+                    $countStmt->bindValue(':gblstatus'.$i, $gblstatus);
+                    $i++;
+                }
+            } elseif (!empty($data['gblstatus'])) {
+                $countStmt->bindValue(':gblstatus', $data['gblstatus']);
+            }
+            if (!empty($data['type'])) {
+                $countStmt->bindValue(':type', $data['type']);
+            }
+            if (!empty($data['target_id'])) {
+                $countStmt->bindValue(':target_id', $data['target_id']);
+            }
+            if (!empty($data['source_id'])) {
+                $countStmt->bindValue(':source_id', $data['source_id']);
+            }
+        }
+
+        $totalCount = $countStmt->executeQuery()->fetchAssociative()['total'];
+
+        // Return results with metadata
+        return [
+            'results' => $results,
+            'total' => $totalCount,
+            'page' => $page,
+            'perPage' => $perPage
+        ];
     }
 
     public function getSingleRuleIdFromRuleName($ruleName)
     {
         $ruleRepository = $this->entityManager->getRepository(Rule::class);
         return $ruleRepository->findOneBy(['name' => $ruleName])->getId();
+    }
+
+    /**
+     * Pre-generate URLs and format dates for documents to avoid expensive calls in Twig template loop.
+     * This caches DateTimeZone objects and performs all formatting in PHP instead of Twig.
+     */
+    private function addDocumentUrls(array $documents): array
+    {
+        // Get user preferences once (not per document)
+        $user = $this->getUser();
+        $dateFormat = $user ? $user->getDateFormat() . ' H:i:s' : 'Y-m-d H:i:s';
+        $userTimezone = $user ? $user->getTimezone() : 'UTC';
+
+        // Cache timezone objects (reused for all 3000+ date formatting operations)
+        $utcTz = new \DateTimeZone('UTC');
+        $targetTz = new \DateTimeZone($userTimezone);
+
+        foreach ($documents as $key => $document) {
+            // Pre-generate URLs
+            $documents[$key]['url_flux'] = !empty($document['id'])
+                ? $this->generateUrl('flux_modern', ['id' => $document['id']])
+                : '#';
+            $documents[$key]['url_rule'] = !empty($document['rule_id'])
+                ? $this->generateUrl('regle_open', ['id' => $document['rule_id']])
+                : '#';
+
+            // Pre-format dates with timezone compensation
+            $documents[$key]['date_created_formatted'] = $this->formatDateCompensated(
+                $document['date_created'] ?? null, $dateFormat, $utcTz, $targetTz
+            );
+            $documents[$key]['date_modified_formatted'] = $this->formatDateCompensated(
+                $document['date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
+            );
+            $documents[$key]['source_date_modified_formatted'] = $this->formatDateCompensated(
+                $document['source_date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
+            );
+        }
+        return $documents;
+    }
+
+    /**
+     * Format a date with timezone compensation (UTC → user timezone).
+     * Reuses cached DateTimeZone objects for performance.
+     */
+    private function formatDateCompensated(?string $date, string $format, \DateTimeZone $utcTz, \DateTimeZone $targetTz): string
+    {
+        if (empty($date)) {
+            return '';
+        }
+
+        try {
+            // Parse date and treat as UTC
+            $dateObj = new \DateTime($date, $utcTz);
+            // Convert to target timezone
+            $dateObj->setTimezone($targetTz);
+            return $dateObj->format($format);
+        } catch (\Exception $e) {
+            return $date; // Return original if parsing fails
+        }
     }
 
     //Create pagination using the Pagerfanta Bundle based on a request
@@ -935,6 +1117,7 @@ public function removeFilter(Request $request): JsonResponse
          * adapter_em_repository = requete
          * maxPerPage = integer
          * page = page en cours
+         * total = total count (optional, for optimized pagination)
          */
 
         $compact = [];
@@ -943,11 +1126,19 @@ public function removeFilter(Request $request): JsonResponse
             $pagerfanta = new Pagerfanta(new QueryAdapter($queryBuilder));
             $compact['pager'] = $pagerfanta;
         } else {
-            $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+            // Use custom adapter when we have a known total (optimized pagination)
+            // Otherwise use standard ArrayAdapter
+            if (isset($params['total'])) {
+                $compact['pager'] = new Pagerfanta(
+                    new ArrayAdapterWithCount($params['adapter_em_repository'], $params['total'])
+                );
+            } else {
+                $compact['pager'] = new Pagerfanta(new ArrayAdapter($params['adapter_em_repository']));
+            }
         }
-    
+
         $compact['pager']->setMaxPerPage(intval($params['maxPerPage']));
-    
+
         try {
             $compact['pager']->setCurrentPage(intval($params['page']));
             $compact['nb'] = $compact['pager']->getNbResults();
@@ -955,7 +1146,7 @@ public function removeFilter(Request $request): JsonResponse
         } catch (NotValidCurrentPageException $e) {
             throw $this->createNotFoundException(sprintf('Page not found. %s %s %d', $e->getMessage(), $e->getFile(), $e->getLine()));
         }
-    
+
         return $compact;
     }
 
@@ -965,7 +1156,7 @@ public function removeFilter(Request $request): JsonResponse
     public function exportDocumentsToCsv(): Response
     {
 
-        $timezone = !empty($timezone) ? $this->getUser()->getTimezone() : 'UTC';
+        $timezone = $this->getUser()?->getTimezone() ?: 'UTC';
         $myUser = $this->getUser();
         $mySeparator = $myUser->getCsvSeparator() ?? ',';
 
@@ -980,7 +1171,7 @@ public function removeFilter(Request $request): JsonResponse
 
         // Clean and prepare IDs
         $documentIds = array_filter(explode(',', $_POST['csvdocumentids']));
-        
+
         if (empty($documentIds)) {
             throw $this->createNotFoundException('No valid document IDs provided');
         }
@@ -1020,12 +1211,12 @@ public function removeFilter(Request $request): JsonResponse
             WHERE document.id IN ($placeholders)";
 
         $stmt = $this->entityManager->getConnection()->prepare($query);
-        
+
         // Bind parameters individually
         foreach ($documentIds as $index => $id) {
             $stmt->bindValue($index + 1, $id);
         }
-        
+
         $results = $stmt->executeQuery()->fetchAllAssociative();
 
         // Create a temporary file in memory
@@ -1063,13 +1254,12 @@ public function removeFilter(Request $request): JsonResponse
             $sourceData = unserialize($row['source_data']);
             $targetData = unserialize($row['target_data']); 
             $historyData = unserialize($row['history_data']);
-            
+
             // Remove extra quotes and semicolon that were added during serialization
             $results[$key]['source_data'] = trim($sourceData, '";');
             $results[$key]['target_data'] = trim($targetData, '";');
             $results[$key]['history_data'] = trim($historyData, '";');
         }
-
 
         // Write data
         foreach ($results as $row) {
@@ -1106,7 +1296,7 @@ public function removeFilter(Request $request): JsonResponse
         $response->headers->set('Content-Disposition', 'attachment; filename="documents_export_'.date('Y-m-d_His').'.csv"');
         $response->headers->set('Pragma', 'no-cache');
         $response->headers->set('Expires', '0');
-        
+
         return $response;
     }
 

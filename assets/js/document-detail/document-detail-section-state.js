@@ -1,4 +1,3 @@
-// console.log('flux-section-state.js loaded');
 
 export class DocumentDetailSectionState {
     static STORAGE_KEY_PREFIX = 'document_detail_sections_';
@@ -300,7 +299,6 @@ export class DocumentDetailSectionState {
             setTimeout(() => {
                 if (window.documentDetailInstance?.multilineLinkHandler) {
                     window.documentDetailInstance.multilineLinkHandler.recheckLinks();
-// console.log(`🔗 Rechecked links after showing page ${pageNumber} for ${stateKey}`);
                 }
             }, 50);
         };
@@ -349,14 +347,12 @@ export class DocumentDetailSectionState {
             toggleBtn.setAttribute('aria-expanded', String(newExpandedState));
 
             this.updateSectionState(normalizedKey, { isExpanded: newExpandedState });
-// console.log(`✅ Updated ${stateKey} expand state:`, newExpandedState);
         };
 
         // Store handler reference for cleanup
         toggleBtn._collapseHandler = collapseHandler;
         toggleBtn.addEventListener('click', collapseHandler);
 
-// console.log(`✅ Collapsible setup complete for: ${stateKey}`);
     }
 
     /**
@@ -386,7 +382,6 @@ export class DocumentDetailSectionState {
         this.setupCollapsible('logs-section', 'logs', 'logs');
         this.setupPagination('logs-section', 'logs', sectionsData?.logs || []);
    
-        // console.log('✅ All sections initialized with independent state management');
     }
 
     /**
@@ -400,7 +395,6 @@ export class DocumentDetailSectionState {
                 const stored = JSON.parse(localStorage.getItem(key));
                 if (stored?.expiresAt && currentTime > stored.expiresAt) {
                     localStorage.removeItem(key);
-// console.log(`🧹 Cleaned up expired state: ${key}`);
                 }
             } catch (error) {
                     // Invalid JSON, remove it

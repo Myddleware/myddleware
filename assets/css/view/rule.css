@@ -21,11 +21,6 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-
-/* #rule td.value {
-	height: 40px;
-} */
-
 #rule .tabinfo {
 	margin: 50px;
 }
@@ -96,29 +91,6 @@
 
 #rule .fields div {
 	padding-left: 10px;
-}
-
-#rule #relate th {
-	background:none;
-}
-
-#rule #relate td {
-	padding: 20px;
-}
-
-#rule #relate td.title {
-	font-weight: bold;
-	text-align: center;
-}
-
-#rule #relate tr {
-	border: none;
-	height: 60px;
-}
-
-#rule #relate a:hover {
-	text-decoration: none;
-	color: #0E68A7;
 }
 
 #ruleparams {

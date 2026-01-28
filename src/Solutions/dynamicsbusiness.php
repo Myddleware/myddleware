@@ -107,6 +107,16 @@ class dynamicsbusiness extends solution
         } else {
                 throw new \Exception("Unable to retrieve access token");
             }
+        } catch (\GuzzleHttp\Exception\RequestException $e) {
+            // Get full error message from Guzzle exception response
+            $errorMessage = $e->getMessage();
+            if ($e->hasResponse()) {
+                $responseBody = $e->getResponse()->getBody()->getContents();
+                $errorMessage = $responseBody;
+            }
+            $error = $errorMessage.' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->logger->error($error);
+            return ['error' => $error];
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);

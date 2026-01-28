@@ -1,0 +1,45 @@
+<section class="mb-4 mt-4" id="step-1">
+  <button id="nav-create-rule-detail" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
+        <i class="fa-solid fa-list-ul"></i>
+  </button>
+  <div>
+    <h3 class="section-create-rule fw-bold mb-4" id="template-rule-create">
+      {{ 'animate.title'|trans }}
+    </h3>
+
+    {% if initialRuleJson is not defined %}
+      <div class="form-check form-switch mt-3 mb-3">
+        <input class="form-check-input" type="checkbox" id="template-mode-switch">
+        <label class="form-check-label" for="template-mode-switch">
+          {{ 'animate.template.title'|trans }}
+        </label>
+      </div>
+    {% endif %}
+  </div>
+
+  <form id="step1-form" novalidate>
+    <div class="row g-4">
+      <div class="col-12 col-lg-6">
+        <label for="rulename" class="form-label">
+          {{ 'animate.rulename'| trans }}
+        </label>
+
+        <div class="position-relative">
+          <input id="rulename" type="text" class="form-control" placeholder="{{ 'animate.rulename'|trans({'default': 'Name here'}) }}" maxlength="40" autocomplete="off" required data-check-url="{{ path('regle_inputs_name_unique') }}">
+
+          <div id="rulename-spinner" class="position-absolute top-50 end-0 translate-middle-y pe-2 d-none">
+            <div class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></div>
+          </div>
+        </div>
+        <div id="rulename-feedback" class="form-text"></div>
+      </div>
+
+      <div class="col-12">
+        <label for="ruledescription" class="form-label">
+          {{ 'animate.choice.description'|trans({'default': 'Description'}) }}
+        </label>
+        <textarea id="ruledescription" class="form-control" rows="4" placeholder="{{ 'animate.choice.description'|trans({'default': 'Description here'}) }}"> </textarea>
+      </div>
+    </div>
+  </form>
+</section>

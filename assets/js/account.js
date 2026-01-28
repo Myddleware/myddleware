@@ -299,21 +299,6 @@ class AccountManager {
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
           </form>
 
-          <!-- Table Settings -->
-          <h3>${t.sections.table_settings || 'Table settings'}</h3>
-          <form id="table-settings-form" class="account-form">
-            <div class="form-group">
-              <label for="rows-per-page">${t.fields.rows_per_page || 'Rows per page'}</label>
-              <input type="number" id="rows-per-page" name="rows-per-page" class="form-control" min="1" />
-            </div>
-
-            <div class="form-group">
-              <label for="maximum-results">${t.fields.maximum_results || 'Maximum results'}</label>
-              <input type="number" id="maximum-results" name="maximum-results" class="form-control" min="1" />
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
-          </form>
         </div>
       </div>
     `;
