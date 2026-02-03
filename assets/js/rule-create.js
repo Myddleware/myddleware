@@ -343,6 +343,9 @@ const UI = {
                   if(tbody) {
                       tbody.querySelectorAll('button.text-danger').forEach(b => {
                           b.disabled = false; b.style.opacity = '1'; b.style.pointerEvents = 'auto';
+                          b.onclick = function() {
+                              this.closest('tr').remove();
+                          };
                       });
                       Array.from(badgesContainer.querySelectorAll('.mapping-src-badge')).forEach(b => {
                           if(window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(b.dataset.field);
@@ -439,45 +442,46 @@ const UI = {
   }
 
   // Loads the Filters UI (Step 4)
-  const loadFiltersUI = async () => {
-    if (!EL.step4 || !EL.step4Body) return;
-    const pathFilter = EL.step4.getAttribute('data-path-filters');
-    if (!pathFilter) return;
+  const loadFiltersUI = async () => {
+    if (!EL.step4 || !EL.step4Body) return;
+    const pathFilter = EL.step4.getAttribute('data-path-filters');
+    if (!pathFilter) return;
 
-    const params = {
-      src_solution_id: EL.src.sol.value,
-      tgt_solution_id: EL.tgt.sol.value,
-      src_module: EL.src.mod.value,
-      tgt_module: EL.tgt.mod.value,
-      src_connector_id: EL.src.conn.value,
-      tgt_connector_id: EL.tgt.conn.value
-    };
+    const params = {
+      src_solution_id: EL.src.sol.value,
+      tgt_solution_id: EL.tgt.sol.value,
+      src_module: EL.src.mod.value,
+      tgt_module: EL.tgt.mod.value,
+      src_connector_id: EL.src.conn.value,
+      tgt_connector_id: EL.tgt.conn.value
+    };
 
-    const rid = new URLSearchParams(location.search).get('rule_id');
-    if (rid) params.rule_id = rid;
+    const rid = new URLSearchParams(location.search).get('rule_id');
+    if (rid) params.rule_id = rid;
 
-    try {
-      const html = await UI.fetchHtml(pathFilter, params);
-      EL.step4Body.innerHTML = html;
-      if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
-      if (window.initFiltersUI) window.initFiltersUI();
-      if (window.initMappingUI) window.initMappingUI();
-    } catch (e) {
-      EL.step4Body.innerHTML = '<p class="text-danger">Unable to load filters. (' + e.message + ')</p>';
-    }
-    console.groupEnd();
-  };
-  window.mydLoadRuleFilters = loadFiltersUI;
+    try {
+      const html = await UI.fetchHtml(pathFilter, params);
+      EL.step4Body.innerHTML = html;
+      if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
+      if (window.initFiltersUI) window.initFiltersUI();
+      if (window.initMappingUI) window.initMappingUI();
+      if (window.autoMapRequiredFields) window.autoMapRequiredFields();
+    } catch (e) {
+      EL.step4Body.innerHTML = '<p class="text-danger">Unable to load filters. (' + e.message + ')</p>';
+    }
+    console.groupEnd();
+  };
+  window.mydLoadRuleFilters = loadFiltersUI;
 
-  function revealStep4and5() {
-    if (EL.step4 && EL.step4.classList.contains('d-none')) {
-      UI.toggle(EL.step4, true);
-      if (window.mydLoadRuleFilters && !filtersLoaded) {
-        window.mydLoadRuleFilters();
-        filtersLoaded = true;
-      }
-    }
-    if (EL.step5) {
+  function revealStep4and5() {
+    if (EL.step4 && EL.step4.classList.contains('d-none')) {
+      UI.toggle(EL.step4, true);
+      if (window.mydLoadRuleFilters && !filtersLoaded) {
+        window.mydLoadRuleFilters();
+        filtersLoaded = true;
+      }
+    }
+ if (EL.step5) {
       UI.toggle(EL.step5, true);
       // initMappingUI is called from loadFiltersUI after fields are loaded
     }
@@ -555,7 +559,143 @@ const UI = {
     addGroup('Target Fields', getJsonAttr(tgtMod, 'data-fields'));
   };
 
-  // Adds a visual row to the filter list
+  window.autoMapRequiredFields = async function() {
+    const tgtConn = document.getElementById('target-connector')?.value;
+    const tgtMod = document.getElementById('target-module')?.value;
+    const srcConn = document.getElementById('source-connector')?.value;
+    const srcMod = document.getElementById('source-module')?.value;
+    const tbody = document.getElementById('rule-mapping-body');
+    const step5 = document.getElementById('step-5');
+
+    if (!tgtConn || !tgtMod || !tbody || !step5) return;
+    if (tbody.getAttribute('data-loaded-module') === tgtMod) return;
+
+    const urlBase = step5.getAttribute('data-path-mapping-initial');
+    if (!urlBase) return;
+
+    try {
+        const params = new URLSearchParams({
+            connector_id: tgtConn,
+            module: tgtMod,
+            src_connector_id: srcConn,
+            src_module: srcMod
+        });
+
+        const res = await fetch(`${urlBase}?${params.toString()}`, { 
+            headers: { 'X-Requested-With': 'XMLHttpRequest' } 
+        });
+        
+        if (!res.ok) return;
+        const html = await res.text();
+        if (html && html.trim().length > 0) {
+            
+            let shouldReplace = false;
+            if (tbody.rows.length === 1) {
+                const row = tbody.rows[0];
+                try {
+                    const tgtSel = row.querySelector('.rule-mapping-target');
+                    const tgtVal = (tgtSel && tgtSel.value) ? tgtSel.value : '';
+                    const badges = row.querySelectorAll('.mapping-src-badge');
+                    const formulaInput = row.querySelector('.rule-mapping-formula-input');
+                    const formulaVal = (formulaInput) ? formulaInput.value : '';
+
+
+                    if (!tgtVal && badges.length === 0 && !formulaVal) {
+                        shouldReplace = true;
+                    }
+                } catch (err) {
+                    console.warn("Erreur check ligne vide, on ajoute par défaut");
+                }
+            }
+
+            if (shouldReplace) {
+                tbody.innerHTML = html;
+            } else {
+                tbody.insertAdjacentHTML('afterbegin', html);
+            }
+
+            initNewRows(tbody);
+            tbody.setAttribute('data-loaded-module', tgtMod);
+        }
+
+    } catch (e) {
+        console.error('Auto-mapping error:', e);
+    }
+};
+
+function initNewRows(container) {
+    $(container).find('.js-select-search-locked').each(function() {
+        if (!this.selectize) {
+            $(this).selectize({ sortField: 'text' });
+        }
+    });
+
+    $(container).find('.js-select-search-source').each(function() {
+        if (this.selectize) return;
+
+        const wrapper = this.closest('.mapping-src-wrapper');
+        const badgesDiv = wrapper ? wrapper.querySelector('.mapping-src-badges') : null;
+
+        $(this).selectize({
+            sortField: 'text',
+            placeholder: 'Search Source...',
+            dropdownParent: 'body',
+            onChange: function(value) {
+                if (!value || !badgesDiv) return;
+                
+                if(badgesDiv.querySelector(`[data-field="${CSS.escape(value)}"]`)) {
+                    this.clear(true);
+                    return;
+                }
+                let txt = value;
+                const item = this.getItem(value);
+                if(item.length) txt = item.text();
+                const badge = document.createElement('span');
+                badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
+                badge.dataset.field = value;
+                badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
+                badge.querySelector('button').onclick = () => badge.remove();
+                badgesDiv.appendChild(badge);
+
+                this.clear(true); 
+            }
+        });
+    });
+
+    $(container).find('.rule-mapping-formula').off('click').on('click', function() {
+        const btn = this;
+        const tr = btn.closest('tr');
+        const hidden = tr.querySelector('.rule-mapping-formula-input');
+        const container = UI.get('formula-selected-fields');
+        const modal = UI.get('mapping-formula');
+        const area = UI.get('area_insert');
+
+        if (container && modal) {
+            container.innerHTML = '';
+            const badges = tr.querySelectorAll('.mapping-src-badge');
+            
+            if (badges.length === 0) {
+                container.innerHTML = '<span class="text-muted">No field selected in source</span>';
+            } else {
+                badges.forEach(b => {
+                    const chip = document.createElement('span');
+                    chip.className = 'badge-formula rounded-pill px-3 mb-3';
+                    chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
+                    chip.dataset.field = b.dataset.field;
+                    container.appendChild(chip);
+                });
+            }
+            
+            modal.dataset.currentRowId = tr.dataset.rowId;
+            modal.dataset.currentFormulaInputId = hidden.id;
+            if (area) area.value = hidden.value || '';
+        }
+    });
+    $(container).find('.rule-mapping-delete').off('click').on('click', function() {
+        $(this).closest('tr').remove();
+    });
+  }
+
   window.addFilterRow = function(fieldVal, opVal, valueVal) {
       const listWrap = UI.get('rule-filters-list');
       const fieldSelect = UI.get('rule-filter-field');
@@ -671,10 +811,10 @@ const UI = {
     return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
   }
 
- // Adds a row to the Mapping table (Step 5)
-  window.addMappingRow = function(tbody) {
+// Adds a row to the Mapping table (Step 5)
+window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = false) {
     // Read fields from embedded JSON (from filter template)
-    let srcFields = null, tgtFields = null;
+    let srcFields = {}, tgtFields = {};
     const fieldsDataEl = document.getElementById('rule-fields-data');
     if (fieldsDataEl) {
       try {
@@ -690,7 +830,12 @@ const UI = {
     // Target Select
     const tdTgt = document.createElement('td');
     const tgtSel = createMappingSelect(tgtFields);
-    tgtSel.classList.add('rule-mapping-target', 'js-select-search'); // Class for auto Selectize
+    tgtSel.classList.add('rule-mapping-target', 'js-select-search');
+
+    if (preselectedTarget) {
+        tgtSel.value = preselectedTarget;
+    }
+    
     tdTgt.appendChild(tgtSel);
 
     // Source Select + Badges (Multiple Source Fields)
@@ -720,26 +865,22 @@ const UI = {
       const badge = document.createElement('span');
       badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
       badge.dataset.field = val;
-      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;  
+      badge.innerHTML = `<span class="mapping-src-badge-label">${txt}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;     
       badge.querySelector('button').onclick = () => badge.remove();
       badgesDiv.appendChild(badge);
     
-      if (srcSel.selectize) {
-          srcSel.selectize.clear(true);
-      } else {
-          srcSel.value = '';
-      }
+      if (srcSel.selectize) srcSel.selectize.clear(true); else srcSel.value = '';
     });
 
     srcWrapper.append(srcSel, badgesDiv);
     tdSrc.appendChild(srcWrapper);
 
-    // Actions (Formula Button)
+   // Actions (Formula Button)
     const tdAct = document.createElement('td');
     tdAct.className = 'd-flex align-items-center';
     const slot = document.createElement('div');
     slot.className = 'formula-slot is-empty';
-    slot.textContent = '...';
+    slot.textContent = '...';   
     const btn = document.createElement('button');
     btn.className = 'btn btn-sm ms-2 rule-mapping-formula';
     btn.innerHTML = '<i class="fa fa-code"></i>';
@@ -761,16 +902,17 @@ const UI = {
       const modal = UI.get('mapping-formula');
       if (container && modal) {
         container.innerHTML = '';
-        const badges = tr.querySelectorAll('.mapping-src-badge');
+        const badges = tr.querySelectorAll('.mapping-src-badge');      
         if (!badges.length) container.innerHTML = '<span class="text-muted">No field</span>';
-        
-        badges.forEach(b => {
-          const chip = document.createElement('span');
-          chip.className = 'badge-formula rounded-pill px-3 mb-3';
-          chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
-          chip.dataset.field = b.dataset.field;
-          container.appendChild(chip);
-        });
+        else {
+            badges.forEach(b => {
+              const chip = document.createElement('span');
+              chip.className = 'badge-formula rounded-pill px-3 mb-3';
+              chip.textContent = b.querySelector('.mapping-src-badge-label').textContent;
+              chip.dataset.field = b.dataset.field;
+              container.appendChild(chip);
+            });
+        }
         
         modal.dataset.currentRowId = tr.dataset.rowId;
         modal.dataset.currentFormulaInputId = hidden.id;
@@ -778,7 +920,7 @@ const UI = {
         if (area) area.value = hidden.value || '';
       }
     };
-
+    
     // Delete Row
     const tdDel = document.createElement('td');
     tdDel.className = 'text-start';
@@ -786,16 +928,30 @@ const UI = {
     delBtn.className = 'btn btn-sm text-danger mt-2';
     delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
     delBtn.type = 'button';
-    delBtn.onclick = () => tr.remove();
+    
+    if (isRequired) {
+        delBtn.disabled = true;
+        delBtn.style.opacity = '0.5';
+        delBtn.title = 'Required field cannot be removed';
+    } else {
+        delBtn.onclick = () => tr.remove();
+    }
     tdDel.appendChild(delBtn);
 
+    // Ajout au DOM
     tr.append(tdTgt, tdSrc, tdAct, tdDel);
     tbody.appendChild(tr);
-    $(tgtSel).selectize({
+    const $tgtSelectize = $(tgtSel).selectize({
         sortField: 'text',
         placeholder: 'Search Target...',
         dropdownParent: 'body',
     });
+    
+    if (preselectedTarget && $tgtSelectize[0].selectize) {
+        const s = $tgtSelectize[0].selectize;
+        s.addOption({value: preselectedTarget, text: preselectedTarget});
+        s.addItem(preselectedTarget, true);
+    }
     
     $(srcSel).selectize({
         sortField: 'text',
@@ -806,28 +962,28 @@ const UI = {
                  var event = new Event('change', { bubbles: true });
                  this.$input[0].dispatchEvent(event);
             }
-        }
+          }
     });
+};
+
+  window.initMappingUI = function() {
+    const btn = UI.get('rule-mapping-add');
+    const tbody = UI.get('rule-mapping-body');
+    if (!btn || !tbody) return;
+
+    if (!tbody.querySelector('tr')) window.addMappingRow(tbody);
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = '1';
+    btn.addEventListener('click', () => window.addMappingRow(tbody));
   };
 
-  window.initMappingUI = function() {
-    const btn = UI.get('rule-mapping-add');
-    const tbody = UI.get('rule-mapping-body');
-    if (!btn || !tbody) return;
-
-    if (!tbody.querySelector('tr')) window.addMappingRow(tbody);
-    if (btn.dataset.bound) return;
-    btn.dataset.bound = '1';
-    btn.addEventListener('click', () => window.addMappingRow(tbody));
-  };
-
-  // Ensures a mapping row exists for the chosen duplicate field
+ // Ensures a mapping row exists for the chosen duplicate field
   window.ensureDuplicateMappingRow = function(targetField) {
       const tbody = UI.get('rule-mapping-body');
       if (!tbody || !targetField) return;
       let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
           const sel = tr.querySelector('.rule-mapping-target');
-          if (!sel) return false;
+          if (!sel) return false; 
           
           let currentVal = sel.value;
           if (sel.selectize) currentVal = sel.selectize.getValue();
@@ -842,6 +998,7 @@ const UI = {
       if (!row) {
           row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
               const tgtSel = tr.querySelector('.rule-mapping-target');
+              if (!tgtSel) return false; 
               let val = tgtSel.value;
               if (tgtSel.selectize) val = tgtSel.selectize.getValue();
               else if ($(tgtSel)[0] && $(tgtSel)[0].selectize) val = $(tgtSel)[0].selectize.getValue();
@@ -852,42 +1009,29 @@ const UI = {
       }
 
       if (!row) {
-          window.addMappingRow(tbody); 
+          window.addMappingRow(tbody, targetField, true); 
           row = tbody.lastElementChild;
+          return; 
       }
 
       if (row) {
           const sel = row.querySelector('.rule-mapping-target');
+          if (!sel) return;
           const selectize = sel.selectize || ($(sel)[0] ? $(sel)[0].selectize : null);
 
           if (selectize) {
               if (selectize.getValue() !== targetField) {
-                  let existingOptionValue = null;
-                  
-                  for (const key in selectize.options) {
-                      const opt = selectize.options[key];
-                      if (opt.value == targetField || opt.text.toLowerCase() == targetField.toLowerCase()) {
-                          existingOptionValue = opt.value;
-                          break;
-                      }
-                  }
-
-                  if (existingOptionValue) {
-                      selectize.setValue(existingOptionValue);
-                  } 
-                  else {
-                      selectize.addOption({value: targetField, text: targetField});
-                      selectize.addItem(targetField);
-                  }
+                  selectize.addOption({value: targetField, text: targetField});
+                  selectize.setValue(targetField);
               }
+              selectize.lock();
           } else {
               sel.value = targetField;
-          }
+          }      
           const delBtn = row.querySelector('button.text-danger');
           if (delBtn) {
               delBtn.disabled = true;
-              delBtn.style.opacity = '0.3';
-              delBtn.style.pointerEvents = 'none';
+              delBtn.style.opacity = '0.5';
               delBtn.title = 'Required Field (Duplicate Check)';
               delBtn.onclick = null; 
           }
