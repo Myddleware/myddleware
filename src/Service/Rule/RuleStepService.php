@@ -226,6 +226,26 @@ class RuleStepService
         return $fieldsGrouped;
     }
 
+    public function getModuleFieldsExtended(int $connectorId, string $moduleName): array
+    {
+        $connector = $this->connectorRepository->find($connectorId);
+        if (!$connector || !$connector->getSolution()) {
+            return [];
+        }
+
+        $solutionName = $connector->getSolution()->getName();
+        $solution = $this->solutionManager->get(strtolower($solutionName));
+        
+        $params = $this->connectorService->resolveParams($connectorId);
+        try {
+            $solution->login($params);
+        } catch (\Throwable $e) {
+            return [];
+        }
+
+        return $solution->get_module_fields($moduleName, 'target') ?? [];
+    }
+
     // --- Private Helper Methods for handleConnectionInput ---
 
     private function processNewConnectorForm(array $data): array

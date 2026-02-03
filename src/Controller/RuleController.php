@@ -328,6 +328,40 @@ class RuleController extends AbstractController
         ]);
     }
 
+    #[Route('/create/mapping-initial-rows', name: 'rule_step_mapping_initial', methods: ['GET'])]
+    public function getMappingInitialRows(Request $request): Response
+    {
+        $connectorId = $request->query->getInt('connector_id');
+        $module = $request->query->get('module');
+        $srcConnectorId = $request->query->getInt('src_connector_id');
+        $srcModule = $request->query->get('src_module');
+
+        if (!$connectorId || !$module) {
+            return new Response('');
+        }
+
+        try {
+            $targetFields = $this->ruleStepService->getModuleFieldsExtended($connectorId, $module);
+            
+            $sourceFields = [];
+            if ($srcConnectorId && $srcModule) {
+                $sourceFields = $this->ruleStepService->getModuleFields($srcConnectorId, $srcModule, 'source');
+            }
+
+            $requiredFields = array_filter($targetFields, function($f) {
+                return (isset($f['required']) && ($f['required'] === true || $f['required'] === 1 || $f['required'] === '1'));
+            });
+
+            return $this->render('Rule/create/ajax_step5/_mapping_rows.html.twig', [
+                'requiredFields' => $requiredFields,
+                'sourceFields'   => $sourceFields,
+            ]);
+
+        } catch (\Exception $e) {
+            return new Response('');
+        }
+    }
+
     #[Route('/create/params/fields', name: 'regle_params_fields', methods: ['GET'])]
     public function getParamsFields(Request $request): Response
     {

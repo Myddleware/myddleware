@@ -1,4 +1,4 @@
-<section class="mb-5 d-none" id="step-5">
+<section class="mb-5 d-none" id="step-5" data-path-mapping-initial="{{ path('rule_step_mapping_initial') }}">
   <div class="section-chevron" aria-hidden="true">
     <a href="#step-5" class="section-chevron">
       <i class="fa-solid fa-circle-chevron-down"></i>
@@ -50,8 +50,8 @@
   </a>
 </section>
 
-    {# --- POP UP : FORMULA --- #}
-    {% include 'Rule/create/_formula.html.twig' %}
+{# --- POP UP : FORMULA --- #}
+{% include 'Rule/create/_formula.html.twig' %}
 
-    {# --- POP UP : SIMULATION --- #}
-    {% include 'Rule/_simulation.html.twig' %}
+{# --- POP UP : SIMULATION --- #}
+{% include 'Rule/_simulation.html.twig' %}
