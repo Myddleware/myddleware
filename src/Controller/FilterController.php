@@ -300,21 +300,16 @@ public function removeFilter(Request $request): JsonResponse
                     }
                 } // end form data not null
 
-                if ($page === 1) {
+                $filterMap = self::FILTER_MAP;
 
-                    // If the form is submitted and the form is valid, we save the filters in the session
-                    $filterMap = self::FILTER_MAP;
-
-                    // Save the filters in the session using the session service and the filter map
-                    foreach ($filterMap as $dataKey => $filterName) {
-                        if (!empty($data[$dataKey])) {
-                            $this->sessionService->{'set'.$filterName}($data[$dataKey]);
-                        } elseif ($dataKey !== 'customWhere') {
-                            $this->sessionService->{'remove'.$filterName}();
-                        }
+                foreach ($filterMap as $dataKey => $filterName) {
+                    if (!empty($data[$dataKey])) {
+                        $this->sessionService->{'set'.$filterName}($data[$dataKey]);
+                    } elseif ($dataKey !== 'customWhere') {
+                        $this->sessionService->{'remove'.$filterName}();
                     }
-
-                } // end if page === 1
+                } 
+                $page = 1;
             } else { // if form is not valid
                     $data = $this->getFluxFilterData();
 

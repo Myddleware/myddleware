@@ -1357,6 +1357,7 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
     background-color: #fff !important; 
     border: 2px dashed #03c4eb !important;
     color: #000000 !important;
+	padding-left: 8px !important;
 }
 
 .template-card {
