@@ -48,6 +48,7 @@ use App\Solutions\prestashop;
 use App\Solutions\ringcentral;
 use App\Solutions\sagecrm;
 use App\Solutions\salesforce;
+use App\Solutions\salesforce_v2;
 use App\Solutions\sap;
 use App\Solutions\sapcrm;
 use App\Solutions\sendinblue;
@@ -89,6 +90,7 @@ class SolutionManager
 							'postgresql',
 							'sugarcrm',
 							'salesforce',
+							'salesforce_v2',
 							'airtable',
 							'sendinblue',
 							'internallist',
@@ -118,6 +120,7 @@ class SolutionManager
         postgresql $postgresql,
         sugarcrm $sugarcrm,
         salesforce $salesforce,
+        salesforce_v2 $salesforce_v2,
         airtable $airtable,
         sendinblue $sendinblue,
         internallist $internallist,
