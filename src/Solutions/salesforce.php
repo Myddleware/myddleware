@@ -78,7 +78,7 @@ class salesforce extends solution {
 										"Case" => array("CaseNumber")
 									);
 									
-	protected string $versionApi = 'v62.0';
+	protected string $versionApi = 'v65.0';
 	
 	protected bool $sendDeletion = true;
 
@@ -131,6 +131,14 @@ class salesforce extends solution {
     {
 		return array('sf_access_token' => $this->access_token,
 					 'sf_instance_url' => $this->instance_url);
+	}
+	
+	protected function setAccessToken($access_token) {
+		$this->access_token = $access_token;
+	}
+
+	protected function getAccessToken() {
+		return $this->access_token;
 	}
 
 	// Liste des paramètres de connexion
