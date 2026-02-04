@@ -2410,6 +2410,10 @@ class DocumentManager
     public function updateWorkflowError($workflowError)
     {
         try {
+			// Update workflowError only if the flag has changed
+			if ($workflowError == $this->workflowError) {
+				return;
+			}
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
@@ -2424,11 +2428,8 @@ class DocumentManager
             $stmt->bindValue(':workflowError', $workflowError);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            if ((int)$workflowError !== 0) {
-                $this->message .= 'Workflow error set to '.$workflowError;
-                $this->createDocLog();
-            }
-            $this->createDocLog();
+            $this->message .= 'Workflow error set to '.$workflowError;
+			$this->createDocLog();
         } catch (\Exception $e) {
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
