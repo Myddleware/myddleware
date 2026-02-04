@@ -532,7 +532,6 @@ public function removeFilter(Request $request): JsonResponse
         $statuses =   [
             'flux.status.new' => 'New',
             'flux.status.predecessor_ok' => 'Predecessor_OK',
-            'flux.status.relate_ok' => 'Relate_OK',
             'flux.status.transformed' => 'Transformed',
             'flux.status.ready_to_send' => 'Ready_to_send',
             'flux.status.filter_ok' => 'Filter_OK',
@@ -543,7 +542,6 @@ public function removeFilter(Request $request): JsonResponse
             'flux.status.cancel' => 'Cancel',
             'flux.status.filter_ko' => 'Filter_KO',
             'flux.status.predecessor_ko' => 'Predecessor_KO',
-            'flux.status.relate_ko' => 'Relate_KO',
             'flux.status.error_transformed' => 'Error_transformed',
             'flux.status.error_checking' => 'Error_checking',
             'flux.status.error_sending' => 'Error_sending',
