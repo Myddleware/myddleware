@@ -243,12 +243,6 @@ class JobManager
         $this->ruleManager->filterDocuments();
     }
 
-    // Permet de contrôler si un docuement a une relation mais n'a pas de correspondance d'ID pour cette relation dans Myddleware
-    public function checkParentDocuments()
-    {
-        $this->ruleManager->checkParentDocuments();
-    }
-
     // Permet de trasformer les documents
     public function transformDocuments()
     {
@@ -673,14 +667,8 @@ class JobManager
                 $responseCheckPredecessor = $this->ruleManager->checkPredecessorDocuments($documentIds);
             }
 
-            // Check parent
-            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckPredecessor);
-            if (!empty($documentIds)) {
-                $responseCheckParent = $this->ruleManager->checkParentDocuments($documentIds);
-            }
-
             // Transform document
-            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckParent);
+            $documentIds = $this->refreshDocumentList($documentIds, $responseCheckPredecessor);
             if (!empty($documentIds)) {
                 $responseTransform = $this->ruleManager->transformDocuments($documentIds);
             }

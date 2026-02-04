@@ -96,7 +96,6 @@ class DocumentManager
     protected array $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
-        'Relate_OK' => 'Open',
         'Transformed' => 'Open',
         'Ready_to_send' => 'Open',
         'Filter_OK' => 'Open',
@@ -108,7 +107,6 @@ class DocumentManager
         'Create_KO' => 'Error',
         'Filter_KO' => 'Error',
         'Predecessor_KO' => 'Error',
-        'Relate_KO' => 'Error',
         'Error_transformed' => 'Error',
         'Error_checking' => 'Error',
         'Error_sending' => 'Error',
@@ -155,7 +153,6 @@ class DocumentManager
         return [
             'New' => 'flux.status.new',
             'Predecessor_OK' => 'flux.status.predecessor_ok',
-            'Relate_OK' => 'flux.status.relate_ok',
             'Transformed' => 'flux.status.transformed',
             'Ready_to_send' => 'flux.status.ready_to_send',
             'Filter_OK' => 'flux.status.filter_ok',
@@ -167,7 +164,6 @@ class DocumentManager
             'Create_KO' => 'flux.status.create_ko',
             'Filter_KO' => 'flux.status.filter_ko',
             'Predecessor_KO' => 'flux.status.predecessor_ko',
-            'Relate_KO' => 'flux.status.relate_ko',
             'Error_transformed' => 'flux.status.error_transformed',
             'Error_checking' => 'flux.status.error_checking',
             'Error_sending' => 'flux.status.error_sending',
@@ -903,132 +899,6 @@ class DocumentManager
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
-            $this->logger->error($this->id.' - '.$this->message);
-            return false;
-        }
-    }
-
-    // Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
-    public function checkParentDocument(): bool
-    {
-        try {
-			// Check on current document before any action
-			$this->checkDocumentBeforeAction();
-			
-			// Return false if job has been manually stopped
-			if (!$this->jobActive) {
-				$this->message .= 'Job is not active. ';
-				return false;
-			}
-            // No relate check for deletion document. The document linked could be also deleted.
-            if ('D' == $this->documentType) {
-                $this->updateStatus('Relate_OK');
-
-                return true;
-            }
-
-            // S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
-            // alors on contôle les enregistrements parent
-            if (
-                    !empty($this->ruleRelationships)
-                && !$this->isChild()
-            ) {
-                $error = false;
-                // Vérification de chaque relation de la règle
-                foreach ($this->ruleRelationships as $ruleRelationship) {
-                    // If relationship source data is empty
-                    if (empty(trim($this->sourceData[$ruleRelationship['field_name_source']]))) {
-                        // If source data is empty and errorEmpty is empty too, then no error
-                        if (empty($ruleRelationship['errorEmpty'])) {
-                            $this->message .= 'The source field '.$ruleRelationship['field_name_source'].' is empty.';
-                            continue;
-                        } else {
-                            $error = true;
-                            break;
-                        }
-                    }
-
-                    // No check if "error if missing" is false
-                    if (empty($ruleRelationship['errorMissing'])) {
-                        $this->message .= 'No check on target field '.$ruleRelationship['field_name_target'].' because "Error if missing" is set to false.';
-                        continue;
-                    }
-
-                    // If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
-                    if (!empty($ruleRelationship['parent'])) {
-                        continue;
-                    }
-
-                    // Select previous document in the same rule with the same id and status different than closed
-                    $targetId = $this->getTargetId($ruleRelationship, $this->sourceData[$ruleRelationship['field_name_source']]);
-                    if (empty($targetId['record_id'])) {
-                        // If no target id found, we check if the parent has been filtered, in this case we filter the relate document too
-                        $documentSearch = $this->searchRelateDocumentByStatus($ruleRelationship, $this->sourceData[$ruleRelationship['field_name_source']], 'Filter');
-                        if (!empty($documentSearch['id'])) {
-                            $this->docIdRefError = $documentSearch['id'];
-                            $this->typeError = 'W';
-                            $this->message .= 'Document filter because the parent document is filter too. Check reference column to open the parent document.';
-                            $this->updateStatus('Filter');
-
-                            return false;
-                        }
-                        $error = true;
-                        break;
-                    }
-                    // Save document relationship to keep the relate id and display document linked into Myddleware
-                    $this->insertDocumentRelationship($ruleRelationship, $targetId['document_id']);
-                }
-
-                // Si aucun document parent n'est trouvé alors bloque le document
-                if ($error) {
-                    // récupération du nom de la règle pour avoir un message plus clair
-                    $sqlParams = '	SELECT name FROM rule WHERE id = :rule_id';
-                    $stmt = $this->connection->prepare($sqlParams);
-                    $stmt->bindValue(':rule_id', $ruleRelationship['field_id']);
-                    $result = $stmt->executeQuery();
-                    $ruleResult = $result->fetchAssociative();
-                    $direction = $this->getRelationshipDirection($ruleRelationship);
-                    throw new \Exception('Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
-                }
-            }
-            // Get the parent document to save it in the table Document for the child document
-            $parentDocumentId = '';
-
-            if (!empty($targetId['document_id'])) {
-                $parentDocumentId = $targetId['document_id'];
-            }
-            // Check if the status was in relate_KO before we set the status Relate_OK
-            // In this cas, new data has been created in Myddleware. So we check again if the mode of the document is still Create
-            if (
-                    'Relate_KO' == $this->status
-                and 'C' == $this->documentType
-            ) {
-                $this->documentType = $this->checkRecordExist($this->sourceId);
-                if ('U' == $this->documentType) {
-                    $this->updateTargetId($this->targetId);
-                    $this->updateType('U');
-					// Check compatibility between rule mode et document type
-					// A rule in create mode can't update data except for a child rule
-					if (
-							$this->ruleMode == 'C'
-						and	$this->documentType == 'U'
-					) {
-						// Check child in a second time to avoid to run a query each time
-						if (!$this->isChild()) {
-							$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
-							$this->updateStatus('Filter');
-							// In case we flter the document, we return false to stop the process when this method is called in the rerun process
-							return false;
-						}
-					}
-                }
-            }
-            $this->updateStatus('Relate_OK');
-            return true;
-        } catch (\Exception $e) {
-            $this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->updateStatus('Relate_KO');
             $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
