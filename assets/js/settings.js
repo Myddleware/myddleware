@@ -30,8 +30,8 @@ class SettingsManager {
         this.apiEndpoints = {
             getConfig: `${this.baseUrl}/rule/api/account/config`,
             updateConfig: `${this.baseUrl}/rule/api/account/config/update`,
-            getElasticsearch: `${this.baseUrl}/rule/api/settings/elasticsearch`,
-            updateElasticsearch: `${this.baseUrl}/rule/api/settings/elasticsearch/update`
+            // getElasticsearch: `${this.baseUrl}/rule/api/settings/elasticsearch`,
+            // updateElasticsearch: `${this.baseUrl}/rule/api/settings/elasticsearch/update`
         };
 
         this.init();
@@ -72,18 +72,18 @@ class SettingsManager {
             console.error('Failed to load config:', error);
         }
 
-        try {
-            // Load Elasticsearch status
-            const esResponse = await axios.get(this.apiEndpoints.getElasticsearch);
-            if (esResponse.data.success) {
-                const esEnabled = document.getElementById('elasticsearch-enabled');
-                if (esEnabled) {
-                    esEnabled.checked = esResponse.data.enabled;
-                }
-            }
-        } catch (error) {
-            console.error('Failed to load Elasticsearch status:', error);
-        }
+        // try {
+        //     // Load Elasticsearch status
+        //     const esResponse = await axios.get(this.apiEndpoints.getElasticsearch);
+        //     if (esResponse.data.success) {
+        //         const esEnabled = document.getElementById('elasticsearch-enabled');
+        //         if (esEnabled) {
+        //             esEnabled.checked = esResponse.data.enabled;
+        //         }
+        //     }
+        // } catch (error) {
+        //     console.error('Failed to load Elasticsearch status:', error);
+        // }
     }
 
     setupEventListeners() {
@@ -96,13 +96,13 @@ class SettingsManager {
             });
         }
 
-        // Elasticsearch toggle
-        const esToggle = document.getElementById('elasticsearch-enabled');
-        if (esToggle) {
-            esToggle.addEventListener('change', () => {
-                this.toggleElasticsearch(esToggle.checked);
-            });
-        }
+        // // Elasticsearch toggle
+        // const esToggle = document.getElementById('elasticsearch-enabled');
+        // if (esToggle) {
+        //     esToggle.addEventListener('change', () => {
+        //         this.toggleElasticsearch(esToggle.checked);
+        //     });
+        // }
     }
 
     async saveTableSettings() {
@@ -126,32 +126,32 @@ class SettingsManager {
         }
     }
 
-    async toggleElasticsearch(enabled) {
-        try {
-            const response = await axios.post(this.apiEndpoints.updateElasticsearch, {
-                enabled: enabled
-            });
+    // async toggleElasticsearch(enabled) {
+    //     try {
+    //         const response = await axios.post(this.apiEndpoints.updateElasticsearch, {
+    //             enabled: enabled
+    //         });
 
-            if (response.data.success) {
-                this.showNotification('success', response.data.message);
-            } else {
-                this.showNotification('danger', response.data.error || 'Failed to update Elasticsearch setting');
-                // Revert toggle on error
-                const esToggle = document.getElementById('elasticsearch-enabled');
-                if (esToggle) {
-                    esToggle.checked = !enabled;
-                }
-            }
-        } catch (error) {
-            console.error('Failed to toggle Elasticsearch:', error);
-            this.showNotification('danger', error.response?.data?.error || 'Failed to update Elasticsearch setting');
-            // Revert toggle on error
-            const esToggle = document.getElementById('elasticsearch-enabled');
-            if (esToggle) {
-                esToggle.checked = !enabled;
-            }
-        }
-    }
+    //         if (response.data.success) {
+    //             this.showNotification('success', response.data.message);
+    //         } else {
+    //             this.showNotification('danger', response.data.error || 'Failed to update Elasticsearch setting');
+    //             // Revert toggle on error
+    //             const esToggle = document.getElementById('elasticsearch-enabled');
+    //             if (esToggle) {
+    //                 esToggle.checked = !enabled;
+    //             }
+    //         }
+    //     } catch (error) {
+    //         console.error('Failed to toggle Elasticsearch:', error);
+    //         this.showNotification('danger', error.response?.data?.error || 'Failed to update Elasticsearch setting');
+    //         // Revert toggle on error
+    //         const esToggle = document.getElementById('elasticsearch-enabled');
+    //         if (esToggle) {
+    //             esToggle.checked = !enabled;
+    //         }
+    //     }
+    // }
 
     showNotification(type, message) {
         // Map type to mdw-alert variant
