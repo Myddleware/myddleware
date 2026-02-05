@@ -55,57 +55,57 @@ class SystemSettingsController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/api/settings/elasticsearch", name="api_settings_elasticsearch", methods={"GET"})
-     */
-    public function getElasticsearchStatus(): JsonResponse
-    {
-        $configRepository = $this->entityManager->getRepository(Config::class);
-        $result = $configRepository->getElasticsearchEnabled();
+    // /**
+    //  * @Route("/api/settings/elasticsearch", name="api_settings_elasticsearch", methods={"GET"})
+    //  */
+    // public function getElasticsearchStatus(): JsonResponse
+    // {
+    //     $configRepository = $this->entityManager->getRepository(Config::class);
+    //     $result = $configRepository->getElasticsearchEnabled();
 
-        $enabled = $result ? ($result['value'] === '1') : false;
+    //     $enabled = $result ? ($result['value'] === '1') : false;
 
-        // Also check if ELASTICSEARCH_URL is configured
-        $elasticsearchUrl = $_ENV['ELASTICSEARCH_URL'] ?? null;
-        $isConfigured = !empty($elasticsearchUrl);
+    //     // Also check if ELASTICSEARCH_URL is configured
+    //     $elasticsearchUrl = $_ENV['ELASTICSEARCH_URL'] ?? null;
+    //     $isConfigured = !empty($elasticsearchUrl);
 
-        return new JsonResponse([
-            'success' => true,
-            'enabled' => $enabled,
-            'configured' => $isConfigured,
-        ]);
-    }
+    //     return new JsonResponse([
+    //         'success' => true,
+    //         'enabled' => $enabled,
+    //         'configured' => $isConfigured,
+    //     ]);
+    // }
 
-    /**
-     * @Route("/api/settings/elasticsearch/update", name="api_settings_elasticsearch_update", methods={"POST"})
-     */
-    public function updateElasticsearchStatus(Request $request): JsonResponse
-    {
-        $user = $this->getUser();
+    // /**
+    //  * @Route("/api/settings/elasticsearch/update", name="api_settings_elasticsearch_update", methods={"POST"})
+    //  */
+    // public function updateElasticsearchStatus(Request $request): JsonResponse
+    // {
+    //     $user = $this->getUser();
 
-        if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
-        }
+    //     if (!$user) {
+    //         return new JsonResponse(['error' => 'User not authenticated'], 401);
+    //     }
 
-        $data = json_decode($request->getContent(), true);
+    //     $data = json_decode($request->getContent(), true);
 
-        if (!isset($data['enabled'])) {
-            return new JsonResponse(['error' => 'Missing enabled parameter'], 400);
-        }
+    //     if (!isset($data['enabled'])) {
+    //         return new JsonResponse(['error' => 'Missing enabled parameter'], 400);
+    //     }
 
-        $enabled = (bool) $data['enabled'];
+    //     $enabled = (bool) $data['enabled'];
 
-        $configRepository = $this->entityManager->getRepository(Config::class);
-        $configRepository->setElasticsearchEnabled($enabled);
+    //     $configRepository = $this->entityManager->getRepository(Config::class);
+    //     $configRepository->setElasticsearchEnabled($enabled);
 
-        return new JsonResponse([
-            'success' => true,
-            'enabled' => $enabled,
-            'message' => $enabled
-                ? $this->translator->trans('settings.messages.elasticsearch_enabled')
-                : $this->translator->trans('settings.messages.elasticsearch_disabled'),
-        ]);
-    }
+    //     return new JsonResponse([
+    //         'success' => true,
+    //         'enabled' => $enabled,
+    //         'message' => $enabled
+    //             ? $this->translator->trans('settings.messages.elasticsearch_enabled')
+    //             : $this->translator->trans('settings.messages.elasticsearch_disabled'),
+    //     ]);
+    // }
 
     /**
      * Create the SMTP configuration form
