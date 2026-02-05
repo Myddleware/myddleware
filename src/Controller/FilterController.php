@@ -56,7 +56,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use App\Service\DocumentElasticsearchService;
+// use App\Service\DocumentElasticsearchService;
 
 /**
  * @Route("/rule")
@@ -119,7 +119,7 @@ class FilterController extends AbstractController
 
     private DocumentRepository $documentRepository;
     private SessionService $sessionService;
-    private ?DocumentElasticsearchService $elasticsearchService = null;
+    // private ?DocumentElasticsearchService $elasticsearchService = null;
 
     public function __construct(
         SessionService $sessionService,
@@ -130,7 +130,7 @@ class FilterController extends AbstractController
         ToolsManager $toolsManager,
         AlertBootstrapInterface $alert,
         DocumentRepository $documentRepository,
-        ?DocumentElasticsearchService $elasticsearchService = null,
+        // ?DocumentElasticsearchService $elasticsearchService = null,
     ) {
         $this->sessionService = $sessionService;
         $this->kernel = $kernel;
@@ -141,7 +141,7 @@ class FilterController extends AbstractController
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
         $this->documentRepository = $documentRepository;
-        $this->elasticsearchService = $elasticsearchService;
+        // $this->elasticsearchService = $elasticsearchService;
 
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
@@ -644,74 +644,74 @@ public function removeFilter(Request $request): JsonResponse
 
     // Search the documents using Elasticsearch or fallback to SQL
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
-        // Check if Elasticsearch is enabled in database config
-        $elasticsearchEnabled = ($this->params['elasticsearch_enabled'] ?? '0') === '1';
+        // // Check if Elasticsearch is enabled in database config
+        // $elasticsearchEnabled = ($this->params['elasticsearch_enabled'] ?? '0') === '1';
 
-        // Try Elasticsearch first if available and enabled
-        if ($elasticsearchEnabled && $this->elasticsearchService !== null) {
-            try {
-                if ($this->elasticsearchService->isAvailable()) {
-                    $this->logger->info('Using Elasticsearch for document search');
-                    return $this->searchDocumentsWithElasticsearch($data, $page);
-                }
-            } catch (\Exception $e) {
-                $this->logger->warning('Elasticsearch search failed, falling back to SQL: ' . $e->getMessage());
-            }
-        }
+        // // Try Elasticsearch first if available and enabled
+        // if ($elasticsearchEnabled && $this->elasticsearchService !== null) {
+        //     try {
+        //         if ($this->elasticsearchService->isAvailable()) {
+        //             $this->logger->info('Using Elasticsearch for document search');
+        //             return $this->searchDocumentsWithElasticsearch($data, $page);
+        //         }
+        //     } catch (\Exception $e) {
+        //         $this->logger->warning('Elasticsearch search failed, falling back to SQL: ' . $e->getMessage());
+        //     }
+        // }
 
         // Fallback to SQL
         $this->logger->info('Using SQL for document search');
         return $this->searchDocumentsWithSql($data, $page, $limit);
     }
 
-    /**
-     * Search documents using Elasticsearch
-     */
-    protected function searchDocumentsWithElasticsearch(array $data, int $page = 1): array
-    {
-        $perPage = $this->params['pager'] ?? 25;
-        $from = ($page - 1) * $perPage;
+    // /**
+    //  * Search documents using Elasticsearch
+    //  */
+    // protected function searchDocumentsWithElasticsearch(array $data, int $page = 1): array
+    // {
+    //     $perPage = $this->params['pager'] ?? 25;
+    //     $from = ($page - 1) * $perPage;
 
-        // Prepare filters for Elasticsearch
-        $filters = $data;
+    //     // Prepare filters for Elasticsearch
+    //     $filters = $data;
 
-        // Handle rule name to get rule_id if needed
-        if (!empty($data['rule'])) {
-            // Elasticsearch service expects rule name directly
-            $filters['rule'] = $data['rule'];
-        }
+    //     // Handle rule name to get rule_id if needed
+    //     if (!empty($data['rule'])) {
+    //         // Elasticsearch service expects rule name directly
+    //         $filters['rule'] = $data['rule'];
+    //     }
 
-        $searchResult = $this->elasticsearchService->searchDocuments($filters, $from, $perPage);
+    //     $searchResult = $this->elasticsearchService->searchDocuments($filters, $from, $perPage);
 
-        // Transform Elasticsearch results to match SQL format
-        $results = [];
-        foreach ($searchResult['hits'] as $hit) {
-            $results[] = [
-                'id' => $hit['id'],
-                'date_created' => $hit['date_created'] ?? null,
-                'date_modified' => $hit['date_modified'] ?? null,
-                'status' => $hit['status'] ?? null,
-                'source_id' => $hit['source_id'] ?? null,
-                'target_id' => $hit['target_id'] ?? null,
-                'source_date_modified' => $hit['source_date_modified'] ?? null,
-                'mode' => $hit['mode'] ?? null,
-                'type' => $hit['type'] ?? null,
-                'attempt' => $hit['attempt'] ?? 0,
-                'global_status' => $hit['global_status'] ?? null,
-                'rule_name' => $hit['rule_name'] ?? null,
-                'module_source' => $hit['module_source'] ?? null,
-                'module_target' => $hit['module_target'] ?? null,
-                'rule_id' => $hit['rule_id'] ?? null,
-            ];
-        }
+    //     // Transform Elasticsearch results to match SQL format
+    //     $results = [];
+    //     foreach ($searchResult['hits'] as $hit) {
+    //         $results[] = [
+    //             'id' => $hit['id'],
+    //             'date_created' => $hit['date_created'] ?? null,
+    //             'date_modified' => $hit['date_modified'] ?? null,
+    //             'status' => $hit['status'] ?? null,
+    //             'source_id' => $hit['source_id'] ?? null,
+    //             'target_id' => $hit['target_id'] ?? null,
+    //             'source_date_modified' => $hit['source_date_modified'] ?? null,
+    //             'mode' => $hit['mode'] ?? null,
+    //             'type' => $hit['type'] ?? null,
+    //             'attempt' => $hit['attempt'] ?? 0,
+    //             'global_status' => $hit['global_status'] ?? null,
+    //             'rule_name' => $hit['rule_name'] ?? null,
+    //             'module_source' => $hit['module_source'] ?? null,
+    //             'module_target' => $hit['module_target'] ?? null,
+    //             'rule_id' => $hit['rule_id'] ?? null,
+    //         ];
+    //     }
 
-        return [
-            'results' => $results,
-            'total' => $searchResult['total'],
-            'page' => $page,
-            'perPage' => $perPage
-        ];
-    }
+    //     return [
+    //         'results' => $results,
+    //         'total' => $searchResult['total'],
+    //         'page' => $page,
+    //         'perPage' => $perPage
+    //     ];
+    // }
 
     /**
      * Search documents using SQL (original implementation)
