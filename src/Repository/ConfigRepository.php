@@ -119,30 +119,30 @@ class ConfigRepository extends ServiceEntityRepository
         }
     }
 
-    public function getElasticsearchEnabled()
-    {
-        return $this->createQueryBuilder('c')
-            ->select('c.value')
-            ->where('c.name = :name')
-            ->setParameter('name', 'elasticsearch_enabled')
-            ->getQuery()
-            ->getOneOrNullResult();
-    }
+    // public function getElasticsearchEnabled()
+    // {
+    //     return $this->createQueryBuilder('c')
+    //         ->select('c.value')
+    //         ->where('c.name = :name')
+    //         ->setParameter('name', 'elasticsearch_enabled')
+    //         ->getQuery()
+    //         ->getOneOrNullResult();
+    // }
 
-    public function setElasticsearchEnabled(bool $enabled): void
-    {
-        $entityManager = $this->getEntityManager();
-        $config = $this->findOneBy(['name' => 'elasticsearch_enabled']);
+    // public function setElasticsearchEnabled(bool $enabled): void
+    // {
+    //     $entityManager = $this->getEntityManager();
+    //     $config = $this->findOneBy(['name' => 'elasticsearch_enabled']);
 
-        if ($config) {
-            $config->setValue($enabled ? '1' : '0');
-        } else {
-            $config = new Config();
-            $config->setName('elasticsearch_enabled');
-            $config->setValue($enabled ? '1' : '0');
-        }
+    //     if ($config) {
+    //         $config->setValue($enabled ? '1' : '0');
+    //     } else {
+    //         $config = new Config();
+    //         $config->setName('elasticsearch_enabled');
+    //         $config->setValue($enabled ? '1' : '0');
+    //     }
 
-        $entityManager->persist($config);
-        $entityManager->flush();
-    }
+    //     $entityManager->persist($config);
+    //     $entityManager->flush();
+    // }
 }
