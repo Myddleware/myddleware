@@ -39,8 +39,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use App\Event\DocumentEvent;
+// use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+// use App\Event\DocumentEvent;
 
 class DocumentManager
 {
@@ -92,7 +92,7 @@ class DocumentManager
     protected FormulaManager $formulaManager;
     protected ?ParameterBagInterface $parameterBagInterface;
     protected ?SolutionManager $solutionManager;
-    protected ?EventDispatcherInterface $eventDispatcher;
+    // protected ?EventDispatcherInterface $eventDispatcher;
     protected array $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
@@ -413,8 +413,8 @@ class DocumentManager
             $insertDataTable = $this->insertDataTable($this->data, 'S');
             $this->updateStatus('New');
 
-            // Dispatch event for Elasticsearch sync
-            $this->dispatchDocumentEvent(DocumentEvent::CREATED);
+            // // Dispatch event for Elasticsearch sync
+            // $this->dispatchDocumentEvent(DocumentEvent::CREATED);
 
 			return $insertDataTable;
         } catch (\Exception $e) {
@@ -2377,11 +2377,11 @@ class DocumentManager
             // Update current global status tracker
             $this->currentGlobalStatus = $globalStatus;
 
-            // Dispatch event for Elasticsearch sync ONLY when global_status changes
-            // This optimization reduces ES operations by ~70% (avoids syncing intermediate statuses)
-            if ($previousGlobalStatus !== $globalStatus) {
-                $this->dispatchDocumentEvent(DocumentEvent::UPDATED);
-            }
+            // // Dispatch event for Elasticsearch sync ONLY when global_status changes
+            // // This optimization reduces ES operations by ~70% (avoids syncing intermediate statuses)
+            // if ($previousGlobalStatus !== $globalStatus) {
+            //     $this->dispatchDocumentEvent(DocumentEvent::UPDATED);
+            // }
 
 			return true;
         } catch (\Exception $e) {
@@ -2423,9 +2423,9 @@ class DocumentManager
             $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
             $this->createDocLog();
 
-            // Dispatch event for Elasticsearch sync
-            // Use DELETED when soft-deleting, UPDATED when restoring
-            $this->dispatchDocumentEvent(!empty($deleted) ? DocumentEvent::DELETED : DocumentEvent::UPDATED);
+            // // Dispatch event for Elasticsearch sync
+            // // Use DELETED when soft-deleting, UPDATED when restoring
+            // $this->dispatchDocumentEvent(!empty($deleted) ? DocumentEvent::DELETED : DocumentEvent::UPDATED);
         } catch (\Exception $e) {
             $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2876,27 +2876,27 @@ class DocumentManager
         $this->createDocLog();
     }
 
-    /**
-     * Dispatch document event for Elasticsearch sync
-     *
-     * @param string $eventType One of DocumentEvent::CREATED, UPDATED, DELETED
-     */
-    protected function dispatchDocumentEvent(string $eventType): void
-    {
-        if ($this->eventDispatcher === null) {
-            return;
-        }
+    // /**
+    //  * Dispatch document event for Elasticsearch sync
+    //  *
+    //  * @param string $eventType One of DocumentEvent::CREATED, UPDATED, DELETED
+    //  */
+    // protected function dispatchDocumentEvent(string $eventType): void
+    // {
+    //     if ($this->eventDispatcher === null) {
+    //         return;
+    //     }
 
-        try {
-            $event = new DocumentEvent($this->id);
-            $this->eventDispatcher->dispatch($event, $eventType);
-        } catch (\Exception $e) {
-            // Log error but don't fail the main operation
-            $this->logger->warning('Failed to dispatch document event: ' . $e->getMessage(), [
-                'document_id' => $this->id,
-                'event_type' => $eventType
-            ]);
-        }
-    }
+    //     try {
+    //         $event = new DocumentEvent($this->id);
+    //         $this->eventDispatcher->dispatch($event, $eventType);
+    //     } catch (\Exception $e) {
+    //         // Log error but don't fail the main operation
+    //         $this->logger->warning('Failed to dispatch document event: ' . $e->getMessage(), [
+    //             'document_id' => $this->id,
+    //             'event_type' => $eventType
+    //         ]);
+    //     }
+    // }
 
 }
