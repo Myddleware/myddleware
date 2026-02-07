@@ -15,7 +15,7 @@
         "sass": "^1.90.0",
         "sass-loader": "^16.0.5",
         "stimulus": "2.0.0",
-        "webpack": "^5.76.0",
+        "webpack": "^5.104.1",
         "webpack-cli": "^4.10.0",
         "webpack-notifier": "^1.15.0"
     },
