@@ -41,7 +41,12 @@
     </div>
 </div>
 
-<input type="text" id="field-filter" class="form-control m-3 search-formula" placeholder="Search...">
+<div class="d-flex align-items-center m-3">
+	<input type="text" id="field-filter" class="form-control search-formula" placeholder="Search...">
+	<button class="btn btn-outline-success ms-3" id="rule-mapping-simulation" type="button" data-bs-toggle="modal" data-bs-target="#mapping-simulation">
+		<i class="fa fa-play" aria-hidden="true"></i>
+	</button>
+</div>
 <div class="d-flex mapping-container flex-wrap p-5">
 	{% if fields %}
 		{% for c, f in fields|sort((a, b) => a.getTarget <=> b.getTarget) %}
