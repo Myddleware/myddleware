@@ -1,4 +1,4 @@
-<div class="modal fade" id="mapping-formula" tabindex="-1" aria-labelledby="mappingFormulaLabel" aria-hidden="true">
+<div class="modal fade" id="mapping-formula" tabindex="-1" aria-labelledby="mappingFormulaLabel" aria-hidden="true" data-module-fields-url="{{ path('regle_module_fields') }}">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
@@ -116,6 +116,34 @@
           </div>
         </div>
 
+        <div id="picklist-wizard" class="mb-4 mt-3">
+            <p class="">Insert Picklist Value</p>
+            
+            <div class="d-flex align-items-center mb-2">
+                <span class="me-2 text-muted small" style="width: 50px;">Source</span>
+                <select id="pl_src_group" class="me-2" style="min-width: 140px;" onchange="loadPlValues('src', this.value)">
+                    <option value="">Select Field</option>
+                </select>
+                <select id="pl_src_val" class="me-2" style="min-width: 140px;" disabled>
+                    <option value="">Select Value</option>
+                </select>
+                <button class="btn btn-sm btn-outline-primary" type="button" onclick="insertPl('src')">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+            <div class="d-flex align-items-center">
+                <span class="me-2 text-muted small" style="width: 50px;">Target</span>
+                <select id="pl_tgt_group" class="me-2" style="min-width: 140px;" onchange="loadPlValues('tgt', this.value)">
+                    <option value="">Select Field</option>
+                </select>
+                <select id="pl_tgt_val" class="me-2" style="min-width: 140px;" disabled>
+                    <option value="">Select Value</option>
+                </select>
+                <button class="btn btn-sm btn-outline-primary" type="button" onclick="insertPl('tgt')">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+        </div>
       </div>
 
       <div class="modal-footer">

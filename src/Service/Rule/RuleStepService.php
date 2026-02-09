@@ -517,4 +517,112 @@ class RuleStepService
             'duplicate_target' => $fieldsDuplicateTarget,
         ];
     }
+
+    public function getModuleFieldsWithPicklists(int $connectorId, string $moduleName, string $type): array
+    {
+        $connector = $this->connectorRepository->find($connectorId);
+
+        if (!$connector || !$connector->getSolution()) {
+            throw new \Exception('Connector not found');
+        }
+
+        $solutionName = $connector->getSolution()->getName();
+        $solution = $this->solutionManager->get(strtolower($solutionName));
+
+        // Connect to the remote system
+        $params = $this->connectorService->resolveParams($connectorId);
+        try {
+            $solution->login($params);
+            if (property_exists($solution, 'connexion_valide') && $solution->connexion_valide === false) {
+                throw new \Exception('Login failed');
+            }
+        } catch (\Throwable $e) {
+            throw new \Exception($e->getMessage());
+        }
+
+        $direction = ($type === 'cible') ? 'target' : 'source';
+        $rawFields = $solution->get_module_fields($moduleName, $direction) ?? [];
+
+        $fields = [];      // fieldName => label (compat)
+        $meta = [];        // fieldName => ['label' => ..., 'type' => ...]
+        $picklists = [];   // fieldName => [value => label]
+
+        if (is_array($rawFields)) {
+            foreach ($rawFields as $fieldName => $def) {
+                $label = (string) $fieldName;
+                $typeField = null;
+
+                if (is_array($def)) {
+                    $label = (string) ($def['label'] ?? $def['name'] ?? $fieldName);
+                    $typeField = $def['type'] ?? ($def['field_type'] ?? null);
+
+                    $opts = $this->extractPicklistOptions($def);
+                    if (!empty($opts)) {
+                        $picklists[(string) $fieldName] = $opts;
+                    }
+                }
+
+                $fields[(string) $fieldName] = $label;
+                $meta[(string) $fieldName] = [
+                    'label' => $label,
+                    'type'  => $typeField,
+                ];
+            }
+        }
+
+        asort($fields, SORT_STRING | SORT_FLAG_CASE);
+
+        return [
+            'fields'    => $fields,
+            'meta'      => $meta,
+            'picklists' => $picklists,
+        ];
+    }
+
+    private function extractPicklistOptions(array $def): array
+    {
+        // Common keys used by connectors to store enum/picklist values
+        $candidates = ['option', 'options', 'values', 'enum', 'dropdown', 'list', 'items', 'picklist'];
+
+        foreach ($candidates as $key) {
+            if (!array_key_exists($key, $def) || empty($def[$key])) {
+                continue;
+            }
+
+            $val = $def[$key];
+
+            // Map: value => label
+            if (is_array($val) && !array_is_list($val)) {
+                $out = [];
+                foreach ($val as $k => $v) {
+                    $out[(string) $k] = (string) $v;
+                }
+                return $out;
+            }
+
+            // List of objects: [{value,label}, ...]
+            if (is_array($val) && array_is_list($val) && isset($val[0]) && is_array($val[0])) {
+                $out = [];
+                foreach ($val as $it) {
+                    $v = $it['value'] ?? ($it['id'] ?? ($it['key'] ?? null));
+                    if ($v === null) continue;
+
+                    $t = $it['label'] ?? ($it['name'] ?? ($it['text'] ?? $v));
+                    $out[(string) $v] = (string) $t;
+                }
+                return $out;
+            }
+
+            // Simple list: [a,b,c] => a=>a, b=>b...
+            if (is_array($val) && array_is_list($val)) {
+                $out = [];
+                foreach ($val as $v) {
+                    $out[(string) $v] = (string) $v;
+                }
+                return $out;
+            }
+        }
+
+        return [];
+    }
 }

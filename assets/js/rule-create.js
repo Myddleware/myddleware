@@ -1828,3 +1828,208 @@ $switchEl.on('change', function() {
   });
 
 })();
+
+/* ===========================================
+ * PICKLIST
+ * =========================================== */
+(function () {
+  const cache = new Map();
+
+  function endpoint() {
+    return document.getElementById('mapping-formula')?.dataset.moduleFieldsUrl || '';
+  }
+
+  function ctx(side) {
+    const conn = document.getElementById(side === 'src' ? 'source-connector' : 'target-connector')?.value || '';
+    const mod  = document.getElementById(side === 'src' ? 'source-module' : 'target-module')?.value || '';
+    const type = (side === 'src') ? 'source' : 'cible';
+    return { conn, mod, type };
+  }
+
+  function el(side) {
+    return {
+      group: document.getElementById(side === 'src' ? 'pl_src_group' : 'pl_tgt_group'),
+      val:   document.getElementById(side === 'src' ? 'pl_src_val'   : 'pl_tgt_val'),
+    };
+  }
+
+  function setDisabled(selectEl, disabled) {
+    if (!selectEl) return;
+    selectEl.disabled = disabled;
+    if (selectEl.selectize) {
+      disabled ? selectEl.selectize.disable() : selectEl.selectize.enable();
+    }
+  }
+
+  /**
+   * @param {HTMLSelectElement} selectEl
+   * @param {string} placeholder
+   * @param {Object} optionsMap
+   */
+  function fillSelect(selectEl, placeholder, optionsMap) {
+    if (!selectEl) return;
+
+    // Native select
+    selectEl.innerHTML = `<option value="">${placeholder}</option>`;
+    Object.entries(optionsMap || {}).forEach(([v, text]) => {
+      selectEl.appendChild(new Option(String(text), String(v)));
+    });
+
+    // Selectize sync
+    if (selectEl.selectize) {
+      const s = selectEl.selectize;
+      s.clear(true);
+      s.clearOptions();
+
+      s.settings.placeholder = placeholder;
+      s.updatePlaceholder();
+
+      Object.entries(optionsMap || {}).forEach(([v, text]) => {
+        s.addOption({ value: String(v), text: String(text) });
+      });
+
+      s.refreshOptions(false);
+    }
+  }
+
+  async function fetchPicklists(conn, mod, type) {
+    const url = endpoint();
+    if (!url) throw new Error('Missing #mapping-formula[data-module-fields-url]');
+
+    const qs = new URLSearchParams({
+      connector_id: conn,
+      module: mod,
+      type: type,
+      with_picklists: '1',
+    });
+
+    const res = await fetch(`${url}?${qs.toString()}`, {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    });
+
+    const text = await res.text();
+    let json;
+    try { json = JSON.parse(text); } catch { throw new Error('Invalid JSON response'); }
+    if (!res.ok) throw new Error(json?.error || 'Request failed');
+
+    return json;
+  }
+
+  async function loadSide(side) {
+    const { group, val } = el(side);
+    const { conn, mod, type } = ctx(side);
+
+    fillSelect(group, 'Select Field', {});
+    setDisabled(group, true);
+
+    fillSelect(val, 'Select a field first...', {});
+    setDisabled(val, true);
+
+    if (!conn || !mod) return;
+
+    const key = `${conn}|${mod}|${type}`;
+    if (!cache.has(key)) {
+      const data = await fetchPicklists(conn, mod, type);
+      cache.set(key, {
+        picklists: data.picklists || {},
+        meta: data.meta || {}
+      });
+    }
+
+    const picklists = cache.get(key)?.picklists || {};
+    const fields = Object.keys(picklists);
+
+    // Field UI: value-only (fieldName)
+    const fieldOptions = {};
+    fields.forEach((f) => { fieldOptions[f] = f; });
+
+    fillSelect(group, fields.length ? 'Select Field' : 'No picklists', fieldOptions);
+    setDisabled(group, fields.length === 0);
+  }
+
+  function getSelectValue(selectEl) {
+    if (!selectEl) return '';
+    return selectEl.selectize ? (selectEl.selectize.getValue() || '') : (selectEl.value || '');
+  }
+
+  function escapeForDoubleQuotes(str) {
+    return String(str).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+  }
+
+  function insertAtCursor(textarea, textToInsert) {
+    if (!textarea) return;
+
+    textarea.focus();
+
+    const start = textarea.selectionStart ?? textarea.value.length;
+    const end   = textarea.selectionEnd ?? textarea.value.length;
+
+    textarea.value =
+      textarea.value.slice(0, start) +
+      textToInsert +
+      textarea.value.slice(end);
+
+    const newPos = start + textToInsert.length;
+    textarea.setSelectionRange(newPos, newPos);
+  }
+
+  window.loadPlValues = function (side, fieldName) {
+    const { val } = el(side);
+    const { conn, mod, type } = ctx(side);
+    const key = `${conn}|${mod}|${type}`;
+
+    const picklists = cache.get(key)?.picklists || {};
+    const opts = picklists[fieldName];
+
+    if (!opts) {
+      fillSelect(val, 'No values', {});
+      setDisabled(val, true);
+      return;
+    }
+
+    const valueOnly = {};
+    Object.keys(opts).forEach((v) => { valueOnly[v] = v; });
+
+    fillSelect(val, 'Select Value', valueOnly);
+    setDisabled(val, false);
+  };
+
+  // onclick="insertPl('src')"
+  window.insertPl = function (side) {
+    const textarea = document.getElementById('area_insert');
+    const { val } = el(side);
+
+    const pickedValue = getSelectValue(val);
+    if (!pickedValue) return;
+
+    const token = `"${escapeForDoubleQuotes(pickedValue)}"`;
+    insertAtCursor(textarea, token);
+  };
+
+  function bindChange(selectId, side) {
+    const sel = document.getElementById(selectId);
+    if (!sel || sel.dataset.plBound) return;
+    sel.dataset.plBound = '1';
+
+    sel.addEventListener('change', () => {
+      const v = getSelectValue(sel);
+      window.loadPlValues(side, v);
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('mapping-formula');
+    if (!modal) return;
+
+    bindChange('pl_src_group', 'src');
+    bindChange('pl_tgt_group', 'tgt');
+
+    modal.addEventListener('shown.bs.modal', async () => {
+      await loadSide('src');
+      await loadSide('tgt');
+    });
+  });
+})();

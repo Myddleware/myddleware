@@ -283,11 +283,27 @@ class RuleController extends AbstractController
     public function getModuleFields(Request $request): JsonResponse
     {
         try {
-            $fields = $this->ruleStepService->getModuleFields(
-                $request->query->getInt('connector_id'),
-                $request->query->get('module'),
-                $request->query->get('type', 'source')
-            );
+            $connectorId = $request->query->getInt('connector_id');
+            $module      = (string) $request->query->get('module', '');
+            $type        = (string) $request->query->get('type', 'source');
+            $withPicklists = $request->query->getBoolean('with_picklists', false);
+
+            if ($connectorId <= 0 || $module === '') {
+                return new JsonResponse(['error' => 'Missing connector_id or module'], 400);
+            }
+
+            if ($withPicklists) {
+                $data = $this->ruleStepService->getModuleFieldsWithPicklists($connectorId, $module, $type);
+
+                return new JsonResponse([
+                    'fields'    => $data['fields'] ?? [],
+                    'picklists' => $data['picklists'] ?? [],
+                    'meta'      => $data['meta'] ?? [],
+                ]);
+            }
+
+            $fields = $this->ruleStepService->getModuleFields($connectorId, $module, $type);
+
             return new JsonResponse(['fields' => $fields]);
         } catch (\Throwable $e) {
             return new JsonResponse(['error' => $e->getMessage()], 400);
