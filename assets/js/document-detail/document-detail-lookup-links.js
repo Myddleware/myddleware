@@ -1,3 +1,5 @@
+import { getBaseUrl } from './document-detail-url-utils.js';
+
 /**
  * DocumentDetailLookupLinks - Handles automatic lookup link generation
  * Creates links to document list filtered by source ID for fields that appear to be IDs
@@ -67,15 +69,7 @@ export class DocumentDetailLookupLinks {
      * @returns {string} Base URL
      */
     static getBaseUrl() {
-        const pathParts = window.location.pathname.split('/');
-        const publicIndex = pathParts.indexOf('public');
-        
-        if (publicIndex !== -1) {
-            const baseParts = pathParts.slice(0, publicIndex + 1);
-            return window.location.origin + baseParts.join('/');
-        }
-        
-        return window.location.origin;
+        return getBaseUrl();
     }
 
     /**
