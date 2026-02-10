@@ -1,5 +1,5 @@
 /**
- * Date formatting utility for document detail  view
+ * Date formatting utility for document detail view
  * Formats dates according to user's timezone and date format preferences
  */
 
