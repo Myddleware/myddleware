@@ -97,26 +97,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     };
 
-    // Replace lookup rule IDs with clickable rule name links
-    document.querySelectorAll('.formula-full').forEach(function (fullSpan) {
-        var text = fullSpan.textContent;
-        var lookupMatch = text.match(/lookup\(\{[^}]+\},\s*"([a-f0-9]+)"/);
-        if (lookupMatch) {
-            var ruleId = lookupMatch[1];
-            var url = path_get_rule_name.replace('__RULE_ID__', ruleId);
-            fetch(url)
-                .then(function (response) { return response.text(); })
-                .then(function (ruleName) {
-                    var viewUrl = path_rule_view.replace('__RULE_ID__', ruleId);
-                    var link = '<a href="' + viewUrl + '" title="' + ruleId + '">' + ruleName + '</a>';
-                    fullSpan.innerHTML = text.replace('"' + ruleId + '"', link);
-                })
-                .catch(function (err) {
-                    console.error('Error fetching rule name for ID ' + ruleId, err);
-                });
-        }
-    });
-
     const searchInput = document.getElementById('field-filter');
     const cards = document.querySelectorAll('.mapping-card');
 
