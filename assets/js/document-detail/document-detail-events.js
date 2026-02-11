@@ -1,10 +1,9 @@
 import axios from 'axios';
+import { getBaseUrl } from './document-detail-url-utils.js';
 
 export class DocumentDetailEvents {
     static getBaseUrl() {
-        return window.location.pathname.includes('/public/') 
-            ? window.location.pathname.split('/public/')[0] + '/public'
-            : '';
+        return getBaseUrl();
     }
 
     static setupEventListeners() {

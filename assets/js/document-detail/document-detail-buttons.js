@@ -1,3 +1,5 @@
+import { getBaseUrl } from './document-detail-url-utils.js';
+
 /**
  * DocumentDetailButtons - Handles conditional button display logic
  * Implements the same conditional logic as the original Twig template
@@ -100,7 +102,6 @@ export class DocumentDetailButtons {
     static updateButtons(documentData, permissions = {}) {
         const buttonContainer = document.getElementById('flux-button-container');
         if (!buttonContainer) {
-            // console.warn('⚠️ Button container not found in DOM');
             return;
         }
 
@@ -108,13 +109,12 @@ export class DocumentDetailButtons {
             const newButtonsHTML = this.generateButtonsHTML(documentData, permissions);
             buttonContainer.outerHTML = newButtonsHTML;
             
-            // console.log('✅ Document buttons updated based on status:', documentData.global_status);
             
             // Initialize tooltips for new buttons if Bootstrap is available
             this.initializeTooltips();
             
         } catch (error) {
-            console.error('❌ Error updating document buttons:', error);
+            console.error(' Error updating document buttons:', error);
         }
     }
 
@@ -123,15 +123,7 @@ export class DocumentDetailButtons {
      * @returns {string} Base URL
      */
     static getBaseUrl() {
-        const pathParts = window.location.pathname.split('/');
-        const publicIndex = pathParts.indexOf('public');
-        
-        if (publicIndex !== -1) {
-            const baseParts = pathParts.slice(0, publicIndex + 1);
-            return window.location.origin + baseParts.join('/');
-        }
-        
-        return window.location.origin + '/index.php';
+        return getBaseUrl();
     }
 
     /**
@@ -145,14 +137,11 @@ export class DocumentDetailButtons {
                 tooltipElements.forEach(element => {
                     new bootstrap.Tooltip(element);
                 });
-                // console.log('✅ Button tooltips initialized');
             } else if (typeof $ !== 'undefined' && $.fn.tooltip) {
                 // Fallback to jQuery tooltips if available
                 $('[data-bs-toggle="tooltip"]').tooltip();
-                // console.log('✅ Button tooltips initialized (jQuery fallback)');
             }
         } catch (error) {
-            // console.warn('⚠️ Could not initialize tooltips:', error.message);
         }
     }
 
@@ -164,35 +153,9 @@ export class DocumentDetailButtons {
      */
     static processPermissions(userPermissions = {}) {
         return {
-            is_super_admin: userPermissions.role === 'ROLE_SUPER_ADMIN' || 
-                           userPermissions.roles?.includes('ROLE_SUPER_ADMIN') || 
+            is_super_admin: userPermissions.role === 'ROLE_SUPER_ADMIN' ||
+                           userPermissions.roles?.includes('ROLE_SUPER_ADMIN') ||
                            false
         };
-    }
-
-    /**
-     * Logs button visibility decisions for debugging
-     * @param {Object} documentData - Document data
-     * @param {Object} permissions - Permissions data
-     */
-    static debugButtonLogic(documentData, permissions) {
-        if (!documentData) return;
-        
-        const globalStatus = documentData.global_status?.toLowerCase() || '';
-        
-        // console.group('🔧 Document Button Logic Debug');
-        // console.log('📋 Document ID:', documentData.id);
-        // console.log('📊 Global Status:', globalStatus);
-        // console.log('🔒 Job Lock:', documentData.job_lock || false);
-        // console.log('📖 Read Record Button:', documentData.read_record_btn || false);
-        // console.log('👑 Is Super Admin:', permissions.is_super_admin || false);
-        
-        // console.log('🚩 Button Conditions:');
-        // console.log('  - Reload:', (globalStatus !== 'cancel' && globalStatus !== 'close') || permissions.is_super_admin);
-        // console.log('  - Cancel:', (globalStatus !== 'cancel' && globalStatus !== 'close') || permissions.is_super_admin);
-        // console.log('  - Read Record:', documentData.read_record_btn || permissions.is_super_admin);
-        // console.log('  - Unlock:', documentData.job_lock || false);
-        
-        console.groupEnd();
     }
 }

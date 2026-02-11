@@ -1,18 +1,16 @@
 // file that handle the extraction of data from the document
-// console.log('flux-data-extractor.js loaded');
 
 import { DocumentDetailDateFormatter } from './document-detail-date-formatter.js';
+import { getBaseUrl } from './document-detail-url-utils.js';
 
 // Cache for document data to avoid repeated API calls
 let documentDataCache = new Map();
 
 // ===== COMPREHENSIVE DOCUMENT DATA FETCHER =====
 export function getDocumentData(documentId, callback) {
-// console.log('getDocumentData called with documentId:', documentId);
     
     // Check cache first
     if (documentDataCache.has(documentId)) {
-        // console.log('📋 Using cached data for document:', documentId);
         const cachedData = documentDataCache.get(documentId);
         if (callback) callback(cachedData, null);
         return;
@@ -31,47 +29,31 @@ export function getDocumentData(documentId, callback) {
     }
     
     // Build URL for comprehensive document data
-    const pathParts = window.location.pathname.split('/');
-    const publicIndex = pathParts.indexOf('public');
-    let baseUrl;
-    
-    if (publicIndex !== -1) {
-        const baseParts = pathParts.slice(0, publicIndex + 1);
-        baseUrl = window.location.origin + baseParts.join('/');
-    } else {
-        baseUrl = window.location.origin;
-        baseUrl += '/index.php';
-    }
-    
+    const baseUrl = getBaseUrl();
     const url = `${baseUrl}/rule/api/flux/document-data/${documentId}`;
-// console.log('🚀 Fetching comprehensive document data from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-// console.log('📡 Sending request for document data...');
         },
         success: function(response) {
-// console.log('✅ Document data request successful!');
-// console.log('Response:', response);
             
             if (response && typeof response === 'object' && response.success) {
                 // Cache the data
                 documentDataCache.set(documentId, response.data);
-// console.log('💾 Cached document data for:', documentId);
                 
                 callback(response.data, null);
             } else if (response && response.error) {
-                console.error('❌ Server returned error:', response.error);
+                console.error(' Server returned error:', response.error);
                 callback(null, response.error);
             } else {
-                console.error('❌ Unexpected response format');
+                console.error(' Unexpected response format');
                 callback(null, 'Unexpected response format');
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Document data request failed!');
+            console.error(' Document data request failed!');
             console.error('Status:', status, 'Error:', error);
             
             let errorMessage = `AJAX Error: ${status} - ${error}`;
@@ -163,7 +145,6 @@ export function extractDocumentDates(documentData) {
 
 // ===== DOCUMENT HISTORY FETCHER =====
 export function getDocumentHistory(documentId, callback) {
-// console.log('getDocumentHistory called with documentId:', documentId);
     // Validate parameters
     if (!documentId) {
         console.error('getDocumentHistory: documentId is required');
@@ -177,43 +158,28 @@ export function getDocumentHistory(documentId, callback) {
     }
     
     // Build URL for document history
-    const pathParts = window.location.pathname.split('/');
-    const publicIndex = pathParts.indexOf('public');
-    let baseUrl;
-    
-    if (publicIndex !== -1) {
-        const baseParts = pathParts.slice(0, publicIndex + 1);
-        baseUrl = window.location.origin + baseParts.join('/');
-    } else {
-        baseUrl = window.location.origin;
-        baseUrl += '/index.php';
-    }
-    
+    const baseUrl = getBaseUrl();
     const url = `${baseUrl}/rule/api/flux/document-history/${documentId}`;
-// console.log('🚀 Fetching document history from:', url);
     
     $.ajax({
         url: url,
         type: 'GET',
         beforeSend: function(xhr) {
-// console.log('📡 Sending request for document history...');
         },
         success: function(response) {
-// console.log('✅ Document history request successful!
-// console.log('Response:', respons
             
             if (response && typeof response === 'object' && response.success) {
                 callback(response.data, null);
             } else if (response && response.error) {
-                console.error('❌ Server returned error:', response.error);
+                console.error(' Server returned error:', response.error);
                 callback(null, response.error);
             } else {
-                console.error('❌ Unexpected response format');
+                console.error(' Unexpected response format');
                 callback(null, 'Unexpected response format');
             }
         },
         error: function(xhr, status, error) {
-            console.error('❌ Document history request failed!');
+            console.error(' Document history request failed!');
             console.error('Status:', status, 'Error:', error);
             
             let errorMessage = `AJAX Error: ${status} - ${error}`;
