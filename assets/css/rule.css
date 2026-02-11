@@ -616,6 +616,14 @@ opacity: 0%;
     background-color: #0a58ca;
 }
 
+.formula-full .all-link {
+    color: #337ab7;
+}
+
+.formula-full .all-link:hover {
+color: #0a58ca;
+}
+
 #deletion-rule-tr-deletion {
 	border-bottom: none !important;
 	border-bottom-width: 0px !important;
