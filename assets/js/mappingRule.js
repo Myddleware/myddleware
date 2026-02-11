@@ -105,10 +105,13 @@ document.addEventListener('DOMContentLoaded', function () {
             var ruleId = lookupMatch[1];
             var url = path_get_rule_name.replace('__RULE_ID__', ruleId);
             fetch(url)
-                .then(function (response) { return response.text(); })
+                .then(function (response) {
+                    if (!response.ok) throw new Error('Rule not found');
+                    return response.text();
+                })
                 .then(function (ruleName) {
                     var viewUrl = path_rule_view.replace('__RULE_ID__', ruleId);
-                    var link = '<a href="' + viewUrl + '" title="' + ruleId + '">' + ruleName + '</a>';
+                    var link = '<a href="' + viewUrl + '" title="' + ruleId + '" class="help-link all-link">' + ruleName + '</a>';
                     fullSpan.innerHTML = text.replace('"' + ruleId + '"', link);
                 })
                 .catch(function (err) {
