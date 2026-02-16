@@ -225,6 +225,11 @@ public function removeFilter(Request $request): JsonResponse
             $this->sessionService->setFluxFilterSourceId($request->query->get('source_id'));
         }
 
+        // When coming from a rule detail "Display Documents" button, clear localStorage filters
+        if ($request->query->has('from_rule')) {
+            $clearStorageScript = $this->sessionService->getClearStoredFluxFiltersScript();
+        }
+
         // this is the case where the user clicks on a lookup link, we only keep the rule name and the source id
         if ($request->query->has('lookup-field-rule')){
 

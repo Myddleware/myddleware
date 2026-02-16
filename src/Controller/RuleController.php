@@ -621,9 +621,11 @@ class RuleController extends AbstractController
     #[Route('/displayflux/{id}', name: 'regle_displayflux', methods: ['GET'])]
     public function displayFlux(Rule $rule): RedirectResponse
     {
+        // Clear all existing filters before setting the rule name filter
+        $this->sessionService->removeAllFluxFilters();
         $this->sessionService->setFluxFilterWhere(['rule' => $rule->getName()]);
         $this->sessionService->setFluxFilterRuleName($rule->getName());
-        return $this->redirect($this->generateUrl('document_list_page'));
+        return $this->redirect($this->generateUrl('document_list_page', ['from_rule' => 1]));
     }
 
     #[Route('/get-rule-name/{id}', name: 'get_rule_name', methods: ['GET'])]
