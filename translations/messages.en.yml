@@ -163,7 +163,7 @@ create_rule:
             current: "Current filters"
             empty: "No filters have been defined yet."
     step5:
-        back: back to list
+        back: Back to list
         simulation: Simulation
         title: Mapping field    
         formula:

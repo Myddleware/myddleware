@@ -328,12 +328,10 @@ const UI = {
       if (dupSelect && badgesContainer) {
     
           const addBadge = (val, label) => {
-              // Anti-doublon
               if (badgesContainer.querySelector(`[data-field="${CSS.escape(val)}"]`)) return;
 
               const badge = document.createElement('span');
               badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-              // badge.style.cssText = "background-color: #f8f9fa; border: 1px solid #ced4da; margin-right:5px; font-size: 0.9em;";
               badge.dataset.field = val;
               badge.innerHTML = `<span class="mapping-src-badge-label">${label}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
 
@@ -977,66 +975,75 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
     btn.addEventListener('click', () => window.addMappingRow(tbody));
   };
 
- // Ensures a mapping row exists for the chosen duplicate field
-  window.ensureDuplicateMappingRow = function(targetField) {
-      const tbody = UI.get('rule-mapping-body');
-      if (!tbody || !targetField) return;
-      let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
-          const sel = tr.querySelector('.rule-mapping-target');
-          if (!sel) return false; 
-          
-          let currentVal = sel.value;
-          if (sel.selectize) currentVal = sel.selectize.getValue();
-          else if ($(sel)[0] && $(sel)[0].selectize) currentVal = $(sel)[0].selectize.getValue();
+    // Ensures a mapping row exists for the chosen duplicate field
+    window.ensureDuplicateMappingRow = function(targetField) {
+        const tbody = UI.get('rule-mapping-body');
+        if (!tbody || !targetField) return;
 
-          if (currentVal === targetField) return true;
-          if (sel.options && sel.selectedIndex >= 0 && sel.options[sel.selectedIndex].text.trim() === targetField) return true;
-          
-          return false;
-      });
+        const wanted = String(targetField).trim();
 
-      if (!row) {
-          row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
-              const tgtSel = tr.querySelector('.rule-mapping-target');
-              if (!tgtSel) return false; 
-              let val = tgtSel.value;
-              if (tgtSel.selectize) val = tgtSel.selectize.getValue();
-              else if ($(tgtSel)[0] && $(tgtSel)[0].selectize) val = $(tgtSel)[0].selectize.getValue();
+        const getTgtSel = (tr) =>tr.querySelector('.rule-mapping-target') || tr.querySelector('.js-select-search-locked') || tr.querySelector('td select');
 
-              const hasSource = tr.querySelectorAll('.mapping-src-badge').length > 0;
-              return !val && !hasSource;
-          });
-      }
+        const getVal = (sel) => {
+            if (!sel) return '';
+            if (sel.selectize) return (sel.selectize.getValue() || '').trim();
+            if ($(sel)[0] && $(sel)[0].selectize) return ($(sel)[0].selectize.getValue() || '').trim();
+            return (sel.value || '').trim();
+        };
 
-      if (!row) {
-          window.addMappingRow(tbody, targetField, true); 
-          row = tbody.lastElementChild;
-          return; 
-      }
+        const norm = (s) => String(s || '').replace(/\*/g, '').trim();
+        let row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
+            const sel = getTgtSel(tr);
+            if (!sel) return false;
 
-      if (row) {
-          const sel = row.querySelector('.rule-mapping-target');
-          if (!sel) return;
-          const selectize = sel.selectize || ($(sel)[0] ? $(sel)[0].selectize : null);
+            const v = getVal(sel);
+            if (v === wanted) return true;
 
-          if (selectize) {
-              if (selectize.getValue() !== targetField) {
-                  selectize.addOption({value: targetField, text: targetField});
-                  selectize.setValue(targetField);
-              }
-              selectize.lock();
-          } else {
-              sel.value = targetField;
-          }      
-          const delBtn = row.querySelector('button.text-danger');
-          if (delBtn) {
-              delBtn.disabled = true;
-              delBtn.style.opacity = '0.5';
-              delBtn.title = 'Required Field (Duplicate Check)';
-              delBtn.onclick = null; 
-          }
-      }
-  };
+            const opt = (sel.options && sel.selectedIndex >= 0) ? sel.options[sel.selectedIndex] : null;
+            const label = norm(opt ? (opt.textContent || opt.text || '') : '');
+            return label === norm(wanted);
+        });
+
+        if (!row) {
+            row = Array.from(tbody.querySelectorAll('tr')).find(tr => {
+                const sel = getTgtSel(tr);
+                if (!sel) return false;
+
+                const v = getVal(sel);
+                const hasSource = tr.querySelectorAll('.mapping-src-badge').length > 0;
+                return !v && !hasSource;
+            });
+        }
+
+        if (!row) {
+            window.addMappingRow(tbody, wanted, true);
+            row = tbody.lastElementChild;
+            return;
+        }
+
+        const sel = getTgtSel(row);
+        if (!sel) return;
+
+        const selectize = sel.selectize || ($(sel)[0] ? $(sel)[0].selectize : null);
+        if (selectize) {
+            if (selectize.getValue() !== wanted) {
+                selectize.addOption({ value: wanted, text: wanted });
+                selectize.setValue(wanted);
+            }
+            selectize.lock();
+        } else {
+            sel.value = wanted;
+        }
+
+        const delBtn =row.querySelector('.rule-mapping-delete') || row.querySelector('button.text-danger');
+
+        if (delBtn) {
+            delBtn.disabled = true;
+            delBtn.style.opacity = '0.5';
+            delBtn.title = 'Duplicate check field cannot be removed';
+            delBtn.onclick = null;
+        }
+    };
 })();
 
 /* ============================================================
