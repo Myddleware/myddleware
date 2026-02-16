@@ -90,7 +90,7 @@ if (window.location.href.includes('rule/view')) {
 }
 
 // if windows loction includes rule/account
-if (window.location.href.includes('rule/account')) {
+if (window.location.href.includes('/account')) {
     require('./js/account.js')
 }
 

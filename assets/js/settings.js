@@ -28,8 +28,8 @@ class SettingsManager {
     constructor() {
         this.baseUrl = this.getBaseUrl();
         this.apiEndpoints = {
-            getConfig: `${this.baseUrl}/rule/api/account/config`,
-            updateConfig: `${this.baseUrl}/rule/api/account/config/update`,
+            getConfig: `${this.baseUrl}/account/api/account/config`,
+            updateConfig: `${this.baseUrl}/account/api/account/config/update`,
             // getElasticsearch: `${this.baseUrl}/rule/api/settings/elasticsearch`,
             // updateElasticsearch: `${this.baseUrl}/rule/api/settings/elasticsearch/update`
         };

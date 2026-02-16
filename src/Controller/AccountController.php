@@ -52,7 +52,7 @@ use App\Entity\Config;
 
 
 /**
- * @Route("/rule")
+ * @Route("/account")
  */
 class AccountController extends AbstractController
 {
@@ -318,7 +318,7 @@ class AccountController extends AbstractController
     /**
      * Modern JavaScript-based account page
      * 
-     * @Route("/account", name="account_modern")
+     * @Route("/", name="account_modern")
      */
     public function accountModern(): Response
     {
