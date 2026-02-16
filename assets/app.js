@@ -108,7 +108,7 @@ require('./js/crontab.js')
 require('./js/jobscheduler.js')
 }
 
-if (window.location.href.includes('rule/managementsmtp')) {
+if (window.location.href.includes('managementsmtp')) {
     require('./js/smtp.js')
 }
 
