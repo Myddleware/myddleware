@@ -473,3 +473,12 @@ label[for^="connector_connectorParams_"][for$="_value"] {
 .flex-center-rule-name {
 	margin-left: 4rem;
 }
+
+
+.formula-full .all-link {
+    color: #337ab7;
+}
+
+.formula-full .all-link:hover {
+color: #0a58ca;
+}
