@@ -141,7 +141,7 @@ if (window.location.href.includes('rule/flux')) {
     require('./js/lookup-filter.js')
 }
 
-if (window.location.href.includes('rule/user_manager')) {
+if (window.location.href.includes('user_manager')) {
     require('./js/user-manager.js')
 }
 if (window.location.href.includes('flux/modern')) {

@@ -51,9 +51,7 @@ use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Config;
 
 
-/**
- * @Route("/account")
- */
+#[Route('/account')]
 class AccountController extends AbstractController
 {
     /**
@@ -130,9 +128,7 @@ class AccountController extends AbstractController
         $this->validator = $validator;
     }
 
-    /**
-     * @Route("/account/locale/{locale}", name="account_locale", options={"expose"=true})
-     */
+    #[Route('/locale/{locale}', name: 'account_locale', options: ['expose' => true])]
     public function changeLocale(string $locale, Request $request): RedirectResponse
     {
         $request->getSession()->set('_locale', $locale);
@@ -140,11 +136,7 @@ class AccountController extends AbstractController
         return $this->redirect($request->headers->get('referer'));
     }
 
-    /**
-     * @return RedirectResponse|Response|null
-     *
-     * @Route("/account/old", name="my_account_old")
-     */
+    #[Route('/old', name: 'my_account_old')]
     public function account(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
         $user = $this->getUser();
@@ -208,11 +200,7 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * @return RedirectResponse|Response|null
-     *
-     * @Route("/account/reset-password", name="my_account_reset_password")
-     */
+    #[Route('/reset-password', name: 'my_account_reset_password')]
     public function resetPasswordAction(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
         $em = $this->entityManager;
@@ -246,9 +234,7 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/download", name="download_log")
-     **/
+    #[Route('/download', name: 'download_log')]
     public function downloadFileAction()
     {
         if ($this->env === "dev") {
@@ -276,9 +262,7 @@ class AccountController extends AbstractController
         return $response;
     }
 
-    /**
-     * @Route("/emptylog", name="empty_log")
-     **/
+    #[Route('/emptylog', name: 'empty_log')]
     public function emptyLogAction(Request $request): Response
     {
         if ($this->env === "dev") {
@@ -315,19 +299,13 @@ class AccountController extends AbstractController
         return $this->redirect($request->headers->get('referer'));
     }
 
-    /**
-     * Modern JavaScript-based account page
-     * 
-     * @Route("/", name="account_modern")
-     */
+    #[Route('/', name: 'account_modern')]
     public function accountModern(): Response
     {
         return $this->render('Account/account-js.html.twig');
     }
 
-    /**
-     * @Route("/api/account/info", name="api_account_info", methods={"GET"})
-     */
+    #[Route('/api/account/info', name: 'api_account_info', methods: ['GET'])]
     public function getAccountInfo(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -446,9 +424,7 @@ class AccountController extends AbstractController
         ]);
     }
 
-    /**
-     * @Route("/api/account/profile/update", name="api_account_profile_update", methods={"POST"})
-     */
+    #[Route('/api/account/profile/update', name: 'api_account_profile_update', methods: ['POST'])]
     public function updateProfile(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -524,9 +500,7 @@ class AccountController extends AbstractController
         return new JsonResponse(['success' => true, 'message' => 'Profile updated successfully']);
     }
 
-    /**
-     * @Route("/api/account/password/update", name="api_account_password_update", methods={"POST"})
-     */
+    #[Route('/api/account/password/update', name: 'api_account_password_update', methods: ['POST'])]
     public function updatePassword(Request $request, UserPasswordHasherInterface $hasher): JsonResponse
     {
         $user = $this->getUser();
@@ -566,9 +540,7 @@ class AccountController extends AbstractController
 
     // get config from the table config
 
-    /**
-     * @Route("/api/account/config", name="api_account_config", methods={"GET"})
-     */
+    #[Route('/api/account/config', name: 'api_account_config', methods: ['GET'])]
     public function getConfig(Request $request): JsonResponse
     {
         // get the pager from the config repository
@@ -580,9 +552,7 @@ class AccountController extends AbstractController
         return new JsonResponse(['success' => true, 'config' => $config]);
     }
 
-    /**
-     * @Route("/api/account/twofactor/update", name="api_account_twofactor_update", methods={"POST"})
-     */
+    #[Route('/api/account/twofactor/update', name: 'api_account_twofactor_update', methods: ['POST'])]
     public function updateTwoFactor(Request $request): JsonResponse
     {
         $user = $this->getUser();
@@ -639,9 +609,7 @@ class AccountController extends AbstractController
         return new JsonResponse(['success' => true, 'message' => 'Two-factor authentication settings updated successfully']);
     }
 
-    /**
-     * @Route("/api/account/locale", name="api_account_locale", methods={"POST"})
-     */
+    #[Route('/api/account/locale', name: 'api_account_locale', methods: ['POST'])]
     public function apiChangeLocale(Request $request): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
@@ -689,9 +657,7 @@ class AccountController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/api/account/logs/download", name="api_account_logs_download", methods={"GET"})
-     */
+    #[Route('/api/account/logs/download', name: 'api_account_logs_download', methods: ['GET'])]
     public function apiDownloadLog(): Response
     {
         if ($this->env === "dev") {
@@ -719,9 +685,7 @@ class AccountController extends AbstractController
         return $response;
     }
 
-    /**
-     * @Route("/api/account/logs/empty", name="api_account_logs_empty", methods={"POST"})
-     */
+    #[Route('/api/account/logs/empty', name: 'api_account_logs_empty', methods: ['POST'])]
     public function apiEmptyLog(): JsonResponse
     {
         // Check user permissions
@@ -766,9 +730,7 @@ class AccountController extends AbstractController
         return new JsonResponse(['error' => 'Failed to empty log file'], 500);
     }
 
-    /**
-     * @Route("/api/account/config/update", name="api_account_config_update", methods={"POST"})
-     */
+    #[Route('/api/account/config/update', name: 'api_account_config_update', methods: ['POST'])]
     public function updateConfig(Request $request): JsonResponse
     {
         $user = $this->getUser();
