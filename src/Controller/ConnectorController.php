@@ -53,9 +53,7 @@ use Symfony\Component\Yaml\Yaml;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Illuminate\Encryption\Encrypter;
 
-/**
- * @Route("/rule")
- */
+#[Route('/rule')]
 class ConnectorController extends AbstractController
 {
     protected $params;
@@ -89,9 +87,8 @@ class ConnectorController extends AbstractController
 
     /**
      * CALLBACK POUR LES APIS.
-     *
-     * @Route("/connector/callback/", name="connector_callback", options={"expose"=true})
      */
+    #[Route('/connector/callback/', name: 'connector_callback', options: ['expose' => true])]
     public function callBack()
     {
         try {
@@ -217,9 +214,8 @@ class ConnectorController extends AbstractController
 
     /**
      * Contrôle si le fichier upload est valide puis le déplace.
-     *
-     * @Route("/connector/upload/{solution}", name="upload", options={"expose"=true})
      */
+    #[Route('/connector/upload/{solution}', name: 'upload', options: ['expose' => true])]
     public function upload($solution): Response
     {
         if (isset($solution)) {
@@ -308,9 +304,8 @@ class ConnectorController extends AbstractController
 
     /**
      * CREATION D UN CONNECTEUR LISTE.
-     *
-     * @Route("/connector/create", name="regle_connector_create")
      */
+    #[Route('/connector/create', name: 'regle_connector_create')]
     public function create(): Response
     {
         $solutions = $this->entityManager->getRepository(Solution::class)->solutionActive();
@@ -348,11 +343,9 @@ class ConnectorController extends AbstractController
      * CREATION D'UN CONNECTEUR.
      *
      * @return RedirectResponse|Response
-     *
-     * @Route("/connector/insert", name="regle_connector_insert")
-     *
      * @throws Exception
      */
+    #[Route('/connector/insert', name: 'regle_connector_insert')]
     public function connectorInsert(Request $request)
     {
         $type = '';
@@ -458,10 +451,9 @@ class ConnectorController extends AbstractController
 
     /**
      * LISTE DES CONNECTEURS.
-     *
-     * @Route("/connector/list", name="regle_connector_list", defaults={"page"=1})
-     * @Route("/connector/list/page-{page}", name="regle_connector_page", requirements={"page"="\d+"})
      */
+    #[Route('/connector/list', name: 'regle_connector_list', defaults: ['page' => 1])]
+    #[Route('/connector/list/page-{page}', name: 'regle_connector_page', requirements: ['page' => '\d+'])]
     public function connectorList($page = 1): Response
     {
         try {
@@ -500,10 +492,9 @@ class ConnectorController extends AbstractController
 
     /**
      * SUPPRESSION DU CONNECTEUR.
-     *
-     * @Route("/connector/delete/{id}", name="connector_delete", methods={"DELETE","POST"})
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[Route('/connector/delete/{id}', name: 'connector_delete', methods: ['DELETE', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function connectorDelete(Request $request, $id): RedirectResponse
     {
         $session = $request->getSession();
@@ -562,13 +553,11 @@ class ConnectorController extends AbstractController
 
     /**
      * FICHE D'UN CONNECTEUR.
-     *
-     * @Route("/connector/view/{id}", name="connector_open")
-     *
      * @throws Exception
      * @throws NonUniqueResultException
      * @throws NonUniqueResultException
      */
+    #[Route('/connector/view/{id}', name: 'connector_open')]
     public function connectorOpen(Request $request, $id)
     {
         // Load connector with proper permissions check
@@ -677,10 +666,9 @@ class ConnectorController extends AbstractController
     /**
      * Get connector data from database as JSON.
      * Used to populate form fields from database values.
-     *
-     * @Route("/api/connector/get-data/{id}", name="connector_get_data", methods={"POST"})
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[Route('/api/connector/get-data/{id}', name: 'connector_get_data', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function getConnectorData($id): Response
     {
         try {
@@ -776,9 +764,7 @@ class ConnectorController extends AbstractController
         return false;
     }
 
-    /**
-     * @Route("/connector/{id}/detail", name="connector_detail")
-     */
+    #[Route('/connector/{id}/detail', name: 'connector_detail')]
     public function detailAction(int $id)
     {
         $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];

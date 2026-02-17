@@ -44,9 +44,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
-/**
- * @Route("/rule")
- */
+#[Route('/task')]
 class TaskController extends AbstractController
 {
     protected $params;
@@ -81,10 +79,8 @@ class TaskController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/task/list", name="task_list", defaults={"page"=1})
-     * @Route("/task/list/page-{page}", name="task_list_page", requirements={"page"="\d+"})
-     */
+    #[Route('/list', name: 'task_list', defaults: ['page' => 1])]
+    #[Route('/list/page-{page}', name: 'task_list_page', requirements: ['page' => '\d+'])]
     public function tasksList($page): Response
     {
         // Get the search limit from requesting the database for config 'search_limit'
@@ -116,10 +112,8 @@ class TaskController extends AbstractController
         );
     }
 
-    /**
-     * @Route("/task/view/{id}/log", name="task_view", defaults={"page"=1})
-     * @Route("/task/view/{id}/log/page-{page}", name="task_view_page", requirements={"page"="\d+"})
-     */
+    #[Route('/view/{id}/log', name: 'task_view', defaults: ['page' => 1])]
+    #[Route('/view/{id}/log/page-{page}', name: 'task_view_page', requirements: ['page' => '\d+'])]
     public function viewTask(Job $task, $page)
     {
         try {
@@ -153,9 +147,7 @@ class TaskController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/task/stop/{id}", name="task_stop")
-     */
+    #[Route('/stop/{id}', name: 'task_stop')]
     public function stopTask(Job $taskStop): RedirectResponse
     {
         try {
@@ -197,10 +189,7 @@ class TaskController extends AbstractController
         }
     }
 
-
-    /**
-     * @Route("/task/stopall", name="task_stopall")
-     */
+    #[Route('/stopall', name: 'task_stopall')]
     public function stopAllTask(): RedirectResponse
     {   
         // Find all the tasks that are started

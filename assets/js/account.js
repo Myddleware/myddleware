@@ -61,15 +61,15 @@ class AccountManager {
     
     // API endpoints with dynamic base URL
     this.apiEndpoints = {
-      getUserInfo: `${this.baseUrl}/rule/api/account/info`,
-      updateProfile: `${this.baseUrl}/rule/api/account/profile/update`,
-      updatePassword: `${this.baseUrl}/rule/api/account/password/update`,
-      updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
-      changeLocale: `${this.baseUrl}/rule/api/account/locale`,
-      downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
-      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`,
-      getConfig: `${this.baseUrl}/rule/api/account/config`,
-      updateConfig: `${this.baseUrl}/rule/api/account/config/update`
+      getUserInfo: `${this.baseUrl}/account/api/account/info`,
+      updateProfile: `${this.baseUrl}/account/api/account/profile/update`,
+      updatePassword: `${this.baseUrl}/account/api/account/password/update`,
+      updateTwoFactor: `${this.baseUrl}/account/api/account/twofactor/update`,
+      changeLocale: `${this.baseUrl}/account/api/account/locale`,
+      downloadLogs: `${this.baseUrl}/account/api/account/logs/download`,
+      emptyLogs: `${this.baseUrl}/account/api/account/logs/empty`,
+      getConfig: `${this.baseUrl}/account/api/account/config`,
+      updateConfig: `${this.baseUrl}/account/api/account/config/update`
     };
     
     // Log all endpoints for debugging

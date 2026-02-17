@@ -144,7 +144,7 @@ class NotificationManager
                 '%min%' => $this->configParams['alert_time_limit'],
                 '%begin%' => $job->getBegin()->format('Y-m-d H:i:s'),
                 '%id%' => $job->getId(),
-                '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$job->getId().'/log' : ''),
+                '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'task/view/'.$job->getId().'/log' : ''),
             ]);
 
             return $this->send($textMail, $this->translator->trans('email_alert.subject'));
@@ -164,7 +164,7 @@ class NotificationManager
             '%rule_id%' => $JobSettings['rule_id'],
             '%job_id%' => $JobSettings['job_id'],
             '%reference_date%' => $JobSettings['reference_date'],
-            '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$JobSettings['job_id'].'/log' : ''),
+            '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'task/view/'.$JobSettings['job_id'].'/log' : ''),
         ]);
 
         return $this->send($textMail, $this->translator->trans('email_alert_same_doc_reference.subject'));

@@ -22,9 +22,7 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
-/**
- * @Route("/rule")
- */
+#[Route('/managementsmtp')]
 class ManagementSMTPController extends AbstractController
 {
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
@@ -53,9 +51,7 @@ class ManagementSMTPController extends AbstractController
     // Adds the authorized form fields to the page but not the sensitive content, ie password and api key.
     // If none of them are present then the default form is loaded.
 
-    /**
-     * @Route("/managementsmtp", name="management_smtp_index")
-     */
+    #[Route('/', name: 'management_smtp_index')]
     public function index(): Response
     {
         // Redirect to the new centralized settings page with SMTP tab active
@@ -145,10 +141,7 @@ class ManagementSMTPController extends AbstractController
 
     // Function that creates a configuration for the smtp system. Creates a form and test the mail configuration.
     // Is called if you click on the Save SMTP config button OR the Send test mail button.
-
-    /**
-     * @Route("/managementsmtp/readConfig", name="management_smtp_create")
-     */
+    #[Route('/readConfig', name: 'management_smtp_create')]
     public function createConfig(Request $request)
     {
         try {
