@@ -526,7 +526,7 @@ export class DocumentDetailDataSections {
 
             let jobLink = this.sanitizeString(jobName);
             if (jobId) {
-                const jobUrl = `${baseUrl}/rule/task/view/${jobId}/log`;
+                const jobUrl = `${baseUrl}/task/view/${jobId}/log`;
                 jobLink = `<a href="${jobUrl}" class="job-link single-line-detected">${this.sanitizeString(jobName)}</a>`;
             } else {
             }
@@ -651,7 +651,7 @@ export class DocumentDetailDataSections {
             let jobLink = job;
             if (job && job !== '' && job.trim() !== '') {
                 const baseUrl = getBaseUrl();
-                const jobUrl = `${baseUrl}/rule/task/view/${job}/log`;
+                const jobUrl = `${baseUrl}/task/view/${job}/log`;
                 jobLink = `<a href="${jobUrl}" class="log-job" style="color: #0F66A9; text-decoration: none;">${job}</a>`;
             }
 
@@ -1240,7 +1240,7 @@ export class DocumentDetailDataSections {
         `;
 
         if (taskId) {
-            const taskUrl = `${baseUrl}/rule/task/view/${taskId}/log`;
+            const taskUrl = `${baseUrl}/task/view/${taskId}/log`;
             messageContent.innerHTML = `
                 You just launched a new task. You can see the details by clicking on
                 <a href="${taskUrl}" style="color: #0c5460; text-decoration: underline; font-weight: bold;">this link</a>.
@@ -1249,7 +1249,7 @@ export class DocumentDetailDataSections {
         } else {
             messageContent.innerHTML = `
                 Mass cancel action initiated for ${documentCount} document${documentCount > 1 ? 's' : ''}.
-                Check the <a href="${baseUrl}/rule/task" style="color: #0c5460; text-decoration: underline; font-weight: bold;">task list</a> for progress.
+                Check the <a href="${baseUrl}/task" style="color: #0c5460; text-decoration: underline; font-weight: bold;">task list</a> for progress.
             `;
         }
 
