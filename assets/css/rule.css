@@ -1394,13 +1394,6 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	background-color: #05bfe6 !important;
 	color: #ffffff !important;
 }
-.selectize-control.form-select {
-    border: none !important;
-    padding: 0 !important;
-    background-image: none !important;
-    height: auto !important;
-}
-
 html body .selectize-control .selectize-input {
     min-height: 48px !important;
     padding: 0.375rem 2.25rem 0.375rem 0.75rem !important;
