@@ -1,0 +1,85 @@
+{% if pager.haveToPaginate %}
+    {% set route = route ?? app.request.attributes.get('_route') %}
+    {% set finalParams = app.request.query.all|merge(queryParams|default({})) %}
+    {% set currentPage = pager.currentPage %}
+    {% set totalPages = pager.nbPages %}
+    {% set proximity = 2 %}
+    {% set is_ajax = ajax|default(false) %}
+    {% set url_model = path(route, finalParams|merge({page: 999999})) %}
+
+    <div class="pagination-container my-4">
+        <div class="d-flex justify-content-center mb-3">
+            <nav aria-label="Page navigation">
+                <ul class="pagination mdw-pagination">
+                    {% if pager.hasPreviousPage %}
+                        <li class="page-item"><a class="page-link" href="{{ path(route, finalParams|merge({page: 1})) }}">&laquo;</a></li>
+                        <li class="page-item"><a class="page-link" href="{{ path(route, finalParams|merge({page: pager.previousPage})) }}">&lsaquo;</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">&laquo;</span></li>
+                        <li class="page-item disabled"><span class="page-link">&lsaquo;</span></li>
+                    {% endif %}
+                    
+                    <li class="page-item {{ currentPage == 1 ? 'active' : '' }}">
+                        <a class="page-link" href="{{ path(route, finalParams|merge({page: 1})) }}">1</a>
+                    </li>
+                    
+                    {% if currentPage > (proximity + 2) %}
+                        <li class="page-item disabled"><span class="page-link dots">...</span></li>
+                    {% endif %}
+                    
+                    {% if totalPages > 2 %}
+                        {% for i in 2..(totalPages - 1) %}
+                            {% if i >= (currentPage - proximity) and i <= (currentPage + proximity) %}
+                                <li class="page-item {{ currentPage == i ? 'active' : '' }}">
+                                    <a class="page-link" href="{{ path(route, finalParams|merge({page: i})) }}">{{ i }}</a>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                    
+                    {% if currentPage < (totalPages - proximity - 1) %}
+                        <li class="page-item disabled"><span class="page-link dots">...</span></li>
+                    {% endif %}
+                    
+                    {% if totalPages > 1 %}
+                        <li class="page-item {{ currentPage == totalPages ? 'active' : '' }}">
+                            <a class="page-link" href="{{ path(route, finalParams|merge({page: totalPages})) }}">{{ totalPages }}</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% if pager.hasNextPage %}
+                        <li class="page-item"><a class="page-link" href="{{ path(route, finalParams|merge({page: pager.nextPage})) }}">&rsaquo;</a></li>
+                        <li class="page-item"><a class="page-link" href="{{ path(route, finalParams|merge({page: totalPages})) }}">&raquo;</a></li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">&rsaquo;</span></li>
+                        <li class="page-item disabled"><span class="page-link">&raquo;</span></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+
+        <div class="d-flex justify-content-center">
+            <form class="d-flex align-items-center gap-2" method="GET" action="#" onsubmit="return handlePaginationGo(event, this)" data-ajax="{{ is_ajax ? 'true' : 'false' }}" data-url="{{ url_model }}">
+                <label class="form-label mb-0 fw-bold">Go to:</label>
+                <input type="number" name="page" class="form-control form-control-sm text-center" style="width: 60px;" min="1" max="{{ totalPages }}" value="{{ currentPage }}">
+                <button id="pagination-go" type="submit" class="btn btn-sm btn-outline-primary rounded-pill">Go</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function handlePaginationGo(e, form) {
+            if (form.dataset.ajax === 'true') {
+                return true; 
+            }
+            e.preventDefault();
+            
+            var pageValue = form.querySelector('input[name="page"]').value;
+            var urlModel = form.dataset.url;
+            var finalUrl = urlModel.replace('999999', pageValue);
+            
+            window.location.href = finalUrl;
+            return false;
+        }
+    </script>
+{% endif %}

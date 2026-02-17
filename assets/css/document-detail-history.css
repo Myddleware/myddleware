@@ -553,11 +553,14 @@
     border-radius:8px;
     line-height:1;
     cursor:pointer;
+    border-color: #fff !important;
 }
 .pagination-btn.active {
-    background:#198BCA;
-    color:#fff;
-    border-color:#198BCA;
+    border-radius: 50% !important;
+    background-color: #03c4eb !important;
+    border-color: #03c4eb !important;
+    color: #fff !important;
+    padding: 0.7rem 0.9rem 0.7rem 0.9rem !important
 }
 .pagination-ellipsis {
     padding:0 6px;

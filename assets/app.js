@@ -4,6 +4,7 @@ require('./app.scss');
 let $ = require('jquery');// create global $ and jQuery variables
 global.$ = global.jQuery = $;
 
+require('selectize');
 // Import FOSJs routing
 const routes = require('../public/js/fos_js_routes.json');
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
@@ -26,12 +27,20 @@ require('./js/lib/jquery_myddleware/function.js')
 
 require('./js/lib/d3.v2.js')
 require('./js/jcarousel.ajax.js')
-require('./js/animation.js')
 require('./js/task.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/rule-group.js')
 require('./js/notifications.js')
+
+const path = window.location.pathname;
+const isEditRule = /\/rule\/[a-zA-Z0-9]{13}\/edit/.test(path);
+const isCreateRule = /\/rule\/[a-zA-Z0-9]{13}\/create/.test(path);
+
+
+if (isEditRule || isCreateRule) {
+    require('./js/rule-create.js');
+}
 
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
 require('./js/mappingRule.js')
@@ -44,6 +53,10 @@ require('./js/historique.js')
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
+}
+
+if (window.location.href.includes('rule/')) {
+    require('./js/rule-create.js')
 }
 
 if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {

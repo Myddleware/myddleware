@@ -1,5 +1,30 @@
 $(function () {
 
+  function getFieldValue(selector) {
+  const el = $(selector)[0];
+  if (el && el.selectize) return el.selectize.getValue();
+  return $(selector).val();
+}
+
+function setFieldValue(selector, value) {
+  const el = $(selector)[0];
+  if (el && el.selectize) {
+    el.selectize.setValue(value, true);
+    return;
+  }
+  $(selector).val(value);
+}
+
+function clearFieldValue(selector) {
+  const el = $(selector)[0];
+  if (el && el.selectize) {
+    el.selectize.clear(true);
+    return;
+  }
+  $(selector).val("");
+}
+
+
   // if, on page load, the sort_field and sort_order are set in localStorage, set the form values to those values
   if (
     localStorage.getItem("sort_field") !== null &&
@@ -83,7 +108,7 @@ $(function () {
 
   function showFilter(filter) {
     if (filter && filter.selector) {
-      var filterValue = $(filter.selector).val();
+      var filterValue = getFieldValue(filter.selector);
       if (
         filterValue !== undefined &&
         filterValue !== null &&
@@ -97,19 +122,9 @@ $(function () {
 
   // Function to hide a filter and clear its value
   function hideFilter(filter) {
-    var lastClass = filter.selector.split("_").pop();
-    $(
-      "#combined_filter_document_" +
-        lastClass +
-        ", #combined_filter_rule_" +
-        lastClass +
-        ", #combined_filter_sourceContent_" +
-        lastClass +
-        ", #combined_filter_message_" +
-        lastClass
-    ).val("");
-    $("#" + filter.name).attr("hidden", true);
-  }
+  clearFieldValue(filter.selector);
+  $("#" + filter.name).attr("hidden", true);
+}
 
   // Show all filters that have a value initially
   filters.forEach(function (filter) {
@@ -131,6 +146,7 @@ $(function () {
 
   // Show a filter when the corresponding option is selected
   $("#item_filter_filter").on("change", function () {
+    var $select = $(this);
     var selectedValue = $(this).val();
     $("#" + selectedValue).removeAttr("hidden");
     if (
@@ -154,6 +170,7 @@ $(function () {
       }
     }
     rearrangeFilters();
+    $select[0].selectize.clear(true); 
   });
 
   // Save filters to localStorage
@@ -161,7 +178,7 @@ $(function () {
     var storedFilters = {};
     filters.forEach(function (filter) {
       storedFilters[filter.name] = {
-        value: $(filter.selector).val(),
+        value: getFieldValue(filter.selector),
         hidden: $("#" + filter.name).attr("hidden") === "hidden",
         reverse: $('[name="' + filter.name + '"][type="checkbox"]').prop(
           "checked"
@@ -179,7 +196,7 @@ $(function () {
     if (storedFilters) {
       filters.forEach(function (filter) {
         if (storedFilters[filter.name]) {
-          $(filter.selector).val(storedFilters[filter.name].value);
+          setFieldValue(filter.selector, storedFilters[filter.name].value);
           if (storedFilters[filter.name].hidden) {
             hideFilter(filter);
           } else {
@@ -232,9 +249,11 @@ $(function () {
     filters.forEach(function (filter) {
       if (filter.name === lastClass) {
         hideFilter(filter);
-        localStorage.clear();
+        localStorage.removeItem("storedFilters");
       }
     });
+    // Reset dropdown to default so the same filter can be re-selected
+    $("#item_filter_filter").val($("#item_filter_filter option:first").val());
     rearrangeFilters();
   });
 });
@@ -247,11 +266,6 @@ function rearrangeFilters() {
 }
 
 $(document).ready(function() {
-  $('#globalStatus select').select2({
-      placeholder: "Select Global Status",
-      allowClear: true,
-      width: 'resolve' 
-  });
 
     let pop=null; 
     const close=()=>{ if(pop){ pop.remove(); pop=null; } };

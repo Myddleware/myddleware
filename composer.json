@@ -117,7 +117,8 @@
         "allow-plugins": {
       "composer/package-versions-deprecated": true,
       "symfony/flex": true,
-      "phpstan/extension-installer": true
+      "phpstan/extension-installer": true,
+      "php-http/discovery": true
     },
         "preferred-install": {
           "*": "dist"

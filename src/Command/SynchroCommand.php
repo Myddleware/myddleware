@@ -58,8 +58,6 @@ class SynchroCommand extends Command
         'Filter_OK' 		=> 40,
         'Predecessor_KO' 	=> 50,
         'Predecessor_OK' 	=> 60,
-        'Relate_KO' 		=> 70,
-        'Relate_OK' 		=> 80,
         'Error_transformed' => 90,
         'Transformed' 		=> 100,
         'Not_found' 		=> 110,
@@ -188,11 +186,6 @@ class SynchroCommand extends Command
 										// Permet de valider qu'aucun document précédent pour la même règle et le même id n'est pas bloqué
 										if ($fromStatusLevel <= 50) {
 											$this->jobManager->checkPredecessorDocuments();
-										}
-										
-										// Permet de valider qu'au moins un document parent(relation père) est existant
-										if ($fromStatusLevel <= 70) {
-											$this->jobManager->checkParentDocuments();
 										}
 										
 										// Permet de transformer les docuement avant d'être envoyés à la cible

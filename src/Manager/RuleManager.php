@@ -805,72 +805,6 @@ class RuleManager
         return $response;
     }
 
-    /**
-     * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
-     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
-     *
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function checkParentDocuments($documents = null): array
-    {
-        // include_once 'document.php';
-        // Permet de charger dans la classe toutes les relations de la règle
-        $response = [];
-
-        // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
-        if (empty($documents)) {
-            $documents = $this->selectDocuments('Predecessor_OK');
-        } else {
-			// Lock the documents in input parameter
-			foreach ($documents as $document) {
-				$this->setDocumentLock($document['id'], true);
-			}
-		}
-        if (!empty($documents)) {
-            $param['jobId'] = $this->jobId;
-            $param['ruleRelationships'] = $this->ruleRelationships;
-			$param['ruleWorkflows'] = $this->ruleWorkflows;
-            // Set all config parameters
-            $this->setConfigParam();
-            // If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-            if (!empty($this->configParams['migration_mode'])) {
-                if (!empty($this->ruleRelationships)) {
-                    // Get all documents of every rules linked
-                    foreach ($this->ruleRelationships as $ruleRelationship) {
-                        // Get documents only if we don't have them yet (we could have several relationship to the same rule)
-                        if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
-                            $param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'], true, true);
-                        }
-                    }
-                }
-            }
-            try {
-				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually. No document generated. ');
-				}
-                // Pour tous les docuements sélectionnés on vérifie les parents
-                foreach ($documents as $document) {
-                    $param['id_doc_myddleware'] = $document['id'];
-                    $param['jobId'] = $this->jobId;
-                    $param['api'] = $this->api;
-                    $param['ruleRelationships'] = $this->ruleRelationships;
-					$param['ruleWorkflows'] = $this->ruleWorkflows;
-                    // Set the param values and clear all document attributes
-                    if($this->documentManager->setParam($param, true)) {
-                        // Check the document is in the right status
-						if (in_array($this->documentManager->getStatus(), array('Predecessor_OK', 'Relate_KO'))) {
-						    $response[$document['id']] = $this->documentManager->checkParentDocument();
-                        }
-					}
-                }
-            } catch (\Exception $e) {
-                $this->logger->error('Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-                $readSource['error'] = 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            }
-        }
-
-        return $response;
-    }
 
     /**
      * Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
@@ -884,7 +818,7 @@ class RuleManager
         $response = [];
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
-            $documents = $this->selectDocuments('Relate_OK');
+            $documents = $this->selectDocuments('Predecessor_OK');
         } else {
 			// Lock the documents in input parameter
 			foreach ($documents as $document) {
@@ -923,7 +857,7 @@ class RuleManager
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if (in_array($this->documentManager->getStatus(), array('Relate_OK', 'Error_transformed'))) {
+                        if (in_array($this->documentManager->getStatus(), array('Predecessor_OK', 'Error_transformed'))) {
 						    $response[$document['id']] = $this->documentManager->transformDocument();
                         }
                     }
@@ -1190,7 +1124,7 @@ class RuleManager
                             'name' => 'bidirectional',
                             'required' => false,
                             'type' => 'option',
-                            'label' => 'create_rule.step3.params.sync',
+                            'label' => 'Bidirectional synchronization',
                             'option' => $option,
                         ],
                     ];
@@ -1497,17 +1431,7 @@ class RuleManager
 				// Update status if an action has been executed
 				$status = $this->documentManager->getStatus();
 			}
-			if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-				$response = $this->checkParentDocuments([['id' => $id_document]]);
-				if (true === $response[$id_document]) {
-					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
-				} else {
-					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
-				}
-				// Update status if an action has been executed
-				$status = $this->documentManager->getStatus();
-			}
-			if (in_array($status, ['Relate_OK', 'Error_transformed'])) {
+			if (in_array($status, ['Predecessor_OK', 'Error_transformed'])) {
 				$response = $this->transformDocuments([['id' => $id_document]]);
 				if (true === $response[$id_document]) {
 					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';

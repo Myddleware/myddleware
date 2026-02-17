@@ -92,17 +92,17 @@ class Workflow
 	/**
      * @ORM\Column(name="active", type="boolean", options={"default":1})
      */
-    private int $active;
-	
+    private bool $active;
+
     /**
      * @ORM\Column(name="`order`", type="integer", length=3, nullable=false, options={"default": 1})
      */
     private int $order;
-	
+
 	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private int $deleted;
+    private bool $deleted;
 	
 /**
  * @var Collection|WorkflowAction[]
@@ -124,8 +124,8 @@ private $workflowActions;
         $this->workflowLogs = new ArrayCollection();
         $this->dateCreated = new \DateTime();
         $this->dateModified = new \DateTime();
-        $this->active = 1;
-        $this->deleted = 0;
+        $this->active = true;
+        $this->deleted = false;
         $this->order = 1;
     }
 	
@@ -247,18 +247,18 @@ private $workflowActions;
         return $this;
     }
 
-    public function getDeleted(): int
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
-	
+
 	public function setActive($active): self
     {
         $this->active = $active;
         return $this;
     }
 
-    public function getActive(): int
+    public function getActive(): bool
     {
         return $this->active;
     }

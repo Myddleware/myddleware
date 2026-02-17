@@ -171,7 +171,7 @@ class Rule
     private $documents;
 
     /**
-     * @ORM\ManyToOne(targetEntity="RuleGroup")
+     * @ORM\ManyToOne(targetEntity="RuleGroup", inversedBy="rules")
      * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=true)
      */
     private ?RuleGroup $group = null;
