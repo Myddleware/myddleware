@@ -960,7 +960,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
     tdDel.appendChild(delBtn);
 
     // Ajout au DOM
-    tr.append(tdSrc, tdTgt, tdAct, tdDel);
+    tr.append(tdTgt, tdSrc, tdAct, tdDel);
     tbody.appendChild(tr);
     const $tgtSelectize = $(tgtSel).selectize({
         sortField: 'text',
