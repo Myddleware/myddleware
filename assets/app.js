@@ -90,7 +90,7 @@ if (window.location.href.includes('rule/view')) {
 }
 
 // if windows loction includes rule/account
-if (window.location.href.includes('rule/account')) {
+if (window.location.href.includes('/account')) {
     require('./js/account.js')
 }
 
@@ -108,7 +108,7 @@ require('./js/crontab.js')
 require('./js/jobscheduler.js')
 }
 
-if (window.location.href.includes('rule/managementsmtp')) {
+if (window.location.href.includes('managementsmtp')) {
     require('./js/smtp.js')
 }
 
@@ -141,7 +141,7 @@ if (window.location.href.includes('rule/flux')) {
     require('./js/lookup-filter.js')
 }
 
-if (window.location.href.includes('rule/user_manager')) {
+if (window.location.href.includes('user_manager')) {
     require('./js/user-manager.js')
 }
 if (window.location.href.includes('flux/modern')) {

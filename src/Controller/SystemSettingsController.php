@@ -16,9 +16,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
-/**
- * @Route("/rule")
- */
+#[Route('/settings')]
 class SystemSettingsController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -35,9 +33,7 @@ class SystemSettingsController extends AbstractController
         $this->logger = $logger;
     }
 
-    /**
-     * @Route("/settings", name="settings_index")
-     */
+    #[Route('/', name: 'settings_index')]
     public function index(Request $request): Response
     {
         // Create SMTP form for display

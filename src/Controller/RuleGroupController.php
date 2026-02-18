@@ -61,9 +61,7 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 
-/**
- * @Route("/rulegroup")
- */
+#[Route('/rulegroup')]
 class RuleGroupController extends AbstractController
 {
     private EntityManagerInterface $entityManager;
@@ -154,10 +152,8 @@ class RuleGroupController extends AbstractController
 
 
     // public function to delet the rulegroup by id (set deleted to 1)
-    /**
-     * @Route("/delete/{id}", name="rulegroup_delete", methods={"POST", "DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/delete/{id}', name: 'rulegroup_delete', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function RulegroupDeleteAction(string $id, Request $request, TranslatorInterface $translator)
     {
         try {
@@ -187,9 +183,7 @@ class RuleGroupController extends AbstractController
     }
 
     // public function to create a new rulegroup
-    /**
-     * @Route("/new", name="rulegroup_create")
-     */
+    #[Route('/new', name: 'rulegroup_create')]
     public function RulegroupCreateAction(Request $request, TranslatorInterface $translator)
     {
         try {
@@ -233,10 +227,8 @@ class RuleGroupController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/show/{id}", name="rulegroup_show", defaults={"page"=1})
-     * @Route("/show/{id}/page-{page}", name="rulegroup_show_page", requirements={"page"="\d+"})
-     */
+    #[Route('/show/{id}', name: 'rulegroup_show', defaults: ['page' => 1])]
+    #[Route('/show/{id}/page-{page}', name: 'rulegroup_show_page', requirements: ['page' => '\d+'])]
     public function RulegroupShowAction(string $id, Request $request, int $page): Response
     {
         try {
@@ -268,9 +260,7 @@ class RuleGroupController extends AbstractController
 
 
     // public function to edit a rulegroup
-    /**
-     * @Route("/edit/{id}", name="rulegroup_edit")
-     */
+    #[Route('/edit/{id}', name: 'rulegroup_edit')]
     public function RulegroupEditAction(string $id, Request $request, TranslatorInterface $translator)
     {
         try {
@@ -315,10 +305,8 @@ class RuleGroupController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/rulegroup/{groupId}/remove-rule/{ruleId}", name="rulegroup_remove_rule", methods={"POST", "DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/{groupId}/remove-rule/{ruleId}', name: 'rulegroup_remove_rule', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function removeRule(
         Request $request, 
         EntityManagerInterface $entityManager,
@@ -346,9 +334,7 @@ class RuleGroupController extends AbstractController
         return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
     }
 
-    /**
-     * @Route("/add-rule/{id}", name="rulegroup_add_rule")
-     */
+    #[Route('/add-rule/{id}', name: 'rulegroup_add_rule')]
     public function addRuleAction(Request $request, string $id): Response
     {
 

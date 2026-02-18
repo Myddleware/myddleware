@@ -222,6 +222,7 @@ const UI = {
 
   const step3ParamsPath = EL.step3 ? EL.step3.getAttribute('data-path-params') : null;
   let filtersLoaded = false;
+  let bootingSteps = false;
   async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
     UI.resetSelect(targetSelect, 'Loading...');
     if (feedbackEl) {
@@ -419,13 +420,33 @@ const UI = {
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
   }
 
-  function tryRevealStep3() {
-    if (!EL.step3) return;
-    if (bothModulesSelected()) {
-      revealStep3();
-      loadStep3Params();
-    }
-  }
+ async function tryRevealStep3() {
+  if (!EL.step3) return;
+  if (!bothModulesSelected()) return;
+
+  bootingSteps = true;
+  UI.toggle(EL.step3, false);
+  UI.toggle(EL.step4, false);
+  UI.toggle(EL.step5, false);
+
+  try {
+    if (window.mydLoadRuleFilters && !filtersLoaded) {
+      await window.mydLoadRuleFilters();
+      filtersLoaded = true;
+    }
+
+    await loadStep3Params();
+
+    UI.toggle(EL.step3, true);
+    UI.toggle(EL.step4, true);
+    UI.toggle(EL.step5, true);
+
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
+  } finally {
+    bootingSteps = false;
+  }
+}
+
 
   // Reset lower steps if a parent module changes
   function resetStep3AndBelow() {
@@ -434,7 +455,8 @@ const UI = {
     filtersLoaded = false;
     const mapBody = UI.get('rule-mapping-body');
     if (mapBody) mapBody.innerHTML = '';
-    
+
+    UI.toggle(EL.step3, false);
     UI.toggle(EL.step4, false);
     UI.toggle(EL.step5, false);
   }
@@ -463,7 +485,7 @@ const UI = {
       if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
       if (window.initFiltersUI) window.initFiltersUI();
       if (window.initMappingUI) window.initMappingUI();
-      if (window.autoMapRequiredFields) window.autoMapRequiredFields();
+      if (window.autoMapRequiredFields) await window.autoMapRequiredFields();
     } catch (e) {
       EL.step4Body.innerHTML = '<p class="text-danger">Unable to load filters. (' + e.message + ')</p>';
     }
@@ -472,6 +494,7 @@ const UI = {
   window.mydLoadRuleFilters = loadFiltersUI;
 
   function revealStep4and5() {
+    if (bootingSteps) return;
     if (EL.step4 && EL.step4.classList.contains('d-none')) {
       UI.toggle(EL.step4, true);
       if (window.mydLoadRuleFilters && !filtersLoaded) {

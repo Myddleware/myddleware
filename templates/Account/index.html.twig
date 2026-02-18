@@ -219,7 +219,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             formData.append('plainPassword', newPassword);
             
             // Send request
-            fetch('/rule/api/account/password/update', {
+            fetch('/account/api/account/password/update', {
                 method: 'POST',
                 body: formData,
                 headers: {
