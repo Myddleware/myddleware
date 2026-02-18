@@ -546,38 +546,19 @@ const UI = {
 
   // Builds the filter field select options
   window.buildFilterFieldOptions = function() {
-    // Skip if filter select already has options (server-rendered)
-    const filterSelect = UI.get('rule-filter-field');
-   if (filterSelect) {
-        if (filterSelect.selectize) {
-             UI.syncSelectize(filterSelect);
-        } else {
-             $(filterSelect).selectize({
-                 sortField: 'text',
-                 placeholder: 'Choose a field...',
-                 dropdownParent: 'body'
-             });
-        }
-    }
-    const srcMod = UI.get('source-module');
-    const tgtMod = UI.get('target-module');
-    if (!filterSelect) return;
+    const filterSelect = UI.get("rule-filter-field");
+    if (!filterSelect) return;
 
-    const placeholder = filterSelect.querySelector('option[value=""]')?.textContent || '';
-    filterSelect.innerHTML = '';
-    filterSelect.appendChild(new Option(placeholder, '', true, true));
-
-    const addGroup = (label, fields) => {
-      if (fields && Object.keys(fields).length) {
-        const og = document.createElement('optgroup');
-        og.label = label;
-        Object.entries(fields).forEach(([val, txt]) => og.appendChild(new Option(val, val)));
-        filterSelect.appendChild(og);
-      }
-    };
-
-    addGroup('Source Fields', getJsonAttr(srcMod, 'data-fields'));
-    addGroup('Target Fields', getJsonAttr(tgtMod, 'data-fields'));
+    if (filterSelect.selectize) {
+      UI.syncSelectize(filterSelect);
+    } else {
+      $(filterSelect).selectize({
+        sortField: "text",
+        lockOptgroupOrder: true,
+        placeholder: "Choose a field...",
+        dropdownParent: "body"
+      });
+    }
   };
 
   window.autoMapRequiredFields = async function() {
