@@ -4,11 +4,6 @@
     
     <tr data-row-id="{{ rowId }}">
         <td>
-            <select class="rule-mapping-target js-select-search-locked">
-                <option value="{{ fieldName }}" selected>{{ fieldName }} *</option>
-            </select>
-        </td>
-        <td>
             <div class="mapping-src-wrapper">
                 <select class="rule-mapping-source-picker js-select-search-source">
                     <option value="">{{ 'Select source...'|trans }}</option>
@@ -18,6 +13,11 @@
                 </select>
                 <div class="mapping-src-badges pt-1"></div>
             </div>
+        </td>
+        <td>
+            <select class="rule-mapping-target js-select-search-locked">
+                <option value="{{ fieldName }}" selected>{{ fieldName }} *</option>
+            </select>
         </td>
         <td class="d-flex align-items-center">
             <div class="formula-slot is-empty">...</div>
