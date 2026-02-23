@@ -201,80 +201,85 @@ const UI = {
  * Managing cascading dropdowns (Solution -> Connector -> Module)
  * ============================================================ */
 (function () {
-  const step2 = UI.get('step-2');
-  if (!step2) return;
+  const step2 = UI.get('step-2');
+  if (!step2) return;
 
-  const PATHS = {
-    connectors: step2.getAttribute('data-path-connectors'),
-    modules: step2.getAttribute('data-path-module')
-  };
+  const PATHS = {
+    connectors: step2.getAttribute('data-path-connectors'),
+    modules: step2.getAttribute('data-path-module')
+  };
 
-  // References to DOM elements for Source (src) and Target (tgt)
-  const EL = {
-    src: { sol: UI.get('source-solution'), conn: UI.get('source-connector'), mod: UI.get('source-module'), spin: UI.get('source-connector-spinner'), modSpin: UI.get('source-module-spinner'), feed: UI.get('source-connector-feedback') },
-    tgt: { sol: UI.get('target-solution'), conn: UI.get('target-connector'), mod: UI.get('target-module'), spin: UI.get('target-connector-spinner'), modSpin: UI.get('target-module-spinner'), feed: UI.get('target-connector-feedback') },
-    step3: UI.get('step-3'),
-    step4: UI.get('step-4'),
-    step5: UI.get('step-5'),
-    step4Body: UI.get('step-4-body'),
-    paramsContainer: UI.get('step-3-params-container')
-  };
+ // References to DOM elements for Source (src) and Target (tgt)
+ const EL = {
+    src: { sol: UI.get('source-solution'), conn: UI.get('source-connector'), mod: UI.get('source-module'), spin: UI.get('source-connector-spinner'), modSpin: UI.get('source-module-spinner'), feed: UI.get('source-connector-feedback') },
+    tgt: { sol: UI.get('target-solution'), conn: UI.get('target-connector'), mod: UI.get('target-module'), spin: UI.get('target-connector-spinner'), modSpin: UI.get('target-module-spinner'), feed: UI.get('target-connector-feedback') },
+    step3: UI.get('step-3'),
+    step4: UI.get('step-4'),
+    step5: UI.get('step-5'),
+    step4Body: UI.get('step-4-body'),
+    paramsContainer: UI.get('step-3-params-container')
+  };
 
-  const step3ParamsPath = EL.step3 ? EL.step3.getAttribute('data-path-params') : null;
-  let filtersLoaded = false;
+  const step3ParamsPath = EL.step3 ? EL.step3.getAttribute('data-path-params') : null;
+  let filtersLoaded = false;
   let bootingSteps = false;
-  async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
-    UI.resetSelect(targetSelect, 'Loading...');
-    if (feedbackEl) {
-        feedbackEl.textContent = '';
-        feedbackEl.classList.remove('text-danger', 'text-success');
-    }
-    if (!url) return;
 
-    try {
-      UI.toggle(spinner, true);
-      const htmlParams = new URLSearchParams(params).toString();
-      const response = await fetch(`${url}?${htmlParams}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-      
-      if (!response.ok) {
-          const errorMsg = await response.text(); 
-          throw new Error(errorMsg || `Error ${response.status}`);
-      }
-      const html = await response.text();
-      
+  function getVal(el) {
+    if (!el) return '';
+    if (el.selectize) return (el.selectize.getValue() || '').trim();
+    return (el.value || '').trim();
+  }
+
+  async function loadSelectData(type, url, params, targetSelect, spinner, feedbackEl) {
+    UI.resetSelect(targetSelect, 'Loading...');
+    if (feedbackEl) {
+      feedbackEl.textContent = '';
+      feedbackEl.classList.remove('text-danger', 'text-success');
+    }
+    if (!url) return;
+
+    try {
+      UI.toggle(spinner, true);
+      const htmlParams = new URLSearchParams(params).toString();
+      const response = await fetch(`${url}?${htmlParams}`, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+
+      if (!response.ok) {
+        const errorMsg = await response.text();
+        throw new Error(errorMsg || `Error ${response.status}`);
+      }
+      const html = await response.text();
+
       // Update native HTML
       targetSelect.innerHTML = '';
-//       targetSelect.appendChild(new Option('', '', true, true));
-      
-      if (html) {
-        const temp = document.createElement('div');
-        temp.innerHTML = html;
-        Array.from(temp.querySelectorAll('option')).forEach(opt => targetSelect.appendChild(opt));
-      }
+
+      if (html) {
+        const temp = document.createElement('div');
+        temp.innerHTML = html;
+        Array.from(temp.querySelectorAll('option')).forEach(opt => targetSelect.appendChild(opt));
+      }
 
       if (targetSelect.selectize) {
-          // On force le placeholder à revenir à la normale
-          targetSelect.selectize.settings.placeholder = 'Search...';
-          targetSelect.selectize.updatePlaceholder();
+        targetSelect.selectize.settings.placeholder = 'Search...';
+        targetSelect.selectize.updatePlaceholder();
       }
 
       // synchronization with Selectize
       UI.syncSelectize(targetSelect);
       UI.enableSelect(targetSelect);
 
-    } catch (e) {
-      console.warn("Loading error:", e.message);
-      UI.resetSelect(targetSelect, 'Error loading list');
-      UI.enableSelect(targetSelect);
-      
-       if (feedbackEl) {
-          feedbackEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + e.message; 
-          feedbackEl.className = 'form-text text-danger fw-bold';
-      }
-    } finally {
-      UI.toggle(spinner, false);
-    }
-  }
+    } catch (e) {
+      console.warn("Loading error:", e.message);
+      UI.resetSelect(targetSelect, 'Error loading list');
+      UI.enableSelect(targetSelect);
+
+      if (feedbackEl) {
+        feedbackEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + e.message;
+        feedbackEl.className = 'form-text text-danger fw-bold';
+      }
+    } finally {
+      UI.toggle(spinner, false);
+    }
+  }
 
   // Loads connectors for a given solution
   const loadConnectorsFor = (side, solutionId) => {
@@ -294,15 +299,15 @@ const UI = {
 // Loads specific Step 3 parameters (date fields, limit, etc.)
   async function loadStep3Params() {
     if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
-    
-    const valSrcConn = EL.src.conn.value;
-    const valTgtConn = EL.tgt.conn.value;
-    const valSrcMod = EL.src.mod.value;
-    const valTgtMod = EL.tgt.mod.value;
+
+    const valSrcConn = getVal(EL.src.conn);
+    const valTgtConn = getVal(EL.tgt.conn);
+    const valSrcMod = getVal(EL.src.mod);
+    const valTgtMod = getVal(EL.tgt.mod);
 
     if (!valSrcConn || !valTgtConn || !valSrcMod || !valTgtMod) {
-        EL.paramsContainer.innerHTML = '';
-        return;
+      EL.paramsContainer.innerHTML = '';
+      return;
     }
 
     const params = {
@@ -314,82 +319,82 @@ const UI = {
 
     try {
       EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
-      
+
       const html = await UI.fetchHtml(step3ParamsPath, params);
       EL.paramsContainer.innerHTML = html;
 
       $('.js-select-search', EL.paramsContainer).selectize({
-          sortField: 'text',
-          placeholder: 'Search...',
+        sortField: 'text',
+        placeholder: 'Search...',
       });
 
       const dupSelect = UI.get('duplicate-field');
       const badgesContainer = UI.get('duplicate-badges-container');
 
       if (dupSelect && badgesContainer) {
-    
-          const addBadge = (val, label) => {
-              if (badgesContainer.querySelector(`[data-field="${CSS.escape(val)}"]`)) return;
 
-              const badge = document.createElement('span');
-              badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-              badge.dataset.field = val;
-              badge.innerHTML = `<span class="mapping-src-badge-label">${label}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
+        const addBadge = (val, label) => {
+          if (badgesContainer.querySelector(`[data-field="${CSS.escape(val)}"]`)) return;
 
-              badge.querySelector('button').onclick = () => {
-                  badge.remove();
-                  const tbody = UI.get('rule-mapping-body');
-                  if(tbody) {
-                      tbody.querySelectorAll('button.text-danger').forEach(b => {
-                          b.disabled = false; b.style.opacity = '1'; b.style.pointerEvents = 'auto';
-                          b.onclick = function() {
-                              this.closest('tr').remove();
-                          };
-                      });
-                      Array.from(badgesContainer.querySelectorAll('.mapping-src-badge')).forEach(b => {
-                          if(window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(b.dataset.field);
-                      });
-                  }
-              };
-              
-              badgesContainer.appendChild(badge);
-              if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(val);
+          const badge = document.createElement('span');
+          badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
+          badge.dataset.field = val;
+          badge.innerHTML = `<span class="mapping-src-badge-label">${label}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
+
+          badge.querySelector('button').onclick = () => {
+            badge.remove();
+            const tbody = UI.get('rule-mapping-body');
+            if (tbody) {
+              tbody.querySelectorAll('button.text-danger').forEach(b => {
+                b.disabled = false; b.style.opacity = '1'; b.style.pointerEvents = 'auto';
+                b.onclick = function () {
+                  this.closest('tr').remove();
+                };
+              });
+              Array.from(badgesContainer.querySelectorAll('.mapping-src-badge')).forEach(b => {
+                if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(b.dataset.field);
+              });
+            }
           };
-          $(dupSelect).on('change', function() {
-              const val = $(this).val();
-              if (!val) return;
 
-              let text = val;
-              if (this.selectize) {
-                  const item = this.selectize.getItem(val);
-                  if(item.length) text = item.text();
-                  this.selectize.clear(true);
-              } else {
-                  text = this.options[this.selectedIndex].text;
-                  this.value = '';
+          badgesContainer.appendChild(badge);
+          if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(val);
+        };
+        $(dupSelect).on('change', function () {
+          const val = $(this).val();
+          if (!val) return;
+
+          let text = val;
+          if (this.selectize) {
+            const item = this.selectize.getItem(val);
+            if (item.length) text = item.text();
+            this.selectize.clear(true);
+          } else {
+            text = this.options[this.selectedIndex].text;
+            this.value = '';
+          }
+
+          addBadge(val, text);
+          if (step3IsComplete()) revealStep4and5();
+        });
+        if (window.initialRule && window.initialRule.syncOptions) {
+          const opts = window.initialRule.syncOptions;
+          const raw = opts.duplicateField || opts.duplicate_fields || opts.duplicateFields;
+          if (raw) {
+            let vals = [];
+            if (Array.isArray(raw)) vals = raw;
+            else if (typeof raw === 'string') vals = raw.split(';');
+
+            vals.forEach(v => {
+              if (v && v.trim() !== '') {
+                addBadge(v.trim(), v.trim());
               }
-
-              addBadge(val, text);
-              if (step3IsComplete()) revealStep4and5();
-          });
-      if (window.initialRule && window.initialRule.syncOptions) {
-           const opts = window.initialRule.syncOptions;          
-           const raw = opts.duplicateField || opts.duplicate_fields || opts.duplicateFields;         
-           if (raw) {
-               let vals = [];
-               if (Array.isArray(raw)) vals = raw;
-               else if (typeof raw === 'string') vals = raw.split(';');
-
-               vals.forEach(v => {
-                   if(v && v.trim() !== '') {
-                       addBadge(v.trim(), v.trim()); 
-                   }
-               });
-               if (dupSelect && vals.length > 0) {
-                   if (dupSelect.selectize) dupSelect.selectize.clear(true);
-                   else dupSelect.value = '';
-               }
-           }
+            });
+            if (dupSelect && vals.length > 0) {
+              if (dupSelect.selectize) dupSelect.selectize.clear(true);
+              else dupSelect.value = '';
+            }
+          }
         }
       }
       const modeSelect = UI.get('mode');
@@ -404,50 +409,61 @@ const UI = {
     }
   }
 
-  function step3IsComplete() {
-    const modeEl = UI.get('mode');
-    return !!(modeEl && modeEl.value);
-  }
+  function step3IsComplete() {
+    const modeEl = UI.get('mode');
+    return !!(modeEl && modeEl.value);
+  }
 
-  function bothModulesSelected() {
-    return !!(EL.src.mod.value && EL.tgt.mod.value);
-  }
+  function bothModulesSelected() {
+    return !!(getVal(EL.src.mod) && getVal(EL.tgt.mod));
+  }
 
   // Progressive display of steps
   function revealStep3() {
-    if (!EL.step3) return;
-    UI.toggle(EL.step3, true);
-    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
-  }
-
- async function tryRevealStep3() {
-  if (!EL.step3) return;
-  if (!bothModulesSelected()) return;
-
-  bootingSteps = true;
-  UI.toggle(EL.step3, false);
-  UI.toggle(EL.step4, false);
-  UI.toggle(EL.step5, false);
-
-  try {
-    if (window.mydLoadRuleFilters && !filtersLoaded) {
-      await window.mydLoadRuleFilters();
-      filtersLoaded = true;
-    }
-
-    await loadStep3Params();
-
+    if (!EL.step3) return;
     UI.toggle(EL.step3, true);
-    UI.toggle(EL.step4, true);
-    UI.toggle(EL.step5, true);
-
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
-  } finally {
-    bootingSteps = false;
   }
-}
 
+  async function tryRevealStep3() {
+    if (!EL.step3) return;
+    if (!bothModulesSelected()) return;
 
+    bootingSteps = true;
+    UI.toggle(EL.step3, false);
+    UI.toggle(EL.step4, false);
+    UI.toggle(EL.step5, false);
+
+    let loader = document.getElementById('steps-345-loader');
+    if (!loader) {
+      loader = document.createElement('div');
+      loader.id = 'steps-345-loader';
+      loader.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.6);z-index:9999;';
+      loader.innerHTML = '<div class="spinner-border" role="status"></div>';
+      document.body.appendChild(loader);
+    }
+    loader.style.display = 'flex';
+
+    try {
+      if (window.mydLoadRuleFilters && !filtersLoaded) {
+        await window.mydLoadRuleFilters();
+        filtersLoaded = true;
+      }
+
+      await loadStep3Params();
+
+      UI.toggle(EL.step3, true);
+      UI.toggle(EL.step4, true);
+      UI.toggle(EL.step5, true);
+
+      if (window.updateRuleNavLinks) window.updateRuleNavLinks();
+    } finally {
+      loader.style.display = 'none';
+      bootingSteps = false;
+    }
+  }
+
+  
   // Reset lower steps if a parent module changes
   function resetStep3AndBelow() {
     if (EL.paramsContainer) EL.paramsContainer.innerHTML = '';
@@ -561,68 +577,77 @@ const UI = {
     }
   };
 
-  window.autoMapRequiredFields = async function() {
-    const tgtConn = document.getElementById('target-connector')?.value;
-    const tgtMod = document.getElementById('target-module')?.value;
-    const srcConn = document.getElementById('source-connector')?.value;
-    const srcMod = document.getElementById('source-module')?.value;
-    const tbody = document.getElementById('rule-mapping-body');
-    const step5 = document.getElementById('step-5');
+window.autoMapRequiredFields = async function() {
+  const tgtConn = document.getElementById('target-connector')?.value;
+  const tgtMod  = document.getElementById('target-module')?.value;
+  const srcConn = document.getElementById('source-connector')?.value;
+  const srcMod  = document.getElementById('source-module')?.value;
+  const tbody   = document.getElementById('rule-mapping-body');
+  const step5   = document.getElementById('step-5');
 
-    if (!tgtConn || !tgtMod || !tbody || !step5) return;
-    if (tbody.getAttribute('data-loaded-module') === tgtMod) return;
+  if (!tgtConn || !tgtMod || !tbody || !step5) return;
+  if (tbody.getAttribute('data-loaded-module') === tgtMod) return;
 
-    const urlBase = step5.getAttribute('data-path-mapping-initial');
-    if (!urlBase) return;
+  const urlBase = step5.getAttribute('data-path-mapping-initial');
+  if (!urlBase) return;
 
-    try {
-        const params = new URLSearchParams({
-            connector_id: tgtConn,
-            module: tgtMod,
-            src_connector_id: srcConn,
-            src_module: srcMod
-        });
-
-        const res = await fetch(`${urlBase}?${params.toString()}`, { 
-            headers: { 'X-Requested-With': 'XMLHttpRequest' } 
-        });
-        
-        if (!res.ok) return;
-        const html = await res.text();
-        if (html && html.trim().length > 0) {
-            
-            let shouldReplace = false;
-            if (tbody.rows.length === 1) {
-                const row = tbody.rows[0];
-                try {
-                    const tgtSel = row.querySelector('.rule-mapping-target');
-                    const tgtVal = (tgtSel && tgtSel.value) ? tgtSel.value : '';
-                    const badges = row.querySelectorAll('.mapping-src-badge');
-                    const formulaInput = row.querySelector('.rule-mapping-formula-input');
-                    const formulaVal = (formulaInput) ? formulaInput.value : '';
-
-
-                    if (!tgtVal && badges.length === 0 && !formulaVal) {
-                        shouldReplace = true;
-                    }
-                } catch (err) {
-                    console.warn("Erreur check ligne vide, on ajoute par défaut");
-                }
-            }
-
-            if (shouldReplace) {
-                tbody.innerHTML = html;
-            } else {
-                tbody.insertAdjacentHTML('afterbegin', html);
-            }
-
-            initNewRows(tbody);
-            tbody.setAttribute('data-loaded-module', tgtMod);
-        }
-
-    } catch (e) {
-        console.error('Auto-mapping error:', e);
+  const getVal = (sel) => {
+    if (!sel) return '';
+    if (sel.selectize) return (sel.selectize.getValue() || '').trim();
+    if (window.jQuery && window.jQuery(sel)[0] && window.jQuery(sel)[0].selectize) {
+      return (window.jQuery(sel)[0].selectize.getValue() || '').trim();
     }
+    return (sel.value || '').trim();
+  };
+
+  try {
+    const params = new URLSearchParams({
+      connector_id: tgtConn,
+      module: tgtMod,
+      src_connector_id: srcConn,
+      src_module: srcMod
+    });
+
+    const res = await fetch(`${urlBase}?${params.toString()}`, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    });
+
+    if (!res.ok) return;
+    const html = await res.text();
+    if (!html || html.trim().length === 0) return;
+
+    const rowsBefore = Array.from(tbody.querySelectorAll('tr'));
+    const emptyRow = rowsBefore.find(tr => {
+      const tgtSel = tr.querySelector('.rule-mapping-target');
+      const tgtVal = getVal(tgtSel);
+      const badges = tr.querySelectorAll('.mapping-src-badge');
+      const formulaInput = tr.querySelector('.rule-mapping-formula-input');
+      const formulaVal = formulaInput ? (formulaInput.value || '').trim() : '';
+      return !tgtVal && badges.length === 0 && !formulaVal;
+    });
+
+    const temp = document.createElement('tbody');
+    temp.innerHTML = html;
+    const newRows = Array.from(temp.querySelectorAll('tr'));
+    if (!newRows.length) return;
+
+    if (emptyRow) {
+      emptyRow.replaceWith(newRows[0]);
+      let anchor = newRows[0];
+      for (let i = 1; i < newRows.length; i++) {
+        anchor.insertAdjacentElement('afterend', newRows[i]);
+        anchor = newRows[i];
+      }
+    } else {
+      newRows.forEach(r => tbody.appendChild(r));
+    }
+
+    initNewRows(tbody);
+    tbody.setAttribute('data-loaded-module', tgtMod);
+
+  } catch (e) {
+    console.error('Auto-mapping error:', e);
+  }
 };
 
 function initNewRows(container) {
