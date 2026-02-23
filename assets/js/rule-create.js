@@ -434,15 +434,19 @@ const UI = {
     UI.toggle(EL.step4, false);
     UI.toggle(EL.step5, false);
 
-    let loader = document.getElementById('steps-345-loader');
-    if (!loader) {
-      loader = document.createElement('div');
-      loader.id = 'steps-345-loader';
-      loader.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.6);z-index:9999;';
-      loader.innerHTML = '<div class="spinner-border" role="status"></div>';
-      document.body.appendChild(loader);
+    const isEdit = !!window.__EDIT_MODE__;
+    let loader = null;
+    if (!isEdit) {
+      loader = document.getElementById('steps-345-loader');
+      if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'steps-345-loader';
+        loader.style.cssText = 'position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(255,255,255,.6);z-index:9999;';
+        loader.innerHTML = '<div class="spinner-border" role="status"></div>';
+        document.body.appendChild(loader);
+      }
+      loader.style.display = 'flex';
     }
-    loader.style.display = 'flex';
 
     try {
       if (window.mydLoadRuleFilters && !filtersLoaded) {
@@ -452,14 +456,14 @@ const UI = {
 
       await loadStep3Params();
 
-    UI.toggle(EL.step3, true);
-    UI.toggle(EL.step4, true);
-    UI.toggle(EL.step5, true);
-    updateMappingHeaders();
+      UI.toggle(EL.step3, true);
+      UI.toggle(EL.step4, true);
+      UI.toggle(EL.step5, true);
+      updateMappingHeaders();
 
       if (window.updateRuleNavLinks) window.updateRuleNavLinks();
     } finally {
-      loader.style.display = 'none';
+      if (loader) loader.style.display = 'none';
       bootingSteps = false;
     }
   }
