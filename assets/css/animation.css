@@ -765,3 +765,9 @@ label[for="update_password_oldPassword"] {
 .myddleware-blue-pen {
     color: #0d6efd !important;
 }
+
+.small-header-field {
+    font-weight: 100 !important;
+    text-transform: capitalize !important;
+    color: #212529 !important;
+}
