@@ -452,9 +452,10 @@ const UI = {
 
       await loadStep3Params();
 
-      UI.toggle(EL.step3, true);
-      UI.toggle(EL.step4, true);
-      UI.toggle(EL.step5, true);
+    UI.toggle(EL.step3, true);
+    UI.toggle(EL.step4, true);
+    UI.toggle(EL.step5, true);
+    updateMappingHeaders();
 
       if (window.updateRuleNavLinks) window.updateRuleNavLinks();
     } finally {
@@ -509,6 +510,31 @@ const UI = {
   };
   window.mydLoadRuleFilters = loadFiltersUI;
 
+  function updateMappingHeaders() {
+    const thTarget = document.getElementById('mapping-th-target');
+    const thSource = document.getElementById('mapping-th-source');
+    if (!thTarget || !thSource) return;
+
+    const rootPath = window.location.pathname.split('/rule')[0];
+
+    const buildHeader = (selectEl) => {
+      if (!selectEl || !selectEl.value) return null;
+      const opt = selectEl.options[selectEl.selectedIndex];
+      if (!opt) return null;
+      const name = opt.text.trim();
+      const slug = (opt.getAttribute('data-solution-slug') || name).toLowerCase();
+      const imgUrl = rootPath + '/rule/assets/solution-icon/' + encodeURIComponent(slug);
+      return '<span class="d-flex align-items-center gap-2">' +
+             '<img src="' + imgUrl + '" style="width:20px;height:20px;object-fit:contain" onerror="this.style.display=\'none\'">' +
+             '<span>' + name + '</span></span>';
+    };
+
+    const tgtHtml = buildHeader(EL.tgt.sol);
+    const srcHtml = buildHeader(EL.src.sol);
+    if (tgtHtml) thTarget.innerHTML = tgtHtml;
+    if (srcHtml) thSource.innerHTML = srcHtml;
+  }
+
   function revealStep4and5() {
     if (bootingSteps) return;
     if (EL.step4 && EL.step4.classList.contains('d-none')) {
@@ -520,6 +546,7 @@ const UI = {
     }
  if (EL.step5) {
       UI.toggle(EL.step5, true);
+      updateMappingHeaders();
       // initMappingUI is called from loadFiltersUI after fields are loaded
     }
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
