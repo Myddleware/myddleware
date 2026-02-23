@@ -108,6 +108,7 @@ create_rule:
         deletion:
             label: Activer la suppression dans l'application cible
             yes: Oui
+            no: Non
         data_wait: Chargement en cours... Merci de patienter
         title: Champs
         placeholder: Veuillez faire glisser vos champs ici

@@ -108,6 +108,7 @@ create_rule:
         deletion:
             label: Allow deletion from target application
             yes: Yes
+            no: No
         data_wait: Loading... Please wait
         title: Fields
         placeholder: Please drag your fields here
