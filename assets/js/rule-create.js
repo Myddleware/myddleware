@@ -992,7 +992,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
         delBtn.style.opacity = '0.5';
         delBtn.title = 'Required field cannot be removed';
     } else {
-        delBtn.onclick = () => tr.remove();
+        delBtn.onclick = () => { tr.remove(); window.refreshTargetDropdowns(); };
     }
     tdDel.appendChild(delBtn);
 
@@ -1000,9 +1000,10 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
     tr.append(tdTgt, tdSrc, tdAct, tdDel);
     tbody.appendChild(tr);
     const $tgtSelectize = $(tgtSel).selectize({
-        sortField: 'text',
-        placeholder: 'Search Target...',
-        dropdownParent: 'body',
+        sortField: "text",
+        placeholder: "Search Target...",
+        dropdownParent: "body",
+        onChange: function() { window.refreshTargetDropdowns(); }
     });
     
     if (preselectedTarget && $tgtSelectize[0].selectize) {
@@ -1022,6 +1023,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
             }
           }
     });
+    window.refreshTargetDropdowns();
 };
 
   window.initMappingUI = function() {
@@ -1270,6 +1272,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
               slot.classList.remove('is-empty');
             }
           });
+        window.refreshTargetDropdowns();
       }
     if (ruleData.syncOptions?.duplicateField && typeof window.ensureDuplicateMappingRow === 'function') {
           let raw = ruleData.syncOptions.duplicateField;

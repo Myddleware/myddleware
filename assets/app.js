@@ -39,6 +39,7 @@ const isCreateRule = /\/rule\/[a-zA-Z0-9]{13}\/create/.test(path);
 
 
 if (isEditRule || isCreateRule) {
+    require('./js/mapping-target-dedup.js');
     require('./js/rule-create.js');
 }
 
@@ -56,6 +57,7 @@ if (window.location.href.includes('rule/document/list')) {
 }
 
 if (window.location.href.includes('rule/')) {
+    require('./js/mapping-target-dedup.js');
     require('./js/rule-create.js')
 }
 
