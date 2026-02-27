@@ -475,7 +475,11 @@ const UI = {
     if (EL.step4Body) EL.step4Body.innerHTML = '';
     filtersLoaded = false;
     const mapBody = UI.get('rule-mapping-body');
-    if (mapBody) mapBody.innerHTML = '';
+    if (mapBody) {
+      mapBody.innerHTML = '';
+      mapBody.removeAttribute('data-loaded-module');
+    }
+    if (window.resetTargetFieldsCache) window.resetTargetFieldsCache();
 
     UI.toggle(EL.step3, false);
     UI.toggle(EL.step4, false);
@@ -675,6 +679,7 @@ window.autoMapRequiredFields = async function() {
 
     initNewRows(tbody);
     tbody.setAttribute('data-loaded-module', tgtMod);
+    window.refreshTargetDropdowns();
 
   } catch (e) {
     console.error('Auto-mapping error:', e);
