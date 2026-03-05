@@ -284,7 +284,7 @@ li span {
     background-color: white;
 }
 
-#flux-table th, .table-task-detail th{
+#flux-table th {
     background: white;
     height: 40px;
     padding: 8px 12px;
@@ -296,7 +296,7 @@ li span {
     border-right: 1px solid #ddd;
 }
 
-#flux-table th:last-child, .table-task-detail th:last-child{
+#flux-table th:last-child {
     border-right: none;
 }
 
