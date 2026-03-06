@@ -30,6 +30,7 @@ use App\Solutions\acton;
 use App\Solutions\airtable;
 use App\Solutions\brevo;
 use App\Solutions\cirrusshield;
+use App\Solutions\dolibarr;
 use App\Solutions\erpnext;
 use App\Solutions\eventbrite;
 use App\Solutions\facebook;
@@ -82,7 +83,9 @@ class SolutionManager
 							'magento',
 							'microsoftsql',
 							'oracledb',
+							'mautic',
 							'mysql',
+							'dolibarr',
 							'vtigercrm',
 							'suitecrm',
 							'mailchimp',
@@ -113,6 +116,8 @@ class SolutionManager
         microsoftsql $microsoftsql,
         oracledb $oracledb,
         mysql $mysql,
+	dolibarr $dolibarr,
+	mautic $mautic,
         vtigercrm $vtigercrm,
         suitecrm $suitecrm,
         mailchimp $mailchimp,
