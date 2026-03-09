@@ -446,6 +446,17 @@ const UI = {
         document.body.appendChild(loader);
       }
       loader.style.display = 'flex';
+    } else {
+      loader = document.getElementById('steps-loading-spinner');
+      if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'steps-loading-spinner';
+        loader.className = 'text-center py-5';
+        loader.innerHTML = '<div class="spinner-border text-primary" role="status"></div>'
+          + '<p class="text-muted mt-2">Loading configuration...</p>';
+        EL.step3.parentNode.insertBefore(loader, EL.step3);
+      }
+      loader.classList.remove('d-none');
     }
 
     try {
@@ -463,7 +474,9 @@ const UI = {
 
       if (window.updateRuleNavLinks) window.updateRuleNavLinks();
     } finally {
-      if (loader) loader.style.display = 'none';
+      if (loader) {
+        isEdit ? loader.classList.add('d-none') : loader.style.display = 'none';
+      }
       bootingSteps = false;
     }
   }

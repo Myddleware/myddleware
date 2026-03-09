@@ -683,6 +683,9 @@ view_workflow:
     condition2: In short, all you need is to write the status name and we do the rest !
     back: Back to the list
     delete: Delete the workflow
+    duplicate: Duplicate the workflow
+    duplicate_success: Workflow duplicated successfully
+    duplication_workflow_deactivated : The workflow has been duplicated but it is deactivated upon creation. Please activate it to use it.
     description: Description
     rule: Rule
     conditions: Conditions

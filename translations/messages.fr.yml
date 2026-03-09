@@ -685,6 +685,9 @@ view_workflow:
     condition2: En bref, il vous suffit d'écrire le nom du statut et nous nous occupons du reste !
     back: Retour
     delete: Supprimer le workflow
+    duplicate: Dupliquer le workflow
+    duplicate_success: Workflow dupliqué avec succès
+    duplication_workflow_deactivated : Le workflow a été dupliqué mais il est désactivé à la création. Veuillez l'activer pour pouvoir l'utiliser.
     description: Description
     rule: Règle
     conditions: Conditions
