@@ -15,7 +15,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Psr\Log\LoggerInterface;
 
-
+#[Route('/user_manager')]
 class UserManagerController extends AbstractController
 {
 
@@ -26,7 +26,7 @@ class UserManagerController extends AbstractController
         $this->logger = $logger;
     }
 
-    #[Route('/rule/user_manager', name: 'user_manager')]
+    #[Route('/', name: 'user_manager')]
     public function index(UserRepository $userRepository): Response
     {
         $users = $userRepository->findAll();
@@ -36,7 +36,7 @@ class UserManagerController extends AbstractController
             'currentUser' => $this->getUser(),
         ]);
     }
-    #[Route('/rule/user_manager/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
+    #[Route('/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
     public function edit(UserRepository $userRepository, int $id, TranslatorInterface $translator): Response
     {
         $user = $userRepository->find($id);
@@ -57,7 +57,7 @@ class UserManagerController extends AbstractController
         ]);
     }
 
-    #[Route('/rule/user_manager/{id}/update', name: 'user_manager_update', methods: ['POST'])]
+    #[Route('/{id}/update', name: 'user_manager_update', methods: ['POST'])]
     public function update(Request $request, User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
         $form = $this->createForm(UserType::class, $user);
@@ -77,7 +77,7 @@ class UserManagerController extends AbstractController
         ]);
     }
 
-    #[Route('/rule/user_manager/new', name: 'user_manager_create')]
+    #[Route('/new', name: 'user_manager_create')]
     public function create(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator): Response
     {
         $user = new User();
@@ -111,7 +111,7 @@ class UserManagerController extends AbstractController
         ]);
     }
 
-    #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['DELETE', 'POST'])]
+    #[Route('/{id}/delete', name: 'user_manager_delete', methods: ['DELETE', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {

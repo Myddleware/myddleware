@@ -37,25 +37,16 @@
 	</div>
 {% endblock titlesm %}
 {% block body %}
-
 	{% include '_notifications.html.twig' with { filter_prefix: 'rule.' } %}
-
-	{# success message if the rule has been duplicated  #}
-
-	{# error message for permission denied #}
-	{% for flash in app.flashes('error-permission') %}
-		<div class="alert alert-danger alert-dismissible fade show">
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			{{ flash }}
-		</div>
-	{% endfor %}
-
 	<div id="rule">
 		{% if nb_rule > 0 %}
 			<div class="row justify-content-center align-items-center my-4 me-5 mt-5">
 				<div id="rulesearchbarcontainer" class="col-auto me-5">
-					<form id="rulenamesearchbar" class="d-flex" action="{{ path('regle_list') }}" method="get">
-						<input type="text" id="rule_name_searchbar" data-url="{{ path('regle_list') }}" class="form-control" placeholder="Search by rule name">
+					<form id="rulenamesearchbar" class="d-flex position-relative" action="{{ path('regle_list') }}" method="get">
+						<input type="text" id="rule_name_searchbar" data-url="{{ path('regle_list') }}" class="form-control pe-5" placeholder="Search by rule name">
+						<button id="clear_rule_search" class="btn btn-link text-danger p-0 position-absolute" style="font-size: 1.5rem; line-height: 1; display: none; right: 8px; top: 50%; transform: translateY(-50%); z-index: 10;" title="Clear search" type="button">
+							<i class="fa fa-times-circle"></i>
+						</button>
 					</form>
 				</div>
 				<div class="col-auto text-center me-5">
@@ -110,7 +101,7 @@
 													<form class="edit-form-name-list" action="{{ path('update_rule_name') }}" method="post">
 														<input type="text" name="ruleName" class="form-control m-2" value="{{ rule.name }}" data-rule-id="{{ rule.id }}"/>
 														<input type="hidden" name="ruleId" value="{{ rule.id }}"/>
-														<button type="submit" class="btn btn-success btn-sm">{{ 'rule_list_view.save' | trans }}</button>
+														<button type="submit" class="btn btn-success btn-sm">{{ 'Save' | trans }}</button>
 														<button type="button" class="btn btn-danger btn-sm close-button-name-list">
 															<i class="fa fa-times" aria-hidden="true"></i>
 														</button>
@@ -140,21 +131,16 @@
 														<i class="fa fa-eye"></i>
 													</span>
 												</a>
-												<a href="{{ path('regle_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="btn btn-sm btn-outline-primary">
+												<a href="{{ path('rule_edit',{'id' : rule.id }) }}" title="{{'list_rule.btn.edit'|trans}}" class="btn btn-sm btn-outline-primary">
 													<span class="btn-opt">
 														<i class="fa fa-pen" aria-hidden="true"></i>
 													</span>
 												</a>
-												<form method="post" action="{{ path('regle_delete',{'id' : rule.id }) }}" style="display: inline;">
-													<button type="submit"
-															class="delete text-decoration-none btn btn-sm btn-outline-danger"
-															onclick="return confirm('{{'list_rule.delete'|trans}}');"
-															title="{{'list_rule.btn.delete'|trans}}">
-														<span class="btn-opt">
-															<i class="fa fa-trash" aria-hidden="true"></i>
-														</span>
-													</button>
-												</form>
+												<a class="delete text-decoration-none btn btn-sm btn-outline-danger" href="{{ path('regle_delete',{'id' : rule.id }) }}" title="{{'list_rule.btn.delete'|trans}}" onclick="return(confirm('{{'list_rule.delete'|trans}}'));">
+													<span class="btn-opt">
+														<i class="fa fa-trash" aria-hidden="true"></i>
+													</span>
+												</a>
 											</td>
 										</tr>
 									{% endfor %}
@@ -172,15 +158,8 @@
 					</div>
 				</div>
 			</div>
-			<div class="d-flex justify-content-center mt-4">
-				{% if pager.haveToPaginate %}
-					{{ pagerfanta(pager, 'twitter_bootstrap4', {
-						'routeName': 'regle_list_page',
-						'proximity': 2,
-						'prev_message': 'pagination.previous'|trans,
-						'next_message': 'pagination.next'|trans
-					})|raw }}
-				{% endif %}
+			<div id="pagination_container" class="d-flex justify-content-center mt-4">
+				{% include '_pagination.html.twig' with {pager: pager, route: "regle_list_page"} %}
 			</div>
 		{% else %}
 			<div class="d-grid justify-content-center pt-4">

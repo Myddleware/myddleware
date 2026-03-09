@@ -1,0 +1,7 @@
+{% if connectors is not empty %}
+  {% for c in connectors %}
+    <option value="{{ c.id }}" data-solution-slug="{{ solutionSlug|e('html_attr') }}">{{ c.name }}</option>
+  {% endfor %}
+{% else %}
+  <option value="" disabled selected></option>
+{% endif %}

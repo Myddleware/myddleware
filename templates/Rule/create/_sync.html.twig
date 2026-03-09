@@ -1,0 +1,20 @@
+<section class="mb-5 d-none" 
+    id="step-3" 
+    data-path-params="{{ path('regle_params_fields') }}">
+
+    <div class="section-chevron" aria-hidden="true">
+        <a href="#step-3" class="section-chevron">
+            <i class="fa-solid fa-circle-chevron-down"></i>
+        </a> 
+    </div>
+
+    <button id="nav-create-rule-sync" class="nav-create-rule btn btn-outline-primary mb-3" type="button" data-bs-toggle="offcanvas" data-bs-target="#ruleCreateNav" aria-controls="ruleCreateNav">
+        <i class="fa-solid fa-list-ul"></i>
+    </button>
+
+    <h3 class="section-create-rule fw-bold mb-4 fw-bold mb-4">
+        {{ 'create_rule.step3.syncdata.title'|trans }}
+    </h3>
+
+    <div id="step-3-params-container"></div>
+</section>

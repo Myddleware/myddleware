@@ -27,7 +27,6 @@ namespace App\Manager;
 
 use App\Entity\Document;
 use App\Entity\DocumentData;
-use App\Entity\DocumentData as DocumentDataEntity;
 use App\Entity\Workflow;
 use App\Entity\WorkflowLog;
 use App\Entity\WorkflowAction;
@@ -40,8 +39,8 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Swift_Mailer;
-use Swift_Message;
+// use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+// use App\Event\DocumentEvent;
 
 class DocumentManager
 {
@@ -75,6 +74,7 @@ class DocumentManager
     protected $workflowError = false;
     protected $userId;
     protected $status;
+    protected $currentGlobalStatus; // Track current global status for ES sync optimization
     protected $document_data;
     protected $solutionTarget;
     protected $solutionSource;
@@ -92,10 +92,10 @@ class DocumentManager
     protected FormulaManager $formulaManager;
     protected ?ParameterBagInterface $parameterBagInterface;
     protected ?SolutionManager $solutionManager;
+    // protected ?EventDispatcherInterface $eventDispatcher;
     protected array $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
-        'Relate_OK' => 'Open',
         'Transformed' => 'Open',
         'Ready_to_send' => 'Open',
         'Filter_OK' => 'Open',
@@ -107,7 +107,6 @@ class DocumentManager
         'Create_KO' => 'Error',
         'Filter_KO' => 'Error',
         'Predecessor_KO' => 'Error',
-        'Relate_KO' => 'Error',
         'Error_transformed' => 'Error',
         'Error_checking' => 'Error',
         'Error_sending' => 'Error',
@@ -124,7 +123,8 @@ class DocumentManager
         FormulaManager $formulaManager,
         SolutionManager $solutionManager = null,
         ParameterBagInterface $parameterBagInterface = null,
-        ToolsManager $tools = null
+        ToolsManager $tools = null,
+        EventDispatcherInterface $eventDispatcher = null
     ) {
         $this->connection = $dbalConnection;
         $this->logger = $logger;
@@ -134,6 +134,7 @@ class DocumentManager
         $this->tools = $tools;
         $this->formulaManager = $formulaManager;
         $this->solutionManager = $solutionManager;
+        $this->eventDispatcher = $eventDispatcher;
 		$this->env = $_SERVER['APP_ENV'];
     }
 
@@ -152,7 +153,6 @@ class DocumentManager
         return [
             'New' => 'flux.status.new',
             'Predecessor_OK' => 'flux.status.predecessor_ok',
-            'Relate_OK' => 'flux.status.relate_ok',
             'Transformed' => 'flux.status.transformed',
             'Ready_to_send' => 'flux.status.ready_to_send',
             'Filter_OK' => 'flux.status.filter_ok',
@@ -164,7 +164,6 @@ class DocumentManager
             'Create_KO' => 'flux.status.create_ko',
             'Filter_KO' => 'flux.status.filter_ko',
             'Predecessor_KO' => 'flux.status.predecessor_ko',
-            'Relate_KO' => 'flux.status.relate_ko',
             'Error_transformed' => 'flux.status.error_transformed',
             'Error_checking' => 'flux.status.error_checking',
             'Error_sending' => 'flux.status.error_sending',
@@ -223,6 +222,7 @@ class DocumentManager
                 $this->userId = $this->document_data['created_by'];
                 $this->ruleId = $this->document_data['rule_id'];
                 $this->status = $this->document_data['status'];
+                $this->currentGlobalStatus = $this->document_data['global_status'] ?? null; // Track for ES sync optimization
                 $this->sourceId = $this->document_data['source_id'];
                 $this->targetId = $this->document_data['target_id'];
                 $this->ruleName = $this->document_data['name_slug'];
@@ -408,6 +408,10 @@ class DocumentManager
             // Insert source data
             $insertDataTable = $this->insertDataTable($this->data, 'S');
             $this->updateStatus('New');
+
+            // // Dispatch event for Elasticsearch sync
+            // $this->dispatchDocumentEvent(DocumentEvent::CREATED);
+
 			return $insertDataTable;
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -895,132 +899,6 @@ class DocumentManager
             $this->message .= 'Failed to check document predecessor : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
             $this->updateStatus('Predecessor_KO');
-            $this->logger->error($this->id.' - '.$this->message);
-            return false;
-        }
-    }
-
-    // Permet de valider qu'aucun document précédent pour la même règle et le même id sont bloqués
-    public function checkParentDocument(): bool
-    {
-        try {
-			// Check on current document before any action
-			$this->checkDocumentBeforeAction();
-			
-			// Return false if job has been manually stopped
-			if (!$this->jobActive) {
-				$this->message .= 'Job is not active. ';
-				return false;
-			}
-            // No relate check for deletion document. The document linked could be also deleted.
-            if ('D' == $this->documentType) {
-                $this->updateStatus('Relate_OK');
-
-                return true;
-            }
-
-            // S'il y a au moins une relation sur la règle et si on n'est pas sur une règle groupée
-            // alors on contôle les enregistrements parent
-            if (
-                    !empty($this->ruleRelationships)
-                && !$this->isChild()
-            ) {
-                $error = false;
-                // Vérification de chaque relation de la règle
-                foreach ($this->ruleRelationships as $ruleRelationship) {
-                    // If relationship source data is empty
-                    if (empty(trim($this->sourceData[$ruleRelationship['field_name_source']]))) {
-                        // If source data is empty and errorEmpty is empty too, then no error
-                        if (empty($ruleRelationship['errorEmpty'])) {
-                            $this->message .= 'The source field '.$ruleRelationship['field_name_source'].' is empty.';
-                            continue;
-                        } else {
-                            $error = true;
-                            break;
-                        }
-                    }
-
-                    // No check if "error if missing" is false
-                    if (empty($ruleRelationship['errorMissing'])) {
-                        $this->message .= 'No check on target field '.$ruleRelationship['field_name_target'].' because "Error if missing" is set to false.';
-                        continue;
-                    }
-
-                    // If the relationship is a parent type, we don't check parent document here. Data will be controlled and read from the child rule when we will send the parent document. So no target id is required now.
-                    if (!empty($ruleRelationship['parent'])) {
-                        continue;
-                    }
-
-                    // Select previous document in the same rule with the same id and status different than closed
-                    $targetId = $this->getTargetId($ruleRelationship, $this->sourceData[$ruleRelationship['field_name_source']]);
-                    if (empty($targetId['record_id'])) {
-                        // If no target id found, we check if the parent has been filtered, in this case we filter the relate document too
-                        $documentSearch = $this->searchRelateDocumentByStatus($ruleRelationship, $this->sourceData[$ruleRelationship['field_name_source']], 'Filter');
-                        if (!empty($documentSearch['id'])) {
-                            $this->docIdRefError = $documentSearch['id'];
-                            $this->typeError = 'W';
-                            $this->message .= 'Document filter because the parent document is filter too. Check reference column to open the parent document.';
-                            $this->updateStatus('Filter');
-
-                            return false;
-                        }
-                        $error = true;
-                        break;
-                    }
-                    // Save document relationship to keep the relate id and display document linked into Myddleware
-                    $this->insertDocumentRelationship($ruleRelationship, $targetId['document_id']);
-                }
-
-                // Si aucun document parent n'est trouvé alors bloque le document
-                if ($error) {
-                    // récupération du nom de la règle pour avoir un message plus clair
-                    $sqlParams = '	SELECT name FROM rule WHERE id = :rule_id';
-                    $stmt = $this->connection->prepare($sqlParams);
-                    $stmt->bindValue(':rule_id', $ruleRelationship['field_id']);
-                    $result = $stmt->executeQuery();
-                    $ruleResult = $result->fetchAssociative();
-                    $direction = $this->getRelationshipDirection($ruleRelationship);
-                    throw new \Exception('Failed to retrieve a related document. No data for the field '.$ruleRelationship['field_name_source'].'. There is not record with the ID '.('1' == $direction ? 'source' : 'target').' '.$this->sourceData[$ruleRelationship['field_name_source']].' in the rule '.$ruleResult['name'].'. This document is queued. ');
-                }
-            }
-            // Get the parent document to save it in the table Document for the child document
-            $parentDocumentId = '';
-
-            if (!empty($targetId['document_id'])) {
-                $parentDocumentId = $targetId['document_id'];
-            }
-            // Check if the status was in relate_KO before we set the status Relate_OK
-            // In this cas, new data has been created in Myddleware. So we check again if the mode of the document is still Create
-            if (
-                    'Relate_KO' == $this->status
-                and 'C' == $this->documentType
-            ) {
-                $this->documentType = $this->checkRecordExist($this->sourceId);
-                if ('U' == $this->documentType) {
-                    $this->updateTargetId($this->targetId);
-                    $this->updateType('U');
-					// Check compatibility between rule mode et document type
-					// A rule in create mode can't update data except for a child rule
-					if (
-							$this->ruleMode == 'C'
-						and	$this->documentType == 'U'
-					) {
-						// Check child in a second time to avoid to run a query each time
-						if (!$this->isChild()) {
-							$this->message .= 'Rule mode only allows to create data. Filter because this document updates data.';
-							$this->updateStatus('Filter');
-							// In case we flter the document, we return false to stop the process when this method is called in the rerun process
-							return false;
-						}
-					}
-                }
-            }
-            $this->updateStatus('Relate_OK');
-            return true;
-        } catch (\Exception $e) {
-            $this->message .= 'Failed to check document related : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->updateStatus('Relate_KO');
             $this->logger->error($this->id.' - '.$this->message);
             return false;
         }
@@ -1575,7 +1453,7 @@ class DocumentManager
             $documentEntity = $this->entityManager
                                     ->getRepository(Document::class)
                                     ->find($this->id);
-            $documentData = new DocumentDataEntity();
+            $documentData = new DocumentData();
             $documentData->setDocId($documentEntity);
             $documentData->setType($type); // Source
             $documentData->setData(json_encode($dataInsert)); // Encode in JSON
@@ -2307,6 +2185,8 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             // Récupération du statut global
             $globalStatus = $this->globalStatus[$new_status];
+            // Track previous global status for ES sync optimization
+            $previousGlobalStatus = $this->currentGlobalStatus;
             // Ajout d'un essai si erreur
             if ('Error' == $globalStatus || 'Close' == $globalStatus) {
                 ++$this->attempt;
@@ -2363,6 +2243,16 @@ class DocumentManager
 				}
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION
+
+            // Update current global status tracker
+            $this->currentGlobalStatus = $globalStatus;
+
+            // // Dispatch event for Elasticsearch sync ONLY when global_status changes
+            // // This optimization reduces ES operations by ~70% (avoids syncing intermediate statuses)
+            // if ($previousGlobalStatus !== $globalStatus) {
+            //     $this->dispatchDocumentEvent(DocumentEvent::UPDATED);
+            // }
+
 			return true;
         } catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -2402,6 +2292,10 @@ class DocumentManager
             $result = $stmt->executeQuery();
             $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
             $this->createDocLog();
+
+            // // Dispatch event for Elasticsearch sync
+            // // Use DELETED when soft-deleting, UPDATED when restoring
+            // $this->dispatchDocumentEvent(!empty($deleted) ? DocumentEvent::DELETED : DocumentEvent::UPDATED);
         } catch (\Exception $e) {
             $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2516,6 +2410,10 @@ class DocumentManager
     public function updateWorkflowError($workflowError)
     {
         try {
+			// Update workflowError only if the flag has changed
+			if ($workflowError == $this->workflowError) {
+				return;
+			}
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
@@ -2530,11 +2428,8 @@ class DocumentManager
             $stmt->bindValue(':workflowError', $workflowError);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
-            if ((int)$workflowError !== 0) {
-                $this->message .= 'Workflow error set to '.$workflowError;
-                $this->createDocLog();
-            }
-            $this->createDocLog();
+            $this->message .= 'Workflow error set to '.$workflowError;
+			$this->createDocLog();
         } catch (\Exception $e) {
             $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2851,5 +2746,28 @@ class DocumentManager
         $this->message = $message;
         $this->createDocLog();
     }
-	
+
+    // /**
+    //  * Dispatch document event for Elasticsearch sync
+    //  *
+    //  * @param string $eventType One of DocumentEvent::CREATED, UPDATED, DELETED
+    //  */
+    // protected function dispatchDocumentEvent(string $eventType): void
+    // {
+    //     if ($this->eventDispatcher === null) {
+    //         return;
+    //     }
+
+    //     try {
+    //         $event = new DocumentEvent($this->id);
+    //         $this->eventDispatcher->dispatch($event, $eventType);
+    //     } catch (\Exception $e) {
+    //         // Log error but don't fail the main operation
+    //         $this->logger->warning('Failed to dispatch document event: ' . $e->getMessage(), [
+    //             'document_id' => $this->id,
+    //             'event_type' => $eventType
+    //         ]);
+    //     }
+    // }
+
 }

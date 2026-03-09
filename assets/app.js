@@ -4,6 +4,7 @@ require('./app.scss');
 let $ = require('jquery');// create global $ and jQuery variables
 global.$ = global.jQuery = $;
 
+require('selectize');
 // Import FOSJs routing
 const routes = require('../public/js/fos_js_routes.json');
 import Routing from '../vendor/friendsofsymfony/jsrouting-bundle/Resources/public/js/router.min.js';
@@ -26,12 +27,21 @@ require('./js/lib/jquery_myddleware/function.js')
 
 require('./js/lib/d3.v2.js')
 require('./js/jcarousel.ajax.js')
-require('./js/animation.js')
 require('./js/task.js')
 require('./js/rule_relation_filter.js')
 require('./js/regle.js')
 require('./js/rule-group.js')
 require('./js/notifications.js')
+
+const path = window.location.pathname;
+const isEditRule = /\/rule\/[a-zA-Z0-9]{13}\/edit/.test(path);
+const isCreateRule = /\/rule\/[a-zA-Z0-9]{13}\/create/.test(path);
+
+
+if (isEditRule || isCreateRule) {
+    require('./js/mapping-target-dedup.js');
+    require('./js/rule-create.js');
+}
 
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
 require('./js/mappingRule.js')
@@ -44,6 +54,11 @@ require('./js/historique.js')
 
 if (window.location.href.includes('rule/document/list')) {
     require('./js/filter.js');
+}
+
+if (window.location.href.includes('rule/')) {
+    require('./js/mapping-target-dedup.js');
+    require('./js/rule-create.js')
 }
 
 if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
@@ -77,7 +92,7 @@ if (window.location.href.includes('rule/view')) {
 }
 
 // if windows loction includes rule/account
-if (window.location.href.includes('rule/account')) {
+if (window.location.href.includes('/account')) {
     require('./js/account.js')
 }
 
@@ -95,7 +110,7 @@ require('./js/crontab.js')
 require('./js/jobscheduler.js')
 }
 
-if (window.location.href.includes('rule/managementsmtp')) {
+if (window.location.href.includes('managementsmtp')) {
     require('./js/smtp.js')
 }
 
@@ -128,7 +143,7 @@ if (window.location.href.includes('rule/flux')) {
     require('./js/lookup-filter.js')
 }
 
-if (window.location.href.includes('rule/user_manager')) {
+if (window.location.href.includes('user_manager')) {
     require('./js/user-manager.js')
 }
 if (window.location.href.includes('flux/modern')) {

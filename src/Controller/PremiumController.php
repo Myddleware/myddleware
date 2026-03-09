@@ -33,9 +33,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-/**
- * @Route("/premium")
- */
+#[Route('/premium')]
 class PremiumController extends AbstractController
 {
 
@@ -72,8 +70,4 @@ class PremiumController extends AbstractController
             throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
         }
     }
-
-
-
-
 }
