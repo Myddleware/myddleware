@@ -22,6 +22,33 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
+// Connection feedback helper: applies card-level animations
+function setStatus($context, state) {
+  var $card = $context.closest('.connector-card');
+  if (!$card.length) $card = $('.connector-card');
+  if (!$card.length) return;
+
+  // Remove previous feedback classes
+  $card.removeClass('is-loading is-valid is-invalid');
+
+  // Store state for next_step() checks
+  $card.attr('data-connection-status', state);
+
+  // Re-trigger animations by forcing reflow
+  void $card[0].offsetWidth;
+
+  if (state === 'loading') {
+    $card.addClass('is-loading');
+  } else if (state === 'online') {
+    $card.addClass('is-valid');
+    // Remove class after animation so styles don't persist
+    setTimeout(function() { $card.removeClass('is-valid'); }, 2000);
+  } else if (state === 'offline') {
+    $card.addClass('is-invalid');
+    setTimeout(function() { $card.removeClass('is-invalid'); }, 2000);
+  }
+}
+
 // Load jQuery UI via CDN as fallback since webpack imports aren't working
 if (typeof $.ui === 'undefined') {
   const jqueryUIScript = document.createElement('script');
@@ -112,27 +139,33 @@ $(function () {
   // Changement de solution source / cible
   $(document).on("change", "#soluce_cible, #soluce_source", function () {
     var val = $(this).val();
-    var parent = $(this).parent().attr("id"); // "source" ou "cible"
+    var $container = $(this).closest('#source, #cible');
+    var parent = $container.attr("id"); // "source" ou "cible"
     var val2 = val ? val.split("_") : [];
 
     $("#msg_status").hide();
 
     if (!val) {
       $("#" + parent + "_msg").hide();
-      $(this).parent().find(".picture").empty();
-      $(this).parent().find(".champs").empty();
-      $(this).parent().find(".help").empty();
+      $container.find(".picture").empty();
+      var $champs = $container.find(".champs");
+      if ($champs.children().length) {
+        $champs.css({ overflow: 'hidden', height: $champs.height() });
+        $champs.animate({ height: 0 }, 400, 'swing', function() {
+          $champs.empty().css({ height: '', overflow: '' });
+        });
+      }
+      $container.find(".help").empty();
       return;
     }
 
     // Affichage du logo de la solution
-    $(this).parent().find(".picture img").remove();
-    $(this).parent().find(".help").empty();
+    $container.find(".picture img").remove();
+    $container.find(".help").empty();
     var solution = val2[0] ? val2[0] : val;
     if (window.location.pathname.includes("createout")) {
       var path_img_modal = "../../../build/images/";
-      $(this)
-        .parent()
+      $container
         .find(".picture")
         .append(
           '<img src="' +
@@ -144,8 +177,7 @@ $(function () {
           '" />'
         );
     } else {
-      $(this)
-        .parent()
+      $container
         .find(".picture")
         .append(
           '<img src="' +
@@ -158,6 +190,9 @@ $(function () {
         );
     }
 
+    // Update dynamic title for connector card
+    $container.find(".connector-config-title").text(solution.charAt(0).toUpperCase() + solution.slice(1));
+
     if ($.isNumeric(val2[1])) {
       $.ajax({
         type: "POST",
@@ -169,26 +204,17 @@ $(function () {
           mod: 3,
         },
         beforeSend: function () {
-          $("#" + parent + "_status img").removeAttr("src");
-          $("#" + parent + "_status img").attr("src", path_img + "loader.gif");
+          setStatus($container, 'loading');
         },
         success: function (msg) {
           var r = msg.split(";");
 
           if (r[1] == 0) {
-            $("#" + parent + "_status img").removeAttr("src");
-            $("#" + parent + "_status img").attr(
-              "src",
-              path_img + "status_offline.png"
-            );
+            setStatus($container, 'offline');
             $("#" + parent + "_msg span").html(r[0]);
             $("#" + parent + "_msg").show();
           } else {
-            $("#" + parent + "_status img").removeAttr("src");
-            $("#" + parent + "_status img").attr(
-              "src",
-              path_img + "status_online.png"
-            );
+            setStatus($container, 'online');
             $("#" + parent + "_msg").hide();
             $("#" + parent + "_msg span").html("");
           }
@@ -198,7 +224,7 @@ $(function () {
       });
     } else {
       // Sinon : on récupère les champs de connexion à afficher (mod=1)
-      champs(val, $(this).parent().find(".champs"), parent);
+      champs(val, $container.find(".champs"), parent);
     }
   });
 
@@ -569,13 +595,11 @@ function notification() {
 // -------------------- ÉTAPE SUIVANTE (création connecteur / règle) -----------
 
 function next_step(error) {
-  $(".status")
-    .find("img")
-    .each(function () {
-      if ($(this).attr("src") != path_img + "status_online.png") {
-        error++;
-      }
-    });
+  $(".connector-card").each(function () {
+    if ($(this).attr("data-connection-status") !== "online") {
+      error++;
+    }
+  });
 
   var connector = $("#connexion_connector");
   if (!connector.length) {
@@ -597,8 +621,8 @@ function verif(div_clock) {
   $(".testing", div_clock).on("click", function () {
     var parent = $("#source").attr("id");
     var datas = "";
-    var status = $(div_clock).parent().find(".status img");
-    var solution = $(div_clock).parent().find(".liste_solution").val();
+    var $cardContext = $(div_clock).closest('#source, #cible');
+    var solution = $(div_clock).closest('#source, #cible').find(".liste_solution").val();
     $("input").each(function () {
       if ($(this).attr("data-param") != undefined) {
         datas +=
@@ -630,21 +654,11 @@ function verif(div_clock) {
         mod: 2,
       },
       beforeSend: function () {
-        $(status).removeAttr("src");
-        if (window.location.pathname.includes("createout")) {
-          $(status).attr("src", path_img_modal + "loader.gif");
-        } else {
-          $(status).attr("src", path_img + "loader.gif");
-        }
+        setStatus($cardContext, 'loading');
       },
       success: function (json) {
         if (!json.success) {
-          $(status).removeAttr("src");
-          if (window.location.pathname.includes("createout")) {
-            $(status).attr("src", path_img_modal + "status_offline.png");
-          } else {
-            $(status).attr("src", path_img + "status_offline.png");
-          }
+          setStatus($cardContext, 'offline');
           $("#msg_status span.error").html(json.message);
           $("#msg_status").show();
           return false;
@@ -695,8 +709,7 @@ function verif(div_clock) {
 
                     var response = dataCode.split(";");
 
-                    $(status).removeAttr("src");
-                    $(status).attr("src", path_img + "status_offline.png");
+                    setStatus($cardContext, 'offline');
 
                     if (
                       typeof data_error_without_popup[0] !== "undefined" &&
@@ -708,8 +721,7 @@ function verif(div_clock) {
                     $("#msg_status span.error").html(response[0]);
                     $("#msg_status").show();
                   } else {
-                    $(status).removeAttr("src");
-                    $(status).attr("src", path_img + "status_online.png");
+                    setStatus($cardContext, 'online');
                     $("#msg_status").hide();
                     $("#msg_status span.error").html("");
                     $("#step_modules_confirme").removeAttr("disabled");
@@ -719,21 +731,11 @@ function verif(div_clock) {
             } else {
               // Sans popup
               if (!json.success) {
-                $(status).removeAttr("src");
-                if (window.location.pathname.includes("createout")) {
-                  $(status).attr("src", path_img_modal + "status_offline.png");
-                } else {
-                  $(status).attr("src", path_img + "status_offline.png");
-                }
+                setStatus($cardContext, 'offline');
                 $("#msg_status span.error").html(json.message);
                 $("#msg_status").show();
               } else {
-                $(status).removeAttr("src");
-                if (window.location.pathname.includes("createout")) {
-                  $(status).attr("src", path_img_modal + "status_online.png");
-                } else {
-                  $(status).attr("src", path_img + "status_online.png");
-                }
+                setStatus($cardContext, 'online');
                 $("#msg_status").hide();
                 $("#msg_status span.error").html("");
                 $("#step_modules_confirme").removeAttr("disabled");
@@ -790,7 +792,18 @@ function champs(solution, champs, parent) {
       mod: 1,
     },
     success: function (data) {
-      $(champs).html(data);
+      var $el = $(champs);
+      // Capture current height (may be 0 if empty)
+      var startHeight = $el.height();
+      $el.css({ height: startHeight, overflow: 'hidden' });
+      // Insert the new content
+      $el.html(data);
+      // Measure natural height with content
+      var targetHeight = $el.prop('scrollHeight');
+      // Animate to natural height
+      $el.animate({ height: targetHeight }, 400, 'swing', function() {
+        $el.css({ height: '', overflow: '' });
+      });
       verif(champs);
     },
   });
