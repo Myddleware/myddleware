@@ -35,35 +35,68 @@
 	{% include '_notifications.html.twig' with { filter_prefix: 'task.' } %}
 
 	<div id="task" >
-<a href="{{ path('task_stopall') }}">
-    <button class="btn btn-danger mb-3 mt-4">
-        <i class="fa fa-ban" aria-hidden="true"></i>
-        {{'list_task.stop_all_tasks'|trans}}
-    </button>
-</a>
+<div id="task-filter-table-wrapper">
+<div id="task-filter-bar">
+	<div class="task-filter-col task-filter-col-param">
+		<label>{{'list_task.th.param'|trans}}</label>
+		<select id="filter_param" class="task-filter-select" placeholder="Search...">
+			<option value="">Search...</option>
+			{% for ruleId, ruleName in filterOptions.rules %}
+				<option value="{{ ruleId }}" {{ filters.param|default('') == ruleId ? 'selected' : '' }}>{{ ruleName }}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="task-filter-col task-filter-col-status">
+		<label>{{'list_task.th.status'|trans}}</label>
+		<select id="filter_status" class="task-filter-select" placeholder="Search...">
+			<option value="">Search...</option>
+			{% for s in filterOptions.statuses %}
+				<option value="{{ s }}" {{ filters.status|default('') == s ? 'selected' : '' }}>{{ s }}</option>
+			{% endfor %}
+		</select>
+	</div>
+	<div class="task-filter-col task-filter-col-date">
+		<label>{{'list_task.th.begin'|trans}}</label>
+		<input type="text" id="filter_begin_date" class="form-control task-filter-datepicker" placeholder="Search..." value="{{ filters.begin_date|default('') }}" autocomplete="off">
+	</div>
+	<div class="task-filter-col task-filter-col-date">
+		<label>{{'list_task.th.end'|trans}}</label>
+		<input type="text" id="filter_end_date" class="form-control task-filter-datepicker" placeholder="Search..." value="{{ filters.end_date|default('') }}" autocomplete="off">
+	</div>
+	<div class="task-filter-col task-filter-col-stopall">
+		<a href="{{ path('task_stopall') }}">
+			<button class="btn btn-danger">
+				<i class="fa fa-ban" aria-hidden="true"></i>
+				{{'list_task.stop_all_tasks'|trans}}
+			</button>
+		</a>
+	</div>
+</div>
 
 <div>
-			{% if nb > 0 %}
-				<div class="table-wrapper table-wrapper-task">
-					<table class="listepager table container shadow-table">
-						{% if entities is not empty %}	
+			<div class="table-wrapper table-wrapper-task">
+				<table class="listepager table container shadow-table">
+					<thead>
 						<tr>
 							<th class="rounded-table-up-left">{{'list_task.th.param'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
 							<th>{{'list_task.th.begin'|trans}}</th>
-							<th>{{'list_task.th.end'|trans}}</th>				
+							<th>{{'list_task.th.end'|trans}}</th>
 							<th>{{'list_task.th.open'|trans}}</th>
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
-							<th>{{'list_task.th.error'|trans}}</th>	
+							<th>{{'list_task.th.error'|trans}}</th>
 							<th class="rounded-table-up-right">{{'list_task.th.message'|trans}}</th>
-						</tr> 
+						</tr>
+					</thead>
+					<tbody id="tbody_task_list">
+					{% if nb > 0 %}
 						{% for task in entities %}
 							{% if task.message is not empty %}
 								<tr class="fd_normal">
 							{% else %}
 								<tr>
-							{% endif %}    
+							{% endif %}
 							<td>
 								{% if task.param|length > 60 %}
 									<a href="{{ path('task_view',{'id' : task.id }) }}">{{ task.param|slice(0, 30) ~ '...' }}</a>
@@ -79,19 +112,19 @@
 									<a href="{{ path('task_view',{'id' : task.id }) }}" class="help-link all-link">{{ task.param }}</a>
 								{% endif %}
 							</td>
-							<td class="ctr">             
+							<td class="ctr">
 								{% if task.status|lower == 'end' %}
 								<span class="label label-default">{{ task.status }}</span>
 								{% else %}
 								<span class="label label-warning">{{ task.status }}</span>
 								{% endif %}
-							</td>    
+							</td>
 							<td class="date_task_list">{{ task.begin|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
 							<td class="date_task_list">{{ task.end|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
-							<td class="count">{{ task.open }}</td>    
+							<td class="count">{{ task.open }}</td>
 							<td class="count">{{ task.close }}</td>
-							<td class="count">{{ task.cancel }}</td> 
-							<td class="count">{{ task.error }}</td>    
+							<td class="count">{{ task.cancel }}</td>
+							<td class="count">{{ task.error }}</td>
 							<td>
 								{% if task.message is not empty %}
 									<div id="message-short-{{ loop.index }}">
@@ -105,9 +138,16 @@
 								{% else %}
 									{{ task.message }}
 								{% endif %}
-							</td>                     
-						</tr>            
-						{% endfor %}		
+							</td>
+						</tr>
+						{% endfor %}
+					{% else %}
+						<tr>
+							<td colspan="9" class="text-center py-3">{{ 'list_task.empty'|trans }}</td>
+						</tr>
+					{% endif %}
+					</tbody>
+					<tfoot>
 						<tr class="invisibele-row-bottom">
 							<th class="rounded-table-down-left">{{'list_task.th.id'|trans}}</th>
 							<th>{{'list_task.th.status'|trans}}</th>
@@ -116,25 +156,24 @@
 							<th>{{'list_task.th.open'|trans}}</th>
 							<th>{{'list_task.th.close'|trans}}</th>
 							<th>{{'list_task.th.cancel'|trans}}</th>
-							<th>{{'list_task.th.error'|trans}}</th>	
-							<th class="rounded-table-down-right">{{'list_task.th.message'|trans}}</th>			
-						</tr>			
-					{% endif %}
+							<th>{{'list_task.th.error'|trans}}</th>
+							<th class="rounded-table-down-right">{{'list_task.th.message'|trans}}</th>
+						</tr>
+					</tfoot>
 				</table>
-			</div>		
-			<div class="d-flex justify-content-center mt-4">
+			</div>
+			<div id="task_pagination_container" class="d-flex justify-content-center mt-4">
 				{% include '_pagination.html.twig' with {pager: pager, route: 'task_list_page'} %}
 			</div>
-			{% else %}
-				<p class="display-6">{{ 'list_task.empty'|trans }}</p>
-			{% endif %}
 		</div>
     </div>
+</div>
 
     {# ------------- PARAMETRES JQUERY ------------- #}
-    <script type="text/javascript">   
+    <script type="text/javascript">
 		var path_img = "{{ asset('build/images/regle/') }}";
 		var lang = "{{app.request.locale}}";
+		var task_list_url = "{{ path('task_list') }}";
     </script>
     {# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock %}
@@ -142,4 +181,5 @@
 {% block cssin %}{% endblock cssin %}
 
 {% block js %}
+	{{ encore_entry_script_tags('tasklist') }}
 {% endblock js %}

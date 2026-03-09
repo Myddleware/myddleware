@@ -26,6 +26,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Repository;
 
 use App\Entity\Job;
+use App\Entity\Rule;
 use App\Manager\HomeManager;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -126,5 +127,109 @@ class JobRepository extends ServiceEntityRepository
         }
 
         return $queryBuilder;
+    }
+
+    public function findJobsFiltered(array $filters, int $limit = null)
+    {
+        $qb = $this->createQueryBuilder('j')
+            ->orderBy('j.status', 'DESC')
+            ->addOrderBy('j.begin', 'DESC');
+
+        if (!empty($filters['param'])) {
+            $qb->andWhere('j.param LIKE :param')
+               ->setParameter('param', '%' . $filters['param'] . '%');
+        }
+
+        if (!empty($filters['status'])) {
+            $qb->andWhere('j.status = :status')
+               ->setParameter('status', $filters['status']);
+        }
+
+        if (!empty($filters['begin_date'])) {
+            $dayStart = new DateTime($filters['begin_date']);
+            $dayStart->setTime(0, 0, 0);
+            $dayEnd = clone $dayStart;
+            $dayEnd->setTime(23, 59, 59);
+            $qb->andWhere('j.begin >= :begin_start AND j.begin <= :begin_end')
+               ->setParameter('begin_start', $dayStart)
+               ->setParameter('begin_end', $dayEnd);
+        }
+
+        if (!empty($filters['end_date'])) {
+            $dayStart = new DateTime($filters['end_date']);
+            $dayStart->setTime(0, 0, 0);
+            $dayEnd = clone $dayStart;
+            $dayEnd->setTime(23, 59, 59);
+            $qb->andWhere('j.end >= :end_start AND j.end <= :end_end')
+               ->setParameter('end_start', $dayStart)
+               ->setParameter('end_end', $dayEnd);
+        }
+
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb;
+    }
+
+    public function getFilterOptions(int $limit = null): array
+    {
+        $ids = null;
+        if ($limit !== null) {
+            $subQb = $this->createQueryBuilder('sub')
+                ->select('sub.id')
+                ->orderBy('sub.status', 'DESC')
+                ->addOrderBy('sub.begin', 'DESC')
+                ->setMaxResults($limit);
+            $subResult = $subQb->getQuery()->getResult();
+            $ids = array_column($subResult, 'id');
+
+            if (empty($ids)) {
+                return [
+                    'rules' => [],
+                    'statuses' => [],
+                ];
+            }
+        }
+
+        // Extract distinct param values, then find rule IDs within them
+        $paramQb = $this->createQueryBuilder('j2')
+            ->select('DISTINCT j2.param');
+        if ($ids !== null) {
+            $paramQb->andWhere('j2.id IN (:ids)')->setParameter('ids', $ids);
+        }
+        $rawParams = array_column($paramQb->getQuery()->getResult(), 'param');
+
+        // Extract rule IDs (hex strings of 13+ chars) from param values
+        $ruleIdSet = [];
+        foreach ($rawParams as $paramValue) {
+            if (preg_match_all('/\b([0-9a-f]{13,})\b/i', $paramValue, $matches)) {
+                foreach ($matches[1] as $match) {
+                    $ruleIdSet[$match] = true;
+                }
+            }
+        }
+        $ruleIds = array_keys($ruleIdSet);
+
+        // Look up rule names for those IDs
+        $ruleMap = [];
+        if (!empty($ruleIds)) {
+            $ruleRepo = $this->getEntityManager()->getRepository(Rule::class);
+            $rules = $ruleRepo->createQueryBuilder('r')
+                ->select('r.id, r.name')
+                ->where('r.id IN (:ids)')
+                ->setParameter('ids', $ruleIds)
+                ->orderBy('r.name', 'ASC')
+                ->getQuery()
+                ->getResult();
+            foreach ($rules as $rule) {
+                $ruleMap[$rule['id']] = $rule['name'];
+            }
+        }
+
+        return [
+            'rules' => $ruleMap,
+            'statuses' => ['Start', 'End'],
+        ];
     }
 }

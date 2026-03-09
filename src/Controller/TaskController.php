@@ -41,6 +41,7 @@ use Pagerfanta\Pagerfanta;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -81,21 +82,41 @@ class TaskController extends AbstractController
 
     #[Route('/list', name: 'task_list', defaults: ['page' => 1])]
     #[Route('/list/page-{page}', name: 'task_list_page', requirements: ['page' => '\d+'])]
-    public function tasksList($page): Response
+    public function tasksList(Request $request, $page): Response
     {
         // Get the search limit from requesting the database for config 'search_limit'
         $searchLimit = $this->params['search_limit'] ?? 1000;
 
-        // Execute query with limit to prevent timeouts on large job tables
-        $jobs = $this->jobRepository->findJobsForPagination($searchLimit)
-            ->getQuery()
-            ->getResult();
+        // Collect filter values from query parameters
+        $filterKeys = ['param', 'status', 'begin_date', 'end_date'];
+        $filters = [];
+        foreach ($filterKeys as $key) {
+            $val = $request->query->get($key, '');
+            if ($val !== '' && $val !== null) {
+                $filters[$key] = $val;
+            }
+        }
+
+        $hasFilters = !empty($filters);
+
+        if ($hasFilters) {
+            $jobs = $this->jobRepository->findJobsFiltered($filters, $searchLimit)
+                ->getQuery()
+                ->getResult();
+        } else {
+            $jobs = $this->jobRepository->findJobsForPagination($searchLimit)
+                ->getQuery()
+                ->getResult();
+        }
 
         $compact = $this->nav_pagination([
             'adapter_em_repository' => $jobs,
             'maxPerPage' => $this->params['pager'] ?? 25,
             'page' => $page,
         ], false);
+
+        // Get distinct values for filter dropdowns
+        $filterOptions = $this->jobRepository->getFilterOptions($searchLimit);
 
         //Check the user timezone
         $timezone = $this->getUser()->getTimezone();
@@ -108,8 +129,9 @@ class TaskController extends AbstractController
             'entities' => $compact['entities'],
             'pager' => $compact['pager'],
             'timezone' => $timezone,
-        ]
-        );
+            'filterOptions' => $filterOptions,
+            'filters' => $filters,
+        ]);
     }
 
     #[Route('/view/{id}/log', name: 'task_view', defaults: ['page' => 1])]
