@@ -146,18 +146,18 @@ $( function() {
 
 		var datas = '';
 		var parent = 'source';
-		var status = $('#source_status img');
-		
+		var $cardContext = $('#source');
+
 		$( '.title' ).each(function(){
-						
-			if( $(this).text() != 'solution' && $(this).text() != 'nom') {				
-				input = $('.params', $(this).parent());                
+
+			if( $(this).text() != 'solution' && $(this).text() != 'nom') {
+				input = $('.params', $(this).parent());
 				if(input.attr('data-param') != undefined){
 					datas += input.attr('data-param') + "::" + input.val().replace( /;/g, "" )+ ";";
 				}
-			}			
-		});		
-		
+			}
+		});
+
 		$.ajax({
 			type: "POST",
 			// url: Routing.generate('regle_inputs'),
@@ -167,106 +167,94 @@ $( function() {
 				parent : parent,
 				solution : $('.vignette').attr('alt'),
 				mod : 2 // connexion
-			},	
-			beforeSend:	function() {				
-				status.removeAttr("src");
-				status.attr("src", "../" +path_img + "loader.gif");				
-			},				
+			},
+			beforeSend:	function() {
+				setStatus($cardContext, 'loading');
+			},
 			success: function(json){
-				
-				//r = data.split(';');
+
 				// Si connexion echoue
-				if(!json.success) {							
-					status.removeAttr("src");
-					status.attr("src", "../" +path_img + "status_offline.png");
+				if(!json.success) {
+					setStatus($cardContext, 'offline');
 					$('#msg_status span.error').html(json.message);
 					$('#msg_status').show();
 					return false;
 				}
-				// Si connexion ok alors on test si la solution à besoin de la pop-up	
+				// Si connexion ok alors on test si la solution à besoin de la pop-up
 				$.ajax({
 					type: "POST",
 					data:{
 						solutionjs : true,
 						detectjs : true
-					}, 				
+					},
 					// url: Routing.generate('connector_callback'),
 					url: '../callback/',
 					success: function(data){
 						param = data.split(';');
-						
+
 						// si popup
-						if(param[0] == 1) {	
-							
+						if(param[0] == 1) {
+
 							link = param[1];
-										
+
 							$.ajax({
 								type: "POST",
 								data:{
 									solutionjs : true
-								},					
+								},
 								// url: Routing.generate('connector_callback'),
 								url: '../callback/',
-								success: function(data){	
+								success: function(data){
 
 									// if 1ere fois
-									if(data != 1) {		
-										
-										var win = window.open( link, 'Connexion','scrollbars=1,resizable=1,height=560,width=770'); 
+									if(data != 1) {
+
+										var win = window.open( link, 'Connexion','scrollbars=1,resizable=1,height=560,width=770');
 										if(data != 401) {
-											var timer = setInterval(function() {   
-												if(win.closed) {  
-													clearInterval(timer);  									        
+											var timer = setInterval(function() {
+												if(win.closed) {
+													clearInterval(timer);
 													if (confirm("Reconnect")) {
 														$('#connexion').trigger();
-													} 
-												}  
-											}, 1000); 												
-										} 
+													}
+												}
+											}, 1000);
+										}
 										else {
 											$('#connexion').trigger();
-										} 																									
-																			
-										r = data.split(';');							
-																	
-										status.removeAttr("src");
-										status.attr("src", "../" +path_img+"status_offline.png");
+										}
+
+										r = data.split(';');
+
+										setStatus($cardContext, 'offline');
 										$('#msg_status span.error').html(r[0]);
-										$('#msg_status').show();																												
+										$('#msg_status').show();
 									}
-									else {									
-										status.removeAttr("src");
-										status.attr("src", "../"+path_img+"status_online.png");
+									else {
+										setStatus($cardContext, 'online');
 										$('#msg_status').hide();
-										$('#msg_status span.error').html('');	
-										$('#step_modules_confirme').removeAttr('disabled');					
+										$('#msg_status span.error').html('');
+										$('#step_modules_confirme').removeAttr('disabled');
 									}
 								}
 							});
 						}// sans popup
-						else {						
-							if(!json.success) {								
-								status.removeAttr("src");
-								status.attr("src","../" +path_img+"status_offline.png");
+						else {
+							if(!json.success) {
+								setStatus($cardContext, 'offline');
 								$('#msg_status span.error').html(r[0]);
 								$('#msg_status').show();
 							}
 							else{
-								let pathString = "../";
-                                // if the window path contains index.php (docker)
-                                if (window.location.pathname.includes("index.php")) {
-                                    pathString = "../../../../";
-                                }	
-								status.removeAttr("src");
-								status.attr("src", pathString + path_img + "status_online.png");
+								setStatus($cardContext, 'online');
 								$('#msg_status').hide();
 								$('#msg_status span.error').html('');
-							}						
-						}							
-						
-						
+							}
+						}
+
+
 					}
-				});				
+				});
 
 			}
 		});		 

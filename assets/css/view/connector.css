@@ -22,38 +22,359 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
 
-#connector #tab_connector td.title {
-	width: 35%;
-	color:#0F66A9;
-	padding-right: 10px;
+/* =========================================
+   CONNECTOR CARD LAYOUT
+   ========================================= */
+
+.connector-card {
+    background: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    max-width: 900px;
+    margin: 2rem auto;
+    position: relative;
 }
 
-#connector #tab_connector td.value input {
-	width:100%;
-	padding:8px;
+@media (min-width: 768px) {
+    .connector-card {
+        flex-direction: row;
+    }
 }
 
-/* Style for status icon to keep it inline with buttons */
-.status {
-	display: inline-block;
-	vertical-align: middle;
-	white-space: nowrap;
+/* LEFT PANEL */
+.card-left {
+    background: linear-gradient(135deg, #ffffff 0%, #e0f4fa 100%);
+    padding: 40px;
+    width: 100%;
+    border-right: 1px solid #e1e5e8;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
 }
 
-/* Prevent button row from wrapping */
-#connector .col[style*="margin-right: 10rem;"] {
-	display: flex;
-	flex-wrap: nowrap;
-	gap: 0.5rem;
-	align-items: center;
+@media (min-width: 768px) {
+    .card-left {
+        width: 35%;
+    }
 }
 
-/* Updates after SF4 upgrade */
-
-/* Title 'Creating a connector' */
-.tabs ul.ui-tabs-nav {
-	display: flex;
-	justify-content: center;
-
+.app-selector select {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid #e1e5e8;
+    font-size: 16px;
+    color: #333333;
+    margin-bottom: 30px;
+    outline: none;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+.app-selector .selectize-control {
+    width: 130%;
+    margin-left: -15%;
+    margin-bottom: 2rem;
+}
+
+.app-selector select:focus {
+    border-color: #0097c5;
+    box-shadow: 0 0 0 3px rgba(0, 151, 197, 0.1);
+}
+
+.app-icon {
+    width: 110px;
+    height: 110px;
+    background: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 10px;
+    border: 4px solid #ffffff;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: hidden;
+}
+
+.app-icon img {
+    max-width: 70%;
+    max-height: 70%;
+    object-fit: contain;
+}
+
+/* RIGHT PANEL */
+.card-right {
+    padding: 40px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+}
+
+@media (min-width: 768px) {
+    .card-right {
+        width: 65%;
+    }
+}
+
+.card-right h2 {
+    color: #0097c5;
+    margin-bottom: 30px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-transform: capitalize;
+}
+
+/* =========================================
+   FLOATING LABEL FORM
+   ========================================= */
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 25px;
+}
+
+.form-grid .input-group {
+    position: relative;
+    animation: fadeUp 0.5s ease-out backwards;
+    display: block;
+}
+
+.form-grid .input-group:nth-child(1) { animation-delay: 0.1s; }
+.form-grid .input-group:nth-child(2) { animation-delay: 0.2s; }
+.form-grid .input-group:nth-child(3) { animation-delay: 0.3s; }
+.form-grid .input-group:nth-child(4) { animation-delay: 0.4s; }
+.form-grid .input-group:nth-child(5) { animation-delay: 0.5s; }
+.form-grid .input-group:nth-child(6) { animation-delay: 0.6s; }
+
+.form-grid .input-group input[type="text"],
+.form-grid .input-group input[type="url"],
+.form-grid .input-group input[type="password"],
+.form-grid .input-group input[type="email"],
+.form-grid .input-group input[type="number"] {
+    width: 100%;
+    padding: 16px 16px 12px 16px;
+    border: 1px solid #e1e5e8;
+    border-radius: 8px;
+    font-size: 15px;
+    color: #333333;
+    background: transparent;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.form-grid .input-group label {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    font-size: 15px;
+    color: #999;
+    pointer-events: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    background: #ffffff;
+    padding: 0 4px;
+}
+
+.form-grid .input-group input:not([type="hidden"]):focus,
+.form-grid .input-group input:not([type="hidden"]):not(:placeholder-shown) {
+    border-color: #0097c5;
+}
+
+.form-grid .input-group input:not([type="hidden"]):focus ~ label,
+.form-grid .input-group input:not([type="hidden"]):not(:placeholder-shown) ~ label {
+    top: -10px;
+    left: 12px;
+    font-size: 12px;
+    color: #0097c5;
+    font-weight: 600;
+}
+
+/* =========================================
+   ACTION BUTTONS
+   ========================================= */
+
+.actions {
+    margin-top: auto;
+    padding-top: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.btn-test {
+    background: #ffffff;
+    color: #333333;
+    border: 1px solid #e1e5e8;
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-test:hover {
+    border-color: #0097c5;
+    color: #0097c5;
+    background: #e0f4fa;
+}
+
+.btn-save {
+    background: #0097c5;
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(0, 151, 197, 0.3);
+    padding: 12px 24px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-save:hover {
+    background: #007da3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 151, 197, 0.4);
+}
+
+/* =========================================
+   CONNECTION TEST FEEDBACK (card-level)
+   ========================================= */
+
+/* Loading: subtle pulse on the whole card */
+.connector-card.is-loading {
+    animation: cardPulse 1.2s ease-in-out infinite;
+}
+
+/* Success: green wash that fades (card only, no child borders) */
+.connector-card.is-valid {
+    animation: cardGreenGlow 1.8s ease-out forwards;
+}
+
+/* Failure: shake + red wash that fades (card only, no child borders) */
+.connector-card.is-invalid {
+    animation: cardShake 0.5s cubic-bezier(.36, .07, .19, .97),
+               cardRedGlow 1.8s ease-out forwards;
+}
+
+/* =========================================
+   KEYFRAMES
+   ========================================= */
+
+@keyframes fadeUp {
+    0% { opacity: 0; transform: translateY(20px); }
+    100% { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Loading pulse --- */
+@keyframes cardPulse {
+    0%, 100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
+    50% { box-shadow: 0 10px 30px rgba(0, 151, 197, 0.25); }
+}
+
+/* --- Success: card bounce --- */
+@keyframes cardBounce {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.025); }
+    50% { transform: scale(0.99); }
+    75% { transform: scale(1.01); }
+    100% { transform: scale(1); }
+}
+
+/* --- Success: card green glow that fades --- */
+@keyframes cardGreenGlow {
+    0% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
+    10% { box-shadow: 0 0 50px 10px rgba(46, 204, 113, 0.7); }
+    40% { box-shadow: 0 0 40px 6px rgba(46, 204, 113, 0.45); }
+    100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
+}
+
+/* --- Success: input borders flash green then revert --- */
+@keyframes inputGreenFlash {
+    0% { border-color: #e1e5e8; background-color: transparent; }
+    10% { border-color: #2ecc71; background-color: rgba(46, 204, 113, 0.08); }
+    40% { border-color: #2ecc71; background-color: rgba(46, 204, 113, 0.04); }
+    100% { border-color: #e1e5e8; background-color: transparent; }
+}
+
+/* --- Success: app icon ring flash green --- */
+@keyframes iconGreenFlash {
+    0% { border-color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+    10% { border-color: #2ecc71; box-shadow: 0 0 30px 8px rgba(46, 204, 113, 0.6); }
+    40% { border-color: #2ecc71; box-shadow: 0 0 20px 4px rgba(46, 204, 113, 0.3); }
+    100% { border-color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+}
+
+/* --- Success: test button flash green --- */
+@keyframes btnGreenFlash {
+    0% { border-color: #e1e5e8; color: #333333; background-color: #ffffff; }
+    10% { border-color: #2ecc71; color: #2ecc71; background-color: rgba(46, 204, 113, 0.1); }
+    40% { border-color: #2ecc71; color: #2ecc71; background-color: rgba(46, 204, 113, 0.05); }
+    100% { border-color: #e1e5e8; color: #333333; background-color: #ffffff; }
+}
+
+/* --- Failure: card shake --- */
+@keyframes cardShake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-6px); }
+    20%, 40%, 60%, 80% { transform: translateX(6px); }
+}
+
+/* --- Failure: card red glow that fades --- */
+@keyframes cardRedGlow {
+    0% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
+    10% { box-shadow: 0 0 50px 10px rgba(231, 76, 60, 0.7); }
+    40% { box-shadow: 0 0 40px 6px rgba(231, 76, 60, 0.45); }
+    100% { box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); }
+}
+
+/* --- Failure: input borders flash red then revert --- */
+@keyframes inputRedFlash {
+    0% { border-color: #e1e5e8; background-color: transparent; }
+    10% { border-color: #e74c3c; background-color: rgba(231, 76, 60, 0.08); }
+    40% { border-color: #e74c3c; background-color: rgba(231, 76, 60, 0.04); }
+    100% { border-color: #e1e5e8; background-color: transparent; }
+}
+
+/* --- Failure: app icon ring flash red --- */
+@keyframes iconRedFlash {
+    0% { border-color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+    10% { border-color: #e74c3c; box-shadow: 0 0 30px 8px rgba(231, 76, 60, 0.6); }
+    40% { border-color: #e74c3c; box-shadow: 0 0 20px 4px rgba(231, 76, 60, 0.3); }
+    100% { border-color: #ffffff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08); }
+}
+
+/* --- Failure: test button flash red --- */
+@keyframes btnRedFlash {
+    0% { border-color: #e1e5e8; color: #333333; background-color: #ffffff; }
+    10% { border-color: #e74c3c; color: #e74c3c; background-color: rgba(231, 76, 60, 0.1); }
+    40% { border-color: #e74c3c; color: #e74c3c; background-color: rgba(231, 76, 60, 0.05); }
+    100% { border-color: #e1e5e8; color: #333333; background-color: #ffffff; }
+}
+
+/* =========================================
+   ERROR BANNER
+   ========================================= */
+
+#msg_status {
+    max-width: 900px;
+    margin: 1rem auto;
+}

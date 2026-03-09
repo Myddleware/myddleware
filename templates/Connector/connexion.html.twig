@@ -22,35 +22,31 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
 
-<!-- create -->
-<div class="container mt-4">
-	<div class="row justify-content-center">
-		<div>
-			<div id="source" class="row justify-content-center">
-				<select id="soluce_source" class="liste_solution col ">
+<div id="source">
+	<div class="connector-card">
+		<div class="card-left">
+			<div class="app-selector">
+				<select id="soluce_source" class="liste_solution">
 					{{solutions | raw }}
 				</select>
-				<div class="picture col"></div>	
-				<div class="help col"></div>
-				<div class="champs"></div>
 			</div>
+			<div class="picture app-icon"></div>
+		</div>
+		<div class="card-right">
+			<h2 class="connector-config-title"></h2>
+			<div class="champs"></div>
+			<div class="help"></div>
 		</div>
 	</div>
 </div>
 
-<div class="clr"></div>
-<div id="step_modules">
-		<div id="msg_status" class="alert alert-danger" role="alert">
-			<i class="fa fa-exclamation" aria-hidden="true"></i>
-			{{'error.connexion'|trans}} : <span class="error"></span>
-		</div>
-
+<div id="msg_status" class="alert alert-danger" role="alert">
+	<i class="fa fa-exclamation" aria-hidden="true"></i>
+	{{'error.connexion'|trans}} : <span class="error"></span>
 </div>
 
 {% block base_js %}
-	{# ------------- PARAMETRES JQUERY ------------- #}
 	<script type="text/javascript">
 		var path_link_fr = "{{'view_connector.help.link'|trans}}";
 	</script>
-	{# ------------- PARAMETRES JQUERY ------------- #}
 {% endblock base_js %}

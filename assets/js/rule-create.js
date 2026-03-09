@@ -1756,6 +1756,7 @@ $(document).ready(function() {
         var options = {
             sortField: 'text',
             placeholder: 'Search...',
+            maxOptions: 5,
             onChange: function(value) {
                 if(this.$input && this.$input[0]) {
                      var event = new Event('change', { bubbles: true });
