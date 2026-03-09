@@ -63,26 +63,9 @@
     </h5>
 
     <div id="rule-filters-list">
-      {% if filters is not empty %}
-        <ul class="list-group">
-          {% for f in filters %}
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-              <span>
-                <strong>{{ f.field }}</strong>
-                <small class="text-muted">({{ f.operator }})</small>
-                = {{ f.value }}
-              </span>
-              <button class="btn btn-sm text-danger" data-filter-id="{{ f.id }}">
-                <i class="fa-solid fa-trash"></i>
-              </button>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-muted mb-0">
-          {{ 'create_rule.step4.filters.empty' | trans }}
-        </p>
-      {% endif %}
+      <p class="text-muted mb-0">
+        {{ 'create_rule.step4.filters.empty' | trans }}
+      </p>
     </div>
   </div>
 </div>

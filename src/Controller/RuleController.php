@@ -314,32 +314,19 @@ class RuleController extends AbstractController
     public function ruleStepFilters(Request $request): Response
     {
         $fieldsGrouped = $this->ruleStepService->getFieldsForFilters($request->query->all());
-        
-        $operators = [
-            $this->translator->trans('filter.content')    => 'content',
-            $this->translator->trans('filter.notcontent') => 'notcontent',
-            $this->translator->trans('filter.begin')      => 'begin',
-            $this->translator->trans('filter.end')        => 'end',
-            $this->translator->trans('filter.gt')         => 'gt',
-            $this->translator->trans('filter.lt')         => 'lt',
-            $this->translator->trans('filter.equal')      => 'equal',
-            $this->translator->trans('filter.different')  => 'different',
-            $this->translator->trans('filter.gteq')       => 'gteq',
-            $this->translator->trans('filter.lteq')       => 'lteq',
-            $this->translator->trans('filter.in')         => 'in',
-            $this->translator->trans('filter.notin')      => 'notin',
-        ];
+        $ruleId = $request->query->get('rule_id');
 
-        // Charger les filtres existants si mode edit (rule_id présent)
-        $filters = [];
-        if ($ruleId = $request->query->get('rule_id')) {
-            $filters = $this->entityManager->getRepository(\App\Entity\RuleFilter::class)->findBy(['rule' => $ruleId]);
+        if ($ruleId) {
+            $rule = $this->entityManager->getRepository(Rule::class)->find($ruleId);
+            if ($rule && !$this->getUser()->isAdmin() && $rule->getCreatedBy()->getId() !== $this->getUser()->getId()) {
+                return new Response('Access denied', 403);
+            }
         }
 
         return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
             'fieldsGrouped' => $fieldsGrouped,
-            'operators'     => $operators,
-            'filters'       => $filters,
+            'operators'     => $this->ruleStepService->getFilterOperators(),
+            'filters'       => $this->ruleStepService->getFiltersByRuleId($ruleId),
             'ruleKey'       => $ruleId,
         ]);
     }
@@ -395,6 +382,54 @@ class RuleController extends AbstractController
             ]);
         } catch (\Throwable $e) {
             return new Response('<div class="alert alert-danger">' . $e->getMessage() . '</div>', 500);
+        }
+    }
+
+    /**
+     * Combined endpoint for edit mode: returns step3 params HTML + step4 filters HTML
+     * in a single request with only one login per external system.
+     */
+    #[Route('/create/edit-init', name: 'rule_edit_init', methods: ['GET'])]
+    public function editInit(Request $request): JsonResponse
+    {
+        try {
+            $srcConnectorId = $request->query->getInt('src_connector_id');
+            $tgtConnectorId = $request->query->getInt('tgt_connector_id');
+            $srcModule = (string) $request->query->get('src_module', '');
+            $tgtModule = (string) $request->query->get('tgt_module', '');
+            $ruleId = $request->query->get('rule_id');
+
+            if ($ruleId) {
+                $rule = $this->entityManager->getRepository(Rule::class)->find($ruleId);
+                if ($rule && !$this->getUser()->isAdmin() && $rule->getCreatedBy()->getId() !== $this->getUser()->getId()) {
+                    return new JsonResponse(['error' => 'Access denied'], 403);
+                }
+            }
+
+            $data = $this->ruleStepService->getEditInitData(
+                $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule, $ruleId
+            );
+
+            // Render step3 HTML
+            $step3Html = $this->renderView('Rule/create/ajax_step3/_options_params.html.twig', [
+                'rule_params'      => $data['step3']['rule_params'],
+                'duplicate_target' => $data['step3']['duplicate_target'],
+            ]);
+
+            // Render step4 HTML
+            $step4Html = $this->renderView('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+                'fieldsGrouped' => $data['step4']['fieldsGrouped'],
+                'operators'     => $data['step4']['operators'],
+                'filters'       => $data['step4']['filters'],
+                'ruleKey'       => $ruleId,
+            ]);
+
+            return new JsonResponse([
+                'step3Html' => $step3Html,
+                'step4Html' => $step4Html,
+            ]);
+        } catch (\Throwable $e) {
+            return new JsonResponse(['error' => $e->getMessage()], 500);
         }
     }
 
