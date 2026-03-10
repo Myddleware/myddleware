@@ -26,7 +26,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Repository;
 
 use App\Entity\Job;
-use App\Entity\Rule;
+
 use App\Manager\HomeManager;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -136,8 +136,19 @@ class JobRepository extends ServiceEntityRepository
             ->addOrderBy('j.begin', 'DESC');
 
         if (!empty($filters['param'])) {
-            $qb->andWhere('j.param LIKE :param')
-               ->setParameter('param', '%' . $filters['param'] . '%');
+            $paramValues = array_filter(array_map('trim', explode(',', $filters['param'])));
+            if (count($paramValues) === 1) {
+                $qb->andWhere('j.param LIKE :param')
+                   ->setParameter('param', '%' . $paramValues[0] . '%');
+            } elseif (count($paramValues) > 1) {
+                $orParts = [];
+                foreach ($paramValues as $i => $pv) {
+                    $paramName = 'param_' . $i;
+                    $orParts[] = 'j.param LIKE :' . $paramName;
+                    $qb->setParameter($paramName, '%' . $pv . '%');
+                }
+                $qb->andWhere('(' . implode(' OR ', $orParts) . ')');
+            }
         }
 
         if (!empty($filters['status'])) {
@@ -186,49 +197,22 @@ class JobRepository extends ServiceEntityRepository
 
             if (empty($ids)) {
                 return [
-                    'rules' => [],
+                    'params' => [],
                     'statuses' => [],
                 ];
             }
         }
 
-        // Extract distinct param values, then find rule IDs within them
         $paramQb = $this->createQueryBuilder('j2')
-            ->select('DISTINCT j2.param');
+            ->select('DISTINCT j2.param')
+            ->orderBy('j2.param', 'ASC');
         if ($ids !== null) {
             $paramQb->andWhere('j2.id IN (:ids)')->setParameter('ids', $ids);
         }
         $rawParams = array_column($paramQb->getQuery()->getResult(), 'param');
 
-        // Extract rule IDs (hex strings of 13+ chars) from param values
-        $ruleIdSet = [];
-        foreach ($rawParams as $paramValue) {
-            if (preg_match_all('/\b([0-9a-f]{13,})\b/i', $paramValue, $matches)) {
-                foreach ($matches[1] as $match) {
-                    $ruleIdSet[$match] = true;
-                }
-            }
-        }
-        $ruleIds = array_keys($ruleIdSet);
-
-        // Look up rule names for those IDs
-        $ruleMap = [];
-        if (!empty($ruleIds)) {
-            $ruleRepo = $this->getEntityManager()->getRepository(Rule::class);
-            $rules = $ruleRepo->createQueryBuilder('r')
-                ->select('r.id, r.name')
-                ->where('r.id IN (:ids)')
-                ->setParameter('ids', $ruleIds)
-                ->orderBy('r.name', 'ASC')
-                ->getQuery()
-                ->getResult();
-            foreach ($rules as $rule) {
-                $ruleMap[$rule['id']] = $rule['name'];
-            }
-        }
-
         return [
-            'rules' => $ruleMap,
+            'params' => $rawParams,
             'statuses' => ['Start', 'End'],
         ];
     }

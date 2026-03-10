@@ -6,8 +6,41 @@ $(function () {
     var currentXhr = null;
     var filterDebounce = null;
 
-    // Initialize selectize on dropdown filters
-    $('.task-filter-select').selectize({
+    function renderParamTags(selectizeInstance) {
+        var $container = $('#param-tags');
+        $container.empty();
+        var values = selectizeInstance.getValue();
+        if (!Array.isArray(values)) values = values ? [values] : [];
+        values.forEach(function (val) {
+            var label = selectizeInstance.getItem(val).text() || val;
+            var $tag = $('<span class="param-tag rounded-pill d-inline-flex align-items-center"></span>');
+            var $label = $('<span class="param-tag-label"></span>').text(label).attr('title', label);
+            var $remove = $('<button type="button" class="p-0 ms-2 param-tag-remove">&times;</button>');
+            $remove.on('click', function () {
+                selectizeInstance.removeItem(val);
+            });
+            $tag.append($label).append($remove);
+            $container.append($tag);
+        });
+        setTimeout(function () {
+            var tagsHeight = $container[0].offsetHeight || 0;
+            $('.table-wrapper-task').css('margin-top', tagsHeight > 0 ? tagsHeight + 8 + 'px' : '');
+        }, 0);
+    }
+
+    $('#filter_param').selectize({
+        allowEmptyOption: true,
+        maxItems: null,
+        onChange: function () {
+            renderParamTags(this);
+            applyFilters();
+        },
+        onInitialize: function () {
+            renderParamTags(this);
+        }
+    });
+
+    $('.task-filter-select:not(#filter_param)').selectize({
         allowEmptyOption: true,
         onChange: function () {
             applyFilters();
@@ -45,16 +78,25 @@ $(function () {
     function collectFilters() {
         var filters = {};
 
-        // Selectize dropdowns
-        ['param', 'status'].forEach(function (field) {
-            var el = document.getElementById('filter_' + field);
-            if (el && el.selectize) {
-                var val = el.selectize.getValue();
-                if (val !== '' && val !== null && val !== undefined) {
-                    filters[field] = val;
-                }
+        // Parameter: multi-select, join as comma-separated
+        var paramEl = document.getElementById('filter_param');
+        if (paramEl && paramEl.selectize) {
+            var paramVal = paramEl.selectize.getValue();
+            if (Array.isArray(paramVal) && paramVal.length > 0) {
+                filters['param'] = paramVal.join(',');
+            } else if (typeof paramVal === 'string' && paramVal !== '') {
+                filters['param'] = paramVal;
             }
-        });
+        }
+
+        // Status: single-select
+        var statusEl = document.getElementById('filter_status');
+        if (statusEl && statusEl.selectize) {
+            var statusVal = statusEl.selectize.getValue();
+            if (statusVal !== '' && statusVal !== null && statusVal !== undefined) {
+                filters['status'] = statusVal;
+            }
+        }
 
         // Date inputs
         ['begin', 'end'].forEach(function (field) {
