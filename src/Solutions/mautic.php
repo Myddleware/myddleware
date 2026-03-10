@@ -251,37 +251,37 @@ class mautic extends solution
 
             // Normalize fields for Myddleware step3: each field meta MUST be an array with 'required'
             foreach ($this->moduleFields as $k => $v) {
-            // Myddleware expects: $fields[$name] = ['required' => bool, ...]
-            // Some connectors (and the Myddleware base class) can populate strings; normalize them.
-            if (is_string($v)) {
-                $v = [
-                    'label'    => $v,
-                    'type'     => 'text',
-                    'required' => false,
-                ];
-            } elseif (!is_array($v)) {
-                // Fallback for unexpected types (null/int/bool)
-                $v = [
-                    'label'    => (string)$k,
-                    'type'     => 'text',
-                    'required' => false,
-                ];
+                // Myddleware expects: $fields[$name] = ['required' => bool, ...]
+                // Some connectors (and the Myddleware base class) can populate strings; normalize them.
+                if (is_string($v)) {
+                    $v = [
+                        'label'    => $v,
+                        'type'     => 'text',
+                        'required' => false,
+                    ];
+                } elseif (!is_array($v)) {
+                    // Fallback for unexpected types (null/int/bool)
+                    $v = [
+                        'label'    => (string) $k,
+                        'type'     => 'text',
+                        'required' => false,
+                    ];
+                }
+
+                if (!isset($v['label']) || $v['label'] === '') {
+                    $v['label'] = (string) $k;
+                }
+
+                if (!array_key_exists('required', $v)) {
+                    $v['required'] = false;
+                } else {
+                    $v['required'] = (bool) $v['required'];
+                }
+
+                $this->moduleFields[$k] = $v;
             }
 
-            if (!isset($v['label']) || $v['label'] === '') {
-                $v['label'] = (string)$k;
-            }
-
-            if (!array_key_exists('required', $v)) {
-                $v['required'] = false;
-            } else {
-                $v['required'] = (bool)$v['required'];
-            }
-
-            $this->moduleFields[$k] = $v;
-        }
-
-        return $this->moduleFields;
+            return $this->moduleFields;
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
@@ -304,7 +304,7 @@ class mautic extends solution
         }
 
         return 'dateModified';
-        }
+    }
 
     /**
      * Read data.
@@ -370,7 +370,7 @@ class mautic extends solution
                             continue;
                         }
                         // Mautic search syntax: field:value
-                        $parts[] = $qk . ':' . $qv;
+                        $parts[] = $qk.':'.$qv;
                     }
                     $qs['search'] = implode(' AND ', $parts);
                 } else {
@@ -482,14 +482,13 @@ class mautic extends solution
                     'error' => $error,
                 ];
             }
-// Update the transfer status in Myddleware (required for documents to progress past Ready_to_send)
+
+            // Update the transfer status in Myddleware (required for documents to progress past Ready_to_send)
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
-
-
 
     // Update
     public function updateData($param): array
@@ -548,13 +547,12 @@ class mautic extends solution
                     'error' => $error,
                 ];
             }
-$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
-
-
 
     // Delete
     public function deleteData($param): array
@@ -608,12 +606,12 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
                     'error' => $error,
                 ];
             }
-$this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
+
+            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
         return $result;
     }
-
 
     // Optional: direct link to record in Mautic UI
     public function getDirectLink($rule, $document, $type)
@@ -656,7 +654,7 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         $raw = curl_exec($ch);
 
         if (false === $raw) {
-            $err = curl_error($ch);
+            $err = $this->sanitizeForExceptionMessage(curl_error($ch));
             curl_close($ch);
             throw new \Exception('cURL error: '.$err);
         }
@@ -667,7 +665,7 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         // Some endpoints might return empty body (e.g. delete)
         if ('' === trim((string) $raw)) {
             if ($status >= 400) {
-                throw new \Exception('HTTP '.$status);
+                throw new \Exception('HTTP '.$this->sanitizeForExceptionMessage((string) $status));
             }
             return [];
         }
@@ -676,7 +674,10 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         if (!is_array($decoded)) {
             // Not JSON; expose raw
             if ($status >= 400) {
-                throw new \Exception('HTTP '.$status.' - '.$raw);
+                throw new \Exception(
+                    'HTTP '.$this->sanitizeForExceptionMessage((string) $status)
+                    .' - '.$this->sanitizeForExceptionMessage($raw)
+                );
             }
             return ['raw' => $raw];
         }
@@ -694,7 +695,13 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
             if (is_string($detail) && strlen($detail) > 2000) {
                 $detail = substr($detail, 0, 2000).'…';
             }
-            throw new \Exception('Mautic API error ('.$status.'): '.$msg.' | '.$method.' '.$url.' | Response: '.$detail);
+            throw new \Exception(
+                'Mautic API error ('.$this->sanitizeForExceptionMessage((string) $status).'): '
+                .$this->sanitizeForExceptionMessage($msg)
+                .' | '.$this->sanitizeForExceptionMessage($method)
+                .' '.$this->sanitizeForExceptionMessage($url)
+                .' | Response: '.$this->sanitizeForExceptionMessage($detail)
+            );
         }
 
         return $decoded;
@@ -753,7 +760,7 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 
         $raw = curl_exec($ch);
         if (false === $raw) {
-            $err = curl_error($ch);
+            $err = $this->sanitizeForExceptionMessage(curl_error($ch));
             curl_close($ch);
             throw new \Exception('OAuth token cURL error: '.$err);
         }
@@ -768,7 +775,10 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
 
         if ($status >= 400) {
             $msg = $decoded['error_description'] ?? ('HTTP '.$status);
-            throw new \Exception('OAuth token error ('.$status.'): '.$msg);
+            throw new \Exception(
+                'OAuth token error ('.$this->sanitizeForExceptionMessage((string) $status).'): '
+                .$this->sanitizeForExceptionMessage($msg)
+            );
         }
 
         if (empty($decoded['access_token']) || empty($decoded['expires_in'])) {
@@ -779,6 +789,15 @@ $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         $this->tokenExpiresAt = $now + (int) $decoded['expires_in'];
 
         return $this->accessToken;
+    }
+
+    private function sanitizeForExceptionMessage($value): string
+    {
+        if (is_array($value) || is_object($value)) {
+            $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
     }
 
     /**
