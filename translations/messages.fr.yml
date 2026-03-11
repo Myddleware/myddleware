@@ -217,6 +217,8 @@ view_rule:
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
         displayflux: Voir les documents
         new_rule: Créer une règle
+        simulation: Simulation
+        more: Plus...
     tabs:
         info: Informations
         mapping: Mapping des champs

@@ -476,6 +476,32 @@ class RuleController extends AbstractController
         }
     }
 
+    #[Route('/{id}/simulation/run', name: 'rule_simulation_run', methods: ['POST'])]
+    public function ruleSimulationRun(Rule $rule, Request $request): Response
+    {
+        $requestData = $this->ruleSimulationService->buildRequestDataFromRule($rule);
+
+        $query = $request->request->get('query');
+        if (!empty($query)) {
+            $requestData['query'] = $query;
+        }
+
+        $simulationData = $this->ruleSimulationService->simulatePreview($requestData, $rule->getId());
+
+        if (isset($simulationData['error'])) {
+            return new Response(json_encode(['error' => $simulationData['error']]), 400);
+        }
+
+        $paramsForView = [
+            'source' => ['solution' => $requestData['src_solution_name'], 'module' => $requestData['src_module']],
+            'cible'  => ['solution' => $requestData['tgt_solution_name'], 'module' => $requestData['tgt_module']],
+        ];
+
+        return $this->render('Rule/_simulation_tab.html.twig', array_merge($simulationData, [
+            'params' => $paramsForView,
+        ]));
+    }
+
     // =========================================================================
     // SECTION 4 : VIEW & EDIT (QueryService)
     // =========================================================================
