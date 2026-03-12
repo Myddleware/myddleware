@@ -225,6 +225,17 @@ li span {
     width: auto;
 }
 
+.table-wrapper-task {
+    overflow: visible;
+}
+
+.table-wrapper-task thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: white;
+}
+
 .shadow-table {
     background-color: white;
     margin-bottom: 0 !important;
