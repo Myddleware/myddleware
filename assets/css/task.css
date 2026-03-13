@@ -135,3 +135,144 @@
 .date_task_list {
     white-space: nowrap;
 }
+
+/* Wrapper that aligns filter bar and table together */
+#task-filter-table-wrapper {
+    display: inline-block;
+    text-align: left;
+}
+
+/* Task list filter bar (outside table) */
+#task-filter-bar {
+    display: flex;
+    gap: 0.9375rem;
+    padding: 0.9375rem 0 1.5625rem;
+    align-items: flex-end;
+}
+
+#task-filter-bar label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 0.375rem;
+    font-size: 0.95em;
+    text-align: left;
+}
+
+.task-filter-col {
+    display: flex;
+    flex-direction: column;
+}
+
+.task-filter-col-param {
+    width: 13.5rem;
+    flex-shrink: 0;
+    position: relative;
+}
+
+.task-filter-col-status {
+    width: 6.875rem;
+    flex-shrink: 0;
+}
+
+.task-filter-col-date {
+    width: 10rem;
+    flex-shrink: 0;
+}
+
+#task-stopall-row {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+html body #task-filter-bar .selectize-control .selectize-input {
+    min-height: 32px !important;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9em;
+    text-align: left;
+    line-height: 1.4;
+}
+
+html body #task-filter-bar .task-filter-col-status .selectize-control .selectize-input {
+    height: 32px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+html body #task-filter-bar .task-filter-col-param .selectize-control .selectize-input {
+    height: 32px;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+html body #task-filter-bar .task-filter-col-param .selectize-control .selectize-input .item {
+    display: none;
+}
+
+/* Selected param tags — absolutely positioned below the input so the filter bar height is unchanged */
+#param-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.35rem;
+    position: absolute;
+    left: 0;
+    top: 100%;
+    width: 13.5rem;
+    z-index: 1;
+}
+
+#param-tags .param-tag {
+    border: 2px dashed #05bfe6;
+    border-radius: 50rem;
+    padding: 0.125rem 0.5rem;
+    font-size: smaller;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    transition: transform .12s ease, box-shadow .12s ease;
+}
+
+#param-tags .param-tag:hover {
+    box-shadow: 0 6px 12px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.08);
+    transform: translateY(-2px);
+}
+
+#param-tags .param-tag-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex: 1;
+    min-width: 0;
+}
+
+#param-tags .param-tag .param-tag-remove {
+    background-color: #fff;
+    border: 0;
+    padding: 0;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    font-weight: bold;
+    color: #05bfe6;
+}
+
+#param-tags .param-tag .param-tag-remove:hover {
+    color: #05bfe6 !important;
+}
+
+#task-filter-bar .selectize-dropdown {
+    text-align: left;
+}
+
+#task-filter-bar .task-filter-datepicker {
+    height: 2rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.9em;
+    box-sizing: border-box;
+}
+

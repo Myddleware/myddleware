@@ -8,6 +8,7 @@ use App\Entity\Solution;
 use App\Form\ConnectorType;
 use App\Manager\SolutionManager;
 use App\Repository\ConnectorRepository;
+use App\Repository\RuleFilterRepository;
 use App\Repository\SolutionRepository;
 use App\Manager\RuleManager;
 use App\Service\ConnectorService;
@@ -18,8 +19,6 @@ use Illuminate\Encryption\Encrypter;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -34,6 +33,7 @@ class RuleStepService
         private SessionService $sessionService,
         private ConnectorService $connectorService,
         private ConnectorRepository $connectorRepository,
+        private RuleFilterRepository $ruleFilterRepository,
         private SolutionRepository $solutionRepository,
         private TranslatorInterface $translator,
         private FormFactoryInterface $formFactory,
@@ -421,6 +421,10 @@ class RuleStepService
             throw new \Exception('Connector not found');
         }
 
+        if (!$srcConnector->getSolution() || !$tgtConnector->getSolution()) {
+            throw new \Exception('Connector has no associated solution');
+        }
+
         $srcSolutionName = $srcConnector->getSolution()->getName();
         $tgtSolutionName = $tgtConnector->getSolution()->getName();
 
@@ -515,6 +519,182 @@ class RuleStepService
         return [
             'rule_params'      => array_values($ruleParams),
             'duplicate_target' => $fieldsDuplicateTarget,
+        ];
+    }
+
+    public function getFilterOperators(): array
+    {
+        return [
+            $this->translator->trans('filter.content')    => 'content',
+            $this->translator->trans('filter.notcontent') => 'notcontent',
+            $this->translator->trans('filter.begin')      => 'begin',
+            $this->translator->trans('filter.end')        => 'end',
+            $this->translator->trans('filter.gt')         => 'gt',
+            $this->translator->trans('filter.lt')         => 'lt',
+            $this->translator->trans('filter.equal')      => 'equal',
+            $this->translator->trans('filter.different')  => 'different',
+            $this->translator->trans('filter.gteq')       => 'gteq',
+            $this->translator->trans('filter.lteq')       => 'lteq',
+            $this->translator->trans('filter.in')         => 'in',
+            $this->translator->trans('filter.notin')      => 'notin',
+        ];
+    }
+
+    public function getFiltersByRuleId(?string $ruleId): array
+    {
+        if (!$ruleId) {
+            return [];
+        }
+
+        return $this->ruleFilterRepository->findBy(['rule' => $ruleId]);
+    }
+
+    /**
+     * Combined data loader for edit mode: fetches step3 params + step4 filter fields
+     * with a SINGLE login per external system instead of separate logins per endpoint.
+     */
+    public function getEditInitData(int $srcConnectorId, int $tgtConnectorId, string $srcModule, string $tgtModule, ?string $ruleId = null): array
+    {
+        if (!$srcConnectorId || !$tgtConnectorId || empty($srcModule) || empty($tgtModule)) {
+            throw new \InvalidArgumentException('Missing parameters');
+        }
+
+        $srcConnector = $this->connectorRepository->find($srcConnectorId);
+        $tgtConnector = $this->connectorRepository->find($tgtConnectorId);
+
+        if (!$srcConnector || !$tgtConnector) {
+            throw new \Exception('Connector not found');
+        }
+
+        if (!$srcConnector->getSolution() || !$tgtConnector->getSolution()) {
+            throw new \Exception('Connector has no associated solution');
+        }
+
+        $srcSolutionName = $srcConnector->getSolution()->getName();
+        $tgtSolutionName = $tgtConnector->getSolution()->getName();
+
+        $srcSolution = $this->solutionManager->get($srcSolutionName);
+        $tgtSolution = $this->solutionManager->get($tgtSolutionName);
+
+        // === ONE login per system ===
+        $srcSolution->login($this->connectorService->resolveParams($srcConnectorId));
+        $tgtSolution->login($this->connectorService->resolveParams($tgtConnectorId));
+
+        // STEP 3: Params
+        $sourceParams = (array) $srcSolution->getFieldsParamUpd('source', $srcModule);
+        $targetParams = (array) $tgtSolution->getFieldsParamUpd('target', $tgtModule);
+        $ruleParams = array_merge($sourceParams, $targetParams);
+
+        $sourceMode = (array) $srcSolution->getRuleMode($srcModule, 'source');
+        $targetMode = (array) $tgtSolution->getRuleMode($tgtModule, 'target');
+
+        if (array_key_exists('S', $targetMode)) {
+            $sourceMode['S'] = 'search_only';
+        }
+
+        $intersectMode = array_intersect_key($targetMode, $sourceMode);
+        if (empty($intersectMode)) {
+            $intersectMode = ['C' => 'create_only'];
+        }
+
+        $fieldsDuplicateTarget = $tgtSolution->getFieldsDuplicate($tgtModule) ?? [];
+        if (!empty($fieldsDuplicateTarget)) {
+            $intersectMode['S'] = 'search_only';
+        }
+
+        $modeTranslate = [];
+        foreach ($intersectMode as $key => $value) {
+            $modeTranslate[$key] = $this->translator->trans('create_rule.step3.syncdata.' . $value);
+        }
+
+        $ruleParams[] = [
+            'id'       => 'mode',
+            'name'     => 'mode',
+            'required' => true,
+            'type'     => 'option',
+            'label'    => $this->translator->trans('create_rule.step3.syncdata.label'),
+            'option'   => $modeTranslate,
+            'value'    => '',
+        ];
+
+        $readDeletion = $srcSolution->getReadDeletion($srcModule) ?? false;
+        $sendDeletion = $tgtSolution->getSendDeletion($tgtModule) ?? false;
+
+        if ($readDeletion && $sendDeletion) {
+            $ruleParams[] = [
+                'id'       => 'deletion',
+                'name'     => 'deletion',
+                'required' => false,
+                'type'     => 'option',
+                'label'    => $this->translator->trans('create_rule.step3.deletion.label'),
+                'option'   => [
+                    0 => $this->translator->trans('create_rule.step3.deletion.no'),
+                    1 => $this->translator->trans('create_rule.step3.deletion.yes'),
+                ],
+            ];
+        }
+
+        $bidirectionalParams = [
+            'connector' => ['source' => $srcConnectorId, 'cible' => $tgtConnectorId],
+            'module'    => ['source' => $srcModule, 'cible' => $tgtModule],
+        ];
+
+        $bidirectional = RuleManager::getBidirectionalRules(
+            $this->connection,
+            $bidirectionalParams,
+            $srcSolution,
+            $tgtSolution
+        );
+
+        if (!empty($bidirectional)) {
+            $ruleParams = array_merge($ruleParams, $bidirectional);
+        }
+
+        // STEP 4: Filter fields (reuse same logged-in solutions)
+        $fieldsGrouped = [
+            'Source Fields'   => [],
+            'Target Fields'   => [],
+            'Relation Fields' => [],
+        ];
+
+        try {
+            $sourceFields = $srcSolution->get_module_fields($srcModule, 'source') ?? [];
+            foreach ($sourceFields as $key => $value) {
+                $label = is_array($value) ? ($value['label'] ?? $key) : (string) $key;
+                $fieldsGrouped['Source Fields'][$key] = $label;
+                if (is_array($value) && !empty($value['relate'])) {
+                    $fieldsGrouped['Relation Fields'][$key] = $label;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error getting source fields: ' . $e->getMessage());
+        }
+
+        try {
+            $targetFields = $tgtSolution->get_module_fields($tgtModule, 'target') ?? [];
+            foreach ($targetFields as $key => $value) {
+                $label = is_array($value) ? ($value['label'] ?? $key) : (string) $key;
+                $fieldsGrouped['Target Fields'][$key] = $label;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error getting target fields: ' . $e->getMessage());
+        }
+
+        foreach ($fieldsGrouped as &$group) {
+            asort($group, SORT_STRING | SORT_FLAG_CASE);
+        }
+        unset($group);
+
+        return [
+            'step3' => [
+                'rule_params'      => array_values($ruleParams),
+                'duplicate_target' => $fieldsDuplicateTarget,
+            ],
+            'step4' => [
+                'fieldsGrouped' => $fieldsGrouped,
+                'operators'     => $this->getFilterOperators(),
+                'filters'       => $this->getFiltersByRuleId($ruleId),
+            ],
         ];
     }
 

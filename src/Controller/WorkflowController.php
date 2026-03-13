@@ -59,6 +59,7 @@ use App\Entity\RuleRelationShip;
 use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Manager\TemplateManager;
+use App\Service\RuleDuplicateService;
 use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
 use App\Form\DuplicateRuleFormType;
@@ -109,6 +110,7 @@ class WorkflowController extends AbstractController
     private DocumentManager $documentManager;
     private WorkflowLogRepository $workflowLogRepository;
     private ConfigRepository $configRepository;
+    private RuleDuplicateService $ruleDuplicateService;
 
 
     protected Connection $connection;
@@ -135,7 +137,8 @@ class WorkflowController extends AbstractController
         TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
         ParameterBagInterface $params,
-        ConfigRepository $configRepository
+        ConfigRepository $configRepository,
+        RuleDuplicateService $ruleDuplicateService
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -156,6 +159,7 @@ class WorkflowController extends AbstractController
         $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
         $this->configRepository = $configRepository;
+        $this->ruleDuplicateService = $ruleDuplicateService;
     }
 
     protected function getInstanceBdd() {}
@@ -630,6 +634,51 @@ class WorkflowController extends AbstractController
 
     }
 
+
+    /**
+     * @Route("/duplicate/{id}", name="workflow_duplicate")
+     */
+    public function WorkflowDuplicateAction(string $id, TranslatorInterface $translator)
+    {
+        if (!$this->tools->isPremium()) {
+            return $this->redirectToRoute('premium_list');
+        }
+
+        try {
+            $em = $this->entityManager;
+            $workflow = $em->getRepository(Workflow::class)->findOneBy(['id' => $id, 'deleted' => 0]);
+
+            if (!$workflow) {
+                $this->addFlash('workflow.duplicate.danger', 'Workflow not found');
+                return $this->redirectToRoute('workflow_list');
+            }
+
+            $newWorkflow = new Workflow();
+            $newWorkflow->setId(uniqid());
+            $newWorkflow->setName($workflow->getName() . ' (copy)');
+            $newWorkflow->setRule($workflow->getRule());
+            $newWorkflow->setCondition($workflow->getCondition());
+            $newWorkflow->setDescription($workflow->getDescription());
+            $newWorkflow->setActive(false);
+            $newWorkflow->setOrder($workflow->getOrder());
+            $newWorkflow->setDateCreated(new \DateTime());
+            $newWorkflow->setDateModified(new \DateTime());
+            $newWorkflow->setCreatedBy($this->getUser());
+            $newWorkflow->setModifiedBy($this->getUser());
+
+            $em->persist($newWorkflow);
+            $em->flush();
+
+            $this->ruleDuplicateService->duplicateWorkflowActions($workflow, $newWorkflow);
+
+            $this->addFlash('workflow.duplicate.success', $translator->trans('view_workflow.duplicate_success'));
+            $this->addFlash('workflow.duplicate.deactivated', $translator->trans('view_workflow.duplication_workflow_deactivated'));
+
+            return $this->redirectToRoute('workflow_show', ['id' => $newWorkflow->getId()]);
+        } catch (Exception $e) {
+            throw $this->createNotFoundException('Error : ' . $e);
+        }
+    }
 
     // public function to edit a workflow
     /**

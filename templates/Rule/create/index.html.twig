@@ -47,7 +47,10 @@
       <div id="rule-page" data-mode="{{ initialRuleJson is defined ? 'edit' : 'create' }}"></div>
 
       {% if initialRuleJson is defined %}
-        <script>window.initialRule = {{ initialRuleJson|raw }};</script>
+        <script>
+          window.initialRule = {{ initialRuleJson|raw }};
+          window.editInitUrl = "{{ path('rule_edit_init') }}";
+        </script>
       {% endif %}
     </div>
   </div>

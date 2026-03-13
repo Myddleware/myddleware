@@ -446,6 +446,17 @@ const UI = {
         document.body.appendChild(loader);
       }
       loader.style.display = 'flex';
+    } else {
+      loader = document.getElementById('steps-loading-spinner');
+      if (!loader) {
+        loader = document.createElement('div');
+        loader.id = 'steps-loading-spinner';
+        loader.className = 'text-center py-5';
+        loader.innerHTML = '<div class="spinner-border text-primary" role="status"></div>'
+          + '<p class="text-muted mt-2">Loading configuration...</p>';
+        EL.step3.parentNode.insertBefore(loader, EL.step3);
+      }
+      loader.classList.remove('d-none');
     }
 
     try {
@@ -463,7 +474,9 @@ const UI = {
 
       if (window.updateRuleNavLinks) window.updateRuleNavLinks();
     } finally {
-      if (loader) loader.style.display = 'none';
+      if (loader) {
+        isEdit ? loader.classList.add('d-none') : loader.style.display = 'none';
+      }
       bootingSteps = false;
     }
   }
@@ -613,15 +626,15 @@ const UI = {
   };
 
 window.autoMapRequiredFields = async function() {
-  const tgtConn = document.getElementById('target-connector')?.value;
-  const tgtMod  = document.getElementById('target-module')?.value;
-  const srcConn = document.getElementById('source-connector')?.value;
-  const srcMod  = document.getElementById('source-module')?.value;
+  const targetConnector = document.getElementById('target-connector')?.value;
+  const targetModule  = document.getElementById('target-module')?.value;
+  const sourceConnector = document.getElementById('source-connector')?.value;
+  const sourceModule  = document.getElementById('source-module')?.value;
   const tbody   = document.getElementById('rule-mapping-body');
   const step5   = document.getElementById('step-5');
 
-  if (!tgtConn || !tgtMod || !tbody || !step5) return;
-  if (tbody.getAttribute('data-loaded-module') === tgtMod) return;
+  if (!targetConnector || !targetModule || !tbody || !step5) return;
+  if (tbody.getAttribute('data-loaded-module') === targetModule) return;
 
   const urlBase = step5.getAttribute('data-path-mapping-initial');
   if (!urlBase) return;
@@ -637,10 +650,10 @@ window.autoMapRequiredFields = async function() {
 
   try {
     const params = new URLSearchParams({
-      connector_id: tgtConn,
-      module: tgtMod,
-      src_connector_id: srcConn,
-      src_module: srcMod
+      connector_id: targetConnector,
+      module: targetModule,
+      src_connector_id: sourceConnector,
+      src_module: sourceModule
     });
 
     const res = await fetch(`${urlBase}?${params.toString()}`, {
@@ -678,7 +691,7 @@ window.autoMapRequiredFields = async function() {
     }
 
     initNewRows(tbody);
-    tbody.setAttribute('data-loaded-module', tgtMod);
+    tbody.setAttribute('data-loaded-module', targetModule);
     window.refreshTargetDropdowns();
 
   } catch (e) {
@@ -1126,6 +1139,18 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
   window.__EDIT_MODE__ = true;
   const nameInput = UI.get('rulename');
 
+  function populateLockedSelect(selectEl, value, label) {
+    if (!selectEl || !value) return;
+    const opt = new Option(label || value, String(value), true, true);
+    selectEl.appendChild(opt);
+    if (selectEl.selectize) {
+      selectEl.selectize.addOption({ value: String(value), text: label || String(value) });
+      selectEl.selectize.setValue(String(value), true);
+    } else {
+      selectEl.value = String(value);
+    }
+  }
+
   // Fills the form with JSON sent by the server
   async function hydrateEditFromJson() {
     try {
@@ -1149,52 +1174,78 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
       }
 
       // Sequential filling and loading of dependent lists
-      const srcSol = UI.get('source-solution');
-      if (srcSol && ruleData.connection?.source?.solutionId) {
-        UI.setValue(srcSol, ruleData.connection.source.solutionId);
-        await window.loadConnectorsFor('source', srcSol.value);
-      }
-      
-      const tgtSol = UI.get('target-solution');
-      if (tgtSol && ruleData.connection?.target?.solutionId) {
-        UI.setValue(tgtSol, ruleData.connection.target.solutionId);
-        await window.loadConnectorsFor('cible', tgtSol.value);
-      }
+      const sourceSolution = UI.get('source-solution');
+      const targetSolution = UI.get('target-solution');
+      const sourceConnector = UI.get('source-connector');
+      const targetConnector = UI.get('target-connector');
+      const sourceModule = UI.get('source-module');
+      const targetModule = UI.get('target-module');
+      const ruleDataConnection = ruleData.connection || {};
 
-      const srcConn = UI.get('source-connector');
-      if (srcConn && ruleData.connection?.source?.connectorId) {
-        UI.setValue(srcConn, ruleData.connection.source.connectorId);
-        await window.loadModulesFor('source', srcConn.value);
-      }
+      if (sourceSolution && ruleDataConnection.source?.solutionId) UI.setValue(sourceSolution, ruleDataConnection.source.solutionId);
 
-      const tgtConn = UI.get('target-connector');
-      if (tgtConn && ruleData.connection?.target?.connectorId) {
-        UI.setValue(tgtConn, ruleData.connection.target.connectorId);
-        await window.loadModulesFor('cible', tgtConn.value);
-      }
+      if (targetSolution && ruleDataConnection.target?.solutionId) UI.setValue(targetSolution, ruleDataConnection.target.solutionId);
 
-      const srcMod = UI.get('source-module');
-      if (srcMod && ruleData.connection?.source?.module) {
-        UI.setValue(srcMod, ruleData.connection.source.module);
-      }
+      if (sourceConnector && ruleDataConnection.source?.connectorId) {
+        UI.enableSelect(sourceConnector);
+        populateLockedSelect(sourceConnector, ruleDataConnection.source.connectorId, ruleDataConnection.source.connectorName || String(ruleDataConnection.source.connectorId));
+      }
 
-      const tgtMod = UI.get('target-module');
-      if (tgtMod && ruleData.connection?.target?.module) {
-        UI.setValue(tgtMod, ruleData.connection.target.module);
-      }
+      if (targetConnector && ruleDataConnection.target?.connectorId) {
+        UI.enableSelect(targetConnector);
+        populateLockedSelect(targetConnector, ruleDataConnection.target.connectorId, ruleDataConnection.target.connectorName || String(ruleDataConnection.target.connectorId));
+      }
+
+      if (sourceModule && ruleDataConnection.source?.module) {
+        UI.enableSelect(sourceModule);
+        populateLockedSelect(sourceModule, ruleDataConnection.source.module, ruleDataConnection.source.module);
+      }
+
+      if (targetModule && ruleDataConnection.target?.module) {
+        UI.enableSelect(targetModule);
+        populateLockedSelect(targetModule, ruleDataConnection.target.module, ruleDataConnection.target.module);
+      }
 
       // Disable structural fields in edit mode
-      [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod].forEach(el => {
+      [sourceSolution, targetSolution, sourceConnector, targetConnector, sourceModule, targetModule].forEach(el => {
         if (!el) return;
         el.disabled = true;
         if (el.selectize) el.selectize.disable();
       });
 
-      // Step 3 Hydration
-      const step3 = UI.get('step-3');
-      if(step3) {
+      // Step 3 and 4 Hydration
+
+      const editInitUrl = window.editInitUrl;
+      if (editInitUrl && ruleDataConnection.source?.connectorId && ruleDataConnection.target?.connectorId) {
+        const editParams = new URLSearchParams({
+          src_connector_id: ruleDataConnection.source.connectorId,
+          tgt_connector_id: ruleDataConnection.target.connectorId,
+          src_module: ruleDataConnection.source.module,
+          tgt_module: ruleDataConnection.target.module,
+          rule_id: ruleData.id || '',
+        });
+
+        const editResponse = await fetch(`${editInitUrl}?${editParams.toString()}`, {
+          headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        });
+
+        if (!editResponse.ok) throw new Error('Failed to load edit init data');
+
+        const initData = await editResponse.json();
+
+        const step3 = UI.get('step-3');
+        const paramsContainer = UI.get('step-3-params-container');
+
+        if (step3 && paramsContainer && initData.step3Html) {
+
           UI.toggle(step3, true);
-          await window.loadStep3Params();
+
+          paramsContainer.innerHTML = initData.step3Html;
+
+          $('.js-select-search', paramsContainer).selectize({
+            sortField: 'text',
+            placeholder: 'Search...',
+          });
 
           if (ruleData.syncOptions?.type) {
              UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
@@ -1214,21 +1265,28 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
       }
 
       // Step 4 Hydration (Filters)
+        const step4Body = UI.get('step-4-body');
       const step4 = UI.get('step-4');
-      if(step4) {
+      if((step4 && step4Body && initData.step4Html)) {
           UI.toggle(step4, true);
-          await window.mydLoadRuleFilters();
-          
+
+          step4Body.innerHTML = initData.step4Html;
+
+          if (window.buildFilterFieldOptions) window.buildFilterFieldOptions();
+
+          if (window.initFiltersUI) window.initFiltersUI();
+
+          if (window.initMappingUI) window.initMappingUI();
+
           if (ruleData.filters && ruleData.filters.length > 0) {
               if (typeof window.addFilterRow === 'function') {
                   ruleData.filters.forEach(f => {
                       window.addFilterRow(f.field, f.operator, f.value);
                   });
-              } else {
-                  console.error('Function addFilterRow not found');
               }
           }
       }
+      }
 
       // Step 5 Hydration (Mapping)
       const step5 = UI.get('step-5');

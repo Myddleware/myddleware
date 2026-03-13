@@ -21,7 +21,10 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-
+/* =========================================
+   CONNECTOR CARD LAYOUT
+   ========================================= */
+   
 #connector #tab_connector td.title {
 	width: 35%;
 	color:#0F66A9;

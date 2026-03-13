@@ -26,6 +26,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Repository;
 
 use App\Entity\Job;
+
 use App\Manager\HomeManager;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -126,5 +127,93 @@ class JobRepository extends ServiceEntityRepository
         }
 
         return $queryBuilder;
+    }
+
+    public function findJobsFiltered(array $filters, int $limit = null)
+    {
+        $qb = $this->createQueryBuilder('j')
+            ->orderBy('j.status', 'DESC')
+            ->addOrderBy('j.begin', 'DESC');
+
+        if (!empty($filters['param'])) {
+            $paramValues = array_filter(array_map('trim', explode(',', $filters['param'])));
+            if (count($paramValues) === 1) {
+                $qb->andWhere('j.param LIKE :param')
+                   ->setParameter('param', '%' . $paramValues[0] . '%');
+            } elseif (count($paramValues) > 1) {
+                $orParts = [];
+                foreach ($paramValues as $i => $pv) {
+                    $paramName = 'param_' . $i;
+                    $orParts[] = 'j.param LIKE :' . $paramName;
+                    $qb->setParameter($paramName, '%' . $pv . '%');
+                }
+                $qb->andWhere('(' . implode(' OR ', $orParts) . ')');
+            }
+        }
+
+        if (!empty($filters['status'])) {
+            $qb->andWhere('j.status = :status')
+               ->setParameter('status', $filters['status']);
+        }
+
+        if (!empty($filters['begin_date'])) {
+            $dayStart = new DateTime($filters['begin_date']);
+            $dayStart->setTime(0, 0, 0);
+            $dayEnd = clone $dayStart;
+            $dayEnd->setTime(23, 59, 59);
+            $qb->andWhere('j.begin >= :begin_start AND j.begin <= :begin_end')
+               ->setParameter('begin_start', $dayStart)
+               ->setParameter('begin_end', $dayEnd);
+        }
+
+        if (!empty($filters['end_date'])) {
+            $dayStart = new DateTime($filters['end_date']);
+            $dayStart->setTime(0, 0, 0);
+            $dayEnd = clone $dayStart;
+            $dayEnd->setTime(23, 59, 59);
+            $qb->andWhere('j.end >= :end_start AND j.end <= :end_end')
+               ->setParameter('end_start', $dayStart)
+               ->setParameter('end_end', $dayEnd);
+        }
+
+        if ($limit !== null) {
+            $qb->setMaxResults($limit);
+        }
+
+        return $qb;
+    }
+
+    public function getFilterOptions(int $limit = null): array
+    {
+        $ids = null;
+        if ($limit !== null) {
+            $subQb = $this->createQueryBuilder('sub')
+                ->select('sub.id')
+                ->orderBy('sub.status', 'DESC')
+                ->addOrderBy('sub.begin', 'DESC')
+                ->setMaxResults($limit);
+            $subResult = $subQb->getQuery()->getResult();
+            $ids = array_column($subResult, 'id');
+
+            if (empty($ids)) {
+                return [
+                    'params' => [],
+                    'statuses' => [],
+                ];
+            }
+        }
+
+        $paramQb = $this->createQueryBuilder('j2')
+            ->select('DISTINCT j2.param')
+            ->orderBy('j2.param', 'ASC');
+        if ($ids !== null) {
+            $paramQb->andWhere('j2.id IN (:ids)')->setParameter('ids', $ids);
+        }
+        $rawParams = array_column($paramQb->getQuery()->getResult(), 'param');
+
+        return [
+            'params' => $rawParams,
+            'statuses' => ['Start', 'End'],
+        ];
     }
 }

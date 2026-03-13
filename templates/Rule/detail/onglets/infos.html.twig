@@ -81,15 +81,30 @@
 										{{ 'view_rule.title.rule' | trans }}
 									</p>
 									<div class="d-flex gap-2 mt-2 mt-md-0">	
-										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
+										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-primary btn-sm">
+											<i class="fa fa-pen me-1"></i>
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
-										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
-											{{ 'view_rule.action.duplic_rule' | trans }}
-										</a>
-										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
-											{{ 'view_rule.action.delete_rule' | trans }}
-										</a>
+										<button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#simulationModal">
+											<i class="fa-solid fa-play me-1"></i>
+											{{ 'view_rule.action.simulation' | trans }}
+										</button>
+										<div class="more-actions-wrapper">
+											<button type="button" class="btn btn-outline-secondary btn-sm">
+												{{ 'view_rule.action.more' | trans }}
+												<i class="fa-solid fa-caret-down ms-1"></i>
+											</button>
+											<div class="more-actions-dropdown">
+												<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" class="dropdown-item text-primary">
+													<i class="fa-regular fa-copy"></i>
+													{{ 'view_rule.action.duplic_rule' | trans }}
+												</a>
+												<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" class="dropdown-item text-danger">
+													<i class="fa-solid fa-trash"></i>
+													{{ 'view_rule.action.delete_rule' | trans }}
+												</a>
+											</div>
+										</div>
 									</div>
 								</div>
 							</th>
@@ -369,6 +384,61 @@
 			</div>
 		</div>
 	</div>
+	{# Simulation Modal in rule detail view #}
+	<div class="modal fade" id="simulationModal" tabindex="-1" aria-labelledby="simulationModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title fs-5" id="simulationModalLabel">
+						{{ 'create_rule.step5.simulation'|trans }}
+					</h2>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row g-3 align-items-end mb-3">
+						<div class="col-12 col-md-6">
+							<label class="form-label" for="simulation-query">
+								{{ 'create_rule.step3.manual_data_simulation_choose_id'|trans }}
+							</label>
+							<input id="simulation-query" class="form-control" type="text" inputmode="numeric" placeholder="example: 5" aria-describedby="sim-id-help-detail">
+							<div id="sim-id-help-detail" class="form-text">
+								{{ 'create_rule.step3.manual_data_simulation_help_text'|trans }}
+							</div>
+						</div>
+						<div class="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
+							<button type="button" id="btn-manual-simulation" class="btn btn-outline-success">
+								<i class="fa fa-keyboard me-2" aria-hidden="true"></i>{{ 'create_rule.step3.data_manual'|trans }}
+							</button>
+							<button type="button" id="btn-simple-simulation" class="btn btn-outline-success">
+								<i class="fa fa-bolt me-2" aria-hidden="true"></i>{{ 'create_rule.step3.data'|trans }}
+							</button>
+						</div>
+					</div>
+
+					<div id="simulation-spinner" class="text-center py-5" style="display: none;">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<p class="mt-2 text-muted">Running simulation...</p>
+					</div>
+
+					<div id="simulation-error" class="alert alert-danger" style="display: none;" role="alert"></div>
+
+					<div id="simulation-results" class="border rounded p-3" style="min-height:180px;">
+						<div class="text-center text-muted" id="sim-empty-detail">
+							{{ 'create_rule.step3.empty_simulate'|trans }}
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+						{{ 'create_rule.step5.formula.close'|trans }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div id="help-content-info" class="help-content">
 		<h2>
 			{{ 'help.title' | trans }}
@@ -379,11 +449,101 @@
 	{% block javascripts %}
 		{{ encore_entry_script_tags('fiche') }}
 	{% endblock %}
+	<script>
+	(function() {
+		var wrapper = document.querySelector('.more-actions-wrapper');
+		if (!wrapper) return;
+		var dropdown = wrapper.querySelector('.more-actions-dropdown');
+		var btn = wrapper.querySelector('button');
+		function positionDropdown() {
+			var rect = btn.getBoundingClientRect();
+			dropdown.style.top = rect.bottom + 'px';
+			dropdown.style.left = (rect.right - dropdown.offsetWidth) + 'px';
+		}
+		wrapper.addEventListener('mouseenter', positionDropdown);
+		wrapper.addEventListener('focusin', positionDropdown);
+	})();
+	</script>
 	<script type="text/javascript">
 		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success' | trans }}";
 var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error' | trans }}";
 var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
 var checkRuleNameUrl = "{{ path('check_rule_name') }}";
 var workflowListUrl = "{{ path('workflow_list') }}";
+	</script>
+	<script>
+	(function() {
+		var runUrl = "{{ path('rule_simulation_run', {'id': rule.getId}) }}";
+		var spinner = document.getElementById('simulation-spinner');
+		var errorBox = document.getElementById('simulation-error');
+		var results = document.getElementById('simulation-results');
+		var emptyMsg = document.getElementById('sim-empty-detail');
+		var queryInput = document.getElementById('simulation-query');
+
+		function runSimulation(query) {
+			spinner.style.display = '';
+			errorBox.style.display = 'none';
+			if (emptyMsg) emptyMsg.style.display = 'none';
+
+			var body = new URLSearchParams();
+			if (query) {
+				body.append('query', query);
+			}
+
+			fetch(runUrl, {
+				method: 'POST',
+				headers: { 'X-Requested-With': 'XMLHttpRequest' },
+				body: body
+			})
+			.then(function(response) {
+				if (!response.ok) {
+					return response.text().then(function(text) {
+						var msg = 'Simulation error';
+						try { msg = JSON.parse(text).error || msg; } catch(e) {}
+						throw new Error(msg);
+					});
+				}
+				return response.text();
+			})
+			.then(function(html) {
+				spinner.style.display = 'none';
+				if (emptyMsg) emptyMsg.style.display = 'none';
+				results.innerHTML = html;
+			})
+			.catch(function(err) {
+				spinner.style.display = 'none';
+				if (emptyMsg) emptyMsg.style.display = '';
+				errorBox.textContent = err.message;
+				errorBox.style.display = '';
+			});
+		}
+
+		document.getElementById('btn-simple-simulation').addEventListener('click', function() {
+			runSimulation('');
+		});
+
+		document.getElementById('btn-manual-simulation').addEventListener('click', function() {
+			var id = queryInput.value.trim();
+			if (!id) {
+				errorBox.className = 'alert alert-warning';
+				errorBox.textContent = 'ID required';
+				errorBox.style.display = '';
+				return;
+			}
+			errorBox.className = 'alert alert-danger';
+			runSimulation(id);
+		});
+
+		document.getElementById('simulationModal').addEventListener('hidden.bs.modal', function() {
+			results.innerHTML = '';
+			if (emptyMsg) {
+				results.appendChild(emptyMsg);
+				emptyMsg.style.display = '';
+			}
+			errorBox.style.display = 'none';
+			spinner.style.display = 'none';
+			queryInput.value = '';
+		});
+	})();
 	</script>
 {% endblock %}

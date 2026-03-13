@@ -70,9 +70,3 @@
         {% endif %}
     </table>
 </div>
-
-<div class="d-flex justify-content-center mt-4">
-    {% if pager_workflow_list is defined and pager_workflow_list.haveToPaginate %}
-        {% include '_pagination.html.twig' with {pager: pager_workflow_list} %}
-    {% endif %}
-</div>

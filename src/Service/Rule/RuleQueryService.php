@@ -148,14 +148,16 @@ public function prepareDataForView(Rule $rule): array
 
         $connection = [
             'source' => [
-                'solutionId'  => method_exists($sourceConnector, 'getSolution') ? $sourceConnector->getSolution()->getId() : null,
-                'connectorId' => $sourceConnector?->getId(),
-                'module'      => $rule->getModuleSource(),
+                'solutionId'    => method_exists($sourceConnector, 'getSolution') ? $sourceConnector->getSolution()->getId() : null,
+                'connectorId'   => $sourceConnector?->getId(),
+                'connectorName' => $sourceConnector?->getName() ?? '',
+                'module'        => $rule->getModuleSource(),
             ],
             'target' => [
-                'solutionId'  => method_exists($targetConnector, 'getSolution') ? $targetConnector->getSolution()->getId() : null,
-                'connectorId' => $targetConnector?->getId(),
-                'module'      => $rule->getModuleTarget(),
+                'solutionId'    => method_exists($targetConnector, 'getSolution') ? $targetConnector->getSolution()->getId() : null,
+                'connectorId'   => $targetConnector?->getId(),
+                'connectorName' => $targetConnector?->getName() ?? '',
+                'module'        => $rule->getModuleTarget(),
             ],
         ];
 

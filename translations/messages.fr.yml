@@ -170,6 +170,7 @@ create_rule:
             empty: "Aucun filtre n'a encore été défini."
     step5:
         back: Retour à la liste
+        back_to_rule: Retour à la règle
         simulation: Simulation
         title: Mappage des champs
         formula:
@@ -217,6 +218,8 @@ view_rule:
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
         displayflux: Voir les documents
         new_rule: Créer une règle
+        simulation: Simulation
+        more: Plus...
     tabs:
         info: Informations
         mapping: Mapping des champs
@@ -685,6 +688,9 @@ view_workflow:
     condition2: En bref, il vous suffit d'écrire le nom du statut et nous nous occupons du reste !
     back: Retour
     delete: Supprimer le workflow
+    duplicate: Dupliquer le workflow
+    duplicate_success: Workflow dupliqué avec succès
+    duplication_workflow_deactivated : Le workflow a été dupliqué mais il est désactivé à la création. Veuillez l'activer pour pouvoir l'utiliser.
     description: Description
     rule: Règle
     conditions: Conditions

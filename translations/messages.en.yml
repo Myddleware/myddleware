@@ -165,6 +165,7 @@ create_rule:
             empty: "No filters have been defined yet."
     step5:
         back: Back to list
+        back_to_rule: Back to rule
         simulation: Simulation
         title: Mapping field    
         formula:
@@ -216,6 +217,8 @@ view_rule:
         confirm_delete_rule: Do you want to delete this rule?
         displayflux: Display the documents
         new_rule: Create a new rule
+        simulation: Simulation
+        more: More...
     tabs:
         info: Overview
         mapping: Field Mapping
@@ -683,6 +686,9 @@ view_workflow:
     condition2: In short, all you need is to write the status name and we do the rest !
     back: Back to the list
     delete: Delete the workflow
+    duplicate: Duplicate the workflow
+    duplicate_success: Workflow duplicated successfully
+    duplication_workflow_deactivated : The workflow has been duplicated but it is deactivated upon creation. Please activate it to use it.
     description: Description
     rule: Rule
     conditions: Conditions
