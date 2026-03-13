@@ -659,7 +659,7 @@ class WorkflowController extends AbstractController
             $newWorkflow->setRule($workflow->getRule());
             $newWorkflow->setCondition($workflow->getCondition());
             $newWorkflow->setDescription($workflow->getDescription());
-            $newWorkflow->setActive($workflow->getActive());
+            $newWorkflow->setActive(false);
             $newWorkflow->setOrder($workflow->getOrder());
             $newWorkflow->setDateCreated(new \DateTime());
             $newWorkflow->setDateModified(new \DateTime());
