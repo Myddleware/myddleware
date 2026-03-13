@@ -165,6 +165,7 @@ create_rule:
             empty: "No filters have been defined yet."
     step5:
         back: Back to list
+        back_to_rule: Back to rule
         simulation: Simulation
         title: Mapping field    
         formula:

@@ -170,6 +170,7 @@ create_rule:
             empty: "Aucun filtre n'a encore été défini."
     step5:
         back: Retour à la liste
+        back_to_rule: Retour à la règle
         simulation: Simulation
         title: Mappage des champs
         formula:
