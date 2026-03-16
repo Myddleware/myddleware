@@ -85,3 +85,7 @@
 .command-crontab{
     min-width: 215px;
 }
+
+#crontabList .table-wrapper {
+    overflow-x: auto !important;
+}
