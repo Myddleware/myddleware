@@ -924,7 +924,6 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 .rule-details-buttons {
   margin-top: 1.5rem;
   display: inline-block !important;
-  margin-left: 200px;
 }
 
 .rule-connectors-buttons {
