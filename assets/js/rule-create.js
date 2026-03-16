@@ -764,7 +764,10 @@ function initNewRows(container) {
             
             modal.dataset.currentRowId = tr.dataset.rowId;
             modal.dataset.currentFormulaInputId = hidden.id;
-            if (area) area.value = hidden.value || '';
+            if (area) {
+                area.value = hidden.value || '';
+                area.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         }
     });
     $(container).find('.rule-mapping-delete').off('click').on('click', function() {
@@ -993,7 +996,10 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
         modal.dataset.currentRowId = tr.dataset.rowId;
         modal.dataset.currentFormulaInputId = hidden.id;
         const area = UI.get('area_insert');
-        if (area) area.value = hidden.value || '';
+        if (area) {
+          area.value = hidden.value || '';
+          area.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       }
     };
     
@@ -1379,6 +1385,7 @@ $(function () {
     el.value = el.value.substring(0, start) + text + el.value.substring(end);
     el.selectionStart = el.selectionEnd = start + text.length;
     el.focus();
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
   const UI_WIZ = {
@@ -2107,6 +2114,7 @@ $switchEl.on('change', function() {
 
     const newPos = start + textToInsert.length;
     textarea.setSelectionRange(newPos, newPos);
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   window.loadPlValues = function (side, fieldName) {
