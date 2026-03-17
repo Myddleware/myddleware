@@ -123,7 +123,7 @@
 }
 
 #rule tr, #connector tr, #jobscheduler tr, #workflowTableContainer tr, #rulegroups tr, #crontabList tr {
-	border-bottom: 1px solid #ccc;	
+	border-bottom: 1px solid #ccc !important;	
 }
 
 #rule td.lft > a, #connector td.lft > a, #jobscheduler td.lft > a, #workflowTableContainer td.lft > a, #rulegroups td.lft > a, #crontabList td.lft > a{
@@ -701,11 +701,6 @@ td .link-fit-rule-name {
     /* Add any other styles you want to override */
 }
 
-#rulenamesearchbar .form-floating > #workflow_name_label::after,
-#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
-#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
-    inset: 0px !important;
-}
 .form-floating > #workflow_name_label::after,
 .form-floating > .form-control:focus ~ #workflow_name_label::after,
 .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
@@ -713,10 +708,29 @@ td .link-fit-rule-name {
     /* Add any other styles you want to override */
 }
 
-#rulenamesearchbar .form-floating > #workflow_name_label::after,
-#rulenamesearchbar .form-floating > .form-control:focus ~ #workflow_name_label::after,
-#rulenamesearchbar .form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
-    inset: 0px !important;
+#rulesearchbarcontainer .selectize-control {
+    width: 100%;
+    margin-bottom: 0;
+}
+
+#rulesearchbarcontainer .selectize-input {
+    border-radius: 8px;
+    border: 1px solid #ced4da;
+    padding: 8px 35px 8px 12px;
+    box-shadow: none;
+}
+
+#rulesearchbarcontainer .selectize-input.focus {
+    border-color: #86b7fe;
+    box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+#rulesearchbarcontainer .selectize-control.single .selectize-input:after {
+    display: none;
+}
+
+#clear_rule_search {
+    z-index: 20 !important;
 }
 
 .myd-tab-wrapper {

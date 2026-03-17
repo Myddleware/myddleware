@@ -41,15 +41,18 @@
 	<div id="rule">
 		{% if nb_rule > 0 %}
 			<div class="row justify-content-center align-items-center my-4 me-5 mt-5">
-				<div id="rulesearchbarcontainer" class="col-auto me-5">
-					<form id="rulenamesearchbar" class="d-flex position-relative" action="{{ path('regle_list') }}" method="get">
-						<input type="text" id="rule_name_searchbar" data-url="{{ path('regle_list') }}" class="form-control pe-5" placeholder="Search by rule name">
-						<button id="clear_rule_search" class="btn btn-link text-danger p-0 position-absolute" style="font-size: 1.5rem; line-height: 1; display: none; right: 8px; top: 50%; transform: translateY(-50%); z-index: 10;" title="Clear search" type="button">
-							<i class="fa fa-times-circle"></i>
-						</button>
-					</form>
+				<div id="rulesearchbarcontainer" class="col-auto me-5" style="width: 300px;">
+					<select id="rule_name_searchbar" name="rule_name" data-url="{{ path('regle_list') }}" placeholder="Search by rule name...">
+						<option value=""></option>
+						{% for rule in entities %}
+							<option value="{{ rule.name }}">{{ rule.name }}</option>
+						{% endfor %}
+					</select>
+					<button id="clear_rule_search" class="btn btn-outline-danger ms-2 mt-1" title="Clear search" type="button">
+						<i class="fa fa-times" aria-hidden="true"></i>
+					</button>
 				</div>
-				<div class="col-auto text-center me-5">
+			<div class="col-auto text-center me-5">
 					<a id="exec_all" class="btn btn-outline-success" href="{{ path('regle_exec',{'id' : 'ALL' }) }}" title="" role="button">
 						{{'view_rule.action.exec_all'|trans}}
 					</a>
