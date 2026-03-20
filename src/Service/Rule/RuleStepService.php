@@ -598,24 +598,8 @@ class RuleStepService
         }
 
         $fieldsDuplicateTarget = $tgtSolution->getFieldsDuplicate($tgtModule) ?? [];
-        if (!empty($fieldsDuplicateTarget)) {
-            $intersectMode['S'] = 'search_only';
-        }
 
         $modeTranslate = [];
-        foreach ($intersectMode as $key => $value) {
-            $modeTranslate[$key] = $this->translator->trans('create_rule.step3.syncdata.' . $value);
-        }
-
-        $ruleParams[] = [
-            'id'       => 'mode',
-            'name'     => 'mode',
-            'required' => true,
-            'type'     => 'option',
-            'label'    => $this->translator->trans('create_rule.step3.syncdata.label'),
-            'option'   => $modeTranslate,
-            'value'    => '',
-        ];
 
         $readDeletion = $srcSolution->getReadDeletion($srcModule) ?? false;
         $sendDeletion = $tgtSolution->getSendDeletion($tgtModule) ?? false;
@@ -679,6 +663,24 @@ class RuleStepService
         } catch (\Throwable $e) {
             $this->logger->error('Error getting target fields: ' . $e->getMessage());
         }
+
+        if (!empty($fieldsDuplicateTarget)) {
+            $intersectMode['S'] = 'search_only';
+        }
+
+        foreach ($intersectMode as $key => $value) {
+            $modeTranslate[$key] = $this->translator->trans('create_rule.step3.syncdata.' . $value);
+        }
+
+        $ruleParams[] = [
+            'id'       => 'mode',
+            'name'     => 'mode',
+            'required' => true,
+            'type'     => 'option',
+            'label'    => $this->translator->trans('create_rule.step3.syncdata.label'),
+            'option'   => $modeTranslate,
+            'value'    => '',
+        ];
 
         foreach ($fieldsGrouped as &$group) {
             asort($group, SORT_STRING | SORT_FLAG_CASE);
