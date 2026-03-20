@@ -457,6 +457,18 @@ class RuleStepService
         // Gestion des doublons
         $fieldsDuplicateTarget = $tgtSolution->getFieldsDuplicate($tgtModule) ?? [];
         if (!empty($fieldsDuplicateTarget)) {
+            $tgtModuleFields = $tgtSolution->get_module_fields($tgtModule, 'target') ?? [];
+            if (!empty($tgtModuleFields)) {
+                $validDuplicateFields = [];
+                foreach ($fieldsDuplicateTarget as $field) {
+                    if (array_key_exists($field, $tgtModuleFields)) {
+                        $validDuplicateFields[] = $field;
+                    }
+                }
+                $fieldsDuplicateTarget = $validDuplicateFields;
+            }
+        }
+        if (!empty($fieldsDuplicateTarget)) {
             // Si gestion de doublon possible, on active le mode Search
             $intersectMode['S'] = 'search_only';
         }
@@ -662,6 +674,16 @@ class RuleStepService
             }
         } catch (\Throwable $e) {
             $this->logger->error('Error getting target fields: ' . $e->getMessage());
+        }
+
+        if (!empty($fieldsDuplicateTarget) && !empty($targetFields)) {
+            $validDuplicateFields = [];
+            foreach ($fieldsDuplicateTarget as $field) {
+                if (array_key_exists($field, $targetFields)) {
+                    $validDuplicateFields[] = $field;
+                }
+            }
+            $fieldsDuplicateTarget = $validDuplicateFields;
         }
 
         if (!empty($fieldsDuplicateTarget)) {
