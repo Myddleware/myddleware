@@ -23,108 +23,101 @@
 *********************************************************************************/ #}
 {% extends 'base.html.twig' %}
 {% block title %}
-	{{parent()}}
-	|
-	{{'view_connector.info.title'|trans}}
+    {{parent()}} | {{'view_connector.info.title'|trans}}
 {% endblock %}
 {% block titlesm %}
-	{{'view_connector.info.title'|trans}} <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i> Connector {{ connector.name }}
+    {{'view_connector.info.title'|trans}} <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation"></i> Connector {{ connector.name }}
 {% endblock titlesm %}
 
 {% block body %}
-	{# success message #}
-	{% for flash in app.flashes('success') %}
-		<div class="alert alert-success alert-dismissible fade show">
-			{{ flash }}
-		</div>
-	{% endfor %}
-
-	{% include '_notifications.html.twig' with { filter_prefix: 'connector.' } %}
-
-	{# error message for permission denied #}
-	{% for flash in app.flashes('error-permission') %}
-		<div class="alert alert-danger alert-dismissible fade show">
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			{{ flash }}
-		</div>
-	{% endfor %}
-
-	<div class="container">
-		<div class="row justify-content-center">
-			<div class="col-md-11">
-				<table class="table table-striped mt-5">
-					<tbody>
-						<tr>
-							<th>{{ 'view_connector.info.solution'|trans }}</th>
-							<td>
-								<img class="vignette" src="{{ asset('build/images/solution/' ~ connector.solution.name ~ '.png') }}" alt="{{ connector.solution.name }}">
-								<p>{{ connector.solution.name }}</p>
-							</td>
-						</tr>
-						<tr>
-							<th>{{ 'create_connector.connexion'|trans }}</th>
-							<td>{{ connector.name }}</td>
-						</tr>
-						{% for key, value in paramConnexion %}
-							<tr>
-								<th class="title">{{ key }}</th>
-								 <td class="params" data-param="{{ key }}">
-									{% if key|lower in sensitiveFields and value is not null %}
-										******************
-									{% else %}
-										{{ value }}
-									{% endif %}
-								</td>
-							</tr>
-						{% endfor %}
-
-
-					</tbody>
-				</table>
-
-				<div class="mt-4">
-					<button type="button" id="connexion_detail" class="btn btn-primary">Test</button>
-					<span id="source_status" class="status">
-						<img alt="status" src="{{ asset('build/images/status_offline.png') }}">
-					</span>
-					<a href="{{ path('connector_open', { 'id': connector.id }) }}" class="btn btn-success ms-5">
-						{{ 'view_connector.btn.edit'|trans }}
-					</a>
-					<a href="{{ path('regle_connector_list') }}" class="btn btn-outline-primary ms-2">
-						{{ 'view_connector.btn.back'|trans }}
-					</a>
-					<form method="post" action="{{ path('connector_delete',{'id' : connector.id }) }}" style="display: inline;">
-						<button type="submit"
-								class="btn btn-danger ms-2"
-								onclick="return confirm('{{'view_connector.btn.confirm_delete'|trans}}');"
-								title="{{'view_connector.btn.delete'|trans}}">
-							{{'view_connector.btn.delete'|trans}}
-						</button>
-					</form>
-				</div>
-			</div>
-			<div id="msg_status" class="alert alert-danger" role="alert">
-				<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation" viewbox="0 0 16 16">
-					<path d="M7.002 11a1 1 0 1 1 2 0 1 1 0 0 1-2 0zM7.1 4.995a.905.905 0 1 1 1.8 0l-.35 3.507a.553.553 0 0 1-1.1 0L7.1 4.995z"/>
-				</svg>
-				{{'error.connexion'|trans}}
-				:
-				<span class="error"></span>
-			</div>
-		</div>
-	</div>
-
- <script type="text/javascript">
-    const sensitiveFields = {{ sensitiveFields|json_encode|raw }};
-    {% for field in sensitiveFields %}
-        {% if paramConnexion[field] is defined and paramConnexion[field] is not empty %}
-            var {{ field }} = "{{ paramConnexion[field] }}";
-        {% endif %}
+    {% for flash in app.flashes('success') %}
+        <div class="alert alert-success alert-dismissible fade show">
+            {{ flash }}
+        </div>
     {% endfor %}
-</script>
+
+    {% include '_notifications.html.twig' with { filter_prefix: 'connector.' } %}
+
+    <div class="modern-connector-layout view-detail-page mt-5">
+        <div class="connector-card">
+            
+            {# Logo and Solution #}
+            <div class="connector-left">
+                <div class="logo-wrapper">
+                    <div class="picture">
+                        <img class="vignette" src="{{ asset('build/images/solution/' ~ connector.solution.name ~ '.png') }}" alt="{{ connector.solution.name }}">
+                    </div>
+                </div>
+                <h3 class="mt-3" style="color: #555;">{{ connector.solution.name }}</h3>
+            </div>
+
+            {# Infos and Champs #}
+            <div class="connector-right">
+                <h1 class="brand-title">Connector Details</h1>
+                
+                <div class="champs">
+                    <div class="row">
+                        <label>{{ 'create_connector.connexion'|trans }}</label>
+                        <div class="col">
+                            <input type="text" class="params form-control" value="{{ connector.name }}" readonly>
+                        </div>
+                    </div>
+
+                    {% for key, value in paramConnexion %}
+                        <div class="row">
+                            <label class="title">{{ key }}</label>
+                            <div class="col">
+                                <div class="params-wrapper" style="position: relative;">
+                                    <input type="text" class="params form-control" 
+                                           value="{% if key|lower in sensitiveFields and value is not null %}******************{% else %}{{ value }}{% endif %}" 
+                                           readonly>
+                                    <div class="params d-none" data-param="{{ key }}">
+                                        {% if key|lower in sensitiveFields and value is not null %}******************{% else %}{{ value }}{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                    <div class="row justify-content-center mt-5">
+                        <div class="col d-flex align-items-center gap-3">
+                            <button type="button" id="connexion_detail" class="btn testing">Test</button>
+                            <span id="source_status" class="status">
+                                <i class="fa fa-lightbulb status-offline"></i>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="connector-actions-footer mt-4 d-flex gap-2">
+                        <a href="{{ path('connector_open', { 'id': connector.id }) }}" class="btn btn-success flex-grow-1">
+                            {{ 'view_connector.btn.edit'|trans }}
+                        </a>
+                        <a href="{{ path('regle_connector_list') }}" class="btn btn-outline-primary">
+                            {{ 'view_connector.btn.back'|trans }}
+                        </a>
+                        <form method="post" action="{{ path('connector_delete',{'id' : connector.id }) }}" style="display: inline;">
+                            <button type="submit" class="btn btn-danger" onclick="return confirm('{{'view_connector.btn.confirm_delete'|trans}}');">
+                                {{'view_connector.btn.delete'|trans}}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                <div id="msg_status" class="alert alert-danger mt-3" style="display:none;">
+                    <i class="fa fa-exclamation-circle"></i> {{'error.connexion'|trans}} : <span class="error"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        const sensitiveFields = {{ sensitiveFields|json_encode|raw }};
+        {% for field in sensitiveFields %}
+            {% if paramConnexion[field] is defined and paramConnexion[field] is not empty %}
+                var {{ field }} = "{{ paramConnexion[field] }}";
+            {% endif %}
+        {% endfor %}
+    </script>
 {% endblock %}
 
 
 {% block javascripts %}
-	{{ encore_entry_script_tags('connector') }}
+    {{ encore_entry_script_tags('connector') }}
 {% endblock %}

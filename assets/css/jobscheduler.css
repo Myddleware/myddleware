@@ -87,5 +87,25 @@
 }
 
 #crontabList .table-wrapper {
-    overflow-x: auto !important;
+    overflow: visible !important;
+}
+
+#crontabList table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+#crontabList thead th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #ccc !important;
+}
+
+#crontabList thead tr:first-child th:first-child {
+    border-top-left-radius: 15px;
+}
+#crontabList thead tr:first-child th:last-child {
+    border-top-right-radius: 15px;
 }
