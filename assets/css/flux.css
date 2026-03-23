@@ -974,3 +974,7 @@ li span {
     width: 36px;
     height: 16px;
 }
+
+.table-doc-tr{
+    white-space: nowrap;
+}

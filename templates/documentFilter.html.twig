@@ -4,7 +4,7 @@
  * @package Myddleware
  * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
  * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
- * @link http://www.myddleware.com	
+ * @link http://www.myddleware.com  
  
  This file is part of Myddleware.
  
@@ -24,15 +24,15 @@
 
 {% extends 'base.html.twig' %}
 {% block title %}
-	{{ parent() }}
-	|
-	{{ 'title.flux.list'|trans }}
+    {{ parent() }}
+    |
+    {{ 'title.flux.list'|trans }}
 {% endblock %}
 {% block titlesm %}
-	{{ 'title.flux.list'|trans }}
-	{% if nbDocuments > 0 %}
-		({{ nbDocuments }})
-	{% endif %}
+    {{ 'title.flux.list'|trans }}
+    {% if nbDocuments > 0 %}
+        ({{ nbDocuments }})
+    {% endif %}
 {% endblock titlesm %}
 {% block body %}
 
@@ -42,7 +42,7 @@
 <div class="px-5 mb-1 py-1 mt-5">
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
-    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-grey' }}" class="input-group filter-premium-container-reduced-width">
+    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-reduced-width-grey' }}" class="input-group filter-premium-container-reduced-width">
         {{ form_widget(formFilter.filter) }}
     </div>
     {{ form_end(formFilter) }}
@@ -230,149 +230,142 @@
                               (<span></span>)
                               <i class="fa-solid fa-star star-icon star-icon-btn-filter"></i>
                               </a>
-                        {# <a id="cancelreloadflux" class="btn btn-outline-primary" role="button" href="javascript:void(0);" title="">{{'list_flux.btn.reloadcancel'|trans}}
-                              (<span></span>)</a> #}
                         <a id="{{ isPremium() ? 'unlockAllFlux' : 'unlockAllFlux-grey' }}" class="btn btn-outline-danger mb-2 ms-2" role="button" href="javascript:void(0);" title="{{'list_flux.btn.unlockall_tooltip'|trans}}">
                               {{ 'list_flux.btn.unlockall'|trans }} (<span id="countSelected"></span>)
                               <i class="fa-solid fa-star star-icon star-icon-btn-filter"></i>
                               </a>
     </div>
     {{ form_end(form) }}
-            {# <div class="col mt-4">
-                  <a class="removeFilter btn btn-danger ms-5" href="{{ path('flux_list_delete_filter') }}" title="" onclick="return(confirm('{{'list_flux.filter.delete_confirm'|trans}}'));">
-                        <i class="fas fa-redo"></i>
-                        {{'list_flux.btn.filter_delete'|trans}}
-                  </a>
-            </div> #}
-            <div class="px-5 row py-1">
-                  <p>
-                        
-                  </p>
-            </div>
 </div>
 <section class="p-1">
-
-	<div class="table-responsive" id="document-table-container">
-		<table class="listepagerflux table">
-			<thead>
-				<tr>
-					<th scope="col">
-						<input id="massselectall" type="checkbox" name="massselectall"/>
-					</th>
-					<th>{{ 'list_flux.tab.id'|trans }}
-						<span data-sort="id">
-							<i class='fas fa-angle-down idIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.name'|trans }}
-						<span data-sort="name">
-							<i class='fas fa-angle-down nameIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.date_created'|trans }}
-						<span data-sort="date_created">
-							<i class='fas fa-angle-down date_createdIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.date_modified'|trans }}
-						<span data-sort="date_modified">
-							<i class='fas fa-angle-down date_modifiedIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.statut'|trans }}
-						<span data-sort="status">
-							<i class='fas fa-angle-down statusIcon'></i>
-						</span>
-					</th>
-					<th>!<span data-sort="status">
-							<i class='fas fa-angle-down statusIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.source_id'|trans }}
-						<span data-sort="source_id">
-							<i class='fas fa-angle-down source_idIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.target_id'|trans }}
-						<span data-sort="target_id">
-							<i class='fas fa-angle-down target_idIcon'></i>
-						</span>
-					</th>
-					<th>{{ 'list_flux.tab.type'|trans }}
-						<span data-sort="type">
-							<i class='fas fa-angle-down typeIcon'></i>
-						</span>
-					</th>
-					<th>
-                        {{ 'list_flux.tab.source_date_modified'|trans }}
-                        <i class="fa fa-exclamation-circle help-pop" data-help="{{ 'list_flux.tab.helppop'|trans }}" aria-label="Help" role="button" tabindex="0"></i>
-                        <span data-sort="source_date_modified">
-                            <i class="fas fa-angle-down source_date_modifiedIcon"></i>
-                        </span>
-                    </th>
-				</tr>
-			</thead>
-			<tbody>
-				{% if pager is defined and pager is not empty %}
-					{% set is_super_admin = is_granted('ROLE_SUPER_ADMIN') %}
-					{% for document in pager %}
-						<tr>
-							<td>
-								{% if not is_super_admin and (document.global_status|lower == 'close' or document.global_status|lower == 'cancel') %}
-									<input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
-								{% else %}
-									<input type="checkbox" name="{{ document.id }}"/>
-								{% endif %}
-							</td>
-							<td>
-								<a href="{{ document.url_flux }}" class="help-link all-link">{{ document.id }}</a>
-							</td>
-							<td>
-								<a href="{{ document.url_rule }}" title="" class="help-link all-link">{{ document.rule_name }}</a>
-							</td>
-							<td>{{ document.date_created|date_compensated(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
-							<td>{{ document.date_modified|date_compensated(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
-							<td class="ctr" id="documents_filters">
-								<div class="gblstatus_{{ document.global_status|lower }}">
-									{{ document.status }}
-									{% if document.global_status|lower == 'close' %}
-										<i class="fa fa-check"></i>
-									{% elseif document.global_status|lower == 'error' %}
-										{% if document.status == 'Error_workflow' %}
-											<i class="fa fa-cog" style="color: #dc3545; font-size: larger;"></i>
-										{% else %}
-											<i class="fa fa-times"></i>
-										{% endif %}
-									{% elseif document.global_status|lower == 'open' %}
-										<span class="glyphicon glyphicon-repeat">
-										{% elseif document.global_status|lower == 'cancel' %}
-											<i class="fa fa-exclamation"></i>
-										{% endif %}
-									</div>
-								</td>
-							</td>
-							<td>
-								{% if document.global_status|lower == 'error' %}
-									<button class="get-log-msg" data-doc-id="{{ document.id }}">
-										<i class="fas fa-comment-dots"></i>
-									</button>
-									<div id="log-msg-{{ document.id }}"></div>
-								{% endif %}
-							</td>
-							<td>{{ document.source_id }}</td>
-							<td>{{ document.target_id }}</td>
-							<td>{{ document.type }}</td>
-							<td>{{ document.source_date_modified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
-						</tr>
-					{% endfor %}
-				{% else %}
-					<tr>
-						<td colspan="11">{{ 'list_flux.empty'|trans }}</td>
-					</tr>
-				{% endif %}
-			</tbody>
-		</table>
-	</div>
+    <div id="document-table-container">
+        <div class="table-wrapper">
+            <table class="listepagerflux table table-hover align-middle shadow-table">
+                <thead>
+                    <tr class="text-center table-doc-tr">
+                        <th scope="col" class="rounded-table-up-left">
+                            <input id="massselectall" type="checkbox" name="massselectall"/>
+                        </th>
+                        <th>{{ 'list_flux.tab.id'|trans }}
+                            <span data-sort="id">
+                                <i class='fas fa-angle-down idIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.name'|trans }}
+                            <span data-sort="name">
+                                <i class='fas fa-angle-down nameIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.date_created'|trans }}
+                            <span data-sort="date_created">
+                                <i class='fas fa-angle-down date_createdIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.date_modified'|trans }}
+                            <span data-sort="date_modified">
+                                <i class='fas fa-angle-down date_modifiedIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.statut'|trans }}
+                            <span data-sort="status">
+                                <i class='fas fa-angle-down statusIcon'></i>
+                            </span>
+                        </th>
+                        <th>!
+                             <span data-sort="status">
+                                <i class='fas fa-angle-down statusIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.source_id'|trans }}
+                            <span data-sort="source_id">
+                                <i class='fas fa-angle-down source_idIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.target_id'|trans }}
+                            <span data-sort="target_id">
+                                <i class='fas fa-angle-down target_idIcon'></i>
+                            </span>
+                        </th>
+                        <th>{{ 'list_flux.tab.type'|trans }}
+                            <span data-sort="type">
+                                <i class='fas fa-angle-down typeIcon'></i>
+                            </span>
+                        </th>
+                        <th class="rounded-table-up-right">
+                            {{ 'list_flux.tab.source_date_modified'|trans }}
+                            <i class="fa fa-exclamation-circle help-pop" data-help="{{ 'list_flux.tab.helppop'|trans }}" aria-label="Help" role="button" tabindex="0"></i>
+                            <span data-sort="source_date_modified">
+                                <i class="fas fa-angle-down source_date_modifiedIcon"></i>
+                            </span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if pager is defined and pager is not empty %}
+                        {% set is_super_admin = is_granted('ROLE_SUPER_ADMIN') %}
+                        {% for document in pager %}
+                            <tr>
+                                <td class="text-center">
+                                    {% if not is_super_admin and (document.global_status|lower == 'close' or document.global_status|lower == 'cancel') %}
+                                        <input type="checkbox" name="{{ document.id }}" disabled="disabled"/>
+                                    {% else %}
+                                        <input type="checkbox" name="{{ document.id }}"/>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ document.url_flux }}" class="help-link all-link">{{ document.id }}</a>
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ document.url_rule }}" title="" class="help-link all-link">{{ document.rule_name }}</a>
+                                </td>
+                                <td class="text-center">{{ document.date_created|date_compensated(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+                                <td class="text-center">{{ document.date_modified|date_compensated(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+                                <td class="ctr text-center" id="documents_filters">
+                                    <div class="gblstatus_{{ document.global_status|lower }}">
+                                        {{ document.status }}
+                                        {% if document.global_status|lower == 'close' %}
+                                            <i class="fa fa-check"></i>
+                                        {% elseif document.global_status|lower == 'error' %}
+                                            {% if document.status == 'Error_workflow' %}
+                                                <i class="fa fa-cog" style="color: #dc3545; font-size: larger;"></i>
+                                            {% else %}
+                                                <i class="fa fa-times"></i>
+                                            {% endif %}
+                                        {% elseif document.global_status|lower == 'open' %}
+                                            <span class="glyphicon glyphicon-repeat"></span>
+                                        {% elseif document.global_status|lower == 'cancel' %}
+                                            <i class="fa fa-exclamation"></i>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    {% if document.global_status|lower == 'error' %}
+                                        <button class="get-log-msg" data-doc-id="{{ document.id }}">
+                                            <i class="fas fa-comment-dots"></i>
+                                        </button>
+                                        <div id="log-msg-{{ document.id }}"></div>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ document.source_id }}</td>
+                                <td class="text-center">{{ document.target_id }}</td>
+                                <td class="text-center">{{ document.type }}</td>
+                                <td class="text-center">{{ document.source_date_modified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
+                            </tr>
+                        {% endfor %}
+                        <tr class="invisibele-row-bottom">
+                            <th class="rounded-table-down-left"></th>
+                            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
+                            <th class="rounded-table-down-right"></th>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="11" class="text-center">{{ 'list_flux.empty'|trans }}</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
     <div class="d-flex justify-content-center mt-4">
         {% include '_pagination.html.twig' with {pager: pager} %}
     </div>
@@ -387,52 +380,52 @@
 	{{ encore_entry_script_tags('filter') }}
 
 	<!-- Scripts personnalisés -->
-	<script type="text/javascript">
-		var path_remove_filter = "{{ path('remove_filter') }}";
-var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
-var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
-var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
-var path_img = "{{ asset('build/images/regle/') }}";
-var lang = "{{ app.request.locale }}";
-var mass_cancel = "{{ path('flux_mass_cancel') }}";
-var mass_unlock = "{{ path('flux_mass_unlock') }}";
-var mass_run = "{{ path('flux_mass_run') }}";
-var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
-var csvdocumentids = "{{ csvdocumentids }}";
+    <script type="text/javascript">
+        var path_remove_filter = "{{ path('remove_filter') }}";
+        var confirm_cancel = "{{ 'list_flux.btn.mass_cancel_confirm'|trans }}";
+        var confirm_reload = "{{ 'list_flux.btn.mass_reload_confirm'|trans }}";
+        var confirm_unlock = "{{ 'list_flux.btn.mass_unlock_confirm'|trans }}";
+        var path_img = "{{ asset('build/images/regle/') }}";
+        var lang = "{{ app.request.locale }}";
+        var mass_cancel = "{{ path('flux_mass_cancel') }}";
+        var mass_unlock = "{{ path('flux_mass_unlock') }}";
+        var mass_run = "{{ path('flux_mass_run') }}";
+        var flux_export_docs_csv = "{{ path('flux_export_docs_csv') }}";
+        var csvdocumentids = "{{ csvdocumentids }}";
 
     // Initialisation du date & time picker pour les filtres de date de modification
     // Initialize date & time pickers only if elements exist
     if (document.getElementById('form_date_modif_end')) {
-        start = new dtsel.DTS('#form_date_modif_end', {showTime: true});
-    }
-    if (document.getElementById('form_date_modif_start')) {
-        end = new dtsel.DTS('#form_date_modif_start', {showTime: true});
-    }
-
-    var $globalStatusField = $('#globalStatus select');
-
-    if ($globalStatusField[0].selectize) {
-        $globalStatusField[0].selectize.destroy();
-    }
-    $globalStatusField.selectize({
-        placeholder: "Select Global Status", 
-        plugins: ['remove_button'],
-        dropdownParent: 'body'
-    });
-$('.get-log-msg').click(function () {
-var docId = $(this).data('doc-id');
-var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
-var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
-
-    $.ajax({
-    url: testlastmessagefinal,
-    method: 'POST',
-    success: function (data) {
-    $('#log-msg-' + docId).text(data);
-        alert(data);
+            start = new dtsel.DTS('#form_date_modif_end', {showTime: true});
         }
-    });
-});
+        if (document.getElementById('form_date_modif_start')) {
+            end = new dtsel.DTS('#form_date_modif_start', {showTime: true});
+        }
+
+        var $globalStatusField = $('#globalStatus select');
+
+        if ($globalStatusField.length && $globalStatusField[0].selectize) {
+            $globalStatusField[0].selectize.destroy();
+        }
+        $globalStatusField.selectize({
+            placeholder: "Select Global Status", 
+            plugins: ['remove_button'],
+            dropdownParent: 'body'
+        });
+        $('.get-log-msg').click(function () {
+            var docId = $(this).data('doc-id');
+            var testLastMessage = "{{ path('document_last_error_message', {'docId': 'PLACEHOLDER_ID'}) }}";
+            var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
+
+            $.ajax({
+                url: testlastmessagefinal,
+                method: 'POST',
+                success: function (data) {
+                    $('#log-msg-' + docId).text(data);
+                    alert(data);
+                }
+            });
+        });
 
 // Clear localStorage storedFilters if the script is provided
 {% if clearStorageScript is not null and clearStorageScript is not empty %}
@@ -468,8 +461,9 @@ var testlastmessagefinal = testLastMessage.replace("PLACEHOLDER_ID", docId);
             });
         });
     </script>
-
-{% endblock javascript %}{% endblock %}{% block cssin %}
-{{ encore_entry_link_tags('app') }}
-{{ encore_entry_link_tags('filter') }}
+{% endblock javascript %}
+{% endblock %}
+{% block cssin %}
+    {{ encore_entry_link_tags('app') }}
+    {{ encore_entry_link_tags('filter') }}
 {% endblock cssin %}
