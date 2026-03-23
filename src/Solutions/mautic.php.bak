@@ -1,5 +1,4 @@
 <?php
-
 /*********************************************************************************
  * This file is part of Myddleware.
  *
@@ -26,12 +25,6 @@ namespace App\Solutions;
 
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpClient\HttpClient;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * Mautic 7 connector (REST API).
@@ -66,24 +59,6 @@ class mautic extends solution
         'contacts' => [],
         'companies' => [],
         'segments' => [],
-    ];
-
-    protected array $moduleConfiguration = [
-        'contacts' => [
-            'endpoint' => 'contacts',
-            'item_key' => 'contact',
-            'items_key' => 'contacts',
-        ],
-        'companies' => [
-            'endpoint' => 'companies',
-            'item_key' => 'company',
-            'items_key' => 'companies',
-        ],
-        'segments' => [
-            'endpoint' => 'segments',
-            'item_key' => 'list',
-            'items_key' => 'lists',
-        ],
     ];
 
     public function getFieldsLogin(): array
@@ -123,7 +98,7 @@ class mautic extends solution
 
         try {
             $this->baseUrl = rtrim((string) $this->paramConnexion['url'], '/');
-            if ('' === $this->baseUrl) {
+            if ($this->baseUrl === '') {
                 throw new \Exception('Missing Mautic URL.');
             }
 
@@ -146,8 +121,6 @@ class mautic extends solution
 
     public function get_modules($type = 'source')
     {
-        unset($type);
-
         try {
             return [
                 'contacts' => 'Contacts',
@@ -155,8 +128,8 @@ class mautic extends solution
                 'segments' => 'Segments',
             ];
         } catch (\Exception $exception) {
-            $errorMessage = $exception->getMessage();
-            $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
+            $errorMessage = $exception->getMessage().' '.$exception->getFile().' Line : ( '.$exception->getLine().' )';
+            $this->logger->error($errorMessage);
 
             return ['error' => $errorMessage];
         }
@@ -164,7 +137,6 @@ class mautic extends solution
 
     public function get_module_fields($module, $type = 'source', $param = null): array
     {
-        unset($param);
         parent::get_module_fields($module, $type);
 
         try {
@@ -174,8 +146,8 @@ class mautic extends solution
 
             return $this->moduleFields;
         } catch (\Exception $exception) {
-            $errorMessage = $exception->getMessage();
-            $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
+            $errorMessage = $exception->getMessage().' '.$exception->getFile().' Line : ( '.$exception->getLine().' )';
+            $this->logger->error($errorMessage);
 
             return ['error' => $errorMessage];
         }
@@ -187,7 +159,7 @@ class mautic extends solution
             return 'dateModified';
         }
 
-        if ('C' === $param['ruleParams']['mode']) {
+        if ($param['ruleParams']['mode'] === 'C') {
             return 'dateAdded';
         }
 
@@ -205,8 +177,8 @@ class mautic extends solution
 
             return $this->formatReadResult($normalizedParameters, $responseData);
         } catch (\Exception $exception) {
-            $errorMessage = $exception->getMessage();
-            $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
+            $errorMessage = $exception->getMessage().' '.$exception->getFile().' Line : ( '.$exception->getLine().' )';
+            $this->logger->error($errorMessage);
 
             return ['error' => $errorMessage];
         }
@@ -289,36 +261,37 @@ class mautic extends solution
 
     public function getDirectLink($rule, $document, $type)
     {
-        unset($rule, $document, $type);
-
         return null;
     }
 
-    /**
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
     public function call($url, $method = 'GET', $data = null): array
     {
         $requestHeaders = $this->buildRequestHeaders();
         $httpMethod = strtoupper((string) $method);
-        $requestOptions = [
-            'headers' => $requestHeaders,
-            'timeout' => 60,
-        ];
+        $requestBody = $this->prepareJsonBody($data, $httpMethod, $requestHeaders);
 
-        $jsonPayload = $this->prepareJsonPayload($data, $httpMethod);
-        if (null !== $jsonPayload) {
-            $requestOptions['body'] = $jsonPayload;
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $url);
+        curl_setopt($curlHandle, CURLOPT_CUSTOMREQUEST, $httpMethod);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $requestHeaders);
+
+        if ($requestBody !== null) {
+            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $requestBody);
         }
 
-        $client = HttpClient::create();
-        $response = $client->request($httpMethod, $url, $requestOptions);
-        $statusCode = $response->getStatusCode();
-        $rawResponse = $response->getContent(false);
+        $rawResponse = curl_exec($curlHandle);
+
+        if ($rawResponse === false) {
+            $curlError = curl_error($curlHandle);
+            curl_close($curlHandle);
+            $safeError = self::escapeExceptionValue($curlError);
+            throw new \Exception(sprintf('cURL error: %s', $safeError));
+        }
+
+        $statusCode = (int) curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+        curl_close($curlHandle);
 
         return $this->parseApiResponse($rawResponse, $statusCode, $httpMethod, (string) $url);
     }
@@ -328,7 +301,7 @@ class mautic extends solution
         $clientId = trim((string) ($this->paramConnexion['client_id'] ?? ''));
         $clientSecret = trim((string) ($this->paramConnexion['client_secret'] ?? ''));
 
-        if ('' !== $clientId && '' !== $clientSecret) {
+        if ($clientId !== '' && $clientSecret !== '') {
             $accessToken = $this->getOAuth2AccessToken($clientId, $clientSecret);
 
             return 'Authorization: Bearer '.$accessToken;
@@ -337,20 +310,13 @@ class mautic extends solution
         $loginValue = (string) ($this->paramConnexion['login'] ?? '');
         $passwordValue = (string) ($this->paramConnexion['password'] ?? '');
 
-        if ('' !== $loginValue && '' !== $passwordValue) {
+        if ($loginValue !== '' && $passwordValue !== '') {
             return 'Authorization: Basic '.base64_encode($loginValue.':'.$passwordValue);
         }
 
         return null;
     }
 
-    /**
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
     private function getOAuth2AccessToken(string $clientId, string $clientSecret): string
     {
         $currentTimestamp = time();
@@ -360,31 +326,46 @@ class mautic extends solution
         }
 
         $tokenUrl = $this->baseUrl.'/oauth/v2/token';
-        $client = HttpClient::create();
-        $response = $client->request('POST', $tokenUrl, [
-            'timeout' => 60,
-            'headers' => [
-                'Accept: application/json',
-                'Content-Type: application/x-www-form-urlencoded',
-            ],
-            'body' => http_build_query([
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'grant_type' => 'client_credentials',
-            ]),
+        $postPayload = http_build_query([
+            'client_id' => $clientId,
+            'client_secret' => $clientSecret,
+            'grant_type' => 'client_credentials',
         ]);
 
-        $statusCode = $response->getStatusCode();
-        $rawResponse = $response->getContent(false);
-        $decodedResponse = json_decode($rawResponse, true);
+        $curlHandle = curl_init();
+        curl_setopt($curlHandle, CURLOPT_URL, $tokenUrl);
+        curl_setopt($curlHandle, CURLOPT_POST, true);
+        curl_setopt($curlHandle, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curlHandle, CURLOPT_TIMEOUT, 60);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, [
+            'Accept: application/json',
+            'Content-Type: application/x-www-form-urlencoded',
+        ]);
+        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $postPayload);
 
+        $rawResponse = curl_exec($curlHandle);
+
+        if ($rawResponse === false) {
+            $curlError = curl_error($curlHandle);
+            curl_close($curlHandle);
+            $safeError = self::escapeExceptionValue($curlError);
+            throw new \Exception(sprintf('OAuth token cURL error: %s', $safeError));
+        }
+
+        $statusCode = (int) curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+        curl_close($curlHandle);
+
+        $decodedResponse = json_decode($rawResponse, true);
         if (!is_array($decodedResponse)) {
             throw new \Exception('OAuth token response was not JSON.');
         }
 
         if ($statusCode >= 400) {
             $message = $decodedResponse['error_description'] ?? ('HTTP '.$statusCode);
-            throw new \Exception(sprintf('OAuth token error (%s): %s', (string) $statusCode, (string) $message));
+            $safeStatus = self::escapeExceptionValue((string) $statusCode);
+            $safeMessage = self::escapeExceptionValue($message);
+
+            throw new \Exception(sprintf('OAuth token error (%s): %s', $safeStatus, $safeMessage));
         }
 
         if (empty($decodedResponse['access_token']) || empty($decodedResponse['expires_in'])) {
@@ -402,11 +383,11 @@ class mautic extends solution
         $cleanParams = [];
 
         foreach ($params as $paramKey => $paramValue) {
-            if (null === $paramValue) {
+            if ($paramValue === null) {
                 continue;
             }
 
-            if ('' === $paramValue && '0' !== $paramValue) {
+            if ($paramValue === '' && $paramValue !== '0') {
                 continue;
             }
 
@@ -414,6 +395,14 @@ class mautic extends solution
         }
 
         return http_build_query($cleanParams);
+    }
+
+    private function camelToSnake(string $name): string
+    {
+        $snakeStepOne = preg_replace('/(.)([A-Z][a-z]+)/', '$1_$2', $name);
+        $snakeStepTwo = preg_replace('/([a-z0-9])([A-Z])/', '$1_$2', (string) $snakeStepOne);
+
+        return strtolower((string) $snakeStepTwo);
     }
 
     private function formatWriteResponse(array $responseData, string $rootKey): array
@@ -425,20 +414,30 @@ class mautic extends solution
         return $responseData;
     }
 
+    private static function escapeExceptionValue($value): string
+    {
+        if (is_array($value) || is_object($value)) {
+            $value = json_encode($value, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        }
+
+        return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+    }
+
     private function loadModuleFields(string $moduleName): void
     {
-        $fieldLoaders = [
-            'contacts' => 'loadContactFields',
-            'companies' => 'loadCompanyFields',
-            'segments' => 'loadSegmentFields',
-        ];
-
-        if (!isset($fieldLoaders[$moduleName])) {
+        if ($moduleName === 'contacts') {
+            $this->loadContactFields();
             return;
         }
 
-        $loaderMethod = $fieldLoaders[$moduleName];
-        $this->{$loaderMethod}();
+        if ($moduleName === 'companies') {
+            $this->loadCompanyFields();
+            return;
+        }
+
+        if ($moduleName === 'segments') {
+            $this->loadSegmentFields();
+        }
     }
 
     private function loadContactFields(): void
@@ -469,7 +468,6 @@ class mautic extends solution
 
         if (!empty($firstCompany['fields']) && is_array($firstCompany['fields'])) {
             $this->appendCompanyFieldsFromGroups($firstCompany['fields']);
-
             return;
         }
 
@@ -583,7 +581,7 @@ class mautic extends solution
             ];
         }
 
-        if (!isset($fieldValue['label']) || '' === $fieldValue['label']) {
+        if (!isset($fieldValue['label']) || $fieldValue['label'] === '') {
             $fieldValue['label'] = (string) $fieldKey;
         }
 
@@ -612,18 +610,17 @@ class mautic extends solution
 
     private function resolveEndpointName(string $moduleName): string
     {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
+        $endpointMap = [
+            'contacts' => 'contacts',
+            'companies' => 'companies',
+            'segments' => 'segments',
+        ];
 
-        return $moduleConfiguration['endpoint'];
-    }
-
-    private function getModuleConfiguration(string $moduleName): array
-    {
-        if (!isset($this->moduleConfiguration[$moduleName])) {
+        if (!isset($endpointMap[$moduleName])) {
             throw new \Exception('Unsupported module '.$moduleName);
         }
 
-        return $this->moduleConfiguration[$moduleName];
+        return $endpointMap[$moduleName];
     }
 
     private function buildReadQueryParams(array $param): array
@@ -649,7 +646,7 @@ class mautic extends solution
         }
 
         $mode = $param['ruleParams']['mode'] ?? '0';
-        $queryParams['orderBy'] = ('C' === $mode) ? 'dateAdded' : 'dateModified';
+        $queryParams['orderBy'] = ($mode === 'C') ? 'dateAdded' : 'dateModified';
         $queryParams['orderByDir'] = 'asc';
 
         return $queryParams;
@@ -663,7 +660,7 @@ class mautic extends solution
 
         $queryParts = [];
         foreach ($query as $fieldName => $fieldValue) {
-            if (null === $fieldValue || '' === $fieldValue) {
+            if ($fieldValue === null || $fieldValue === '') {
                 continue;
             }
 
@@ -704,38 +701,76 @@ class mautic extends solution
 
     private function resolveReadItemsKey(string $moduleName): string
     {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
+        $itemsKeyMap = [
+            'contacts' => 'contacts',
+            'companies' => 'companies',
+            'segments' => 'lists',
+        ];
 
-        return $moduleConfiguration['items_key'];
+        return $itemsKeyMap[$moduleName] ?? $moduleName;
     }
 
     private function createRecord(string $moduleName, array $payloadData): array
     {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $responseData = $this->call(
-            $this->apiBase.'/'.$moduleConfiguration['endpoint'].'/new',
-            'POST',
-            $payloadData
-        );
+        if ($moduleName === 'contacts') {
+            $responseData = $this->call($this->apiBase.'/contacts/new', 'POST', $payloadData);
+            return $this->formatWriteResponse($responseData, 'contact');
+        }
 
-        return $this->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
+        if ($moduleName === 'companies') {
+            $responseData = $this->call($this->apiBase.'/companies/new', 'POST', $payloadData);
+            return $this->formatWriteResponse($responseData, 'company');
+        }
+
+        if ($moduleName === 'segments') {
+            $responseData = $this->call($this->apiBase.'/segments/new', 'POST', $payloadData);
+            return $this->formatWriteResponse($responseData, 'list');
+        }
+
+        throw new \Exception('Unsupported module '.$moduleName);
     }
 
     private function updateRecord(string $moduleName, $recordId, array $payloadData): void
     {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $responseData = $this->call(
-            $this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/edit',
-            'PATCH',
-            $payloadData
-        );
-        $this->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
+        if ($moduleName === 'contacts') {
+            $responseData = $this->call($this->apiBase.'/contacts/'.$recordId.'/edit', 'PATCH', $payloadData);
+            $this->formatWriteResponse($responseData, 'contact');
+            return;
+        }
+
+        if ($moduleName === 'companies') {
+            $responseData = $this->call($this->apiBase.'/companies/'.$recordId.'/edit', 'PATCH', $payloadData);
+            $this->formatWriteResponse($responseData, 'company');
+            return;
+        }
+
+        if ($moduleName === 'segments') {
+            $responseData = $this->call($this->apiBase.'/segments/'.$recordId.'/edit', 'PATCH', $payloadData);
+            $this->formatWriteResponse($responseData, 'list');
+            return;
+        }
+
+        throw new \Exception('Unsupported module '.$moduleName);
     }
 
     private function deleteRecord(string $moduleName, $recordId): void
     {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/delete', 'DELETE');
+        if ($moduleName === 'contacts') {
+            $this->call($this->apiBase.'/contacts/'.$recordId.'/delete', 'DELETE');
+            return;
+        }
+
+        if ($moduleName === 'companies') {
+            $this->call($this->apiBase.'/companies/'.$recordId.'/delete', 'DELETE');
+            return;
+        }
+
+        if ($moduleName === 'segments') {
+            $this->call($this->apiBase.'/segments/'.$recordId.'/delete', 'DELETE');
+            return;
+        }
+
+        throw new \Exception('Unsupported module '.$moduleName);
     }
 
     private function extractTargetRecordId(array &$payloadData, string $operationName)
@@ -747,7 +782,7 @@ class mautic extends solution
         }
 
         if (empty($recordId)) {
-            throw new \Exception('Missing record id for operation '.$operationName.'.');
+            throw new \Exception('Missing record id for '.$operationName.'.');
         }
 
         return $recordId;
@@ -757,9 +792,9 @@ class mautic extends solution
         \Exception $exception,
         string $documentId,
         array $param,
-        array $payloadData,
+        array $payloadData
     ): array {
-        $errorMessage = $exception->getMessage();
+        $errorMessage = $exception->getMessage().' '.$exception->getFile().' Line : ( '.$exception->getLine().' )';
 
         $this->logger->error('Mautic send error', [
             'method' => __FUNCTION__,
@@ -767,8 +802,6 @@ class mautic extends solution
             'module' => $param['module'] ?? null,
             'payload' => $payloadData,
             'error' => $errorMessage,
-            'exception_file' => $exception->getFile(),
-            'exception_line' => $exception->getLine(),
         ]);
 
         return [
@@ -791,13 +824,15 @@ class mautic extends solution
         return $requestHeaders;
     }
 
-    private function prepareJsonPayload($data, string $httpMethod): ?string
+    private function prepareJsonBody($data, string $httpMethod, array &$requestHeaders): ?string
     {
         $methodsWithBody = ['POST', 'PUT', 'PATCH'];
 
         if (empty($data) || !in_array($httpMethod, $methodsWithBody, true)) {
             return null;
         }
+
+        $requestHeaders[] = 'Content-Type: application/json';
 
         return json_encode($data);
     }
@@ -806,7 +841,7 @@ class mautic extends solution
     {
         $trimmedResponse = trim((string) $rawResponse);
 
-        if ('' === $trimmedResponse) {
+        if ($trimmedResponse === '') {
             return $this->parseEmptyApiResponse($statusCode);
         }
 
@@ -825,7 +860,8 @@ class mautic extends solution
     private function parseEmptyApiResponse(int $statusCode): array
     {
         if ($statusCode >= 400) {
-            throw new \Exception(sprintf('HTTP %s', (string) $statusCode));
+            $safeStatus = self::escapeExceptionValue((string) $statusCode);
+            throw new \Exception(sprintf('HTTP %s', $safeStatus));
         }
 
         return [];
@@ -834,7 +870,9 @@ class mautic extends solution
     private function parseNonJsonApiResponse(string $rawResponse, int $statusCode): array
     {
         if ($statusCode >= 400) {
-            throw new \Exception(sprintf('HTTP %s - %s', (string) $statusCode, $rawResponse));
+            $safeStatus = self::escapeExceptionValue((string) $statusCode);
+            $safeRawResponse = self::escapeExceptionValue($rawResponse);
+            throw new \Exception(sprintf('HTTP %s - %s', $safeStatus, $safeRawResponse));
         }
 
         return ['raw' => $rawResponse];
@@ -845,7 +883,7 @@ class mautic extends solution
         string $rawResponse,
         int $statusCode,
         string $httpMethod,
-        string $requestUrl,
+        string $requestUrl
     ): void {
         $errorMessage = $decodedResponse['error_description']
             ?? ($decodedResponse['error']['message'] ?? null)
@@ -853,7 +891,20 @@ class mautic extends solution
 
         $responseDetail = $this->buildApiErrorDetail($decodedResponse, $rawResponse);
 
-        throw new \Exception(sprintf('Mautic API error (%s): %s | %s %s | Response: %s', (string) $statusCode, (string) $errorMessage, $httpMethod, $requestUrl, $responseDetail));
+        $safeStatus = self::escapeExceptionValue((string) $statusCode);
+        $safeMessage = self::escapeExceptionValue($errorMessage);
+        $safeMethod = self::escapeExceptionValue($httpMethod);
+        $safeUrl = self::escapeExceptionValue($requestUrl);
+        $safeDetail = self::escapeExceptionValue($responseDetail);
+
+        throw new \Exception(sprintf(
+            'Mautic API error (%s): %s | %s %s | Response: %s',
+            $safeStatus,
+            $safeMessage,
+            $safeMethod,
+            $safeUrl,
+            $safeDetail
+        ));
     }
 
     private function buildApiErrorDetail(array $decodedResponse, string $rawResponse): string
