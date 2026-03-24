@@ -177,6 +177,8 @@ class dolibarr extends solution
      */
     public function get_modules($type = 'source')
     {
+        unset($type);
+
         try {
             // Dolibarr REST API supports read & write; allow both.
             $modules = [
@@ -364,101 +366,14 @@ class dolibarr extends solution
     public function readData($param): array
     {
         try {
-            $result = [];
-            $result['count'] = 0;
-            $result['date_ref'] = $param['ruleParams']['datereference'];
+            $normalizedParam = $this->prepareReadParameters($param);
+            $result = $this->createEmptyReadResult($normalizedParam);
 
-            if (empty($param['limit'])) {
-                $param['limit'] = $this->defaultLimit;
+            if ($this->hasSpecificRecordQuery($normalizedParam)) {
+                return $this->readSpecificRecord($normalizedParam, $result);
             }
 
-            // Remove Myddleware's system fields
-            $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-            // Add required fields (including id)
-            $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
-
-            // Specific record by id
-            if (!empty($param['query']) && !empty($param['query']['id'])) {
-                $recordId = $param['query']['id'];
-                $row = $this->callApi($this->apiBase.$param['module'].'/'.$recordId, 'GET');
-
-                if (!is_array($row) || isset($row['error'])) {
-                    return $result;
-                }
-
-                $row = $this->filterFields($row, $param['fields']);
-                $row['id'] = $recordId;
-                $result['values'][] = $row;
-                $result['count'] = 1;
-
-                return $result;
-            }
-
-            // List mode
-            $page = 0; // Dolibarr pages start at 0
-            $stop = false;
-
-            do {
-                $query = [
-                    'limit' => $param['limit'],
-                    'page' => $page,
-                    'sortfield' => !empty($param['sortfield']) ? $param['sortfield'] : 't.rowid',
-                    'sortorder' => !empty($param['sortorder']) ? $param['sortorder'] : 'ASC',
-                ];
-
-                // Incremental sync (best-effort): build sqlfilters using date_ref if query isn't forced
-                if (empty($param['query'])) {
-                    $sqlfilters = $this->buildSqlFiltersForDateRef($param);
-                    if (!empty($sqlfilters)) {
-                        $query['sqlfilters'] = $sqlfilters;
-                    }
-                }
-
-                // Optional extra filters passed by rule
-                if (!empty($param['query']) && is_array($param['query'])) {
-                    foreach ($param['query'] as $k => $v) {
-                        if ('id' === $k) {
-                            continue;
-                        }
-                        $query[$k] = $v;
-                    }
-                }
-
-                $rows = $this->callApi($this->apiBase.$param['module'], 'GET', $query);
-
-                if (!is_array($rows) || isset($rows['error'])) {
-                    // Stop on error to avoid infinite loops; Myddleware will log the exception upstream
-                    $stop = true;
-                    break;
-                }
-
-                $recordCount = 0;
-                foreach ($rows as $row) {
-                    if (!is_array($row)) {
-                        continue;
-                    }
-                    // Keep only mapped fields, but always include id
-                    $one = $this->filterFields($row, $param['fields']);
-                    if (!empty($row['id'])) {
-                        $one['id'] = $row['id'];
-                    } elseif (!empty($row['rowid'])) {
-                        $one['id'] = $row['rowid'];
-                    }
-                    $result['values'][] = $one;
-                    ++$recordCount;
-                }
-
-                $result['count'] += $recordCount;
-
-                // Stop if we got less than limit (no more pages)
-                if ($recordCount < (int) $param['limit']) {
-                    $stop = true;
-                } else {
-                    ++$page;
-                }
-            } while (!$stop);
-
-            return $result;
+            return $this->readPagedRecords($normalizedParam, $result);
         } catch (\Exception $e) {
             $this->logger->error('Dolibarr read error', ['error' => $e->getMessage(), 'exception_file' => $e->getFile(), 'exception_line' => $e->getLine()]);
             throw $e;
@@ -523,46 +438,9 @@ class dolibarr extends solution
 
         foreach ($param['data'] as $idDoc => $data) {
             try {
-                // Check control before create/update
-                $data = $this->checkDataBeforeCreate($param, $data, $idDoc);
-
-                // Determine record id for update
-                $recordId = null;
-                if ('POST' !== $method) {
-                    $recordId = !empty($data['target_id']) ? $data['target_id'] : (!empty($data['id']) ? $data['id'] : null);
-                    if (empty($recordId)) {
-                        throw new \Exception('Missing target_id for update.');
-                    }
-                }
-
-                // Remove Myddleware system fields
-                unset($data['target_id']);
-
-                // Send request
-                $url = $this->apiBase.$param['module'].($recordId ? '/'.$recordId : '');
-                $resp = $this->callApi($url, $method, $data);
-
-                if (is_array($resp) && isset($resp['error'])) {
-                    throw new \Exception($this->formatDolibarrError($resp));
-                }
-
-                // Create often returns integer id, update often returns object
-                $newId = null;
-                if (is_int($resp) || (is_string($resp) && ctype_digit($resp))) {
-                    $newId = (string) $resp;
-                } elseif (is_array($resp)) {
-                    if (!empty($resp['id'])) {
-                        $newId = (string) $resp['id'];
-                    } elseif (!empty($resp['rowid'])) {
-                        $newId = (string) $resp['rowid'];
-                    }
-                }
-
-                if (empty($newId)) {
-                    // Some endpoints return 200 with a message; fall back to update id.
-                    $newId = $recordId ?: '-1';
-                }
-
+                $writeData = $this->prepareWriteData($method, $param, $data, $idDoc);
+                $response = $this->sendWriteRequest($method, $param['module'], $writeData['recordId'], $writeData['payload']);
+                $newId = $this->resolveWriteResultId($response, $writeData['recordId']);
                 $result[$idDoc] = ['id' => $newId, 'error' => false];
             } catch (\Exception $e) {
                 $result[$idDoc] = ['id' => '-1', 'error' => $e->getMessage()];
@@ -588,68 +466,17 @@ class dolibarr extends solution
      */
     protected function callApi(string $url, string $method = 'GET', array $args = [], int $timeout = 60)
     {
-        $headers = [
-            'Accept' => 'application/json',
-            'DOLAPIKEY' => $this->apiKey,
-        ];
-        if (!empty($this->apiEntity)) {
-            $headers['DOLAPIENTITY'] = $this->apiEntity;
-        }
-
         $method = strtoupper($method);
-        $requestOptions = [
-            'headers' => $headers,
-            'timeout' => $timeout,
-            'verify_peer' => $this->verify_ssl,
-            'verify_host' => $this->verify_ssl,
-        ];
+        $requestOptions = $this->buildRequestOptions($method, $args, $timeout);
 
         if ('GET' === $method && !empty($args)) {
             $url = sprintf('%s?%s', $url, http_build_query($args));
-        } elseif (in_array($method, ['POST', 'PUT', 'PATCH', 'DELETE'], true)) {
-            $headers['Content-Type'] = 'application/json';
-            $requestOptions['headers'] = $headers;
-
-            if (!empty($args)) {
-                $requestOptions['body'] = json_encode($args);
-            } elseif ('POST' === $method) {
-                $requestOptions['body'] = '{}';
-            }
         }
 
         $client = HttpClient::create();
         $response = $client->request($method, $url, $requestOptions);
-        $httpCode = $response->getStatusCode();
-        $rawResponse = $response->getContent(false);
 
-        $trimmedResponse = trim($rawResponse);
-        if ('' !== $trimmedResponse && ctype_digit($trimmedResponse)) {
-            return (int) $trimmedResponse;
-        }
-
-        $decoded = json_decode($rawResponse, true);
-
-        if (null === $decoded && JSON_ERROR_NONE !== json_last_error()) {
-            return [
-                'error' => [
-                    'code' => $httpCode,
-                    'message' => 'Invalid JSON response: '.json_last_error_msg(),
-                    'raw' => $rawResponse,
-                ],
-            ];
-        }
-
-        if ($httpCode >= 400 && (empty($decoded) || !isset($decoded['error']))) {
-            return [
-                'error' => [
-                    'code' => $httpCode,
-                    'message' => 'HTTP error '.$httpCode,
-                    'raw' => $decoded ?: $rawResponse,
-                ],
-            ];
-        }
-
-        return $decoded;
+        return $this->normalizeApiResponse($response->getStatusCode(), $response->getContent(false));
     }
 
     protected function normalizeApiBase(string $url): string

@@ -29,14 +29,14 @@ namespace App\Manager;
 use App\Solutions\acton;
 use App\Solutions\airtable;
 use App\Solutions\brevo;
-use App\Solutions\cirrusshield;
 use App\Solutions\dolibarr;
+use App\Solutions\dynamicsbusiness;
+use App\Solutions\dynamicscrm;
 use App\Solutions\erpnext;
-use App\Solutions\eventbrite;
-use App\Solutions\facebook;
 use App\Solutions\file;
 use App\Solutions\hubspot;
 use App\Solutions\internallist;
+use App\Solutions\iomad;
 use App\Solutions\magento;
 use App\Solutions\mailchimp;
 use App\Solutions\mautic;
@@ -46,26 +46,15 @@ use App\Solutions\mysql;
 use App\Solutions\oracledb;
 use App\Solutions\postgresql;
 use App\Solutions\prestashop;
-use App\Solutions\ringcentral;
-use App\Solutions\sagecrm;
 use App\Solutions\salesforce;
 use App\Solutions\salesforce_v2;
-use App\Solutions\sap;
-use App\Solutions\sapcrm;
 use App\Solutions\sendinblue;
 use App\Solutions\sugarcrm;
 use App\Solutions\suitecrm;
 use App\Solutions\suitecrm8;
 use App\Solutions\vtigercrm;
-use App\Solutions\woocommerce;
-use App\Solutions\wooeventmanager;
-use App\Solutions\wordpress;
 use App\Solutions\yousign;
 use App\Solutions\zuora;
-use App\Solutions\dynamicsbusiness;
-use App\Solutions\dynamicscrm;
-use App\Solutions\iomad;
-use Exception;
 
 /**
  * Class SolutionManager.
@@ -73,38 +62,38 @@ use Exception;
 class SolutionManager
 {
     private array $classes = [];
-	
-	public static array $solutions = [
-							'erpnext',
-							'hubspot',
-							'zuora',
-							'file',
-							'moodle',
-							'magento',
-							'microsoftsql',
-							'oracledb',
-							'mautic',
-							'mysql',
-							'dolibarr',
-							'vtigercrm',
-							'suitecrm',
-							'mailchimp',
-							'prestashop',
-							'postgresql',
-							'sugarcrm',
-							'salesforce',
-							'salesforce_v2',
-							'airtable',
-							'sendinblue',
-							'internallist',
-							'suitecrm8',
-							'yousign',
-							'brevo',
-							'acton',
-							'dynamicsbusiness',
-							'dynamicscrm',
-							'iomad'
-						];
+
+    public static array $solutions = [
+        'erpnext',
+        'hubspot',
+        'zuora',
+        'file',
+        'moodle',
+        'magento',
+        'microsoftsql',
+        'oracledb',
+        'mautic',
+        'mysql',
+        'dolibarr',
+        'vtigercrm',
+        'suitecrm',
+        'mailchimp',
+        'prestashop',
+        'postgresql',
+        'sugarcrm',
+        'salesforce',
+        'salesforce_v2',
+        'airtable',
+        'sendinblue',
+        'internallist',
+        'suitecrm8',
+        'yousign',
+        'brevo',
+        'acton',
+        'dynamicsbusiness',
+        'dynamicscrm',
+        'iomad',
+    ];
 
     public function __construct(
         erpnext $erpnext,
@@ -116,8 +105,8 @@ class SolutionManager
         microsoftsql $microsoftsql,
         oracledb $oracledb,
         mysql $mysql,
-	dolibarr $dolibarr,
-	mautic $mautic,
+        dolibarr $dolibarr,
+        mautic $mautic,
         vtigercrm $vtigercrm,
         suitecrm $suitecrm,
         mailchimp $mailchimp,
@@ -135,20 +124,21 @@ class SolutionManager
         acton $acton,
         dynamicsbusiness $dynamicsbusiness,
         dynamicscrm $dynamicscrm,
-        iomad $iomad
+        iomad $iomad,
     ) {
-		// Load the solution classes
-		if (!empty(self::$solutions)) {
-			foreach(self::$solutions as $solution) {
-				$this->classes[$solution] = $$solution;
-			}
-		}
+        if (empty(self::$solutions)) {
+            return;
+        }
+
+        foreach (self::$solutions as $solution) {
+            $this->classes[$solution] = $$solution;
+        }
     }
 
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
-            throw new Exception('Solution ' . $name . ' not found. Please make sure that you have added this solution into Myddleware. ');
+            throw new \Exception('Solution '.$name.' not found. Please make sure that you have added this solution into Myddleware.');
         }
 
         return $this->classes[$name];
