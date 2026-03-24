@@ -391,7 +391,8 @@ class mautic extends solution
 
         if ($statusCode >= 400) {
             $message = $decodedResponse['error_description'] ?? ('HTTP '.$statusCode);
-            throw new \Exception(sprintf('OAuth token error (%s): %s', (string) $statusCode, (string) $message));
+            $this->logger->error('Mautic OAuth token error', ['status_code' => $statusCode, 'message' => $message]);
+            throw new \Exception('Mautic OAuth token request failed.');
         }
 
         if (empty($decodedResponse['access_token']) || empty($decodedResponse['expires_in'])) {
@@ -649,7 +650,8 @@ class mautic extends solution
     private function getModuleConfiguration(string $moduleName): array
     {
         if (!isset($this->moduleConfiguration[$moduleName])) {
-            throw new \Exception('Unsupported module '.$moduleName);
+            $this->logger->error('Unsupported Mautic module', ['module' => $moduleName]);
+            throw new \Exception('Unsupported Mautic module.');
         }
 
         return $this->moduleConfiguration[$moduleName];
@@ -776,7 +778,8 @@ class mautic extends solution
         }
 
         if (empty($recordId)) {
-            throw new \Exception('Missing record id for operation '.$operationName.'.');
+            $this->logger->error('Missing Mautic record id', ['operation' => $operationName]);
+            throw new \Exception('Missing Mautic record id for write operation.');
         }
 
         return $recordId;
@@ -854,7 +857,8 @@ class mautic extends solution
     private function parseEmptyApiResponse(int $statusCode): array
     {
         if ($statusCode >= 400) {
-            throw new \Exception(sprintf('HTTP %s', (string) $statusCode));
+            $this->logger->error('Mautic HTTP error', ['status_code' => $statusCode]);
+            throw new \Exception('Mautic HTTP request failed.');
         }
 
         return [];
@@ -863,7 +867,8 @@ class mautic extends solution
     private function parseNonJsonApiResponse(string $rawResponse, int $statusCode): array
     {
         if ($statusCode >= 400) {
-            throw new \Exception(sprintf('HTTP %s - %s', (string) $statusCode, $rawResponse));
+            $this->logger->error('Mautic non-JSON HTTP error', ['status_code' => $statusCode, 'raw_response' => $rawResponse]);
+            throw new \Exception('Mautic HTTP request failed with a non-JSON response.');
         }
 
         return ['raw' => $rawResponse];
@@ -882,7 +887,8 @@ class mautic extends solution
 
         $responseDetail = $this->buildApiErrorDetail($decodedResponse, $rawResponse);
 
-        throw new \Exception(sprintf('Mautic API error (%s): %s | %s %s | Response: %s', (string) $statusCode, (string) $errorMessage, $httpMethod, $requestUrl, $responseDetail));
+        $this->logger->error('Mautic API error', ['status_code' => $statusCode, 'message' => $errorMessage, 'http_method' => $httpMethod, 'request_url' => $requestUrl, 'response_detail' => $responseDetail]);
+        throw new \Exception('Mautic API request failed.');
     }
 
     private function buildApiErrorDetail(array $decodedResponse, string $rawResponse): string
