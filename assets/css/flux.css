@@ -298,14 +298,8 @@ li span {
 }
 
 /* Flux Table Styling */
-#flux-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-}
 
 #flux-table th, .table-task-detail th{
-    background: white;
     height: 40px;
     padding: 8px 12px;
     text-align: center;

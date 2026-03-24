@@ -92,14 +92,21 @@ class RuleController extends AbstractController
 
     #[Route('/list', name: 'regle_list', defaults: ['page' => 1])]
     #[Route('/list/page-{page}', name: 'regle_list_page', requirements: ['page' => '\d+'])]
-    public function ruleListAction(Request $request, int $page = 1): Response
-    {
-        try {
-            $ruleName = $request->query->get('rule_name');
-            $limit = $this->tools->getParamValue('ruleListPager') ?? 20;
+public function ruleListAction(Request $request, int $page = 1): Response
+{
+    try {
+        $ruleNameParam = $request->query->get('rule_name');
+        $ruleNames = null;
 
-            $query = $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser(), $ruleName);
-            $query->setHydrationMode(Query::HYDRATE_ARRAY);
+        if ($ruleNameParam) {
+            $ruleNames = str_contains($ruleNameParam, ',') ? explode(',', $ruleNameParam) : [$ruleNameParam];
+            $ruleNames = array_filter(array_map('trim', $ruleNames));
+        }
+
+        $limit = $this->tools->getParamValue('ruleListPager') ?? 20;
+
+        $query = $this->entityManager->getRepository(Rule::class)->findListRuleByUser($this->getUser(), $ruleNames);
+        $query->setHydrationMode(Query::HYDRATE_ARRAY);
 
             $adapter = new QueryAdapter($query, false, true);
             $pagerfanta = new Pagerfanta($adapter);

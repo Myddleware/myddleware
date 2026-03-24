@@ -67,10 +67,6 @@
     font-weight: bold;
 }
 
-#task tr:hover, #task .fd_normal,
-#workflows tr:hover, #workflows .fd_normal {
-    background: #ECECEC;
-}
 
 #task table a, #task table a:hover,
 #workflows table a, #workflows table a:hover, 
@@ -285,13 +281,4 @@ html body #task-filter-bar .task-filter-col-param .selectize-control .selectize-
     border: 2px dashed #03c4eb !important;
     color: #000000 !important;
 	padding-left: 8px !important;
-}
-
-.table-task-detail{
-    width: 100%;
-}
-
-.table-task-detail:hover{
-    box-shadow: 0 6px 12px rgba(0,0,0,.12), 0 2px 4px rgba(0,0,0,.08);
-	transform: translateY(-2px);
 }
