@@ -86,6 +86,17 @@ class mautic extends solution
         ],
     ];
 
+    protected array $metadataFields = [
+        'segments' => [
+            'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'alias' => ['label' => 'Alias', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'description' => ['label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'isPublished' => ['label' => 'Is published', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'isGlobal' => ['label' => 'Is global', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        ],
+    ];
+
     public function getFieldsLogin(): array
     {
         return [
@@ -173,8 +184,6 @@ class mautic extends solution
 
             if (!empty($metadataFields)) {
                 $this->moduleFields = array_merge($this->moduleFields, $metadataFields);
-            } else {
-                $this->loadModuleFields($module);
             }
 
             $this->moduleFields = $this->normalizeModuleFields($this->moduleFields);
@@ -435,148 +444,11 @@ class mautic extends solution
 
     private function getMetadataFields(string $moduleName): array
     {
-        $moduleFields = [];
-
-        require __DIR__.'/lib/mautic/metadata.php';
-
-        if (!empty($moduleFields[$moduleName]) && is_array($moduleFields[$moduleName])) {
-            return $moduleFields[$moduleName];
-        }
-
-        if ('segments' === $moduleName && !empty($moduleFields['segment']) && is_array($moduleFields['segment'])) {
-            return $moduleFields['segment'];
+        if (!empty($this->metadataFields[$moduleName]) && is_array($this->metadataFields[$moduleName])) {
+            return $this->metadataFields[$moduleName];
         }
 
         return [];
-    }
-
-    private function loadModuleFields(string $moduleName): void
-    {
-        $fieldLoaders = [
-            'contacts' => 'loadContactFields',
-            'companies' => 'loadCompanyFields',
-            'segments' => 'loadSegmentFields',
-        ];
-
-        if (!isset($fieldLoaders[$moduleName])) {
-            return;
-        }
-
-        $loaderMethod = $fieldLoaders[$moduleName];
-        $this->{$loaderMethod}();
-    }
-
-    private function loadContactFields(): void
-    {
-        $fieldList = $this->call($this->apiBase.'/contacts/list/fields', 'GET');
-        if (!is_array($fieldList)) {
-            return;
-        }
-
-        foreach ($fieldList as $fieldMetadata) {
-            if (!is_array($fieldMetadata) || empty($fieldMetadata['alias'])) {
-                continue;
-            }
-
-            $fieldAlias = $fieldMetadata['alias'];
-            $this->moduleFields[$fieldAlias] = [
-                'label' => $fieldMetadata['label'] ?? $fieldAlias,
-                'type' => $fieldMetadata['type'] ?? 'text',
-                'group' => $fieldMetadata['group'] ?? 'core',
-            ];
-        }
-    }
-
-    private function loadCompanyFields(): void
-    {
-        $companyResponse = $this->call($this->apiBase.'/companies?limit=1&minimal=0', 'GET');
-        $firstCompany = $this->extractFirstCompany($companyResponse);
-
-        if (!empty($firstCompany['fields']) && is_array($firstCompany['fields'])) {
-            $this->appendCompanyFieldsFromGroups($firstCompany['fields']);
-
-            return;
-        }
-
-        $this->loadFallbackCompanyFields();
-    }
-
-    private function extractFirstCompany(array $companyResponse): ?array
-    {
-        if (empty($companyResponse['companies']) || !is_array($companyResponse['companies'])) {
-            return null;
-        }
-
-        $firstCompany = reset($companyResponse['companies']);
-        if (!is_array($firstCompany)) {
-            return null;
-        }
-
-        return $firstCompany;
-    }
-
-    private function appendCompanyFieldsFromGroups(array $groupedFields): void
-    {
-        foreach ($groupedFields as $groupName => $groupFields) {
-            if (!is_array($groupFields)) {
-                continue;
-            }
-
-            foreach ($groupFields as $fieldAlias => $fieldMetadata) {
-                if (!is_array($fieldMetadata)) {
-                    continue;
-                }
-
-                $this->moduleFields[$fieldAlias] = [
-                    'label' => $fieldMetadata['label'] ?? $fieldAlias,
-                    'type' => $fieldMetadata['type'] ?? 'text',
-                    'group' => $fieldMetadata['group'] ?? $groupName,
-                ];
-            }
-        }
-    }
-
-    private function loadFallbackCompanyFields(): void
-    {
-        try {
-            $fallbackResponse = $this->call($this->apiBase.'/fields/company', 'GET');
-        } catch (\Exception $exception) {
-            return;
-        }
-
-        if (!is_array($fallbackResponse)) {
-            return;
-        }
-
-        $fieldItems = $fallbackResponse['fields'] ?? $fallbackResponse;
-        if (!is_array($fieldItems)) {
-            return;
-        }
-
-        foreach ($fieldItems as $fieldMetadata) {
-            if (!is_array($fieldMetadata) || empty($fieldMetadata['alias'])) {
-                continue;
-            }
-
-            $fieldAlias = $fieldMetadata['alias'];
-            $this->moduleFields[$fieldAlias] = [
-                'label' => $fieldMetadata['label'] ?? $fieldAlias,
-                'type' => $fieldMetadata['type'] ?? 'text',
-                'group' => $fieldMetadata['group'] ?? 'core',
-            ];
-        }
-    }
-
-    private function loadSegmentFields(): void
-    {
-        $this->moduleFields = array_merge($this->moduleFields, [
-            'id' => ['label' => 'id', 'type' => 'int'],
-            'name' => ['label' => 'name', 'type' => 'text'],
-            'alias' => ['label' => 'alias', 'type' => 'text'],
-            'isPublished' => ['label' => 'isPublished', 'type' => 'bool'],
-            'dateAdded' => ['label' => 'dateAdded', 'type' => 'datetime'],
-            'dateModified' => ['label' => 'dateModified', 'type' => 'datetime'],
-        ]);
     }
 
     private function normalizeModuleFields(array $moduleFields): array

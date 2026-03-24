@@ -162,7 +162,7 @@ class SolutionManager
     public function get(string $name)
     {
         if (!isset($this->classes[$name])) {
-            throw new \Exception('Solution '.$name.' not found. Please make sure that you have added this solution into Myddleware.');
+            throw new \Exception('Requested solution was not found. Please make sure that you have added this solution into Myddleware.');
         }
 
         return $this->classes[$name];

@@ -64,6 +64,122 @@ class dolibarr extends solution
     protected string $apiKey = '';
     protected ?string $apiEntity = null;
 
+    protected array $metadataFields = [
+        'thirdparties' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'rowid' => ['label' => 'Row ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'nom' => ['label' => 'Name', 'type' => 'string', 'required' => 0],
+            'email' => ['label' => 'Email', 'type' => 'string', 'required' => 0],
+            'phone' => ['label' => 'Phone', 'type' => 'string', 'required' => 0],
+            'town' => ['label' => 'Town', 'type' => 'string', 'required' => 0],
+            'zip' => ['label' => 'Zip', 'type' => 'string', 'required' => 0],
+            'status' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'contacts' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'lastname' => ['label' => 'Last name', 'type' => 'string', 'required' => 0],
+            'firstname' => ['label' => 'First name', 'type' => 'string', 'required' => 0],
+            'email' => ['label' => 'Email', 'type' => 'string', 'required' => 0],
+            'phone_mobile' => ['label' => 'Mobile phone', 'type' => 'string', 'required' => 0],
+            'phone_pro' => ['label' => 'Business phone', 'type' => 'string', 'required' => 0],
+            'socid' => ['label' => 'Third party ID', 'type' => 'int', 'required' => 0],
+            'poste' => ['label' => 'Job title', 'type' => 'string', 'required' => 0],
+            'statut' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'products' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'label' => ['label' => 'Label', 'type' => 'string', 'required' => 0],
+            'description' => ['label' => 'Description', 'type' => 'string', 'required' => 0],
+            'price' => ['label' => 'Price', 'type' => 'float', 'required' => 0],
+            'price_ttc' => ['label' => 'Price incl. tax', 'type' => 'float', 'required' => 0],
+            'status' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'invoices' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'socid' => ['label' => 'Third party ID', 'type' => 'int', 'required' => 0],
+            'date' => ['label' => 'Invoice date', 'type' => 'date', 'required' => 0],
+            'total_ht' => ['label' => 'Total excl. tax', 'type' => 'float', 'required' => 0],
+            'total_ttc' => ['label' => 'Total incl. tax', 'type' => 'float', 'required' => 0],
+            'statut' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'orders' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'socid' => ['label' => 'Third party ID', 'type' => 'int', 'required' => 0],
+            'date_commande' => ['label' => 'Order date', 'type' => 'date', 'required' => 0],
+            'total_ht' => ['label' => 'Total excl. tax', 'type' => 'float', 'required' => 0],
+            'total_ttc' => ['label' => 'Total incl. tax', 'type' => 'float', 'required' => 0],
+            'statut' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'proposals' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'socid' => ['label' => 'Third party ID', 'type' => 'int', 'required' => 0],
+            'datep' => ['label' => 'Proposal date', 'type' => 'date', 'required' => 0],
+            'fin_validite' => ['label' => 'Validity end', 'type' => 'date', 'required' => 0],
+            'total_ht' => ['label' => 'Total excl. tax', 'type' => 'float', 'required' => 0],
+            'total_ttc' => ['label' => 'Total incl. tax', 'type' => 'float', 'required' => 0],
+            'statut' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'tickets' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'subject' => ['label' => 'Subject', 'type' => 'string', 'required' => 0],
+            'message' => ['label' => 'Message', 'type' => 'string', 'required' => 0],
+            'status' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'projects' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'title' => ['label' => 'Title', 'type' => 'string', 'required' => 0],
+            'description' => ['label' => 'Description', 'type' => 'string', 'required' => 0],
+            'date_start' => ['label' => 'Start date', 'type' => 'date', 'required' => 0],
+            'date_end' => ['label' => 'End date', 'type' => 'date', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'tasks' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'label' => ['label' => 'Label', 'type' => 'string', 'required' => 0],
+            'description' => ['label' => 'Description', 'type' => 'string', 'required' => 0],
+            'fk_project' => ['label' => 'Project ID', 'type' => 'int', 'required' => 0],
+            'dateo' => ['label' => 'Start date', 'type' => 'date', 'required' => 0],
+            'datee' => ['label' => 'End date', 'type' => 'date', 'required' => 0],
+            'progress' => ['label' => 'Progress', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'supplierorders' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'socid' => ['label' => 'Supplier ID', 'type' => 'int', 'required' => 0],
+            'date_commande' => ['label' => 'Order date', 'type' => 'date', 'required' => 0],
+            'total_ht' => ['label' => 'Total excl. tax', 'type' => 'float', 'required' => 0],
+            'total_ttc' => ['label' => 'Total incl. tax', 'type' => 'float', 'required' => 0],
+            'statut' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+        'supplierinvoices' => [
+            'id' => ['label' => 'ID', 'type' => 'int', 'required' => 0],
+            'ref' => ['label' => 'Reference', 'type' => 'string', 'required' => 0],
+            'socid' => ['label' => 'Supplier ID', 'type' => 'int', 'required' => 0],
+            'date' => ['label' => 'Invoice date', 'type' => 'date', 'required' => 0],
+            'total_ht' => ['label' => 'Total excl. tax', 'type' => 'float', 'required' => 0],
+            'total_ttc' => ['label' => 'Total incl. tax', 'type' => 'float', 'required' => 0],
+            'statut' => ['label' => 'Status', 'type' => 'int', 'required' => 0],
+            'tms' => ['label' => 'Modified date', 'type' => 'datetime', 'required' => 0],
+        ],
+    ];
+
     // Default paging
     protected int $defaultLimit = 100;
     protected int $timeout = 60;
@@ -245,12 +361,8 @@ class dolibarr extends solution
 
     protected function getMetadataFields(string $module): array
     {
-        $moduleFields = [];
-
-        require __DIR__.'/lib/dolibarr/metadata.php';
-
-        if (!empty($moduleFields[$module]) && is_array($moduleFields[$module])) {
-            return $moduleFields[$module];
+        if (!empty($this->metadataFields[$module]) && is_array($this->metadataFields[$module])) {
+            return $this->metadataFields[$module];
         }
 
         return [];
