@@ -1517,6 +1517,36 @@ body.menu-is-open {
 	display: block;
 }
 
+.more-actions-wrapper, 
+.more-actions-wrapper-documents {
+    display: inline-block;
+    background-color: #ffffff;
+    border: 1px solid #929da2;
+    border-radius: 22px;
+    transition: all 0.2s ease;
+}
+
+.more-actions-wrapper-documents button.btn, .more-actions-wrapper button.btn{
+    color: #929da2;
+    background-color: transparent;
+    border: none;
+    padding: 5px 15px;
+}
+
+.more-actions-wrapper-documents button.btn svg, .more-actions-wrapper button.btn svg{
+    fill: currentColor;
+}
+
+.more-actions-wrapper:hover, 
+.more-actions-wrapper-documents:hover {
+    background-color: #929da2;
+}
+
+.more-actions-wrapper:hover button.btn, 
+.more-actions-wrapper-documents:hover button.btn {
+    color: #ffffff !important;
+}
+
 .more-actions-dropdown .dropdown-item {
 	display: flex;
 	align-items: center;
