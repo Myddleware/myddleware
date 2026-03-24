@@ -24,9 +24,10 @@
 
 namespace App\Solutions;
 
+use App\Solutions\Support\MauticApiHelper;
+use App\Solutions\Support\MauticConnectorHelper;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -180,13 +181,13 @@ class mautic extends solution
 
         try {
             $this->moduleFields = $this->addRequiredField($this->moduleFields, $module);
-            $metadataFields = $this->getMetadataFields($module);
+            $metadataFields = (new MauticConnectorHelper())->getMetadataFields($this->metadataFields, $module);
 
             if (!empty($metadataFields)) {
                 $this->moduleFields = array_merge($this->moduleFields, $metadataFields);
             }
 
-            $this->moduleFields = $this->normalizeModuleFields($this->moduleFields);
+            $this->moduleFields = (new MauticConnectorHelper())->normalizeModuleFields($this->moduleFields);
 
             return $this->moduleFields;
         } catch (\Exception $exception) {
@@ -213,13 +214,22 @@ class mautic extends solution
     public function readData($param): array
     {
         try {
-            $normalizedParameters = $this->prepareReadParameters($param);
-            $endpointName = $this->resolveEndpointName($normalizedParameters['module']);
-            $queryParams = $this->buildReadQueryParams($normalizedParameters);
-            $requestUrl = $this->apiBase.'/'.$endpointName.'?'.$this->createUrlParam($queryParams);
+            $connectorHelper = new MauticConnectorHelper();
+            $normalizedParameters = $connectorHelper->prepareReadParameters(
+                $param,
+                fn (array $fields) => $this->cleanMyddlewareElementId($fields),
+                fn (array $fields, string $module) => $this->addRequiredField($fields, $module),
+            );
+            $endpointName = $connectorHelper->resolveEndpointName($this->moduleConfiguration, $normalizedParameters['module']);
+            $queryParams = $connectorHelper->buildReadQueryParams($normalizedParameters, $this->getRefFieldName($normalizedParameters));
+            $requestUrl = $this->apiBase.'/'.$endpointName.'?'.$connectorHelper->createUrlParam($queryParams);
             $responseData = $this->call($requestUrl, 'GET');
 
-            return $this->formatReadResult($normalizedParameters, $responseData);
+            return $connectorHelper->formatReadResult(
+                $normalizedParameters,
+                $responseData,
+                $connectorHelper->resolveReadItemsKey($this->moduleConfiguration, $normalizedParameters['module']),
+            );
         } catch (\Exception $exception) {
             $errorMessage = $exception->getMessage();
             $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
@@ -319,24 +329,13 @@ class mautic extends solution
      */
     public function call($url, $method = 'GET', $data = null): array
     {
-        $requestHeaders = $this->buildRequestHeaders();
-        $httpMethod = strtoupper((string) $method);
-        $requestOptions = [
-            'headers' => $requestHeaders,
-            'timeout' => 60,
-        ];
-
-        $jsonPayload = $this->prepareJsonPayload($data, $httpMethod);
-        if (null !== $jsonPayload) {
-            $requestOptions['body'] = $jsonPayload;
-        }
-
-        $client = HttpClient::create();
-        $response = $client->request($httpMethod, $url, $requestOptions);
-        $statusCode = $response->getStatusCode();
-        $rawResponse = $response->getContent(false);
-
-        return $this->parseApiResponse($rawResponse, $statusCode, $httpMethod, (string) $url);
+        return (new MauticApiHelper())->call(
+            (string) $url,
+            (string) $method,
+            $data,
+            (new MauticApiHelper())->buildRequestHeaders($this->buildAuthHeader()),
+            $this->logger,
+        );
     }
 
     private function buildAuthHeader(): ?string
@@ -369,265 +368,35 @@ class mautic extends solution
      */
     private function getOAuth2AccessToken(string $clientId, string $clientSecret): string
     {
-        $currentTimestamp = time();
+        $tokenData = (new MauticApiHelper())->getOAuth2AccessToken(
+            $this->baseUrl,
+            $clientId,
+            $clientSecret,
+            time(),
+            $this->accessToken,
+            $this->tokenExpiresAt,
+            $this->logger,
+        );
 
-        if (!empty($this->accessToken) && $this->tokenExpiresAt > ($currentTimestamp + 60)) {
-            return $this->accessToken;
-        }
-
-        $tokenUrl = $this->baseUrl.'/oauth/v2/token';
-        $client = HttpClient::create();
-        $response = $client->request('POST', $tokenUrl, [
-            'timeout' => 60,
-            'headers' => [
-                'Accept: application/json',
-                'Content-Type: application/x-www-form-urlencoded',
-            ],
-            'body' => http_build_query([
-                'client_id' => $clientId,
-                'client_secret' => $clientSecret,
-                'grant_type' => 'client_credentials',
-            ]),
-        ]);
-
-        $statusCode = $response->getStatusCode();
-        $rawResponse = $response->getContent(false);
-        $decodedResponse = json_decode($rawResponse, true);
-
-        if (!is_array($decodedResponse)) {
-            throw new \Exception('OAuth token response was not JSON.');
-        }
-
-        if ($statusCode >= 400) {
-            $message = $decodedResponse['error_description'] ?? ('HTTP '.$statusCode);
-            $this->logger->error('Mautic OAuth token error', ['status_code' => $statusCode, 'message' => $message]);
-            throw new \Exception('Mautic OAuth token request failed.');
-        }
-
-        if (empty($decodedResponse['access_token']) || empty($decodedResponse['expires_in'])) {
-            throw new \Exception('OAuth token response missing access_token/expires_in.');
-        }
-
-        $this->accessToken = (string) $decodedResponse['access_token'];
-        $this->tokenExpiresAt = $currentTimestamp + (int) $decodedResponse['expires_in'];
+        $this->accessToken = $tokenData['access_token'];
+        $this->tokenExpiresAt = $tokenData['token_expires_at'];
 
         return $this->accessToken;
-    }
-
-    protected function createUrlParam(array $params): string
-    {
-        $cleanParams = [];
-
-        foreach ($params as $paramKey => $paramValue) {
-            if (null === $paramValue) {
-                continue;
-            }
-
-            if ('' === $paramValue && '0' !== $paramValue) {
-                continue;
-            }
-
-            $cleanParams[$paramKey] = $paramValue;
-        }
-
-        return http_build_query($cleanParams);
-    }
-
-    private function formatWriteResponse(array $responseData, string $rootKey): array
-    {
-        if (!empty($responseData[$rootKey]) && is_array($responseData[$rootKey])) {
-            return $responseData[$rootKey];
-        }
-
-        return $responseData;
-    }
-
-    private function getMetadataFields(string $moduleName): array
-    {
-        if (!empty($this->metadataFields[$moduleName]) && is_array($this->metadataFields[$moduleName])) {
-            return $this->metadataFields[$moduleName];
-        }
-
-        return [];
-    }
-
-    private function normalizeModuleFields(array $moduleFields): array
-    {
-        $normalizedFields = [];
-
-        foreach ($moduleFields as $fieldKey => $fieldValue) {
-            $normalizedFields[$fieldKey] = $this->normalizeSingleField($fieldKey, $fieldValue);
-        }
-
-        return $normalizedFields;
-    }
-
-    private function normalizeSingleField($fieldKey, $fieldValue): array
-    {
-        if (is_string($fieldValue)) {
-            return [
-                'label' => $fieldValue,
-                'type' => 'text',
-                'required' => false,
-            ];
-        }
-
-        if (!is_array($fieldValue)) {
-            return [
-                'label' => (string) $fieldKey,
-                'type' => 'text',
-                'required' => false,
-            ];
-        }
-
-        if (!isset($fieldValue['label']) || '' === $fieldValue['label']) {
-            $fieldValue['label'] = (string) $fieldKey;
-        }
-
-        $fieldValue['required'] = array_key_exists('required', $fieldValue)
-            ? (bool) $fieldValue['required']
-            : false;
-
-        return $fieldValue;
-    }
-
-    private function prepareReadParameters(array $param): array
-    {
-        if (empty($param['limit'])) {
-            $param['limit'] = 200;
-        }
-
-        if (empty($param['offset'])) {
-            $param['offset'] = 0;
-        }
-
-        $param['fields'] = $this->cleanMyddlewareElementId($param['fields']);
-        $param['fields'] = $this->addRequiredField($param['fields'], $param['module']);
-
-        return $param;
-    }
-
-    private function resolveEndpointName(string $moduleName): string
-    {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-
-        return $moduleConfiguration['endpoint'];
-    }
-
-    private function getModuleConfiguration(string $moduleName): array
-    {
-        if (!isset($this->moduleConfiguration[$moduleName])) {
-            $this->logger->error('Unsupported Mautic module', ['module' => $moduleName]);
-            throw new \Exception('Unsupported Mautic module.');
-        }
-
-        return $this->moduleConfiguration[$moduleName];
-    }
-
-    private function buildReadQueryParams(array $param): array
-    {
-        $queryParams = [
-            'start' => (int) $param['offset'],
-            'limit' => (int) $param['limit'],
-            'minimal' => 1,
-        ];
-
-        $dateReference = $param['ruleParams']['datereference'] ?? null;
-        $manualQuery = $param['query'] ?? null;
-
-        if (empty($manualQuery) && !empty($dateReference)) {
-            $referenceField = $this->getRefFieldName($param);
-            $queryParams['where[0][col]'] = $referenceField;
-            $queryParams['where[0][expr]'] = 'gte';
-            $queryParams['where[0][val]'] = $dateReference;
-        }
-
-        if (!empty($manualQuery)) {
-            $queryParams['search'] = $this->normalizeSearchQuery($manualQuery);
-        }
-
-        $mode = $param['ruleParams']['mode'] ?? '0';
-        $queryParams['orderBy'] = ('C' === $mode) ? 'dateAdded' : 'dateModified';
-        $queryParams['orderByDir'] = 'asc';
-
-        return $queryParams;
-    }
-
-    private function normalizeSearchQuery($query): string
-    {
-        if (!is_array($query)) {
-            return (string) $query;
-        }
-
-        $queryParts = [];
-        foreach ($query as $fieldName => $fieldValue) {
-            if (null === $fieldValue || '' === $fieldValue) {
-                continue;
-            }
-
-            $queryParts[] = $fieldName.':'.$fieldValue;
-        }
-
-        return implode(' AND ', $queryParts);
-    }
-
-    private function formatReadResult(array $param, array $responseData): array
-    {
-        $itemsKey = $this->resolveReadItemsKey($param['module']);
-        $rawItems = $responseData[$itemsKey] ?? [];
-
-        if (!is_array($rawItems)) {
-            $rawItems = [];
-        }
-
-        $values = [];
-        foreach ($rawItems as $itemKey => $rowData) {
-            if (!is_array($rowData)) {
-                continue;
-            }
-
-            if (!isset($rowData['id'])) {
-                $rowData['id'] = is_numeric($itemKey) ? (int) $itemKey : $itemKey;
-            }
-
-            $values[] = $rowData;
-        }
-
-        return [
-            'count' => count($values),
-            'values' => $values,
-            'date_ref' => $param['ruleParams']['datereference'] ?? null,
-        ];
-    }
-
-    private function resolveReadItemsKey(string $moduleName): string
-    {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-
-        return $moduleConfiguration['items_key'];
     }
 
     private function createRecord(string $moduleName, array $payloadData): array
     {
         $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $responseData = $this->call(
-            $this->apiBase.'/'.$moduleConfiguration['endpoint'].'/new',
-            'POST',
-            $payloadData
-        );
+        $responseData = $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/new', 'POST', $payloadData);
 
-        return $this->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
+        return (new MauticConnectorHelper())->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
     }
 
     private function updateRecord(string $moduleName, $recordId, array $payloadData): void
     {
         $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $responseData = $this->call(
-            $this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/edit',
-            'PATCH',
-            $payloadData
-        );
-        $this->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
+        $responseData = $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/edit', 'PATCH', $payloadData);
+        (new MauticConnectorHelper())->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
     }
 
     private function deleteRecord(string $moduleName, $recordId): void
@@ -636,138 +405,31 @@ class mautic extends solution
         $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/delete', 'DELETE');
     }
 
+    private function getModuleConfiguration(string $moduleName): array
+    {
+        try {
+            return $this->getConnectorHelper()->getModuleConfiguration($this->moduleConfiguration, $moduleName);
+        } catch (\Exception $exception) {
+            $this->logger->error('Unsupported Mautic module', ['module' => $moduleName]);
+            throw $exception;
+        }
+    }
+
     private function extractTargetRecordId(array &$payloadData, string $operationName)
     {
-        $recordId = $payloadData['target_id'] ?? ($payloadData['id'] ?? null);
-
-        if (!empty($payloadData['target_id'])) {
-            unset($payloadData['target_id']);
-        }
-
-        if (empty($recordId)) {
+        try {
+            return (new MauticConnectorHelper())->extractTargetRecordId($payloadData, $operationName);
+        } catch (\Exception $exception) {
             $this->logger->error('Missing Mautic record id', ['operation' => $operationName]);
-            throw new \Exception('Missing Mautic record id for write operation.');
+            throw $exception;
         }
-
-        return $recordId;
     }
 
-    private function buildWriteErrorResult(
-        \Exception $exception,
-        string $documentId,
-        array $param,
-        array $payloadData,
-    ): array {
-        $errorMessage = $exception->getMessage();
-
-        $this->logger->error('Mautic send error', [
-            'method' => __FUNCTION__,
-            'document_id' => $documentId,
-            'module' => $param['module'] ?? null,
-            'payload' => $payloadData,
-            'error' => $errorMessage,
-            'exception_file' => $exception->getFile(),
-            'exception_line' => $exception->getLine(),
-        ]);
-
-        return [
-            'id' => '-1',
-            'error' => $errorMessage,
-        ];
-    }
-
-    private function buildRequestHeaders(): array
+    private function buildWriteErrorResult(\Exception $exception, string $documentId, array $param, array $payloadData): array
     {
-        $requestHeaders = [
-            'Accept: application/json',
-        ];
+        $errorData = (new MauticApiHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData);
+        $this->logger->error('Mautic send error', $errorData['log_context']);
 
-        $authHeader = $this->buildAuthHeader();
-        if (!empty($authHeader)) {
-            $requestHeaders[] = $authHeader;
-        }
-
-        return $requestHeaders;
-    }
-
-    private function prepareJsonPayload($data, string $httpMethod): ?string
-    {
-        $methodsWithBody = ['POST', 'PUT', 'PATCH'];
-
-        if (empty($data) || !in_array($httpMethod, $methodsWithBody, true)) {
-            return null;
-        }
-
-        return json_encode($data);
-    }
-
-    private function parseApiResponse($rawResponse, int $statusCode, string $httpMethod, string $requestUrl): array
-    {
-        $trimmedResponse = trim((string) $rawResponse);
-
-        if ('' === $trimmedResponse) {
-            return $this->parseEmptyApiResponse($statusCode);
-        }
-
-        $decodedResponse = json_decode((string) $rawResponse, true);
-        if (!is_array($decodedResponse)) {
-            return $this->parseNonJsonApiResponse((string) $rawResponse, $statusCode);
-        }
-
-        if ($statusCode >= 400) {
-            $this->throwApiErrorException($decodedResponse, (string) $rawResponse, $statusCode, $httpMethod, $requestUrl);
-        }
-
-        return $decodedResponse;
-    }
-
-    private function parseEmptyApiResponse(int $statusCode): array
-    {
-        if ($statusCode >= 400) {
-            $this->logger->error('Mautic HTTP error', ['status_code' => $statusCode]);
-            throw new \Exception('Mautic HTTP request failed.');
-        }
-
-        return [];
-    }
-
-    private function parseNonJsonApiResponse(string $rawResponse, int $statusCode): array
-    {
-        if ($statusCode >= 400) {
-            $this->logger->error('Mautic non-JSON HTTP error', ['status_code' => $statusCode, 'raw_response' => $rawResponse]);
-            throw new \Exception('Mautic HTTP request failed with a non-JSON response.');
-        }
-
-        return ['raw' => $rawResponse];
-    }
-
-    private function throwApiErrorException(
-        array $decodedResponse,
-        string $rawResponse,
-        int $statusCode,
-        string $httpMethod,
-        string $requestUrl,
-    ): void {
-        $errorMessage = $decodedResponse['error_description']
-            ?? ($decodedResponse['error']['message'] ?? null)
-            ?? ('HTTP '.$statusCode);
-
-        $responseDetail = $this->buildApiErrorDetail($decodedResponse, $rawResponse);
-
-        $this->logger->error('Mautic API error', ['status_code' => $statusCode, 'message' => $errorMessage, 'http_method' => $httpMethod, 'request_url' => $requestUrl, 'response_detail' => $responseDetail]);
-        throw new \Exception('Mautic API request failed.');
-    }
-
-    private function buildApiErrorDetail(array $decodedResponse, string $rawResponse): string
-    {
-        $responseDetail = !empty($decodedResponse)
-            ? json_encode($decodedResponse, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)
-            : $rawResponse;
-
-        if (is_string($responseDetail) && strlen($responseDetail) > 2000) {
-            return substr($responseDetail, 0, 2000).'…';
-        }
-
-        return (string) $responseDetail;
+        return $errorData['result'];
     }
 }

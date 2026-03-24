@@ -24,10 +24,11 @@
 
 namespace App\Solutions;
 
+use App\Solutions\Support\DolibarrApiHelper;
+use App\Solutions\Support\DolibarrConnectorHelper;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
@@ -361,75 +362,17 @@ class dolibarr extends solution
 
     protected function getMetadataFields(string $module): array
     {
-        if (!empty($this->metadataFields[$module]) && is_array($this->metadataFields[$module])) {
-            return $this->metadataFields[$module];
-        }
-
-        return [];
+        return (new DolibarrConnectorHelper())->getMetadataFields($this->metadataFields, $module);
     }
 
     protected function getSampleRecord(string $module): ?array
     {
-        $probe = $this->callApi($this->apiBase.$module, 'GET', [
-            'limit' => 1,
-            'page' => 0,
-            'sortfield' => 't.rowid',
-            'sortorder' => 'ASC',
-        ]);
-
-        if (!is_array($probe)) {
-            return null;
-        }
-
-        if (!empty($probe[0]) && is_array($probe[0])) {
-            return $probe[0];
-        }
-
-        if (!empty($probe['data'][0]) && is_array($probe['data'][0])) {
-            return $probe['data'][0];
-        }
-
-        return null;
+        return (new DolibarrConnectorHelper())->getSampleRecord(fn (string $url, string $method, array $args) => $this->callApi($url, $method, $args), $this->apiBase, $module);
     }
 
     protected function buildFieldsFromSample(array $record): array
     {
-        $discoveredFields = [];
-
-        foreach ($record as $key => $value) {
-            if (isset($this->moduleFields[$key])) {
-                continue;
-            }
-
-            $discoveredFields[$key] = [
-                'label' => $key,
-                'type' => $this->guessFieldType($value),
-                'required' => 0,
-            ];
-        }
-
-        return $discoveredFields;
-    }
-
-    protected function guessFieldType($value): string
-    {
-        if (is_int($value)) {
-            return 'int';
-        }
-
-        if (is_float($value)) {
-            return 'float';
-        }
-
-        if (is_bool($value)) {
-            return 'bool';
-        }
-
-        if (is_array($value)) {
-            return 'array';
-        }
-
-        return 'string';
+        return (new DolibarrConnectorHelper())->buildFieldsFromSample($record, $this->moduleFields);
     }
 
     /**
@@ -438,22 +381,7 @@ class dolibarr extends solution
      */
     protected function ensureFieldDefinitionDefaults(array $fields): array
     {
-        foreach ($fields as $key => $def) {
-            if (!is_array($def)) {
-                $fields[$key] = [
-                    'label' => (string) $def,
-                    'type' => 'string',
-                    'required' => 0,
-                ];
-                continue;
-            }
-
-            $fields[$key]['label'] = $def['label'] ?? $key;
-            $fields[$key]['type'] = $def['type'] ?? 'string';
-            $fields[$key]['required'] = $def['required'] ?? 0;
-        }
-
-        return $fields;
+        return (new DolibarrConnectorHelper())->ensureFieldDefinitionDefaults($fields);
     }
 
     /**
@@ -568,103 +496,33 @@ class dolibarr extends solution
      */
     protected function callApi(string $url, string $method = 'GET', array $args = [], int $timeout = 60)
     {
-        $method = strtoupper($method);
-        $requestOptions = $this->buildRequestOptions($method, $args, $timeout);
-
-        if ('GET' === $method && !empty($args)) {
-            $url = sprintf('%s?%s', $url, http_build_query($args));
-        }
-
-        $client = $this->getHttpClient();
-        $response = $client->request($method, $url, $requestOptions);
-
-        return $this->normalizeApiResponse($response->getStatusCode(), $response->getContent(false));
-    }
-
-    protected function getHttpClient()
-    {
-        return HttpClient::create();
+        return (new DolibarrApiHelper())->callApi(
+            fn (string $requestMethod, array $requestArgs, int $requestTimeout) => $this->buildRequestOptions($requestMethod, $requestArgs, $requestTimeout),
+            fn (int $statusCode, string $content) => $this->normalizeApiResponse($statusCode, $content),
+            $url,
+            $method,
+            $args,
+            $timeout,
+        );
     }
 
     protected function normalizeApiBase(string $url): string
     {
-        $url = trim($url);
-
-        // If user provides the UI root, we try to append /api/index.php/
-        // If user provides .../api/index.php, we normalize with trailing slash.
-        if (preg_match('#/api/index\\.php/?$#', $url)) {
-            $url = rtrim($url, '/').'/';
-        } elseif (preg_match('#/api/index\\.php/#', $url)) {
-            // already contains the api entrypoint somewhere; just ensure it ends with /.
-            $pos = strpos($url, '/api/index.php/');
-            $url = substr($url, 0, $pos + strlen('/api/index.php/'));
-        } else {
-            $url = rtrim($url, '/').'/api/index.php/';
-        }
-
-        return $url;
+        return (new DolibarrConnectorHelper())->normalizeApiBase($url);
     }
 
     protected function filterFields(array $row, array $fields): array
     {
-        if (empty($fields)) {
-            return $row;
-        }
-        $out = [];
-        foreach ($fields as $f) {
-            if (array_key_exists($f, $row)) {
-                $out[$f] = $row[$f];
-            }
-        }
-        // Always keep id if present
-        if (!empty($row['id']) && !isset($out['id'])) {
-            $out['id'] = $row['id'];
-        } elseif (!empty($row['rowid']) && !isset($out['id'])) {
-            $out['id'] = $row['rowid'];
-        }
-
-        return $out;
+        return (new DolibarrConnectorHelper())->filterFields($row, $fields);
     }
 
     protected function buildSqlFiltersForDateRef(array $param): ?string
     {
-        if (empty($param['ruleParams']['datereference'])) {
-            return null;
-        }
-
-        $module = $param['module'];
-        $sqlField = $this->dateRefFieldMap[$module] ?? null;
-        if (empty($sqlField)) {
-            return null;
-        }
-
-        // Myddleware date_ref is usually a datetime string; Dolibarr doc confirms ISO date format is supported.
-        // To stay compatible with most Dolibarr endpoints, we reduce to YYYY-MM-DD.
-        $date = $param['ruleParams']['datereference'];
-        try {
-            $dateTime = new \DateTime($date);
-            $iso = $dateTime->format('Y-m-d');
-        } catch (\Exception $e) {
-            // If parsing fails, do not apply filter.
-            return null;
-        }
-
-        // Example from Dolibarr wiki: (t.nom:=:'Acme Inc')
-        // Here: (t.tms:>=:'2026-03-03')
-        return '('.$sqlField.":>=:'".$iso."')";
+        return (new DolibarrConnectorHelper())->buildSqlFiltersForDateRef($param, $this->dateRefFieldMap);
     }
 
     protected function formatDolibarrError(array $resp): string
     {
-        if (!isset($resp['error'])) {
-            return 'Unknown Dolibarr error';
-        }
-        if (is_string($resp['error'])) {
-            return $resp['error'];
-        }
-        $code = $resp['error']['code'] ?? '';
-        $message = $resp['error']['message'] ?? 'Unknown error';
-
-        return trim(('' !== $code ? '['.$code.'] ' : '').$message);
+        return (new DolibarrConnectorHelper())->formatDolibarrError($resp);
     }
 }
