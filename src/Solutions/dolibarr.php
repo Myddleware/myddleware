@@ -30,11 +30,6 @@ use App\Solutions\Support\DolibarrWriteHelper;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
-use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 /**
  * Dolibarr connector (REST API).
@@ -239,32 +234,10 @@ class dolibarr extends solution
         parent::login($paramConnexion);
 
         try {
-            if (empty($this->paramConnexion['url'])) {
-                throw new \Exception('Missing URL.');
-            }
+            $this->validateLoginParameters();
+            $this->initializeConnectionSettings();
 
-            if (empty($this->paramConnexion['apikey'])) {
-                throw new \Exception('Missing API key.');
-            }
-
-            $this->apiKey = $this->paramConnexion['apikey'];
-            $this->apiEntity = !empty($this->paramConnexion['entity']) ? (string) $this->paramConnexion['entity'] : null;
-            $this->verify_ssl = !array_key_exists('verify_ssl', $this->paramConnexion) || !empty($this->paramConnexion['verify_ssl']);
-            $this->apiBase = (new DolibarrConnectorHelper())->normalizeApiBase($this->paramConnexion['url']);
-
-            $status = $this->callApi($this->apiBase.'status', 'GET');
-            $probeSucceeded = is_array($status) && !isset($status['error']);
-            if (!$probeSucceeded) {
-                $probe = $this->callApi($this->apiBase.'thirdparties', 'GET', [
-                    'limit' => 1,
-                    'page' => 0,
-                    'sortfield' => 't.rowid',
-                    'sortorder' => 'ASC',
-                ]);
-                $probeSucceeded = is_array($probe) && !isset($probe['error']);
-            }
-
-            if ($probeSucceeded) {
+            if ($this->probeLoginConnection()) {
                 $this->connexion_valide = true;
 
                 return;
@@ -277,6 +250,48 @@ class dolibarr extends solution
 
             return ['error' => $error];
         }
+    }
+
+    protected function validateLoginParameters(): void
+    {
+        if (empty($this->paramConnexion['url'])) {
+            throw new \Exception('Missing URL.');
+        }
+
+        if (empty($this->paramConnexion['apikey'])) {
+            throw new \Exception('Missing API key.');
+        }
+    }
+
+    protected function initializeConnectionSettings(): void
+    {
+        $helper = new DolibarrConnectorHelper();
+
+        $this->apiKey = $this->paramConnexion['apikey'];
+        $this->apiEntity = !empty($this->paramConnexion['entity']) ? (string) $this->paramConnexion['entity'] : null;
+        $this->verify_ssl = !array_key_exists('verify_ssl', $this->paramConnexion) || !empty($this->paramConnexion['verify_ssl']);
+        $this->apiBase = $helper->normalizeApiBase($this->paramConnexion['url']);
+    }
+
+    protected function probeLoginConnection(): bool
+    {
+        return $this->isSuccessfulProbe($this->callApi($this->apiBase.'status', 'GET'))
+            || $this->isSuccessfulProbe($this->callApi($this->apiBase.'thirdparties', 'GET', $this->getLoginProbeParameters()));
+    }
+
+    protected function getLoginProbeParameters(): array
+    {
+        return [
+            'limit' => 1,
+            'page' => 0,
+            'sortfield' => 't.rowid',
+            'sortorder' => 'ASC',
+        ];
+    }
+
+    protected function isSuccessfulProbe($response): bool
+    {
+        return is_array($response) && !isset($response['error']);
     }
 
     /**
@@ -434,12 +449,6 @@ class dolibarr extends solution
      *
      * - For GET with $args, parameters are appended to query string.
      * - For POST/PUT/PATCH/DELETE, payload is JSON.
-     *
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
      */
     protected function callApi(string $url, string $method = 'GET', array $args = [], int $timeout = 60)
     {
