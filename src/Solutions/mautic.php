@@ -169,7 +169,14 @@ class mautic extends solution
 
         try {
             $this->moduleFields = $this->addRequiredField($this->moduleFields, $module);
-            $this->loadModuleFields($module);
+            $metadataFields = $this->getMetadataFields($module);
+
+            if (!empty($metadataFields)) {
+                $this->moduleFields = array_merge($this->moduleFields, $metadataFields);
+            } else {
+                $this->loadModuleFields($module);
+            }
+
             $this->moduleFields = $this->normalizeModuleFields($this->moduleFields);
 
             return $this->moduleFields;
@@ -423,6 +430,28 @@ class mautic extends solution
         }
 
         return $responseData;
+    }
+
+    private function getMetadataFields(string $moduleName): array
+    {
+        $moduleFields = [];
+        $metadataFile = __DIR__.'/lib/mautic/metadata.php';
+
+        if (!file_exists($metadataFile)) {
+            return [];
+        }
+
+        require $metadataFile;
+
+        if (!empty($moduleFields[$moduleName]) && is_array($moduleFields[$moduleName])) {
+            return $moduleFields[$moduleName];
+        }
+
+        if ('segments' === $moduleName && !empty($moduleFields['segment']) && is_array($moduleFields['segment'])) {
+            return $moduleFields['segment'];
+        }
+
+        return [];
     }
 
     private function loadModuleFields(string $moduleName): void

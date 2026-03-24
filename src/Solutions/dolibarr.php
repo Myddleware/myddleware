@@ -74,7 +74,7 @@ class dolibarr extends solution
      * You can refine this mapping if you need strict incremental sync.
      * Values are SQL aliases used by Dolibarr APIs (see explorer examples).
      */
-    protected array $dateRefSqlFieldByModule = [
+    protected array $dateRefFieldMap = [
         // most endpoints use table alias "t"
         'thirdparties' => 't.tms',
         'contacts' => 't.tms',
@@ -214,62 +214,28 @@ class dolibarr extends solution
      */
     public function get_module_fields($module, $type = 'source', $param = null): array
     {
+        unset($param);
         $this->moduleFields = parent::get_module_fields($module, $type);
-
         $this->moduleFields = $this->ensureFieldDefinitionDefaults($this->moduleFields);
 
         try {
-            // Already cached?
             if (!empty($this->moduleFields) && count($this->moduleFields) > 1) {
                 return $this->ensureFieldDefinitionDefaults($this->moduleFields);
             }
 
-            // Probe 1 record to infer keys
-            $probe = $this->callApi($this->apiBase.$module, 'GET', [
-                'limit' => 1,
-                'page' => 0,
-                'sortfield' => 't.rowid',
-                'sortorder' => 'ASC',
-            ]);
+            $metadataFields = $this->getMetadataFields($module);
+            if (!empty($metadataFields)) {
+                $this->moduleFields = array_merge($this->moduleFields, $metadataFields);
 
-            $record = null;
-            if (is_array($probe)) {
-                // list endpoints usually return an array of objects
-                if (!empty($probe[0]) && is_array($probe[0])) {
-                    $record = $probe[0];
-                } elseif (!empty($probe['data'][0]) && is_array($probe['data'][0])) {
-                    // some modules might wrap in "data"
-                    $record = $probe['data'][0];
-                }
-            }
-
-            if (empty($record)) {
-                // If module is empty, keep only Myddleware system fields; user can still map target fields manually.
                 return $this->ensureFieldDefinitionDefaults($this->moduleFields);
             }
 
-            foreach ($record as $key => $value) {
-                if (isset($this->moduleFields[$key])) {
-                    continue;
-                }
-
-                $typeGuess = 'string';
-                if (is_int($value)) {
-                    $typeGuess = 'int';
-                } elseif (is_float($value)) {
-                    $typeGuess = 'float';
-                } elseif (is_bool($value)) {
-                    $typeGuess = 'bool';
-                } elseif (is_array($value)) {
-                    $typeGuess = 'array';
-                }
-
-                $this->moduleFields[$key] = [
-                    'label' => $key,
-                    'type' => $typeGuess,
-                    'required' => 0,
-                ];
+            $sampleRecord = $this->getSampleRecord($module);
+            if (empty($sampleRecord)) {
+                return $this->ensureFieldDefinitionDefaults($this->moduleFields);
             }
+
+            $this->moduleFields = array_merge($this->moduleFields, $this->buildFieldsFromSample($sampleRecord));
 
             return $this->ensureFieldDefinitionDefaults($this->moduleFields);
         } catch (\Exception $e) {
@@ -278,6 +244,88 @@ class dolibarr extends solution
 
             return ['error' => $error];
         }
+    }
+
+    protected function getMetadataFields(string $module): array
+    {
+        $moduleFields = [];
+        $metadataFile = __DIR__.'/lib/dolibarr/metadata.php';
+
+        if (!file_exists($metadataFile)) {
+            return [];
+        }
+
+        require $metadataFile;
+
+        if (!empty($moduleFields[$module]) && is_array($moduleFields[$module])) {
+            return $moduleFields[$module];
+        }
+
+        return [];
+    }
+
+    protected function getSampleRecord(string $module): ?array
+    {
+        $probe = $this->callApi($this->apiBase.$module, 'GET', [
+            'limit' => 1,
+            'page' => 0,
+            'sortfield' => 't.rowid',
+            'sortorder' => 'ASC',
+        ]);
+
+        if (!is_array($probe)) {
+            return null;
+        }
+
+        if (!empty($probe[0]) && is_array($probe[0])) {
+            return $probe[0];
+        }
+
+        if (!empty($probe['data'][0]) && is_array($probe['data'][0])) {
+            return $probe['data'][0];
+        }
+
+        return null;
+    }
+
+    protected function buildFieldsFromSample(array $record): array
+    {
+        $discoveredFields = [];
+
+        foreach ($record as $key => $value) {
+            if (isset($this->moduleFields[$key])) {
+                continue;
+            }
+
+            $discoveredFields[$key] = [
+                'label' => $key,
+                'type' => $this->guessFieldType($value),
+                'required' => 0,
+            ];
+        }
+
+        return $discoveredFields;
+    }
+
+    protected function guessFieldType($value): string
+    {
+        if (is_int($value)) {
+            return 'int';
+        }
+
+        if (is_float($value)) {
+            return 'float';
+        }
+
+        if (is_bool($value)) {
+            return 'bool';
+        }
+
+        if (is_array($value)) {
+            return 'array';
+        }
+
+        return 'string';
     }
 
     /**
@@ -651,7 +699,7 @@ class dolibarr extends solution
         }
 
         $module = $param['module'];
-        $sqlField = $this->dateRefSqlFieldByModule[$module] ?? null;
+        $sqlField = $this->dateRefFieldMap[$module] ?? null;
         if (empty($sqlField)) {
             return null;
         }
