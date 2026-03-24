@@ -124,51 +124,46 @@ class dolibarr extends solution
             if (empty($this->paramConnexion['url'])) {
                 throw new \Exception('Missing URL.');
             }
+
             if (empty($this->paramConnexion['apikey'])) {
                 throw new \Exception('Missing API key.');
             }
 
             $this->apiKey = $this->paramConnexion['apikey'];
             $this->apiEntity = !empty($this->paramConnexion['entity']) ? (string) $this->paramConnexion['entity'] : null;
-
-            // SSL verify default = true
-            $this->verify_ssl = true;
-            if (array_key_exists('verify_ssl', $this->paramConnexion)) {
-                // Symfony checkbox may return "1" or true/false
-                $this->verify_ssl = !empty($this->paramConnexion['verify_ssl']);
-            }
-
+            $this->verify_ssl = !array_key_exists('verify_ssl', $this->paramConnexion) || !empty($this->paramConnexion['verify_ssl']);
             $this->apiBase = $this->normalizeApiBase($this->paramConnexion['url']);
 
-            // Prefer /status if available, else fallback to a cheap list call.
-            $loginSuccessful = false;
+            if ($this->hasSuccessfulLoginProbe()) {
+                $this->connexion_valide = true;
 
-            $status = $this->callApi($this->apiBase.'status', 'GET');
-            if (is_array($status) && !isset($status['error'])) {
-                $loginSuccessful = true;
-            } else {
-                $probe = $this->callApi($this->apiBase.'thirdparties', 'GET', [
-                    'limit' => 1,
-                    'page' => 0,
-                    'sortfield' => 't.rowid',
-                    'sortorder' => 'ASC',
-                ]);
-                if (is_array($probe) && !isset($probe['error'])) {
-                    $loginSuccessful = true;
-                }
+                return;
             }
 
-            if (!$loginSuccessful) {
-                throw new \Exception('Login error. Check base URL, REST API module enabled, and API key permissions.');
-            }
-
-            $this->connexion_valide = true;
+            throw new \Exception('Login error. Check base URL, REST API module enabled, and API key permissions.');
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
 
             return ['error' => $error];
         }
+    }
+
+    protected function hasSuccessfulLoginProbe(): bool
+    {
+        $status = $this->callApi($this->apiBase.'status', 'GET');
+        if (is_array($status) && !isset($status['error'])) {
+            return true;
+        }
+
+        $probe = $this->callApi($this->apiBase.'thirdparties', 'GET', [
+            'limit' => 1,
+            'page' => 0,
+            'sortfield' => 't.rowid',
+            'sortorder' => 'ASC',
+        ]);
+
+        return is_array($probe) && !isset($probe['error']);
     }
 
     /**
@@ -251,13 +246,8 @@ class dolibarr extends solution
     protected function getMetadataFields(string $module): array
     {
         $moduleFields = [];
-        $metadataFile = __DIR__.'/lib/dolibarr/metadata.php';
 
-        if (!file_exists($metadataFile)) {
-            return [];
-        }
-
-        require $metadataFile;
+        require __DIR__.'/lib/dolibarr/metadata.php';
 
         if (!empty($moduleFields[$module]) && is_array($moduleFields[$module])) {
             return $moduleFields[$module];
@@ -473,10 +463,15 @@ class dolibarr extends solution
             $url = sprintf('%s?%s', $url, http_build_query($args));
         }
 
-        $client = HttpClient::create();
+        $client = $this->getHttpClient();
         $response = $client->request($method, $url, $requestOptions);
 
         return $this->normalizeApiResponse($response->getStatusCode(), $response->getContent(false));
+    }
+
+    protected function getHttpClient()
+    {
+        return HttpClient::create();
     }
 
     protected function normalizeApiBase(string $url): string

@@ -126,13 +126,37 @@ class SolutionManager
         dynamicscrm $dynamicscrm,
         iomad $iomad,
     ) {
-        if (empty(self::$solutions)) {
-            return;
-        }
-
-        foreach (self::$solutions as $solution) {
-            $this->classes[$solution] = $$solution;
-        }
+        $this->classes = [
+            'erpnext' => $erpnext,
+            'hubspot' => $hubspot,
+            'zuora' => $zuora,
+            'file' => $file,
+            'moodle' => $moodle,
+            'magento' => $magento,
+            'microsoftsql' => $microsoftsql,
+            'oracledb' => $oracledb,
+            'mautic' => $mautic,
+            'mysql' => $mysql,
+            'dolibarr' => $dolibarr,
+            'vtigercrm' => $vtigercrm,
+            'suitecrm' => $suitecrm,
+            'mailchimp' => $mailchimp,
+            'prestashop' => $prestashop,
+            'postgresql' => $postgresql,
+            'sugarcrm' => $sugarcrm,
+            'salesforce' => $salesforce,
+            'salesforce_v2' => $salesforce_v2,
+            'airtable' => $airtable,
+            'sendinblue' => $sendinblue,
+            'internallist' => $internallist,
+            'suitecrm8' => $suitecrm8,
+            'yousign' => $yousign,
+            'brevo' => $brevo,
+            'acton' => $acton,
+            'dynamicsbusiness' => $dynamicsbusiness,
+            'dynamicscrm' => $dynamicscrm,
+            'iomad' => $iomad,
+        ];
     }
 
     public function get(string $name)

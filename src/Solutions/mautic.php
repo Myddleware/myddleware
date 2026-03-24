@@ -436,13 +436,8 @@ class mautic extends solution
     private function getMetadataFields(string $moduleName): array
     {
         $moduleFields = [];
-        $metadataFile = __DIR__.'/lib/mautic/metadata.php';
 
-        if (!file_exists($metadataFile)) {
-            return [];
-        }
-
-        require $metadataFile;
+        require __DIR__.'/lib/mautic/metadata.php';
 
         if (!empty($moduleFields[$moduleName]) && is_array($moduleFields[$moduleName])) {
             return $moduleFields[$moduleName];
