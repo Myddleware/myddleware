@@ -26,6 +26,7 @@ namespace App\Solutions;
 
 use App\Solutions\Support\MauticApiHelper;
 use App\Solutions\Support\MauticConnectorHelper;
+use App\Solutions\Support\MauticRuntimeHelper;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
@@ -198,19 +199,6 @@ class mautic extends solution
         }
     }
 
-    public function getRefFieldName($param): string
-    {
-        if (in_array($param['ruleParams']['mode'], ['0', 'S', 'U'], true)) {
-            return 'dateModified';
-        }
-
-        if ('C' === $param['ruleParams']['mode']) {
-            return 'dateAdded';
-        }
-
-        return 'dateModified';
-    }
-
     public function readData($param): array
     {
         try {
@@ -221,14 +209,15 @@ class mautic extends solution
                 fn (array $fields, string $module) => $this->addRequiredField($fields, $module),
             );
             $endpointName = $connectorHelper->resolveEndpointName($this->moduleConfiguration, $normalizedParameters['module']);
-            $queryParams = $connectorHelper->buildReadQueryParams($normalizedParameters, $this->getRefFieldName($normalizedParameters));
+            $referenceField = 'C' === ($normalizedParameters['ruleParams']['mode'] ?? '0') ? 'dateAdded' : 'dateModified';
+            $queryParams = $connectorHelper->buildReadQueryParams($normalizedParameters, $referenceField);
             $requestUrl = $this->apiBase.'/'.$endpointName.'?'.$connectorHelper->createUrlParam($queryParams);
             $responseData = $this->call($requestUrl, 'GET');
 
             return $connectorHelper->formatReadResult(
                 $normalizedParameters,
                 $responseData,
-                $connectorHelper->resolveReadItemsKey($this->moduleConfiguration, $normalizedParameters['module']),
+                $connectorHelper->getModuleConfiguration($this->moduleConfiguration, $normalizedParameters['module'])['items_key'],
             );
         } catch (\Exception $exception) {
             $errorMessage = $exception->getMessage();
@@ -245,7 +234,11 @@ class mautic extends solution
         foreach ($param['data'] as $documentId => $payloadData) {
             try {
                 $moduleName = $param['module'];
-                $responsePayload = $this->createRecord($moduleName, $payloadData);
+                $moduleConfiguration = (new MauticRuntimeHelper())->getModuleConfiguration($this->moduleConfiguration, $moduleName, $this->logger);
+                $responsePayload = (new MauticConnectorHelper())->formatWriteResponse(
+                    $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/new', 'POST', $payloadData),
+                    $moduleConfiguration['item_key'],
+                );
                 $recordId = $responsePayload['id'] ?? null;
 
                 if (empty($recordId)) {
@@ -256,7 +249,7 @@ class mautic extends solution
                     'id' => (string) $recordId,
                 ];
             } catch (\Exception $exception) {
-                $result[$documentId] = $this->buildWriteErrorResult($exception, $documentId, $param, $payloadData);
+                $result[$documentId] = (new MauticRuntimeHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData, $this->logger);
             }
 
             $this->updateDocumentStatus($documentId, $result[$documentId], $param);
@@ -272,15 +265,18 @@ class mautic extends solution
         foreach ($param['data'] as $documentId => $payloadData) {
             try {
                 $moduleName = $param['module'];
-                $recordId = $this->extractTargetRecordId($payloadData, 'update');
-
-                $this->updateRecord($moduleName, $recordId, $payloadData);
+                $recordId = (new MauticRuntimeHelper())->extractTargetRecordId($payloadData, 'update', $this->logger);
+                $moduleConfiguration = (new MauticRuntimeHelper())->getModuleConfiguration($this->moduleConfiguration, $moduleName, $this->logger);
+                (new MauticConnectorHelper())->formatWriteResponse(
+                    $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/edit', 'PATCH', $payloadData),
+                    $moduleConfiguration['item_key'],
+                );
 
                 $result[$documentId] = [
                     'id' => (string) $recordId,
                 ];
             } catch (\Exception $exception) {
-                $result[$documentId] = $this->buildWriteErrorResult($exception, $documentId, $param, $payloadData);
+                $result[$documentId] = (new MauticRuntimeHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData, $this->logger);
             }
 
             $this->updateDocumentStatus($documentId, $result[$documentId], $param);
@@ -296,15 +292,15 @@ class mautic extends solution
         foreach ($param['data'] as $documentId => $payloadData) {
             try {
                 $moduleName = $param['module'];
-                $recordId = $this->extractTargetRecordId($payloadData, 'delete');
-
-                $this->deleteRecord($moduleName, $recordId);
+                $recordId = (new MauticRuntimeHelper())->extractTargetRecordId($payloadData, 'delete', $this->logger);
+                $moduleConfiguration = (new MauticRuntimeHelper())->getModuleConfiguration($this->moduleConfiguration, $moduleName, $this->logger);
+                $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/delete', 'DELETE');
 
                 $result[$documentId] = [
                     'id' => (string) $recordId,
                 ];
             } catch (\Exception $exception) {
-                $result[$documentId] = $this->buildWriteErrorResult($exception, $documentId, $param, $payloadData);
+                $result[$documentId] = (new MauticRuntimeHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData, $this->logger);
             }
 
             $this->updateDocumentStatus($documentId, $result[$documentId], $param);
@@ -329,107 +325,32 @@ class mautic extends solution
      */
     public function call($url, $method = 'GET', $data = null): array
     {
+        $authHeader = (new MauticRuntimeHelper())->buildAuthHeader(
+            $this->paramConnexion,
+            function (string $clientId, string $clientSecret): string {
+                $tokenData = (new MauticApiHelper())->getOAuth2AccessToken(
+                    $this->baseUrl,
+                    $clientId,
+                    $clientSecret,
+                    time(),
+                    $this->accessToken,
+                    $this->tokenExpiresAt,
+                    $this->logger,
+                );
+
+                $this->accessToken = $tokenData['access_token'];
+                $this->tokenExpiresAt = $tokenData['token_expires_at'];
+
+                return $this->accessToken;
+            },
+        );
+
         return (new MauticApiHelper())->call(
             (string) $url,
             (string) $method,
             $data,
-            (new MauticApiHelper())->buildRequestHeaders($this->buildAuthHeader()),
+            (new MauticApiHelper())->buildRequestHeaders($authHeader),
             $this->logger,
         );
-    }
-
-    private function buildAuthHeader(): ?string
-    {
-        $clientId = trim((string) ($this->paramConnexion['client_id'] ?? ''));
-        $clientSecret = trim((string) ($this->paramConnexion['client_secret'] ?? ''));
-
-        if ('' !== $clientId && '' !== $clientSecret) {
-            $accessToken = $this->getOAuth2AccessToken($clientId, $clientSecret);
-
-            return 'Authorization: Bearer '.$accessToken;
-        }
-
-        $loginValue = (string) ($this->paramConnexion['login'] ?? '');
-        $passwordValue = (string) ($this->paramConnexion['password'] ?? '');
-
-        if ('' !== $loginValue && '' !== $passwordValue) {
-            return 'Authorization: Basic '.base64_encode($loginValue.':'.$passwordValue);
-        }
-
-        return null;
-    }
-
-    /**
-     * @throws ClientExceptionInterface
-     * @throws DecodingExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
-    private function getOAuth2AccessToken(string $clientId, string $clientSecret): string
-    {
-        $tokenData = (new MauticApiHelper())->getOAuth2AccessToken(
-            $this->baseUrl,
-            $clientId,
-            $clientSecret,
-            time(),
-            $this->accessToken,
-            $this->tokenExpiresAt,
-            $this->logger,
-        );
-
-        $this->accessToken = $tokenData['access_token'];
-        $this->tokenExpiresAt = $tokenData['token_expires_at'];
-
-        return $this->accessToken;
-    }
-
-    private function createRecord(string $moduleName, array $payloadData): array
-    {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $responseData = $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/new', 'POST', $payloadData);
-
-        return (new MauticConnectorHelper())->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
-    }
-
-    private function updateRecord(string $moduleName, $recordId, array $payloadData): void
-    {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $responseData = $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/edit', 'PATCH', $payloadData);
-        (new MauticConnectorHelper())->formatWriteResponse($responseData, $moduleConfiguration['item_key']);
-    }
-
-    private function deleteRecord(string $moduleName, $recordId): void
-    {
-        $moduleConfiguration = $this->getModuleConfiguration($moduleName);
-        $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/delete', 'DELETE');
-    }
-
-    private function getModuleConfiguration(string $moduleName): array
-    {
-        try {
-            return $this->getConnectorHelper()->getModuleConfiguration($this->moduleConfiguration, $moduleName);
-        } catch (\Exception $exception) {
-            $this->logger->error('Unsupported Mautic module', ['module' => $moduleName]);
-            throw $exception;
-        }
-    }
-
-    private function extractTargetRecordId(array &$payloadData, string $operationName)
-    {
-        try {
-            return (new MauticConnectorHelper())->extractTargetRecordId($payloadData, $operationName);
-        } catch (\Exception $exception) {
-            $this->logger->error('Missing Mautic record id', ['operation' => $operationName]);
-            throw $exception;
-        }
-    }
-
-    private function buildWriteErrorResult(\Exception $exception, string $documentId, array $param, array $payloadData): array
-    {
-        $errorData = (new MauticApiHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData);
-        $this->logger->error('Mautic send error', $errorData['log_context']);
-
-        return $errorData['result'];
     }
 }

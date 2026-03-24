@@ -14,15 +14,16 @@ class MauticConnectorHelper
     public function normalizeModuleFields(array $moduleFields): array
     {
         $normalizedFields = [];
+        $fieldHelper = new MauticFieldHelper();
 
         foreach ($moduleFields as $fieldKey => $fieldValue) {
-            $normalizedFields[$fieldKey] = $this->normalizeSingleField($fieldKey, $fieldValue);
+            $normalizedFields[$fieldKey] = $fieldHelper->normalizeSingleField($fieldKey, $fieldValue);
         }
 
         return $normalizedFields;
     }
 
-    public function prepareReadParameters(array $param, callable $cleanMyddlewareElementId, callable $addRequiredField): array
+    public function prepareReadParameters(array $param, callable $cleanElementId, callable $addRequiredField): array
     {
         if (empty($param['limit'])) {
             $param['limit'] = 200;
@@ -32,7 +33,7 @@ class MauticConnectorHelper
             $param['offset'] = 0;
         }
 
-        $param['fields'] = $cleanMyddlewareElementId($param['fields']);
+        $param['fields'] = $cleanElementId($param['fields']);
         $param['fields'] = $addRequiredField($param['fields'], $param['module']);
 
         return $param;
@@ -70,7 +71,7 @@ class MauticConnectorHelper
         }
 
         if (!empty($manualQuery)) {
-            $queryParams['search'] = $this->normalizeSearchQuery($manualQuery);
+            $queryParams['search'] = (new MauticFieldHelper())->normalizeSearchQuery($manualQuery);
         }
 
         $mode = $param['ruleParams']['mode'] ?? '0';
@@ -108,11 +109,6 @@ class MauticConnectorHelper
         ];
     }
 
-    public function resolveReadItemsKey(array $moduleConfiguration, string $moduleName): string
-    {
-        return $this->getModuleConfiguration($moduleConfiguration, $moduleName)['items_key'];
-    }
-
     public function createUrlParam(array $params): string
     {
         $cleanParams = [];
@@ -139,7 +135,7 @@ class MauticConnectorHelper
             : $responseData;
     }
 
-    public function extractTargetRecordId(array &$payloadData, string $operationName): mixed
+    public function extractTargetRecordId(array &$payloadData): mixed
     {
         $recordId = $payloadData['target_id'] ?? ($payloadData['id'] ?? null);
 
@@ -152,52 +148,5 @@ class MauticConnectorHelper
         }
 
         return $recordId;
-    }
-
-    private function normalizeSingleField(mixed $fieldKey, mixed $fieldValue): array
-    {
-        if (is_string($fieldValue)) {
-            return [
-                'label' => $fieldValue,
-                'type' => 'text',
-                'required' => false,
-            ];
-        }
-
-        if (!is_array($fieldValue)) {
-            return [
-                'label' => (string) $fieldKey,
-                'type' => 'text',
-                'required' => false,
-            ];
-        }
-
-        if (!isset($fieldValue['label']) || '' === $fieldValue['label']) {
-            $fieldValue['label'] = (string) $fieldKey;
-        }
-
-        $fieldValue['required'] = array_key_exists('required', $fieldValue)
-            ? (bool) $fieldValue['required']
-            : false;
-
-        return $fieldValue;
-    }
-
-    private function normalizeSearchQuery(mixed $query): string
-    {
-        if (!is_array($query)) {
-            return (string) $query;
-        }
-
-        $queryParts = [];
-        foreach ($query as $fieldName => $fieldValue) {
-            if (null === $fieldValue || '' === $fieldValue) {
-                continue;
-            }
-
-            $queryParts[] = $fieldName.':'.$fieldValue;
-        }
-
-        return implode(' AND ', $queryParts);
     }
 }

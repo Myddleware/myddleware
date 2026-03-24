@@ -26,6 +26,7 @@ namespace App\Solutions;
 
 use App\Solutions\Support\DolibarrApiHelper;
 use App\Solutions\Support\DolibarrConnectorHelper;
+use App\Solutions\Support\DolibarrWriteHelper;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -249,9 +250,21 @@ class dolibarr extends solution
             $this->apiKey = $this->paramConnexion['apikey'];
             $this->apiEntity = !empty($this->paramConnexion['entity']) ? (string) $this->paramConnexion['entity'] : null;
             $this->verify_ssl = !array_key_exists('verify_ssl', $this->paramConnexion) || !empty($this->paramConnexion['verify_ssl']);
-            $this->apiBase = $this->normalizeApiBase($this->paramConnexion['url']);
+            $this->apiBase = (new DolibarrConnectorHelper())->normalizeApiBase($this->paramConnexion['url']);
 
-            if ($this->hasSuccessfulLoginProbe()) {
+            $status = $this->callApi($this->apiBase.'status', 'GET');
+            $probeSucceeded = is_array($status) && !isset($status['error']);
+            if (!$probeSucceeded) {
+                $probe = $this->callApi($this->apiBase.'thirdparties', 'GET', [
+                    'limit' => 1,
+                    'page' => 0,
+                    'sortfield' => 't.rowid',
+                    'sortorder' => 'ASC',
+                ]);
+                $probeSucceeded = is_array($probe) && !isset($probe['error']);
+            }
+
+            if ($probeSucceeded) {
                 $this->connexion_valide = true;
 
                 return;
@@ -264,23 +277,6 @@ class dolibarr extends solution
 
             return ['error' => $error];
         }
-    }
-
-    protected function hasSuccessfulLoginProbe(): bool
-    {
-        $status = $this->callApi($this->apiBase.'status', 'GET');
-        if (is_array($status) && !isset($status['error'])) {
-            return true;
-        }
-
-        $probe = $this->callApi($this->apiBase.'thirdparties', 'GET', [
-            'limit' => 1,
-            'page' => 0,
-            'sortfield' => 't.rowid',
-            'sortorder' => 'ASC',
-        ]);
-
-        return is_array($probe) && !isset($probe['error']);
     }
 
     /**
@@ -330,58 +326,35 @@ class dolibarr extends solution
     {
         unset($param);
         $this->moduleFields = parent::get_module_fields($module, $type);
-        $this->moduleFields = $this->ensureFieldDefinitionDefaults($this->moduleFields);
+        $helper = new DolibarrConnectorHelper();
+        $this->moduleFields = $helper->ensureFieldDefinitionDefaults($this->moduleFields);
 
         try {
             if (!empty($this->moduleFields) && count($this->moduleFields) > 1) {
-                return $this->ensureFieldDefinitionDefaults($this->moduleFields);
+                return $helper->ensureFieldDefinitionDefaults($this->moduleFields);
             }
 
-            $metadataFields = $this->getMetadataFields($module);
+            $metadataFields = $helper->getMetadataFields($this->metadataFields, $module);
             if (!empty($metadataFields)) {
                 $this->moduleFields = array_merge($this->moduleFields, $metadataFields);
 
-                return $this->ensureFieldDefinitionDefaults($this->moduleFields);
+                return $helper->ensureFieldDefinitionDefaults($this->moduleFields);
             }
 
-            $sampleRecord = $this->getSampleRecord($module);
+            $sampleRecord = $helper->getSampleRecord(fn (string $url, string $method, array $args) => $this->callApi($url, $method, $args), $this->apiBase, $module);
             if (empty($sampleRecord)) {
-                return $this->ensureFieldDefinitionDefaults($this->moduleFields);
+                return $helper->ensureFieldDefinitionDefaults($this->moduleFields);
             }
 
-            $this->moduleFields = array_merge($this->moduleFields, $this->buildFieldsFromSample($sampleRecord));
+            $this->moduleFields = array_merge($this->moduleFields, $helper->buildFieldsFromSample($sampleRecord, $this->moduleFields));
 
-            return $this->ensureFieldDefinitionDefaults($this->moduleFields);
+            return $helper->ensureFieldDefinitionDefaults($this->moduleFields);
         } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error, ['exception_file' => $e->getFile(), 'exception_line' => $e->getLine()]);
 
             return ['error' => $error];
         }
-    }
-
-    protected function getMetadataFields(string $module): array
-    {
-        return (new DolibarrConnectorHelper())->getMetadataFields($this->metadataFields, $module);
-    }
-
-    protected function getSampleRecord(string $module): ?array
-    {
-        return (new DolibarrConnectorHelper())->getSampleRecord(fn (string $url, string $method, array $args) => $this->callApi($url, $method, $args), $this->apiBase, $module);
-    }
-
-    protected function buildFieldsFromSample(array $record): array
-    {
-        return (new DolibarrConnectorHelper())->buildFieldsFromSample($record, $this->moduleFields);
-    }
-
-    /**
-     * Ensure each field definition contains keys expected by Myddleware mapping UI.
-     * Some controllers expect 'required' to exist; default to 0 when missing.
-     */
-    protected function ensureFieldDefinitionDefaults(array $fields): array
-    {
-        return (new DolibarrConnectorHelper())->ensureFieldDefinitionDefaults($fields);
     }
 
     /**
@@ -415,7 +388,7 @@ class dolibarr extends solution
      */
     public function createData($param): array
     {
-        return $this->createOrUpdate('POST', $param);
+        return (new DolibarrWriteHelper())->createOrUpdate('POST', $param, fn (string $writeMethod, array $writeParam, array $data, string $idDoc) => $this->prepareWriteData($writeMethod, $writeParam, $data, $idDoc), fn (string $writeMethod, string $moduleName, $recordId, array $payload) => $this->sendWriteRequest($writeMethod, $moduleName, $recordId, $payload), fn ($response, $recordId) => $this->resolveWriteResultId($response, $recordId), fn (string $idDoc, array $value, array $statusParam) => $this->updateDocumentStatus($idDoc, $value, $statusParam));
     }
 
     /**
@@ -423,7 +396,7 @@ class dolibarr extends solution
      */
     public function updateData($param): array
     {
-        return $this->createOrUpdate('PUT', $param);
+        return (new DolibarrWriteHelper())->createOrUpdate('PUT', $param, fn (string $writeMethod, array $writeParam, array $data, string $idDoc) => $this->prepareWriteData($writeMethod, $writeParam, $data, $idDoc), fn (string $writeMethod, string $moduleName, $recordId, array $payload) => $this->sendWriteRequest($writeMethod, $moduleName, $recordId, $payload), fn ($response, $recordId) => $this->resolveWriteResultId($response, $recordId), fn (string $idDoc, array $value, array $statusParam) => $this->updateDocumentStatus($idDoc, $value, $statusParam));
     }
 
     /**
@@ -443,39 +416,13 @@ class dolibarr extends solution
 
                 // Dolibarr often returns {"success":{"code":200,"message":"..."}}
                 if (is_array($resp) && isset($resp['error'])) {
-                    throw new \Exception($this->formatDolibarrError($resp));
+                    throw new \Exception((new DolibarrConnectorHelper())->formatDolibarrError($resp));
                 }
 
                 $result[$idDoc] = ['id' => $recordId, 'error' => false];
             } catch (\Exception $e) {
                 $result[$idDoc] = ['id' => '-1', 'error' => $e->getMessage()];
             }
-            $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Shared create/update logic.
-     *
-     * - POST /<module> to create
-     * - PUT  /<module>/{id} to update
-     */
-    protected function createOrUpdate(string $method, array $param): array
-    {
-        $result = [];
-
-        foreach ($param['data'] as $idDoc => $data) {
-            try {
-                $writeData = $this->prepareWriteData($method, $param, $data, $idDoc);
-                $response = $this->sendWriteRequest($method, $param['module'], $writeData['recordId'], $writeData['payload']);
-                $newId = $this->resolveWriteResultId($response, $writeData['recordId']);
-                $result[$idDoc] = ['id' => $newId, 'error' => false];
-            } catch (\Exception $e) {
-                $result[$idDoc] = ['id' => '-1', 'error' => $e->getMessage()];
-            }
-
             $this->updateDocumentStatus($idDoc, $result[$idDoc], $param);
         }
 
@@ -504,25 +451,5 @@ class dolibarr extends solution
             $args,
             $timeout,
         );
-    }
-
-    protected function normalizeApiBase(string $url): string
-    {
-        return (new DolibarrConnectorHelper())->normalizeApiBase($url);
-    }
-
-    protected function filterFields(array $row, array $fields): array
-    {
-        return (new DolibarrConnectorHelper())->filterFields($row, $fields);
-    }
-
-    protected function buildSqlFiltersForDateRef(array $param): ?string
-    {
-        return (new DolibarrConnectorHelper())->buildSqlFiltersForDateRef($param, $this->dateRefFieldMap);
-    }
-
-    protected function formatDolibarrError(array $resp): string
-    {
-        return (new DolibarrConnectorHelper())->formatDolibarrError($resp);
     }
 }
