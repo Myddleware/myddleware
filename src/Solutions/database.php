@@ -418,17 +418,17 @@ class database extends solution
                 $idTarget = $value;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
+			$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
 			if ($value === 'null') {
 				$values .= 'null,';
 			} elseif (is_bool($value)) {
-				$sql .= ($value ? 1 : 0).',';
+				$values .= ($value ? 1 : 0).',';
 			// Check if the field type is in the $ignoreQuotesOnQuery array
 			} elseif (in_array(gettype($value), $ignoreQuotesOnQuery)) {
-				$sql .= $this->escape($value).',';
+				$values .= $this->escape($value).',';
 			} else {
-				$sql .= $this->escape($value)."',";
-			}			
+				$values .= "'".$this->escape($value)."',";
+			}
         }
 
         // Remove the last coma
