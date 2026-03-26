@@ -84,6 +84,46 @@ class RuleStepService
         return $this->connectorRepository->findActiveBySolution($solution);
     }
 
+    public function validateConnections(int $srcConnectorId, int $tgtConnectorId): array
+    {
+        $errors = [];
+
+        foreach (['source' => $srcConnectorId, 'target' => $tgtConnectorId] as $side => $connectorId) {
+            $connector = $this->connectorRepository->find($connectorId);
+            if (!$connector || !$connector->getSolution()) {
+                $errors[] = ucfirst($side) . ': connector not found';
+                continue;
+            }
+
+            try {
+                $solutionName = $connector->getSolution()->getName();
+                $solution = $this->solutionManager->get($solutionName);
+                $params = $this->connectorService->resolveParams($connectorId);
+                $loginResult = $solution->login($params);
+
+                if (empty($solution->connexion_valide)) {
+                    $detail = '';
+                    if (is_array($loginResult) && !empty($loginResult['error'])) {
+                        $detail = $loginResult['error'];
+                    }
+                    $errors[] = ucfirst($side) . ' (' . $connector->getName() . '): '
+                        . $this->translator->trans('error.connexion')
+                        . ($detail ? ' - ' . $detail : '');
+                }
+            } catch (\Throwable $e) {
+                $errors[] = ucfirst($side) . ' (' . $connector->getName() . '): ' . $e->getMessage();
+            }
+        }
+
+        if (!empty($errors)) {
+            $message = $this->translator->trans('error.rule.edit_connection_failed')
+                . '<br>' . implode('<br>', $errors);
+            return ['success' => false, 'error' => $message];
+        }
+
+        return ['success' => true, 'error' => ''];
+    }
+
     /**
      * Récupère la liste des modules disponibles pour un connecteur.
      */

@@ -520,6 +520,17 @@ public function ruleListAction(Request $request, int $page = 1): Response
             throw $this->createNotFoundException(sprintf('Rule "%s" has been deleted', $rule->getId()));
         }
 
+        $connectionCheck = $this->ruleStepService->validateConnections(
+            $rule->getConnectorSource()->getId(),
+            $rule->getConnectorTarget()->getId()
+        );
+
+        if (!$connectionCheck['success']) {
+            $this->addFlash('rule.error', $connectionCheck['error']);
+
+            return $this->redirectToRoute('regle_open', ['id' => $rule->getId()]);
+        }
+
         $initialRuleJson = $this->ruleQueryService->prepareJsonForEdit($rule);
         $lst_functions = $this->entityManager->getRepository(Functions::class)->findAll();
         $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);

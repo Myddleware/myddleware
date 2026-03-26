@@ -923,6 +923,7 @@ error:
         target_module_load_list: Erreur de chargement des modules cible
         edit_document_error_open: Impossible d'éditer la règle car au moins un document est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces documents pour pouvoir éditer cette règle.
         edit_document_error_open_admin: Au moins un document est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces documents avant d'éditer la règle.
+        edit_connection_failed: "Impossible d'éditer la règle car la connexion avec un connecteur a échoué :"
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
         delete_document: Impossible de supprimer la règle car au moins un document de données existe sur cette règle. Veuillez supprimer ces documents pour pouvoir supprimer cette règle.
         delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
