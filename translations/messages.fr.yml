@@ -1193,11 +1193,18 @@ settings:
         elasticsearch_label: Statut Elasticsearch
         enable_elasticsearch: Activer Elastic Search
         elasticsearch_hint: Elasticsearch permet de meilleures performances lors de la recherche de chaines parmi de tres grandes quantites de documents (+100k)
+    logs:
+        title: Logs
+        download_logs: Telecharger les derniers logs
+        empty_logs: Vider le fichier de logs
+        confirm_empty_logs: Etes-vous sur de vouloir vider le fichier de logs ? Cette action est irreversible.
     messages:
         save_success: Parametres enregistres avec succes
         save_error: Echec de l'enregistrement des parametres
         elasticsearch_enabled: Elasticsearch a ete active
         elasticsearch_disabled: Elasticsearch a ete desactive
+        logs_emptied: Logs vides avec succes
+        logs_empty_error: Echec du vidage des logs
 
 login:
     title: Connexion

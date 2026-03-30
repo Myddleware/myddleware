@@ -30,6 +30,8 @@ class SettingsManager {
         this.apiEndpoints = {
             getConfig: `${this.baseUrl}/account/api/account/config`,
             updateConfig: `${this.baseUrl}/account/api/account/config/update`,
+            downloadLogs: `${this.baseUrl}/account/api/account/logs/download`,
+            emptyLogs: `${this.baseUrl}/account/api/account/logs/empty`,
             // getElasticsearch: `${this.baseUrl}//settings/api/settings/elasticsearch`,
             // updateElasticsearch: `${this.baseUrl}//settings/api/settings/elasticsearch/update`
         };
@@ -96,6 +98,22 @@ class SettingsManager {
             });
         }
 
+        const downloadLogsBtn = document.getElementById('download-logs');
+        if (downloadLogsBtn) {
+            downloadLogsBtn.addEventListener('click', () => {
+                window.location.href = this.apiEndpoints.downloadLogs;
+            });
+        }
+
+        const emptyLogsBtn = document.getElementById('empty-logs');
+        if (emptyLogsBtn) {
+            emptyLogsBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to empty the log file? This action cannot be undone.')) {
+                    this.emptyLogs();
+                }
+            });
+        }
+
         // // Elasticsearch toggle
         // const esToggle = document.getElementById('elasticsearch-enabled');
         // if (esToggle) {
@@ -123,6 +141,20 @@ class SettingsManager {
         } catch (error) {
             console.error('Failed to save table settings:', error);
             this.showNotification('danger', error.response?.data?.error || 'Failed to save settings');
+        }
+    }
+
+    async emptyLogs() {
+        try {
+            const response = await axios.post(this.apiEndpoints.emptyLogs);
+            if (response.data.success) {
+                this.showNotification('success', response.data.message || 'Logs emptied successfully');
+            } else {
+                this.showNotification('danger', response.data.error || 'Failed to empty logs');
+            }
+        } catch (error) {
+            console.error('Failed to empty logs:', error);
+            this.showNotification('danger', error.response?.data?.error || 'Failed to empty logs');
         }
     }
 

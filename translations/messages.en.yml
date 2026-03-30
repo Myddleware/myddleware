@@ -1194,11 +1194,18 @@ settings:
         elasticsearch_label: Elasticsearch Status
         enable_elasticsearch: Enable Elastic Search
         elasticsearch_hint: Elasticsearch enables greater performance when searching for strings among very large amounts of document (+100k)
+    logs:
+        title: Logs
+        download_logs: Download Latest Logs
+        empty_logs: Empty Log File
+        confirm_empty_logs: Are you sure you want to empty the log file? This action cannot be undone.
     messages:
         save_success: Settings saved successfully
         save_error: Failed to save settings
         elasticsearch_enabled: Elasticsearch has been enabled
         elasticsearch_disabled: Elasticsearch has been disabled
+        logs_emptied: Logs emptied successfully
+        logs_empty_error: Failed to empty logs
 
 login:
     title: Connection

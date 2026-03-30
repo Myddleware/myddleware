@@ -33,6 +33,32 @@
     </form>
 </div>
 
+<div class="settings-section mt-4">
+    <h4>{{ 'settings.logs.title'|trans }}</h4>
+
+    <div class="d-flex gap-3 mt-3 flex-wrap">
+        <div>
+            <label class="form-label">{{ 'settings.logs.download_logs'|trans }}</label>
+            <div>
+                <button type="button" id="download-logs" class="btn-log btn-download">
+                    <i class="fas fa-download me-2"></i>{{ 'settings.logs.download_logs'|trans }}
+                </button>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_SUPER_ADMIN') %}
+        <div>
+            <label class="form-label">{{ 'settings.logs.empty_logs'|trans }}</label>
+            <div>
+                <button type="button" id="empty-logs" class="btn-log btn-delete">
+                    <i class="fas fa-trash-alt me-2"></i>{{ 'settings.logs.empty_logs'|trans }}
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
 <hr class="my-4">
 
 {# <!-- Search Settings Section -->
