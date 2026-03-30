@@ -62,8 +62,8 @@ class RuleRepository extends ServiceEntityRepository
                     ->getSingleScalarResult();
     }
 
-    // Retourne toutes les règles d'un user
- public function findListRuleByUser(User $user, $ruleName = null): Query
+        // Retourne toutes les règles d'un user
+    public function findListRuleByUser(User $user, $ruleName = null): Query
     {
         $sql = $this->createQueryBuilder('r')
             ->join('r.connectorSource', 'cs')
@@ -91,13 +91,8 @@ class RuleRepository extends ServiceEntityRepository
 
         // Add search condition
         if ($ruleName) {
-            if (is_array($ruleName)) {
-                $sql->andWhere('r.name IN (:names)')
-                    ->setParameter('names', $ruleName);
-            } else {
-                $sql->andWhere('r.name LIKE :name')
-                    ->setParameter('name', '%' . $ruleName . '%');
-            }
+            $sql->andWhere('r.name LIKE :name')
+            ->setParameter('name', '%' . $ruleName . '%');
         }
 
         return $sql->getQuery();
