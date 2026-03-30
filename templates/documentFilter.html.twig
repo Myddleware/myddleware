@@ -48,7 +48,7 @@
     {{ form_end(formFilter) }}
     {{ form_start(form, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
-    <div class="m-3 row" id="filters-container">
+    <div class="mb-3 mt-3 row" id="filters-container">
         <div class="col-md-4" id="sourceContent" hidden="true">
             {{ form_label(form.sourceContent.sourceContent, 'list_flux.filter.source_content'|trans) }}
             <div class="input-group">
@@ -217,7 +217,7 @@
         </div>
     </div>
 
-    <div class="input-group">
+    <div class="input-group mb-5 mt-3">
         {{ form_widget(form.save) }}
         <a id="exportfluxcsv" class="btn btn-outline-primary ms-2 mb-2" role="button" href="javascript:void(0);" title="">
                             {{'list_flux.btn.exportcsv'|trans}}

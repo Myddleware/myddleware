@@ -144,6 +144,8 @@
     gap: 0.9375rem;
     padding: 0.9375rem 0 0.5625rem;
     align-items: flex-end;
+    position: relative;
+    z-index: 11;
 }
 
 #task-filter-bar label {
@@ -175,6 +177,9 @@
     flex-shrink: 0;
 }
 
+.date-selector-wrapper{
+    z-index: 11 !important;
+}
 #task-stopall-row {
     text-align: center;
     margin-bottom: 2rem;
