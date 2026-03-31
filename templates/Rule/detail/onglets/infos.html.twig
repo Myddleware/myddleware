@@ -87,7 +87,7 @@
 										{{ 'view_rule.title.rule' | trans }}
 									</p>
 									<div class="d-flex gap-2 mt-2 mt-md-0">	
-										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-primary btn-sm btn-edit-rule">
+										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-primary btn-sm">
 											<i class="fa fa-pen me-1"></i>
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
