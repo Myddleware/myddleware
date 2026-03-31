@@ -1523,7 +1523,6 @@ body.menu-is-open {
     color: #929da2;
     background-color: transparent;
     border: none;
-    padding: 5px 15px;
 }
 
 .more-actions-wrapper-documents button.btn svg, .more-actions-wrapper button.btn svg{
