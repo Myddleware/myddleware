@@ -29,7 +29,7 @@
             <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2">
                 {{ 'variable.back_to_list'|trans }}
             </a>
-            <a href="{{ path('variable_edit', {'id': variable.id}) }}" class="btn btn-outline-success m-2">
+            <a href="{{ path('variable_edit', {'id': variable.id}) }}" class="btn btn-outline-primary m-2">
                 {{ 'variable.btn.edit'|trans }}
             </a>
             <form method="post" action="{{ path('variable_delete', {'id': variable.id}) }}" style="display: inline;">

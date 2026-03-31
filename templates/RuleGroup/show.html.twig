@@ -13,7 +13,7 @@
     <div class="rulegroups-btn">
         <a href="{{ path('rulegroup_list') }}" class="btn btn-outline-primary m-2">
             {{ 'rulegroup.back'| trans }}</a>
-        <a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" class="btn btn-outline-success m-2">
+        <a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" class="btn btn-outline-primary m-2">
             {{ 'rulegroup.edit'| trans }}</a>
         <form method="post" action="{{ path('rulegroup_delete', {'id': rulegroup.id}) }}" style="display: inline;">
             <button type="submit"
