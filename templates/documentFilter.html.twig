@@ -352,11 +352,6 @@
                                 <td class="text-center">{{ document.source_date_modified|date(app.user.dateFormat ~ " H:i:s", app.user.timezone) }}</td>
                             </tr>
                         {% endfor %}
-                        <tr class="invisibele-row-bottom">
-                            <th class="rounded-table-down-left"></th>
-                            <th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th><th></th>
-                            <th class="rounded-table-down-right"></th>
-                        </tr>
                     {% else %}
                         <tr>
                             <td colspan="11" class="text-center">{{ 'list_flux.empty'|trans }}</td>
