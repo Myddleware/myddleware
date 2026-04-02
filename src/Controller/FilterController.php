@@ -663,7 +663,6 @@ public function removeFilter(Request $request): JsonResponse
         // }
 
         // Fallback to SQL
-        $this->logger->info('Using SQL for document search');
         return $this->searchDocumentsWithSql($data, $page, $limit);
     }
 
