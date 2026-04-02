@@ -985,9 +985,6 @@ class suitecrm extends solution
     //function to make cURL request
     protected function call($method, $parameters)
     {
-        if ($method == 'login') {
-            $this->logger->critical("using the regular login");
-        }
 
         try {
             ob_start();

@@ -1475,7 +1475,6 @@ $result = [];
             $document = $this->entityManager->getRepository(Document::class)->find($id);
 
             if (!$document) {
-                $this->logger->critical("[DATE-FLOW-PHP-1] Document not found with ID: " . $id);
                 return new JsonResponse(['error' => 'Document not found'], 404);
             }
 
@@ -1485,7 +1484,6 @@ $result = [];
             $rule = $document->getRule();
 
             if (!$rule) {
-                $this->logger->critical("[DATE-FLOW-PHP-1] No rule associated with document ID: " . $id);
                 return new JsonResponse(['error' => 'No rule associated with this document'], 404);
             }
             
