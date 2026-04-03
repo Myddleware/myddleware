@@ -308,26 +308,42 @@ class FormulaManager
         return $error;
     }
 
-    // Transformation et securite de la formule
     private function secureFormule()
     {
+        // 1. Initial conversion logic already present
         $string = str_replace('{', '$', $this->parse['formuleConvert']);
-        $tab = ['}'];
-        $string = str_replace($tab, '', $string);
-
-        // méthodes
+        $string = str_replace('}', '', $string);
         $string = str_replace('[', '(', $string);
         $string = str_replace(']', ')', $string);
 
-        // ----------- secure
+        // 2. CRITICAL: Block PHP execution tokens and statement separators
+        // This prevents multiple commands (like using ; to start a new line of code)
+        if (preg_match('/[;<>?]|(\x3c\x3fphp)/i', $string)) {
+            $this->parse['error']++;
+            return;
+        }
+
+        // 3. CRITICAL: Validate every function call against the whitelist
+        // This regex finds patterns like "function_name("
+        preg_match_all('/([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)\s*\(/', $string, $matches);
+
+        if (!empty($matches[1])) {
+            $allowedFunctions = $this->secureFunction();
+            foreach ($matches[1] as $calledFunction) {
+                // Check if it's a whitelisted PHP function or a Myddleware internal function
+                $isInternal = strpos($calledFunction, 'App\Manager\FormulaFunctionManager::') !== false;
+
+                if (!$isInternal && !in_array($calledFunction, $allowedFunctions)) {
+                    // If the function isn't whitelisted, it's a security violation
+                    $this->parse['error']++;
+                    return;
+                }
+            }
+        }
+
+        // 4. Standard cleanup already present
         $string = trim($string);
-
-        // ----- remove control characters -----
-        $string = str_replace("\r", '', $string);    // --- replace with empty space
-        $string = str_replace("\n", '', $string);   // --- replace with empty space
-        $string = str_replace("\t", '', $string);   // --- replace with empty space
-
-        // ----- remove multiple spaces -----
+        $string = str_replace(["\r", "\n", "\t"], '', $string);
         $string = trim(preg_replace('/ {2,}/', ' ', $string));
 
         $this->parse['formuleConvert'] = $string;
