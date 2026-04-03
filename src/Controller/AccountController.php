@@ -49,6 +49,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Config;
+use App\Entity\User;
 
 
 #[Route('/account')]
@@ -205,6 +206,11 @@ class AccountController extends AbstractController
     {
         $em = $this->entityManager;
         $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('You must be logged in to reset your password.');
+        }
+
         $form = $this->createForm(UpdatePasswordType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -505,8 +511,8 @@ class AccountController extends AbstractController
     {
         $user = $this->getUser();
         
-        if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        if (!$user instanceof User) {
+        return new JsonResponse(['error' => 'User not authenticated or invalid user type'], 401);
         }
         
         $data = json_decode($request->getContent(), true);

@@ -236,14 +236,22 @@ class ConnectorController extends AbstractController
             }
         }
 
-        // Supprime ancien fichier de config s'il existe
-        if (isset($_GET['file']) && '' != $_GET['file']) {
-            $name_without_space = str_replace(' ', '_', $_GET['file']);
-            $path_delete_old = $output_dir.$name_without_space;
-            if (file_exists($path_delete_old)) {
-                unlink($path_delete_old);
-                echo '<br/><br/><p><span class="label label-warning">'.$this->translator->trans('create_connector.upload_delete').' : '.htmlentities($name_without_space).'</span></p>';
-            }
+        //Make sure the input is treated only as a filename (removes ../ and /)
+        $safe_filename = basename($_GET['file']);
+
+        // Remove the spaces
+        $name_without_space = str_replace(' ', '_', $safe_filename);
+
+        // Make the absolute path
+        $path_delete_old = $output_dir . $name_without_space;
+
+        // Make sure the path is actually inside the directory
+        $real_output_dir = realpath($output_dir);
+        $real_target_path = realpath(dirname($path_delete_old));
+
+        if ($real_target_path === $real_output_dir && file_exists($path_delete_old)) {
+            unlink($path_delete_old);
+            echo '<br/><br/><p><span class="label label-warning">'.$this->translator->trans('create_connector.upload_delete').' : '.htmlentities($name_without_space).'</span></p>';
         }
 
         if ('all' == $solution) {
