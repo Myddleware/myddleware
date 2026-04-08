@@ -21,12 +21,6 @@
 {% include '_notifications.html.twig' with { filter_prefix: 'workflow.' } %}
 		{{ form_start(form) }}
 		<div class="text-center m-5 d-flex justify-content-between align-items-center">
-			<div class="left-buttons">
-				<a href="{{ path('workflow_list') }}" class="btn btn-outline-primary m-2">
-					{{ 'view_workflow.back'| trans }}
-				</a>
-			</div>
-
 			<div class="center-buttons">
 				<a href="{{ path('workflow_create') }}" class="btn btn-primary success m-2">
 					{{ 'view_edit_workflow.create'| trans }}
@@ -50,7 +44,7 @@
 			</div>
 		</div>
 		<div class="workflow-details">
-			<div class="mb-3 workflow-details">
+			<div class="m-4">
 				<div class="card-header mb-4 card-title-workflow">
 					{{ 'view_workflow.edit'| trans | upper }}
 				</div>
@@ -62,7 +56,7 @@
 						{{ form_row(form.Rule) }}
 					</div>
 				</div>
-				<div class="row mb-4">
+				<div class="row mb-5">
 					<div class="col-md-6">
 						{{ form_row(form.description) }}
 					</div>

@@ -23,7 +23,6 @@
 			</a>
 		</div>
 		<div class="text-center pt-4 pb-4">
-			<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.back_to_workflow'|trans }}</a>
 			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.edit'|trans }}</a>
 			<form method="post" action="{{ path('workflow_action_delete', {'id': workflow.id}) }}" style="display: inline;">
 				<button type="submit" 

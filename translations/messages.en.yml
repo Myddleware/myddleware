@@ -452,7 +452,6 @@ list_connector:
 view_connector:
     btn:
         edit: Edit
-        back: Back to the list
         save: Save
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?
@@ -473,6 +472,7 @@ delete_connector:
         success: Connector deleted successfully
 
 list_flux:
+    more_filter: More filter
     start: Start
     end: End
     total: Number of documents
@@ -684,7 +684,6 @@ view_workflow:
     title2: Condition Field
     condition: The condition field is automatically generated with the string {status} == ", and the opening parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
     condition2: In short, all you need is to write the status name and we do the rest !
-    back: Back to the list
     delete: Delete the workflow
     duplicate: Duplicate the workflow
     duplicate_success: Workflow duplicated successfully
@@ -728,7 +727,6 @@ view_workflow_action:
     workflow: Workflow
     action: Action
     order: Order
-    back_to_workflow: Back to the workflow
     create: Create a new action
     multiple_runs: Multiple Runs
     multiple_runs_yes: Yes
@@ -1339,7 +1337,6 @@ variable:
   deleted_successfully: "Variable deleted successfully."
   name_already_exists: The name of the variable already exists. Please choose another name.
   edit: Edit variable
-  back_to_list: Back to the list
   save: Save
   editing: Edit variable
   total: Total of Variables

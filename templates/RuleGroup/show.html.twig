@@ -3,16 +3,13 @@
     {{ parent() }} | {{ 'rulegroup.title_one'|trans }}
 {% endblock %}
 {% block titlesm %}
-    {{ 'rulegroup.title_one'|trans }}
-    <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation"></i>
+    <a href="{{ path('rulegroup_list') }}">{{ 'rulegroup.title_one'|trans }}</a><i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation"></i>
     {{ rulegroup.name }}
 {% endblock titlesm %}
 
 {% block body %}
 <div id="rulegroups-details">
     <div class="rulegroups-btn">
-        <a href="{{ path('rulegroup_list') }}" class="btn btn-outline-primary m-2">
-            {{ 'rulegroup.back'| trans }}</a>
         <a href="{{ path('rulegroup_edit', {'id': rulegroup.id}) }}" class="btn btn-outline-primary m-2">
             {{ 'rulegroup.edit'| trans }}</a>
         <form method="post" action="{{ path('rulegroup_delete', {'id': rulegroup.id}) }}" style="display: inline;">

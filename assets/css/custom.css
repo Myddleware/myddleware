@@ -343,37 +343,6 @@ div:has(> label + .form-control) > .form-control::placeholder {
     color: transparent !important;
 }
 
-.form-floating {
-    position: relative;
-    margin-top: 12px;
-}
-
-.form-floating > .form-control {
-    border: 1px solid #cccccc !important;
-    border-radius: 8px !important;
-    background-color: transparent !important;
-    box-shadow: none !important;
-    padding: 9px 15px !important;
-    height: auto !important;
-    min-height: 42px;
-}
-
-.form-floating > label {
-    position: absolute !important;
-    top: -9px !important;
-    left: 15px !important;
-    background-color: #ffffff !important;
-    padding: 0 8px !important;
-    color: #495057 !important;
-    font-size: 13px !important;
-    font-weight: 500 !important;
-    z-index: 5 !important;
-    text-transform: uppercase !important;
-    width: max-content !important;
-    height: auto !important;
-    transform: none !important;
-    opacity: 1 !important;
-}
 .mdw-floating-field {
     position: relative;
     padding-top: 10px;
