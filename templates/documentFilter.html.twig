@@ -43,6 +43,7 @@
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
     <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-reduced-width-grey' }}" class="input-group filter-premium-container-reduced-width mdw-floating-field">
+        <label for="{{ formFilter.filter.vars.id }}">{{'list_flux.more_filter'|trans }}</label>
         {{ form_widget(formFilter.filter) }}
     </div>
     {{ form_end(formFilter) }}

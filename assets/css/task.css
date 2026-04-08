@@ -263,12 +263,11 @@ html body #task-filter-bar .task-filter-col-param .selectize-control .selectize-
 }
 
 
-.toggleparam-task{
-    padding: 6px 9px 5px 0px;
+.toggleparam-task, .button_plus_message, .button_minus_message {
+    padding: 0px 4px;
     font-size: smaller !important;
     border-radius: 20px !important;
     background-color: #ffffff00 !important; 
     border: 2px dashed #03c4eb !important;
     color: #000000 !important;
-	padding-left: 8px !important;
 }

@@ -687,20 +687,6 @@ td .link-fit-rule-name {
     line-height: 1.5;  /* Adjust line spacing */
 }
 
-.form-floating > #rule_name_label::after,
-.form-floating > .form-control:focus ~ #rule_name_label::after,
-.form-floating > .form-control:not(:placeholder-shown) ~ #rule_name_label::after {
-    inset: 0px !important;
-    /* Add any other styles you want to override */
-}
-
-.form-floating > #workflow_name_label::after,
-.form-floating > .form-control:focus ~ #workflow_name_label::after,
-.form-floating > .form-control:not(:placeholder-shown) ~ #workflow_name_label::after {
-    inset: 0px !important;
-    /* Add any other styles you want to override */
-}
-
 #rulesearchbarcontainer .selectize-control {
     width: 100%;
     margin-bottom: 0;
