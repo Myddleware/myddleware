@@ -15,7 +15,6 @@ use App\Service\ConnectorService;
 use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Illuminate\Encryption\Encrypter;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\FormFactoryInterface;
@@ -320,15 +319,13 @@ class RuleStepService
         ];
     }
 
-    private function validateNewConnector(array $data, ?string $ruleKey): array
+   private function validateNewConnector(array $data, ?string $ruleKey): array
     {
         $classe = strtolower($data['solution']);
-        $solution = $this->solutionManager->get($classe);
         $param = [];
 
-        // Parsing des champs envoyés (format "key::value;key2::value2")
-        $champs = explode(';', $data['champs']);
-        if ($champs) {
+        if (!empty($data['champs'])) {
+            $champs = explode(';', $data['champs']);
             foreach ($champs as $key) {
                 $input = explode('::', $key);
                 if (!empty($input[0]) && (isset($input[1]) || is_numeric($input[1]))) {
@@ -339,21 +336,15 @@ class RuleStepService
         }
         $this->sessionService->setParamConnectorParentType($data['parent'], 'solution', $classe);
 
-        // Validation du nombre de champs
-        $nonRequiredFields = $this->getNonRequiredFields();
-        $requiredCount = count($solution->getFieldsLogin());
-        
-        // Ajustement approximatif pour la validation (logique héritée)
-        $isValidCount = (count($param) == $requiredCount || count($param) == ($requiredCount - count($nonRequiredFields)));
-
-        if ($isValidCount) {
-            $result = $solution->login($param);
-            if (!empty($solution->connexion_valide)) {
+        if (count($param) > 0) {
+            $testResult = $this->connectorService->testConnection($classe, $param);
+            
+            if ($testResult['success']) {
                 return ['success' => true];
             }
             
             $this->sessionService->removeParamRule($ruleKey);
-            return ['success' => false, 'message' => $result['error'] ?? 'Connection failed'];
+            return $testResult; 
         }
 
         return ['success' => false, 'message' => 'create_connector.form_error'];
@@ -370,7 +361,6 @@ class RuleStepService
 
         $this->sessionService->removeParamParentRule($ruleKey, $data['parent']);
         $classe = strtolower($params[0]);
-        $solution = $this->solutionManager->get($classe);
         $connectorId = $params[1];
 
         $connector = $this->connectorRepository->find($connectorId);
@@ -384,33 +374,13 @@ class RuleStepService
 
         $this->sessionService->setParamRuleName($ruleKey, $data['name']);
         $this->sessionService->setParamRuleConnectorParent($ruleKey, $data['parent'], $connectorId);
-        
-        // Déchiffrement et connexion
-        $decryptedParams = $this->decryptParams($this->sessionService->getParamParentRule($ruleKey, $data['parent']));
         $this->sessionService->setParamRuleParentName($ruleKey, $data['parent'], 'solution', $classe);
+        
+        // Déchiffrement et connexion via le ConnectorService
+        $encryptedParams = $this->sessionService->getParamParentRule($ruleKey, $data['parent']);
+        $decryptedParams = $this->connectorService->decryptParams($encryptedParams, $this->secret);
 
-        $result = $solution->login($decryptedParams);
-
-        if (!empty($solution->connexion_valide)) {
-            return ['success' => true];
-        }
-
-        return ['success' => false, 'message' => $result['error'] ?? 'Connection error'];
-    }
-
-    private function decryptParams($tab_params)
-    {
-        $encrypter = new Encrypter(substr($this->secret, -16));
-        if (is_array($tab_params)) {
-            $return_params = [];
-            foreach ($tab_params as $key => $value) {
-                if (is_string($value) && !in_array($key, ['solution', 'module'])) {
-                    $return_params[$key] = $encrypter->decrypt($value);
-                }
-            }
-            return $return_params;
-        }
-        return $encrypter->decrypt($tab_params);
+        return $this->connectorService->testConnection($classe, $decryptedParams);
     }
 
     private function getNonRequiredFields()

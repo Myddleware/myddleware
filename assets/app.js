@@ -119,7 +119,8 @@ if (window.location.href.includes('managementsmtp')) {
 if (
     (
         window.location.href.includes('rule/connector/create') ||
-        window.location.href.match(/rule\/connector\/\d+\/detail/)
+        window.location.href.match(/rule\/connector\/\d+\/detail/)||
+        window.location.href.match(/rule\/connector\/view\/\d+/)
     )
     && 
     !(window.location.href.includes('install')) 

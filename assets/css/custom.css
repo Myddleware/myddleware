@@ -247,6 +247,8 @@ menu .caret, #myd_top .caret {
 
 .btn{
     border-radius: 25px !important;
+    font-weight: 500 !important;
+    font-size: 16px;
 }
 
 .typewriter {
@@ -297,4 +299,127 @@ menu .caret, #myd_top .caret {
     animation-iteration-count: 2 !important; 
 }
 
+.task-filter-col,
+div:has(> label + .form-control) {
+    position: relative;
+    margin-top: 12px;
+}
 
+.task-filter-col > label,
+div:has(> label + .form-control) > label {
+    position: absolute;
+    top: -9px;
+    left: 15px;
+    background-color: #ffffff;
+    padding: 0 8px;
+    color: #495057;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 5;
+    text-transform: uppercase;
+    margin-bottom: 0;
+    width: max-content;
+}
+
+.task-filter-col > .form-control,
+.task-filter-col .selectize-input,
+div:has(> label + .form-control) > .form-control {
+    border: 1px solid #cccccc !important;
+    border-radius: 8px !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: 9px 15px !important;
+    width: 100%;
+}
+
+input.form-control, 
+select.form-control, 
+.selectize-input {
+    min-height: 42px; 
+}
+
+.task-filter-col > .form-control::placeholder,
+div:has(> label + .form-control) > .form-control::placeholder {
+    color: transparent !important;
+}
+
+.form-floating {
+    position: relative;
+    margin-top: 12px;
+}
+
+.form-floating > .form-control {
+    border: 1px solid #cccccc !important;
+    border-radius: 8px !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+    padding: 9px 15px !important;
+    height: auto !important;
+    min-height: 42px;
+}
+
+.form-floating > label {
+    position: absolute !important;
+    top: -9px !important;
+    left: 15px !important;
+    background-color: #ffffff !important;
+    padding: 0 8px !important;
+    color: #495057 !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    z-index: 5 !important;
+    text-transform: uppercase !important;
+    width: max-content !important;
+    height: auto !important;
+    transform: none !important;
+    opacity: 1 !important;
+}
+.mdw-floating-field {
+    position: relative;
+    padding-top: 10px;
+    margin-bottom: 15px;
+}
+
+.mdw-floating-field > label {
+    position: absolute !important;
+    top: 0px !important;
+    left: 20px !important;
+    background-color: #ffffff !important;
+    padding: 0 5px !important;
+    color: #595b5d !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    z-index: 5 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 0 !important;
+    width: max-content !important;
+}
+
+.mdw-floating-field .form-control,
+.mdw-floating-field .selectize-input {
+    border: 1px solid #cccccc !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    padding: 9px 15px !important;
+    width: 100%;
+    margin-top: 0 !important;
+}
+
+.mdw-floating-field input.form-control,
+.mdw-floating-field select.form-control,
+.mdw-floating-field .selectize-input {
+    min-height: 42px !important;
+    height: auto !important;
+}
+
+.mdw-floating-field .form-control::placeholder,
+.mdw-floating-field .selectize-input input::placeholder {
+    color: transparent !important;
+}
+
+.mdw-floating-field .selectize-control.form-control {
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
+}

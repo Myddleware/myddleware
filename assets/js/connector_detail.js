@@ -36,24 +36,19 @@ $(function () {
 
             if ($(this).text() != 'solution' && $(this).text() != 'nom') {
 
-                var input = $(this).parent().find('.params'); 
+                var dataElement = $(this).parent().find('[data-param]'); 
 
-                if (input.length > 0) {
-                    if (input.is('input')) {
-                        if (input.attr('data-param') != undefined) {
-                            datas += input.attr('data-param') + "::" + input.val().replace(/;/g, "") + ";";
-                        }
-                    } else {
-                         var dataParam = input.attr('data-param');
-                         var textValue = input.text().trim();
+                if (dataElement.length > 0) {
+                    var dataParam = dataElement.attr('data-param');
+                    var textValue = dataElement.is('input') ? dataElement.val() : dataElement.text().trim();
 
-                        if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
-                            const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
-                            textValue = window[matchedKeyword];
-                        }
-                        if (dataParam !== undefined) {
-                            datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";
-                        }
+                   if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
+                        const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
+                        textValue = window[matchedKeyword];
+                    }
+                    if (dataParam !== undefined) {
+                        datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";
+                        
                     }
                 }
             }

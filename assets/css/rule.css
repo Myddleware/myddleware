@@ -482,13 +482,6 @@ color: #03c4eb!important;
 	margin: 30px;
 }
 
-#rulenamesearchbar {
-    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
-    transition: all 0.5s;
-    max-width: 400px;
-    position: relative;
-}
-
 #rule_name{
 	padding: 5px;
 	padding-top: 15px !important;
@@ -1530,7 +1523,6 @@ body.menu-is-open {
     color: #929da2;
     background-color: transparent;
     border: none;
-    padding: 5px 15px;
 }
 
 .more-actions-wrapper-documents button.btn svg, .more-actions-wrapper button.btn svg{

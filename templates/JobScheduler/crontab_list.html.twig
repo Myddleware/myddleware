@@ -74,7 +74,7 @@
                             <tr>
                                 <td class="value">
                                     <div id="command-short-{{ loop.index }}" class="command-crontab">
-                                        {{ value.command|slice(0, 20) ~ '...' }}
+                                        {{ value.command|slice(0, 20) ~ '...' }}</br>
                                         <button class="button_plus_message" onclick="document.getElementById('command-short-{{ loop.index }}').style.display='none';document.getElementById('command-full-{{ loop.index }}').style.display='block';">+</button>
                                     </div>
                                     <div id="command-full-{{ loop.index }}" style="display: none;">

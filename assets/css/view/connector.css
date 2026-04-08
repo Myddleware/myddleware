@@ -88,22 +88,6 @@
     margin-bottom: 20px;
 }
 
-.view-create-page .champs .btn-success {
-    background-color: #5ed391 !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 12px 25px !important;
-    font-weight: bold !important;
-    width: 100% !important;
-    margin-top: 20px !important;
-    position: relative !important;
-}
-
-.champs .testing {
-    border-radius: 8px !important;
-    padding: 8px 20px !important;
-}
-
 .champs .row.justify-content-center.mt-5 {
     display: flex !important;
     flex-direction: row !important;
@@ -114,7 +98,7 @@
 }
 
 .status-online { 
-    color: #5ed391 !important; font-size: 24px; 
+    color: #19ca42 !important; font-size: 24px; 
 }
 .status-offline { 
     color: #8e8b8b !important; font-size: 24px; 
@@ -174,12 +158,11 @@
     flex-grow: 0 !important;
     width: auto !important;
     padding: 10px 25px !important;
-    border-radius: 8px !important;
     font-weight: bold !important;
 }
 
 .connector-actions-footer .btn-success {
-    background-color: #5ed391 !important;
+    background-color: #19ca42 !important;
     border: none !important;
     color: #fff !important;
 }
@@ -244,4 +227,15 @@
     position: relative !important;
     z-index: 10;
     pointer-events: auto;
+}
+
+#connexion_detail, #connexion{
+    color: #929da2;
+    background-color: transparent;
+    border: 1px solid #929da2;
+}
+
+#connexion_detail:hover, #connexion:hover{
+    color: #ffffff;
+    background-color: #929da2;
 }

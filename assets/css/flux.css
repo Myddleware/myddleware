@@ -955,13 +955,8 @@ li span {
 }
 
 #clear_rule_search {
-    width: 38px;
-    height: 38px;
-    border-radius: 50% !important;
+    box-shadow: none;
     padding: 0 !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
 }
 
 #clear_rule_search svg {
