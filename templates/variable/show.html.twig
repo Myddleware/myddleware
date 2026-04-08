@@ -5,7 +5,7 @@
 {% endblock %}
 
 {% block titlesm %}
-    {{ 'variable.list_title'|trans }} <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i> {{ variable.name }}
+    <a href="{{ path('variable_list') }}">{{ 'variable.list_title'|trans }}</a> <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i> {{ variable.name }}
 {% endblock %}
 
 {% block body %}
@@ -26,9 +26,6 @@
 
     <div id="variables" class="container mt-4">
         <div>
-            <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2">
-                {{ 'variable.back_to_list'|trans }}
-            </a>
             <a href="{{ path('variable_edit', {'id': variable.id}) }}" class="btn btn-outline-primary m-2">
                 {{ 'variable.btn.edit'|trans }}
             </a>

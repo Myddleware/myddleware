@@ -7,8 +7,7 @@
 {% endblock %}
 
 {% block titlesm %}
-	{{ 'view_workflow.title'|trans }}
-	<i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i>
+	<a href="{{ path('workflow_list') }}">{{ 'view_workflow.title'|trans }}</a> <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i>
 	{{ workflow.name }}
 {% endblock titlesm %}
 {% block body %}
@@ -23,8 +22,6 @@
     </div>
 
     <div class="workflows-btn">
-        <a href="{{ path('workflow_list') }}" class="btn btn-outline-primary m-2">
-            {{ 'view_workflow.back'| trans }}</a>
         <a href="{{ path('workflow_edit', {'id': workflow.id}) }}" class="btn btn-outline-primary m-2">
             {{ 'view_workflow.edit'| trans }}</a>
         <div class="more-actions-wrapper">

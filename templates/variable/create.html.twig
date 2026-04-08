@@ -6,10 +6,6 @@
 
 {% block body %}
     <div class="container mt-5">
-        <div class="text-center m-5">
-            <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2"> {{ 'variable.back_to_list'|trans }}</a>
-        </div>
-
         {% include '_notifications.html.twig' with { filter_prefix: 'variable.create' } %}
         
         {{ form_start(form) }}
