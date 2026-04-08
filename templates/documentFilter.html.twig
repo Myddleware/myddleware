@@ -42,14 +42,14 @@
 <div class="px-5 mb-1 py-1 mt-5">
     {{ form_start(formFilter, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
-    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-reduced-width-grey' }}" class="input-group filter-premium-container-reduced-width">
+    <div id="{{ isPremium() ? 'filter-premium-container' : 'filter-premium-container-reduced-width-grey' }}" class="input-group filter-premium-container-reduced-width mdw-floating-field">
         {{ form_widget(formFilter.filter) }}
     </div>
     {{ form_end(formFilter) }}
     {{ form_start(form, { 'action': path('document_list_page', { 'sortField': app.request.get('sortField'), 'sortOrder': app.request.get('sortOrder') }), 'method': 'post' }) }}
 
     <div class="mb-3 mt-3 row" id="filters-container">
-        <div class="col-md-4" id="sourceContent" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="sourceContent" hidden="true">
             {{ form_label(form.sourceContent.sourceContent, 'list_flux.filter.source_content'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.sourceContent.sourceContent, {'required': false}) }}
@@ -59,7 +59,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="targetContent" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="targetContent" hidden="true">
             {{ form_label(form.sourceContent.targetContent, 'list_flux.filter.target_content'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.sourceContent.targetContent, {'required': false}) }}
@@ -69,7 +69,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="status" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="status" hidden="true">
             {{ form_label(form.document.status, 'list_flux.filter.status'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.status, {'required': false}) }}
@@ -79,21 +79,21 @@
             </div>
         </div>
         
-        <div class="col-md-4" id="name" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="name" hidden="true">
             {{ form_label(form.rule.name, 'list_flux.filter.rule'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.rule.name, {'required': false}) }}
             </div>
         </div>
 
-        <div class="col-md-4 global-status-reduced-width" id="globalStatus" hidden="true">
+        <div class="col-md-4 global-status-reduced-width mdw-floating-field" id="globalStatus" hidden="true">
             {{ form_label(form.document.globalStatus, 'list_flux.filter.global_status'|trans) }}
             <div class="input-group">
                  {{ form_widget(form.document.globalStatus, {'required': false }) }}
             </div>
         </div>
 
-        <div class="col-md-4" id="type" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="type" hidden="true">
             {{ form_label(form.document.type, 'list_flux.filter.type'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.type, {'required': false}) }}
@@ -102,7 +102,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4" id="sort_field" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="sort_field" hidden="true">
             {{ form_label(form.document.sort_field, 'list_flux.filter.sort_field'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.sort_field, {'required': false}) }}
@@ -111,7 +111,7 @@
                 </div>
             </div>
         </div>
-        <div class="col-md-4" id="sort_order" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="sort_order" hidden="true">
             {{ form_label(form.document.sort_order, 'list_flux.filter.sort_order'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.sort_order, {'required': false}) }}
@@ -121,21 +121,21 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="target" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="target" hidden="true">
             {{ form_label(form.document.target, 'list_flux.filter.target_id'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.target, {'required': false}) }}
             </div>
         </div>
 
-        <div class="col-md-4" id="sourceId" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="sourceId" hidden="true">
             {{ form_label(form.document.sourceId, 'list_flux.filter.source_id'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.sourceId, {'required': false}) }}
             </div>
         </div>
 
-          <div class="col-md-4" id="message" hidden="true">
+          <div class="col-md-4 mdw-floating-field" id="message" hidden="true">
             {{ form_label(form.message.message, 'list_flux.filter.message'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.message.message, {'required': false}) }}
@@ -145,7 +145,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="reference" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="reference" hidden="true">
             {{ form_label(form.document.reference, 'list_flux.filter.reference'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.reference, {'required': false}) }}
@@ -155,7 +155,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="date_modif_start" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="date_modif_start" hidden="true">
             {{ form_label(form.document.date_modif_start, 'list_flux.filter.date_modified_start'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.date_modif_start, {'required': false}) }}
@@ -165,7 +165,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="date_modif_end" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="date_modif_end" hidden="true">
             {{ form_label(form.document.date_modif_end, 'list_flux.filter.date_modified_end'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.document.date_modif_end, {'required': false}) }}
@@ -175,7 +175,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="moduleSource" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="moduleSource" hidden="true">
             {{ form_label(form.rule.moduleSource, 'list_flux.filter.module_source'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.rule.moduleSource, {'required': false}) }}
@@ -185,7 +185,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="moduleTarget" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="moduleTarget" hidden="true">
             {{ form_label(form.rule.moduleTarget, 'list_flux.filter.module_target'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.rule.moduleTarget, {'required': false}) }}
@@ -196,7 +196,7 @@
         </div>
 
 
-        <div class="col-md-4" id="connectorSource" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="connectorSource" hidden="true">
             {{ form_label(form.rule.connectorSource, 'list_flux.filter.connector_source'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.rule.connectorSource, {'required': false}) }}
@@ -206,7 +206,7 @@
             </div>
         </div>
 
-        <div class="col-md-4" id="connectorTarget" hidden="true">
+        <div class="col-md-4 mdw-floating-field" id="connectorTarget" hidden="true">
             {{ form_label(form.rule.connectorTarget, 'list_flux.filter.connector_target'|trans) }}
             <div class="input-group">
                 {{ form_widget(form.rule.connectorTarget, {'required': false}) }}
@@ -431,7 +431,7 @@
 {% if clearStorageScript is not null and clearStorageScript is not empty %}
     {{ clearStorageScript|raw }}
 {% endif %}
-	</script>
+    </script>
 
     <script type="text/javascript">
         $(document).ready(function() {

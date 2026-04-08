@@ -1,7 +1,7 @@
 <div class="row g-4 align-items-start">
     {% for param in rule_params %}
         <div class="col-12 col-md-6">
-            <div class="form-group">
+            <div class="form-group mdw-floating-field">
                 <label class="form-label" for="{{ param.id }}">
                     {{ param.label }} {% if param.required %}*{% endif %}
                 </label>
@@ -31,7 +31,7 @@
 
 {% if duplicate_target is defined and duplicate_target is not empty %}
     <div class="col-12 col-md-6">
-        <div class="form-group">
+        <div class="form-group mdw-floating-field">
             <label class="form-label" for="duplicate-field">
                 {{ 'create_rule.step5.params.duplicate'|trans }}
             </label>

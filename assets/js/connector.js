@@ -30,6 +30,7 @@ const $ = require('jquery');
 $( function() {
     // Get data from database
     let isLoadingData = false;
+    let isConnectionTested = false;
 
     // Function to load and populate data from database
     function loadConnectorData() {
@@ -139,6 +140,7 @@ $( function() {
 
     // Test connexion
     $('#connexion').on('click', function(){
+        isConnectionTested = false;
 
         var datas = '';
         var parent = 'source';
@@ -238,7 +240,8 @@ $( function() {
                                         status.html('<i class="fa fa-lightbulb status-online"></i>');
                                         $('#msg_status').hide();
                                         $('#msg_status span.error').html('');   
-                                        $('#step_modules_confirme').removeAttr('disabled');                 
+                                        $('#step_modules_confirme').removeAttr('disabled');
+                                        isConnectionTested = true;             
                                     }
                                 }
                             });
@@ -253,6 +256,7 @@ $( function() {
                                 status.html('<i class="fa fa-lightbulb status-online"></i>');
                                 $('#msg_status').hide();
                                 $('#msg_status span.error').html('');
+                                isConnectionTested = true;
                             }                       
                         }                           
                     }
@@ -260,6 +264,28 @@ $( function() {
 
             }
         });      
+    })
+    $('#connector_save').on('click', function(e) {
+        e.preventDefault();
+        
+        const form = $('form').filter(function() {
+            const action = $(this).attr('action');
+            return action && action.includes('/connector/view/');
+        });
+
+       if (form.length === 0) {
+            console.error("Error");
+            return;
+        }
+
+        if (!isConnectionTested) {
+            const confirmSave = confirm("You haven't tested your connector. Do you still want to save ?");
+            
+            if (!confirmSave) {
+                return; 
+            }
+        }
+
+       form[0].submit();
     });
-    
 });

@@ -299,23 +299,18 @@ menu .caret, #myd_top .caret {
     animation-iteration-count: 2 !important; 
 }
 
-/* * 1. CONTENEURS PARENTS 
- * Cible la barre de filtres ET tous les divs Symfony contenant un label + un champ form-control
- */
 .task-filter-col,
 div:has(> label + .form-control) {
     position: relative;
-    margin-top: 12px; /* Dégage de l'espace en haut pour que le label remonte */
+    margin-top: 12px;
 }
 
-/* * 2. LE LABEL (qui vient couper la bordure dynamiquement) 
- */
 .task-filter-col > label,
 div:has(> label + .form-control) > label {
     position: absolute;
     top: -9px;
     left: 15px;
-    background-color: #ffffff; /* IMPORTANT : Doit correspondre à la couleur de fond de la page */
+    background-color: #ffffff;
     padding: 0 8px;
     color: #495057;
     font-size: 13px;
@@ -323,11 +318,9 @@ div:has(> label + .form-control) > label {
     z-index: 5;
     text-transform: uppercase;
     margin-bottom: 0;
-    width: max-content; /* S'adapte exactement à la longueur du texte (Rule, Description, etc.) */
+    width: max-content;
 }
 
-/* * 3. LE CHAMP (Input, Textarea, Select, Selectize)
- */
 .task-filter-col > .form-control,
 .task-filter-col .selectize-input,
 div:has(> label + .form-control) > .form-control {
@@ -339,15 +332,12 @@ div:has(> label + .form-control) > .form-control {
     width: 100%;
 }
 
-/* Fix spécifique pour unifier la hauteur (sans écraser les textareas qui ont besoin d'être plus hauts) */
 input.form-control, 
 select.form-control, 
 .selectize-input {
     min-height: 42px; 
 }
 
-/* * 4. OPTIONNEL : Masquer les placeholders (puisque l'info est déjà dans la bordure)
- */
 .task-filter-col > .form-control::placeholder,
 div:has(> label + .form-control) > .form-control::placeholder {
     color: transparent !important;
@@ -358,18 +348,16 @@ div:has(> label + .form-control) > .form-control::placeholder {
     margin-top: 12px;
 }
 
-/* 2. Le champ input (écrase le form-control-sm et shadow-sm) */
 .form-floating > .form-control {
     border: 1px solid #cccccc !important;
     border-radius: 8px !important;
     background-color: transparent !important;
-    box-shadow: none !important; /* Retire le shadow-sm */
-    padding: 9px 15px !important; /* Uniformise le padding */
-    height: auto !important; /* Retire la hauteur forcée de form-floating */
+    box-shadow: none !important;
+    padding: 9px 15px !important;
+    height: auto !important;
     min-height: 42px;
 }
 
-/* 3. Le label (Annule l'animation Bootstrap et le fixe sur la bordure) */
 .form-floating > label {
     position: absolute !important;
     top: -9px !important;
@@ -383,13 +371,55 @@ div:has(> label + .form-control) > .form-control::placeholder {
     text-transform: uppercase !important;
     width: max-content !important;
     height: auto !important;
-    
-    /* Annule les transformations natives de Bootstrap 5 */
     transform: none !important;
     opacity: 1 !important;
 }
+.mdw-floating-field {
+    position: relative;
+    padding-top: 10px;
+    margin-bottom: 15px;
+}
 
-/* 4. Masquer le placeholder natif */
-.form-floating > .form-control::placeholder {
+.mdw-floating-field > label {
+    position: absolute !important;
+    top: 0px !important;
+    left: 20px !important;
+    background-color: #ffffff !important;
+    padding: 0 5px !important;
+    color: #595b5d !important;
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    z-index: 5 !important;
+    text-transform: uppercase !important;
+    margin-bottom: 0 !important;
+    width: max-content !important;
+}
+
+.mdw-floating-field .form-control,
+.mdw-floating-field .selectize-input {
+    border: 1px solid #cccccc !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    padding: 9px 15px !important;
+    width: 100%;
+    margin-top: 0 !important;
+}
+
+.mdw-floating-field input.form-control,
+.mdw-floating-field select.form-control,
+.mdw-floating-field .selectize-input {
+    min-height: 42px !important;
+    height: auto !important;
+}
+
+.mdw-floating-field .form-control::placeholder,
+.mdw-floating-field .selectize-input input::placeholder {
     color: transparent !important;
+}
+
+.mdw-floating-field .selectize-control.form-control {
+    border: none !important;
+    padding: 0 !important;
+    box-shadow: none !important;
+    min-height: 0 !important;
 }

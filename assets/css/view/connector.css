@@ -88,17 +88,6 @@
     margin-bottom: 20px;
 }
 
-.view-create-page .champs .btn-success {
-    background-color: #19ca42 !important;
-    border: none !important;
-    border-radius: 8px !important;
-    padding: 12px 25px !important;
-    font-weight: bold !important;
-    width: 100% !important;
-    margin-top: 20px !important;
-    position: relative !important;
-}
-
 .champs .row.justify-content-center.mt-5 {
     display: flex !important;
     flex-direction: row !important;
