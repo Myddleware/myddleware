@@ -26,37 +26,50 @@
 namespace App\Repository;
 
 use App\Entity\User;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class UserRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, User::class);
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @throws \Doctrine\ORM\NonUniqueResultException
-     */
     public function loadUserByUsername(string $username)
     {
-        return $this->createQueryBuilder('u')
-            ->where('u.username = :username OR u.email = :email')
-            ->setParameter('username', $username)
-            ->setParameter('email', $username)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['username' => $username]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('u')
+                ->where('u.username = :username OR u.email = :email')
+                ->setParameter('username', $username)
+                ->setParameter('email', $username)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function findEmailsToNotification()
     {
-        return $this->createQueryBuilder('u')
-            ->select('u.email')
-            ->where('u.roles LIKE :role')
-            ->andWhere('u.enabled = 1')
-            ->setParameter('role', '%ADMIN%')
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('u')
+                ->select('u.email')
+                ->where('u.roles LIKE :role')
+                ->andWhere('u.enabled = 1')
+                ->setParameter('role', '%ADMIN%')
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\WorkflowAudit;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\OptimisticLockException;
 use Doctrine\ORM\ORMException;
@@ -18,20 +19,24 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class WorkflowAuditRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, WorkflowAudit::class);
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @throws ORMException
-     * @throws OptimisticLockException
-     */
     public function add(WorkflowAudit $entity, bool $flush = true): void
     {
-        $this->_em->persist($entity);
-        if ($flush) {
-            $this->_em->flush();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entity' => $entity, 'flush' => $flush]);
+        try {
+            $this->_em->persist($entity);
+            if ($flush) {
+                $this->_em->flush();
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
@@ -41,38 +46,14 @@ class WorkflowAuditRepository extends ServiceEntityRepository
      */
     public function remove(WorkflowAudit $entity, bool $flush = true): void
     {
-        $this->_em->remove($entity);
-        if ($flush) {
-            $this->_em->flush();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entity' => $entity, 'flush' => $flush]);
+        try {
+            $this->_em->remove($entity);
+            if ($flush) {
+                $this->_em->flush();
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
-
-    // /**
-    //  * @return WorkflowAudit[] Returns an array of WorkflowAudit objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('w')
-            ->andWhere('w.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('w.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
-
-    /*
-    public function findOneBySomeField($value): ?WorkflowAudit
-    {
-        return $this->createQueryBuilder('w')
-            ->andWhere('w.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
 }

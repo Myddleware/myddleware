@@ -96,7 +96,9 @@ class acton extends solution
 			  ],
 			];
 			// Save tokens
+			$this->logDebug('acton login request');
 			$response = $this->client->request('POST', 'https://api.actonsoftware.com/token', $parameters);
+			$this->logDebug('acton login response', ['status' => $response->getStatusCode()]);
 			$tokens = json_decode($response->getBody());
 
 			if (!empty($tokens->refresh_token)) {
@@ -189,8 +191,10 @@ class acton extends solution
 		// For list module
 		if ($param['module'] == 'list') {
 			// Call act-on
+			$this->logDebug('acton read list request');
 			$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/?count=1000', $parameters);
 			// Manage response
+			$this->logDebug('acton read list response', ['status' => $response->getStatusCode()]);
 			if (!empty($response)) {
 				$records = json_decode($response->getBody(),1);
 				if (!empty($records['result'])) {
@@ -209,11 +213,15 @@ class acton extends solution
 			// Get the list id
 			$listId = explode(':',$param['query']['id'])[0];
 			// Get the contacts
+			$this->logDebug('acton read list_contact request', ['listId' => $listId]);
 			$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId.'/record/'.$param['query']['id'], $parameters);
+			$this->logDebug('acton read list_contact response', ['status' => $response->getStatusCode()]);
 			$responseBodyContact = json_decode($response->getBody()->getContents(), true);
 			if (!empty($responseBodyContact)) {
 				// Get the field list from the Act-on list
+				$this->logDebug('acton read list fields request', ['listId' => $listId]);
 				$response = $this->client->request('GET', 'https://api.actonsoftware.com/api/1/list/'.$listId, $parameters);
+				$this->logDebug('acton read list fields response', ['status' => $response->getStatusCode()]);
 				$responseBodyList = json_decode($response->getBody()->getContents(), true);
 
 				// Remove first field that contains the contact id
@@ -258,8 +266,10 @@ class acton extends solution
 				throw new \Exception('The email address is required to add a member to a list.');
 			}
 			// Send data to Act-on
-			$parameters['body'] = $record['body']; 
+			$parameters['body'] = $record['body'];
+			$this->logDebug('acton create request', ['module' => $param['module']]);
 			$response = $this->client->request('POST', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record', $parameters);
+			$this->logDebug('acton create response', ['status' => $response->getStatusCode()]);
 			$responseBody = json_decode($response->getBody()->getContents(), true);
 			if (empty($responseBody['contact_id'])) {
 				throw new \Exception('No contact ID returned.');
@@ -290,8 +300,10 @@ class acton extends solution
 				throw new \Exception('The field target_id (contact_id) is required to update a member to a list.');
 			}
 			// Send data to Act-on
-			$parameters['body'] = $record['body']; 
+			$parameters['body'] = $record['body'];
+			$this->logDebug('acton update request', ['module' => $param['module']]);
 			$response = $this->client->request('PUT', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record/'.$record['target_id'], $parameters);
+			$this->logDebug('acton update response', ['status' => $response->getStatusCode()]);
 			$responseBody = json_decode($response->getBody()->getContents(), true);
 			// Managed response
 			if (
@@ -327,7 +339,9 @@ class acton extends solution
 				throw new \Exception('The field target_id (contact_id) is required to update a member to a list.');
 			}
 			// Delete data from Act-on
+			$this->logDebug('acton delete request', ['module' => $param['module']]);
 			$response = $this->client->request('DELETE', 'https://api.actonsoftware.com/api/1/list/'.$record['listid'].'/record/'.$record['target_id'], $parameters);
+			$this->logDebug('acton delete response', ['status' => $response->getStatusCode()]);
 			$responseBody = json_decode($response->getBody()->getContents(), true);
 			// Managed response
 			if (

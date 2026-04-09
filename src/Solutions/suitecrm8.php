@@ -68,7 +68,9 @@ class suitecrm8 extends solution
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+			$this->logDebug('suitecrm8 login request', ['url' => $this->baseUrl.'access_token']);
 			$output = curl_exec($ch);
+			$this->logDebug('suitecrm8 login response', ['response' => $output]);
 			preg_match('/\{[^}]*"access_token"[^}]*\}/', $output, $matches);
 			$authOut = json_decode($matches[0], true);
 			// Manage return : token or error
@@ -363,7 +365,9 @@ class suitecrm8 extends solution
 			if (curl_errno($ch)) {
 				throw new \Exception('cURL error: ' . curl_error($ch));
 			}
+			$this->logDebug('suitecrm8 call request', ['url' => $this->baseUrl.$suffixUrl, 'method' => $method]);
 			$output = curl_exec($ch);
+			$this->logDebug('suitecrm8 call response', ['response' => $output]);
 			preg_match('/(\{.*\})/s', $output, $matches);
 			$response = json_decode($matches[1], true);
 			

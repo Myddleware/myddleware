@@ -111,8 +111,10 @@ class airtable extends solution
                     'Authorization' => 'Bearer ' . $this->token,
                 ],
             ];
+            $this->logDebug('airtable login request');
             $response = $client->request('GET', $this->airtableURL.$this->projectID.'/'.$this->tableName[$this->projectID], $options);
             $statusCode = $response->getStatusCode();
+            $this->logDebug('airtable login response', ['status' => $statusCode]);
             $contentType = $response->getHeaders()['content-type'][0];
             $content = $response->getContent();
             $content = $response->toArray();
@@ -212,8 +214,10 @@ class airtable extends solution
                 if (!empty($param['query'])) {
                     if (!empty($param['query']['id'])) {
                         $id = $param['query']['id'];
+                        $this->logDebug('airtable read by id request', ['module' => $param['module'], 'id' => $id]);
                         $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'/'.$id.'?returnFieldsByFieldId=true', $options);
                         $statusCode = $response->getStatusCode();
+                        $this->logDebug('airtable read by id response', ['status' => $statusCode]);
                         $contentType = $response->getHeaders()['content-type'][0];
                         $content2 = $response->getContent();
                         $content2 = $response->toArray();
@@ -252,8 +256,10 @@ class airtable extends solution
 							$filterByFormula .= ')';
 						}
 						// Get all records corresponding to the filters
+						$this->logDebug('airtable read by filter request', ['module' => $param['module']]);
 						$response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module'].'?returnFieldsByFieldId=true&'.$filterByFormula, $options);
 						$statusCode = $response->getStatusCode();
+						$this->logDebug('airtable read by filter response', ['status' => $statusCode]);
 						$contentType = $response->getHeaders()['content-type'][0];
 						$content = $response->getContent();
 						$content = $response->toArray();
@@ -261,8 +267,10 @@ class airtable extends solution
                 } else {
                     // all records
                     $dateRef = $this->dateTimeFromMyddleware($param['date_ref']);
+                    $this->logDebug('airtable read all request', ['module' => $param['module'], 'page' => $page]);
                     $response = $client->request('GET', $this->airtableURL.$baseID.'/'.$param['module']."?sort[0][field]=Last Modified&filterByFormula=IS_AFTER({Last Modified},'$dateRef')&returnFieldsByFieldId=true&pageSize=".$this->defaultLimit.'&maxRecords='.$param['limit'].$offset, $options);
                     $statusCode = $response->getStatusCode();
+                    $this->logDebug('airtable read all response', ['status' => $statusCode]);
                     $contentType = $response->getHeaders()['content-type'][0];
                     $content = $response->getContent();
                     $content = $response->toArray();
@@ -474,15 +482,16 @@ class airtable extends solution
                     'headers' => ['Content-Type' => 'application/json'],
                 ];
                 // POST, DELETE or PATCH depending on the method
+                $this->logDebug('airtable upsert request', ['method' => $method, 'module' => $module]);
                 if ('delete' === $method) {
-                    // Parameters are directly in the URL for a deletion
                     $response = $client->request('DELETE', $this->airtableURL.$baseID.'/'.$module.'?'.$urlParamDelete, $options);
                 } elseif ('update' === $method) {
                     $response = $client->request('PATCH', $this->airtableURL.$baseID.'/'.$module, $options);
-                } else { // Create
+                } else {
                     $response = $client->request('POST', $this->airtableURL.$baseID.'/'.$module, $options);
                 }
                 $statusCode = $response->getStatusCode();
+                $this->logDebug('airtable upsert response', ['method' => $method, 'status' => $statusCode]);
                 // If error 422, we return directly the error
 				if ($statusCode === 422) {
 					throw new Exception('422 error : '.$response->getContent(false));

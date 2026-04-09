@@ -28,6 +28,7 @@ namespace App\Controller;
 use Exception;
 use App\Entity\Rule;
 use App\Entity\RuleGroup;
+use App\Service\DebugLogger;
 use Pagerfanta\Pagerfanta;
 use App\Manager\JobManager;
 use App\Manager\HomeManager;
@@ -68,22 +69,30 @@ class RuleGroupController extends AbstractController
     private TranslatorInterface $translator;
     private ToolsManager $toolsManager;
     protected Connection $connection;
-    // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
+    private DebugLogger $debugLogger;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         Connection $connection,
         TranslatorInterface $translator,
-        ToolsManager $toolsManager
+        ToolsManager $toolsManager,
+        DebugLogger $debugLogger
     ) {
         $this->entityManager = $entityManager;
         $this->connection = $connection;
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
+        $this->debugLogger = $debugLogger;
     }
 
-    protected function getInstanceBdd() {}
+    protected function getInstanceBdd() {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
+    }
 
 
     /* ******************************************************
@@ -99,15 +108,17 @@ class RuleGroupController extends AbstractController
     #[Route('/list/page-{page}', name: 'rulegroup_list_page', requirements: ['page' => '\d+'])]
     public function RulegroupListAction(Request $request, int $page = 1)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page]);
+        $__debugReturn = null;
+        try {
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                return $this->redirectToRoute('premium_list');
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
             $rulegroupName = $request->query->get('rulegroup_name');
-            
-            // Récupérer les filtres depuis la requête
+
             $criteria = ['deleted' => 0];
             $rulegroups = $this->entityManager->getRepository(Rulegroup::class)->findBy($criteria);
 
@@ -117,15 +128,13 @@ class RuleGroupController extends AbstractController
                 });
             }
 
-            // Pagination avec ArrayAdapter car findBy retourne un tableau
             $adapter = new ArrayAdapter($rulegroups);
             $pager = new Pagerfanta($adapter);
             $pager->setMaxPerPage(15);
             $pager->setCurrentPage($page);
 
-            // Si la requête est AJAX, rendre uniquement la table des rulegroups
             if ($request->isXmlHttpRequest()) {
-                return $this->render('RuleGroup/_rulegroup_table.html.twig', [
+                return $__debugReturn = $this->render('RuleGroup/_rulegroup_table.html.twig', [
                     'entities' => $pager->getCurrentPageResults(),
                     'pager' => $pager,
                 ]);
@@ -135,8 +144,7 @@ class RuleGroupController extends AbstractController
 
             $nb_rulegroup = $pager->getNbResults();
 
-            // Si ce n'est pas une requête AJAX, rendre la page complète
-            return $this->render(
+            return $__debugReturn = $this->render(
                 'RuleGroup/list.html.twig',
                 [
                     'entities' => $entities,
@@ -147,6 +155,9 @@ class RuleGroupController extends AbstractController
         } catch (Exception $e) {
             throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 
@@ -156,10 +167,13 @@ class RuleGroupController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function RulegroupDeleteAction(string $id, Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                return $this->redirectToRoute('premium_list');
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
             $em = $this->entityManager;
@@ -176,9 +190,12 @@ class RuleGroupController extends AbstractController
                 $this->addFlash('rulegroup.delete.danger', $translator->trans('rulegroup.not_found'));
             }
 
-            return $this->redirectToRoute('rulegroup_list');
+            return $__debugReturn = $this->redirectToRoute('rulegroup_list');
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -186,10 +203,13 @@ class RuleGroupController extends AbstractController
     #[Route('/new', name: 'rulegroup_create')]
     public function RulegroupCreateAction(Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                return $this->redirectToRoute('premium_list');
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
             $rules = RuleRepository::findActiveRulesNames($this->entityManager);
@@ -213,10 +233,10 @@ class RuleGroupController extends AbstractController
 
                 $this->addFlash('rulegroup.create.success', $translator->trans('rulegroup.created_successfully'));
 
-                return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
+                return $__debugReturn = $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
             }
 
-            return $this->render(
+            return $__debugReturn = $this->render(
                 'RuleGroup/new.html.twig',
                 [
                     'form' => $form->createView(),
@@ -225,16 +245,22 @@ class RuleGroupController extends AbstractController
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/show/{id}', name: 'rulegroup_show', defaults: ['page' => 1])]
     #[Route('/show/{id}/page-{page}', name: 'rulegroup_show_page', requirements: ['page' => '\d+'])]
     public function RulegroupShowAction(string $id, Request $request, int $page): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'page' => $page]);
+        $__debugReturn = null;
+        try {
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                return $this->redirectToRoute('premium_list');
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
             $em = $this->entityManager;
@@ -243,7 +269,7 @@ class RuleGroupController extends AbstractController
 
 
             if ($rulegroup[0]) {
-                return $this->render(
+                return $__debugReturn = $this->render(
                     'RuleGroup/show.html.twig',
                     [
                         'rulegroup' => $rulegroup[0],
@@ -251,10 +277,13 @@ class RuleGroupController extends AbstractController
                 );
             } else {
                 $this->addFlash('rulegroup.show.danger', $this->translator->trans('rulegroup.not_found'));
-                return $this->redirectToRoute('rulegroup_list');
+                return $__debugReturn = $this->redirectToRoute('rulegroup_list');
             }
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -263,10 +292,13 @@ class RuleGroupController extends AbstractController
     #[Route('/edit/{id}', name: 'rulegroup_edit')]
     public function RulegroupEditAction(string $id, Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
 
             if (!$this->toolsManager->isPremium()) {
-                return $this->redirectToRoute('premium_list');
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
             $em = $this->entityManager;
@@ -286,10 +318,10 @@ class RuleGroupController extends AbstractController
                     $em->flush();
                     $this->addFlash('rulegroup.edit.success', $translator->trans('rulegroup.updated_successfully'));
 
-                    return $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
+                    return $__debugReturn = $this->redirectToRoute('rulegroup_show', ['id' => $rulegroup->getId()]);
                 }
 
-                return $this->render(
+                return $__debugReturn = $this->render(
                     'RuleGroup/edit.html.twig',
                     [
                         'form' => $form->createView(),
@@ -298,25 +330,30 @@ class RuleGroupController extends AbstractController
                 );
             } else {
                 $this->addFlash('rulegroup.edit.danger', $translator->trans('rulegroup.not_found'));
-                return $this->redirectToRoute('rulegroup_list');
+                return $__debugReturn = $this->redirectToRoute('rulegroup_list');
             }
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/{groupId}/remove-rule/{ruleId}', name: 'rulegroup_remove_rule', methods: ['POST', 'DELETE'])]
     #[IsGranted('ROLE_ADMIN')]
     public function removeRule(
-        Request $request, 
+        Request $request,
         EntityManagerInterface $entityManager,
         string $groupId,
         string $ruleId
     ): Response {
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'entityManager' => $entityManager, 'groupId' => $groupId, 'ruleId' => $ruleId]);
+        $__debugReturn = null;
+        try {
 
         if (!$this->toolsManager->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $ruleGroup = $entityManager->getRepository(RuleGroup::class)->find($groupId);
@@ -326,24 +363,29 @@ class RuleGroupController extends AbstractController
             throw $this->createNotFoundException('RuleGroup or Rule not found');
         }
 
-        // Remove the rule from the group
         $rule->setGroup(null);
         $entityManager->flush();
 
         $this->addFlash('rulegroup.remove_rule.success', $this->translator->trans('rulegroup.rule_removed_successfully'));
-        return $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
+        return $__debugReturn = $this->redirectToRoute('rulegroup_show', ['id' => $groupId]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/add-rule/{id}', name: 'rulegroup_add_rule')]
     public function addRuleAction(Request $request, string $id): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
 
         if (!$this->toolsManager->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $ruleGroup = $this->entityManager->getRepository(RuleGroup::class)->find($id);
-        
+
         if (!$ruleGroup) {
             throw $this->createNotFoundException('RuleGroup not found');
         }
@@ -368,13 +410,11 @@ class RuleGroupController extends AbstractController
 
         if (empty($availableRules)) {
             $this->addFlash('rulegroup.add_rule.warning', $this->translator->trans('rulegroup.no_available_rules'));
-            return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
+            return $__debugReturn = $this->redirectToRoute('rulegroup_show', ['id' => $id]);
         }
 
-        // Create form with rule choices
         $formBuilder = $this->createFormBuilder();
-        
-        // If we have a selected rule, set it as the default data
+
         $defaultData = [];
         if ($selectedRuleId) {
             $selectedRule = $this->entityManager->getRepository(Rule::class)->find($selectedRuleId);
@@ -391,7 +431,7 @@ class RuleGroupController extends AbstractController
                 'choice_label' => 'name',
                 'required' => true,
                 'label' => 'rulegroup.table.select_rule',
-                'attr' => [ 
+                'attr' => [
                     'class' => 'form-control mt-3',
                 ],
             ])
@@ -411,7 +451,7 @@ class RuleGroupController extends AbstractController
 
             // If rule is already in another group and transfer not confirmed
             if ($currentGroup && $currentGroup->getId() !== $id && !$request->query->get('confirm')) {
-                return $this->render('RuleGroup/confirm_transfer.html.twig', [
+                return $__debugReturn = $this->render('RuleGroup/confirm_transfer.html.twig', [
                     'rule' => $rule,
                     'currentGroup' => $currentGroup,
                     'newGroup' => $ruleGroup,
@@ -425,12 +465,15 @@ class RuleGroupController extends AbstractController
             $this->entityManager->flush();
 
             $this->addFlash('rulegroup.add_rule.success', $this->translator->trans('rulegroup.rule_added_successfully'));
-            return $this->redirectToRoute('rulegroup_show', ['id' => $id]);
+            return $__debugReturn = $this->redirectToRoute('rulegroup_show', ['id' => $id]);
         }
 
-        return $this->render('RuleGroup/add_rule.html.twig', [
+        return $__debugReturn = $this->render('RuleGroup/add_rule.html.twig', [
             'form' => $form->createView(),
             'rulegroup' => $ruleGroup
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

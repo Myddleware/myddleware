@@ -58,6 +58,9 @@
   margin-bottom: 0.25rem;
 }
 
+.account-card .debug-slider {
+    margin-bottom: 0;
+}
 .account-card input, 
 .account-card select {
   width: 60%;

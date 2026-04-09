@@ -32,8 +32,10 @@ class SettingsManager {
             updateConfig: `${this.baseUrl}/account/api/account/config/update`,
             downloadLogs: `${this.baseUrl}/account/api/account/logs/download`,
             emptyLogs: `${this.baseUrl}/account/api/account/logs/empty`,
-            // getElasticsearch: `${this.baseUrl}//settings/api/settings/elasticsearch`,
-            // updateElasticsearch: `${this.baseUrl}//settings/api/settings/elasticsearch/update`
+            getDebugMode: `${this.baseUrl}/settings/api/debug-mode`,
+            toggleDebugMode: `${this.baseUrl}/settings/api/debug-mode/toggle`,
+            getLogLevel: `${this.baseUrl}/settings/api/log-level`,
+            updateLogLevel: `${this.baseUrl}/settings/api/log-level/update`,
         };
 
         this.init();
@@ -74,6 +76,30 @@ class SettingsManager {
             console.error('Failed to load config:', error);
         }
 
+        try {
+            const debugResponse = await axios.get(this.apiEndpoints.getDebugMode);
+            if (debugResponse.data.success) {
+                const debugToggle = document.getElementById('debug-mode-toggle');
+                if (debugToggle) {
+                    debugToggle.checked = debugResponse.data.enabled;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load debug mode status:', error);
+        }
+
+        try {
+            const levelResponse = await axios.get(this.apiEndpoints.getLogLevel);
+            if (levelResponse.data.success) {
+                const levelSelect = document.getElementById('log-level-select');
+                if (levelSelect) {
+                    levelSelect.value = levelResponse.data.level;
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load log level:', error);
+        }
+
         // try {
         //     // Load Elasticsearch status
         //     const esResponse = await axios.get(this.apiEndpoints.getElasticsearch);
@@ -111,6 +137,20 @@ class SettingsManager {
                 if (confirm('Are you sure you want to empty the log file? This action cannot be undone.')) {
                     this.emptyLogs();
                 }
+            });
+        }
+
+        const debugToggle = document.getElementById('debug-mode-toggle');
+        if (debugToggle) {
+            debugToggle.addEventListener('change', () => {
+                this.toggleDebugMode(debugToggle.checked);
+            });
+        }
+
+        const logLevelSelect = document.getElementById('log-level-select');
+        if (logLevelSelect) {
+            logLevelSelect.addEventListener('change', () => {
+                this.updateLogLevel(logLevelSelect.value);
             });
         }
 
@@ -155,6 +195,60 @@ class SettingsManager {
         } catch (error) {
             console.error('Failed to empty logs:', error);
             this.showNotification('danger', error.response?.data?.error || 'Failed to empty logs');
+        }
+    }
+
+    async toggleDebugMode(enabled) {
+        const debugToggle = document.getElementById('debug-mode-toggle');
+        const spinner = document.getElementById('debug-mode-spinner');
+
+        if (debugToggle) debugToggle.disabled = true;
+        if (spinner) spinner.style.display = 'inline-block';
+
+        try {
+            const response = await axios.post(this.apiEndpoints.toggleDebugMode, {
+                enabled: enabled
+            });
+
+            if (response.data.success) {
+                this.showNotification('success', response.data.message);
+            } else {
+                this.showNotification('danger', response.data.error || 'Failed to update debug mode');
+                if (debugToggle) debugToggle.checked = !enabled;
+            }
+        } catch (error) {
+            console.error('Failed to toggle debug mode:', error);
+            this.showNotification('danger', error.response?.data?.error || 'Failed to update debug mode');
+            if (debugToggle) debugToggle.checked = !enabled;
+        } finally {
+            if (debugToggle) debugToggle.disabled = false;
+            if (spinner) spinner.style.display = 'none';
+        }
+    }
+
+    async updateLogLevel(level) {
+        const levelSelect = document.getElementById('log-level-select');
+        const spinner = document.getElementById('log-level-spinner');
+
+        if (levelSelect) levelSelect.disabled = true;
+        if (spinner) spinner.style.display = 'inline-block';
+
+        try {
+            const response = await axios.post(this.apiEndpoints.updateLogLevel, {
+                level: level
+            });
+
+            if (response.data.success) {
+                this.showNotification('success', response.data.message);
+            } else {
+                this.showNotification('danger', response.data.error || 'Failed to update log level');
+            }
+        } catch (error) {
+            console.error('Failed to update log level:', error);
+            this.showNotification('danger', error.response?.data?.error || 'Failed to update log level');
+        } finally {
+            if (levelSelect) levelSelect.disabled = false;
+            if (spinner) spinner.style.display = 'none';
         }
     }
 

@@ -28,6 +28,7 @@ namespace App\Repository;
 use App\Entity\Job;
 use App\Entity\Rule;
 use App\Entity\User;
+use App\Service\DebugLogger;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\EntityManagerInterface;
@@ -43,9 +44,12 @@ use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
  */
 class RuleRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, Rule::class);
+        $this->debugLogger = $debugLogger;
     }
 
     /**
@@ -54,78 +58,100 @@ class RuleRepository extends ServiceEntityRepository
      */
     public function findCountAllRuleByUser($id)
     {
-        return $this->createQueryBuilder('r')
-                    ->select('COUNT(r)')
-                    ->where('r.createdBy = :user_id')
-                    ->setParameter('user_id', $id)
-                    ->getQuery()
-                    ->getSingleScalarResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                        ->select('COUNT(r)')
+                        ->where('r.createdBy = :user_id')
+                        ->setParameter('user_id', $id)
+                        ->getQuery()
+                        ->getSingleScalarResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
         // Retourne toutes les règles d'un user
     public function findListRuleByUser(User $user, $ruleName = null): Query
     {
-        $sql = $this->createQueryBuilder('r')
-            ->join('r.connectorSource', 'cs')
-            ->join('r.connectorTarget', 'ct')
-            ->join('cs.solution', 'Solution_source')
-            ->join('ct.solution', 'Solution_target')
-            ->addSelect('r.id')
-            ->addSelect('r.dateCreated')
-            ->addSelect('r.name')
-            ->addSelect('r.active')
-            ->addSelect('r.nameSlug')
-            ->addSelect('cs.name lbl_source')
-            ->addSelect('ct.name lbl_target')
-            ->addSelect('Solution_source.name solution_source')
-            ->addSelect('Solution_target.name solution_target')
-            ;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user->getId(), 'ruleName' => $ruleName]);
+        $__debugReturn = null;
+        try {
+            $sql = $this->createQueryBuilder('r')
+                ->join('r.connectorSource', 'cs')
+                ->join('r.connectorTarget', 'ct')
+                ->join('cs.solution', 'Solution_source')
+                ->join('ct.solution', 'Solution_target')
+                ->addSelect('r.id')
+                ->addSelect('r.dateCreated')
+                ->addSelect('r.name')
+                ->addSelect('r.active')
+                ->addSelect('r.nameSlug')
+                ->addSelect('cs.name lbl_source')
+                ->addSelect('ct.name lbl_target')
+                ->addSelect('Solution_source.name solution_source')
+                ->addSelect('Solution_target.name solution_target')
+                ;
 
-        // si ce n'est pas le support alors on affecte l'id client sinon on affiche tout
-        if (!$user->isAdmin()) {
-            $sql->where('r.createdBy = :user_id AND r.deleted = 0')
-                 ->setParameter('user_id', $user->getId());
-        } else {
-            $sql->where('r.deleted = 0');
+            if (!$user->isAdmin()) {
+                $sql->where('r.createdBy = :user_id AND r.deleted = 0')
+                     ->setParameter('user_id', $user->getId());
+            } else {
+                $sql->where('r.deleted = 0');
+            }
+
+            if ($ruleName) {
+                $sql->andWhere('r.name LIKE :name')
+                    ->setParameter('name', '%' . $ruleName . '%');
+            }
+
+            return $__debugReturn = $sql->getQuery();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        // Add search condition
-        if ($ruleName) {
-            $sql->andWhere('r.name LIKE :name')
-            ->setParameter('name', '%' . $ruleName . '%');
-        }
-
-        return $sql->getQuery();
     }
 
     // Infos connecteurs et solution d'une règle
     public function infosConnectorByRule($id)
     {
-        return $this->createQueryBuilder('r')
-            ->innerJoin('r.connectorSource', 'cs')
-            ->innerJoin('r.connectorTarget', 'ct')
-            ->innerJoin('cs.solution', 'Solution_source')
-            ->innerJoin('ct.solution', 'Solution_target')
-            ->addSelect('cs.name lbl_source')
-            ->addSelect('ct.name lbl_target')
-            ->addSelect('cs.id id_source')
-            ->addSelect('ct.id id_target')
-            ->addSelect('Solution_source.name solution_source')
-            ->addSelect('Solution_target.name solution_target')
-            ->where('r.id = :rule_id')
-            ->setParameter('rule_id', $id)
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->innerJoin('r.connectorSource', 'cs')
+                ->innerJoin('r.connectorTarget', 'ct')
+                ->innerJoin('cs.solution', 'Solution_source')
+                ->innerJoin('ct.solution', 'Solution_target')
+                ->addSelect('cs.name lbl_source')
+                ->addSelect('ct.name lbl_target')
+                ->addSelect('cs.id id_source')
+                ->addSelect('ct.id id_target')
+                ->addSelect('Solution_source.name solution_source')
+                ->addSelect('Solution_target.name solution_target')
+                ->where('r.id = :rule_id')
+                ->setParameter('rule_id', $id)
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function findActiveRules()
     {
-        return $this->createQueryBuilder('r')
-            ->select('r.id, r.name')
-            ->where('r.active = 1 ')
-            ->andWhere('r.deleted = 0 ')
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->select('r.id, r.name')
+                ->where('r.active = 1 ')
+                ->andWhere('r.deleted = 0 ')
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -133,14 +159,20 @@ class RuleRepository extends ServiceEntityRepository
      */
     public function findByRuleParam($ruleId): ?Rule
     {
-        return $this->createQueryBuilder('r')
-            ->select('r')
-            ->leftJoin('App\Entity\RuleParam', 'rule_param', Join::WITH, 'r.id = rule_param.rule AND rule_param.name = :mode')
-            ->where('r.id = :rule_id')
-            ->setParameter('name', 'mode')
-            ->setParameter('rule_id', $ruleId)
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->select('r')
+                ->leftJoin('App\Entity\RuleParam', 'rule_param', Join::WITH, 'r.id = rule_param.rule AND rule_param.name = :mode')
+                ->where('r.id = :rule_id')
+                ->setParameter('name', 'mode')
+                ->setParameter('rule_id', $ruleId)
+                ->getQuery()
+                ->getOneOrNullResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -148,82 +180,115 @@ class RuleRepository extends ServiceEntityRepository
      */
     public function errorByRule(User $user = null): array
     {
-        $qb = $this->createQueryBuilder('r')
-            ->select('r.name, r.id, COUNT(document.id) as cpt')
-            ->join('r.documents', 'document')
-            ->andWhere('document.globalStatus IN (:status)')
-            ->andWhere('document.deleted = 0')
-            ->setParameter('status', ['Error'])
-            ->groupBy('r.id')
-            ->having('cpt > 0')
-            ->orderBy('cpt', 'DESC');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user ? $user->getId() : null]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('r')
+                ->select('r.name, r.id, COUNT(document.id) as cpt')
+                ->join('r.documents', 'document')
+                ->andWhere('document.globalStatus IN (:status)')
+                ->andWhere('document.deleted = 0')
+                ->setParameter('status', ['Error'])
+                ->groupBy('r.id')
+                ->having('cpt > 0')
+                ->orderBy('cpt', 'DESC');
 
-        if ($user && !$user->isAdmin()) {
-            $qb->andWhere('r.createdBy = :user')
-                ->setParameter('user', $user);
+            if ($user && !$user->isAdmin()) {
+                $qb->andWhere('r.createdBy = :user')
+                    ->setParameter('user', $user);
+            }
+
+            return $__debugReturn = $qb->getQuery()->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        return $qb->getQuery()->getResult();
     }
 
     public function findRulesByIds(array $rulesIds)
     {
-        return $this->createQueryBuilder('r')
-            ->select('r')
-            ->where('r.id IN (:ids)')
-            ->setParameter('ids', $rulesIds)
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rulesIds' => $rulesIds]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->select('r')
+                ->where('r.id IN (:ids)')
+                ->setParameter('ids', $rulesIds)
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function findAllRulesByOrder()
     {
-        return $this->createQueryBuilder('r')
-            ->select('r')
-            ->join('r.orders', 'rule_order')
-            ->where('r.active = 1')
-            ->andWhere('r.deleted = 0')
-            ->orderBy('rule_order.order', 'ASC')
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->select('r')
+                ->join('r.orders', 'rule_order')
+                ->where('r.active = 1')
+                ->andWhere('r.deleted = 0')
+                ->orderBy('rule_order.order', 'ASC')
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @return Rule[]
-     */
     public function findRulesWithDeletedParams(): array
     {
-        return $this->createQueryBuilder('r')
-            ->select('r')
-            ->join('r.params', 'rule_param')
-            ->where('rule_param.name = :deleted')
-            ->setParameter('deleted', 'deleted')
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->select('r')
+                ->join('r.params', 'rule_param')
+                ->where('rule_param.name = :deleted')
+                ->setParameter('deleted', 'deleted')
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getSolutionsByJob(Job $job)
     {
-        return $this->createQueryBuilder('r')
-            ->select('connector_source.id as sol_id_source, connector_target.id as sol_id_target')
-            ->join('r.logs', 'log')
-            ->join('r.connectorSource', 'connector_source')
-            ->join('r.connectorTarget', 'connector_target')
-            ->where('log.job = :job')
-            ->setParameter('job', $job)
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['job' => $job->getId()]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('r')
+                ->select('connector_source.id as sol_id_source, connector_target.id as sol_id_target')
+                ->join('r.logs', 'log')
+                ->join('r.connectorSource', 'connector_source')
+                ->join('r.connectorTarget', 'connector_target')
+                ->where('log.job = :job')
+                ->setParameter('job', $job)
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getRuleToOrder()
     {
-        return $this->createQueryBuilder('rule')
-            ->select('rule.id, GROUP_CONCAT(relationship.fieldId SEPARATOR \';\')')
-            ->join('rule.relationsShip', 'relationship')
-            ->where('rule.deleted = 0')
-            ->groupBy('rule.id')
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('rule')
+                ->select('rule.id, GROUP_CONCAT(relationship.fieldId SEPARATOR \';\')')
+                ->join('rule.relationsShip', 'relationship')
+                ->where('rule.deleted = 0')
+                ->groupBy('rule.id')
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 
@@ -319,15 +384,20 @@ class RuleRepository extends ServiceEntityRepository
 
     // Remove lock from rule using a job id
 	public function removeLock($jobId) {
-        $empty = null;
-		$qr = $this->createQueryBuilder('r')
-			->update()
-			->set('r.readJobLock', ':empty')
-			->where('r.readJobLock = :readJobLock')
-			->setParameter('readJobLock', $jobId)
-            ->setParameter('empty', $empty)
-			->getQuery();
-        $qr->execute();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['jobId' => $jobId]);
+        try {
+            $empty = null;
+            $qr = $this->createQueryBuilder('r')
+                ->update()
+                ->set('r.readJobLock', ':empty')
+                ->where('r.readJobLock = :readJobLock')
+                ->setParameter('readJobLock', $jobId)
+                ->setParameter('empty', $empty)
+                ->getQuery();
+            $qr->execute();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
 	}
 
 }

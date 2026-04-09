@@ -1193,6 +1193,10 @@ settings:
         elasticsearch_hint: Elasticsearch permet de meilleures performances lors de la recherche de chaines parmi de tres grandes quantites de documents (+100k)
     logs:
         title: Logs
+        enable_debug: Activer les logs de debug
+        debug_hint: Lorsque active, les informations de debug detaillees (reponses API, requetes SQL) seront ecrites dans le fichier de logs.
+        choose_level: Choisir le niveau de logs
+        level_hint: Selectionnez le niveau de log minimum. Les niveaux inferieurs incluent plus de details mais generent des fichiers de logs plus volumineux.
         download_logs: Telecharger les derniers logs
         empty_logs: Vider le fichier de logs
         confirm_empty_logs: Etes-vous sur de vouloir vider le fichier de logs ? Cette action est irreversible.
@@ -1201,6 +1205,9 @@ settings:
         save_error: Echec de l'enregistrement des parametres
         elasticsearch_enabled: Elasticsearch a ete active
         elasticsearch_disabled: Elasticsearch a ete desactive
+        debug_enabled: Les logs de debug ont ete actives
+        debug_disabled: Les logs de debug ont ete desactives
+        log_level_updated: Niveau de log mis a jour a %level%
         logs_emptied: Logs vides avec succes
         logs_empty_error: Echec du vidage des logs
 

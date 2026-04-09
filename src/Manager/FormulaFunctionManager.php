@@ -26,37 +26,61 @@
 namespace App\Manager;
 
 use App\Entity\DocumentRelationship as DocumentRelationship;
+use App\Service\DebugLogger;
 
 class FormulaFunctionManager
 {
     protected array $names = ['changeTimeZone', 'changeFormatDate', 'changeValue', 'changeMultiValue', 'getValueFromArray','lookup','getRecord','getRecords'];
     protected string $path = "App\Manager\FormulaFunctionManager::";
-	
+    private DebugLogger $debugLogger;
+
+    public function __construct(DebugLogger $debugLogger)
+    {
+        $this->debugLogger = $debugLogger;
+    }
+
     public function getNamesFunctions(): array
     {
-        return $this->names;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->names;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getPathFunctions(): array
     {
-        // Concaténation avant envoi du chemin avec le nom
-        $return = [];
-        foreach ($this->names as $name) {
-            $return[] = $this->path.$name;
-        }
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $return = [];
+            foreach ($this->names as $name) {
+                $return[] = $this->path.$name;
+            }
 
-        return $return;
+            return $__debugReturn = $return;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function addPathFunctions($formula)
     {
-        if (!empty($this->names)) {
-            foreach ($this->names as $name) {
-                $formula = str_replace($name.'(', $this->path.$name.'(', $formula);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['formula' => $formula]);
+        $__debugReturn = null;
+        try {
+            if (!empty($this->names)) {
+                foreach ($this->names as $name) {
+                    $formula = str_replace($name.'(', $this->path.$name.'(', $formula);
+                }
             }
-        }
 
-        return $formula;
+            return $__debugReturn = $formula;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public static function changeTimeZone($dateToChange, $oldTimeZone, $newTimeZone)

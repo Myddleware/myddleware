@@ -1194,6 +1194,10 @@ settings:
         elasticsearch_hint: Elasticsearch enables greater performance when searching for strings among very large amounts of document (+100k)
     logs:
         title: Logs
+        enable_debug: Enable Debug Logs
+        debug_hint: When enabled, detailed debug information (API responses, SQL queries) will be written to the log file.
+        choose_level: Choose debug logs
+        level_hint: Select the minimum log level. Lower levels include more detail but generate larger log files.
         download_logs: Download Latest Logs
         empty_logs: Empty Log File
         confirm_empty_logs: Are you sure you want to empty the log file? This action cannot be undone.
@@ -1202,6 +1206,9 @@ settings:
         save_error: Failed to save settings
         elasticsearch_enabled: Elasticsearch has been enabled
         elasticsearch_disabled: Elasticsearch has been disabled
+        debug_enabled: Debug logging has been enabled
+        debug_disabled: Debug logging has been disabled
+        log_level_updated: Log level updated to %level%
         logs_emptied: Logs emptied successfully
         logs_empty_error: Failed to empty logs
 

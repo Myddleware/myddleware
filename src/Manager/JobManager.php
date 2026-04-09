@@ -34,6 +34,7 @@ use DateTimeZone;
 use Doctrine\DBAL\Connection as DriverConnection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use App\Service\DebugLogger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -103,6 +104,7 @@ class JobManager
     private int $nbDays;
     private string $pruneDatabaseMaxDate;
 
+    private DebugLogger $debugLogger;
 
     public function __construct(
         LoggerInterface $logger,
@@ -120,9 +122,10 @@ class JobManager
         ToolsManager $toolsManager,
         RuleManager $ruleManager,
         TemplateManager $templateManager,
-        UpgradeManager $upgrade
+        UpgradeManager $upgrade,
+        DebugLogger $debugLogger
     ) {
-        $this->logger = $logger; // gestion des logs symfony monolog
+        $this->logger = $logger;
         $this->connection = $dbalConnection;
         $this->parameterBagInterface = $parameterBagInterface;
         $this->translator = $translator;
@@ -138,6 +141,7 @@ class JobManager
         $this->projectDir = $kernel->getProjectDir();
         $this->jobRepository = $jobRepository;
         $this->documentRepository = $documentRepository;
+        $this->debugLogger = $debugLogger;
 
         $this->env = $parameterBagInterface->get('kernel.environment');
         $this->setManual();
@@ -145,27 +149,51 @@ class JobManager
 
     public function getId()
     {
-        return $this->id;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->id;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function setId($id)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        try {
         $this->id = $id;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function getMessage(): string
     {
-        return $this->message;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->message;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function setMessage($message)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['message' => $message]);
+        try {
         $this->message .= $message;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Set the rule data in the current inctance of the rule
     public function setRule($filter): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['filter' => $filter]);
+        try {
         try {
             // Get the connector ID
             $sqlRule = 'SELECT * 
@@ -210,16 +238,27 @@ class JobManager
 
             return false;
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 	
 	// Unset the lock on the rule 
 	public function unsetRuleLock() {
-		return $this->ruleManager->unsetRuleLock();
-	}
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+		return $__debugReturn = $this->ruleManager->unsetRuleLock();
+	} finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
     public function createDocuments()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $createDocuments = $this->ruleManager->createDocuments();
         if (!empty($createDocuments['error'])) {
             $this->message .= print_r($createDocuments['error'], true);
@@ -229,24 +268,42 @@ class JobManager
         } else {
             return 0;
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
     public function checkPredecessorDocuments()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $this->ruleManager->checkPredecessorDocuments();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Permet de filtrer les documents en fonction des filtres de la règle
     public function filterDocuments()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $this->ruleManager->filterDocuments();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Permet de trasformer les documents
     public function transformDocuments()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $this->ruleManager->transformDocuments();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Permet de récupérer les données de la cible avant modification des données
@@ -255,21 +312,33 @@ class JobManager
     //     - Le document est un document de création mais la règle a un paramètre de vérification des données pour ne pas créer de doublon
     public function getTargetDataDocuments()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $this->ruleManager->getTargetDataDocuments();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Ecriture dans le système source et mise à jour de la table document
     public function sendDocuments()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $sendDocuments = $this->ruleManager->sendDocuments();
         if (!empty($sendDocuments['error'])) {
             $this->message .= $sendDocuments['error'];
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
     // Ecriture dans le système source et mise à jour de la table document
 	public function runError($limit, $attempt)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['limit' => $limit, 'attempt' => $attempt]);
+        try {
         try {
 			$ruleId = '';
             // Récupération de tous les flux en erreur ou des flux en attente (new) qui ne sont pas sur règles actives (règle child pour des règles groupées)
@@ -311,6 +380,9 @@ class JobManager
             $this->logger->error('Error AAA : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Error AAA : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -318,6 +390,8 @@ class JobManager
      */
     public function initJob(string $paramJob): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['paramJob' => $paramJob]);
+        try {
 		try {
 			$this->paramJob = $paramJob;
 			$this->id = uniqid('', true);
@@ -346,6 +420,9 @@ class JobManager
 		} catch (Exception $e) {
             throw new Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -353,6 +430,9 @@ class JobManager
      */
     public function closeJob(): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // Get job data
         $this->logData = $this->getLogData();
 		
@@ -364,12 +444,17 @@ class JobManager
 		$this->ruleRepository->removeLock($this->id);
 
         // Update table job
-        return $this->updateJob();
+        return $__debugReturn = $this->updateJob();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Permet d'exécuter des jobs manuellement depuis Myddleware
     public function actionMassTransfer($event, $datatype, $param)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['event' => $event, 'datatype' => $datatype, 'param' => $param]);
+        try {
         if (in_array($event, ['rerun', 'cancel'])) {
             // Pour ces 2 actions, l'event est le premier paramètre, le type de donnée est le deuxième
             // et ce sont les ids des documents ou règles qui sont envoyés dans le $param
@@ -381,6 +466,9 @@ class JobManager
         } else {
             return 'Action '.$event.' unknown. Failed to run this action. ';
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -391,6 +479,8 @@ class JobManager
      */
     public function runBackgroundJob($job, $param)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['job' => $job, 'param' => $param]);
+        try {
         try {
             // Création d'un fichier temporaire
             $guid = uniqid();
@@ -470,11 +560,17 @@ class JobManager
 
             return false;
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Function to modify a group of documents
     public function massAction($action, $dataType, $ids, $forceAll, $fromStatus, $toStatus): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['action' => $action, 'dataType' => $dataType, 'ids' => $ids, 'forceAll' => $forceAll, 'fromStatus' => $fromStatus, 'toStatus' => $toStatus]);
+        $__debugReturn = null;
+        try {
         try {
 			$errors = array();
             if (empty($ids)) {
@@ -578,20 +674,26 @@ class JobManager
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            return false;
+            return $__debugReturn = false;
         }
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Function to clear the unlock on rule
     public function clearLock($dataType, $ids): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['dataType' => $dataType, 'ids' => $ids]);
+        $__debugReturn = null;
+        try {
         try {
             if (empty($ids)) {
                 throw new Exception('No ids in the input parameter of the function clearLock.');
             }
     
-            $queryIn = '(' . implode(',', array_map(function($id) { return "'" . $id . "'"; }, $ids)) . ')';
+            $queryIn = '(' . implode(',', array_map(function($id) { return $__debugReturn = "'" . $id . "'"; }, $ids)) . ')';
             $where = ' WHERE id IN ' . $queryIn;
     
             if ('rule' == $dataType) {
@@ -603,15 +705,21 @@ class JobManager
             }
         } catch (Exception $e) {
             $this->logger->error('Error in clearLock: ' . $e->getMessage());
-            return false;
+            return $__debugReturn = false;
         }
     
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Function to create one of several document using a query 
     public function readRecord($ruleId, $filterQuery, $filterValues): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId, 'filterQuery' => $filterQuery, 'filterValues' => $filterValues]);
+        $__debugReturn = null;
+        try {
         try {
             $responseFilter = [];
             $responseCheckPredecessor = [];
@@ -687,13 +795,19 @@ class JobManager
         } catch (Exception $e) {
             $this->message .= 'Error : '.$e->getMessage();
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            return false;
+            return $__debugReturn = false;
         }
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Remove the document from the list if the retrun value is not true
     public function refreshDocumentList($documentIds, $response) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documentIds' => $documentIds, 'response' => $response]);
+        $__debugReturn = null;
+        try {
         $documentListRefresh = [];
         if (!empty($response)) {
             foreach($response as $docId => $return) {
@@ -702,12 +816,17 @@ class JobManager
                 }
             }
         }
-        return $documentListRefresh;
+        return $__debugReturn = $documentListRefresh;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Remove all data flagged deleted in the database
     public function pruneDatabase($nbDays): void
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['nbDays' => $nbDays]);
+        try {
         $this->noDocumentsTablesToEmptyCounter = 0;
         $this->noRulesTablesToEmptyCounter = 0;
 
@@ -734,10 +853,15 @@ class JobManager
             $this->message .= 'Error  : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($this->message);
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function processDeletableItems($listOfSqlParams, $tableTypeToDelete)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['listOfSqlParams' => $listOfSqlParams, 'tableTypeToDelete' => $tableTypeToDelete]);
+        try {
         foreach ($listOfSqlParams as $oneSqlParam => $oneDeleteStatement)
             {
                 $requestCounter = 0;
@@ -759,10 +883,16 @@ class JobManager
                     $this->deleteSelectedItems($cleanItemIds, $oneDeleteStatement);
                 }
             }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function getListOfSqlDocumentParams(): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
 
 
         $listOfSqlDocumentParams = [
@@ -791,11 +921,17 @@ class JobManager
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
         ];
 
-        return $listOfSqlDocumentParams;
+        return $__debugReturn = $listOfSqlDocumentParams;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function documentSqlParams()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
 
         $listOfSqlDocumentParams = [
             "SELECT document.id
@@ -803,11 +939,17 @@ class JobManager
         WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
         ];
-        return $listOfSqlDocumentParams;
+        return $__debugReturn = $listOfSqlDocumentParams;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getListOfSqlRuleParams()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $listOfSqlRuleParams = [
         "SELECT ruleaudit.id
         FROM ruleaudit
@@ -853,11 +995,17 @@ class JobManager
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM ruleparam WHERE id IN (%s)",
         ];
 
-        return $listOfSqlRuleParams;
+        return $__debugReturn = $listOfSqlRuleParams;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function ruleSqlParams()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
 
         $listOfSqlRuleParams = [
         "SELECT rule.id
@@ -866,32 +1014,49 @@ class JobManager
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM rule WHERE id IN (%s)"
         ];
 
-        return $listOfSqlRuleParams;
+        return $__debugReturn = $listOfSqlRuleParams;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
     
     public function findItemsToDelete($oneSqlParam): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['oneSqlParam' => $oneSqlParam]);
+        $__debugReturn = null;
+        try {
             $stmt = $this->connection->prepare($oneSqlParam);
             $stmt->bindValue(':limitOfDeletePerRequest', (int) trim($this->limitOfDeletePerRequest), PDO::PARAM_INT);
             $result = $stmt->executeQuery();
             $itemIds= [];
             $itemIds = $result->fetchAllAssociative();
-        return $itemIds;
+        return $__debugReturn = $itemIds;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function cleanItemIds($itemIds)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['itemIds' => $itemIds]);
+        $__debugReturn = null;
+        try {
         $cleanItemIds = [];
         foreach ($itemIds as $oneIdKey => $oneIdValue) {
             foreach ($oneIdValue as $oneInnerKey => $oneInnerValue) {
                     $cleanItemIds[] = $oneInnerValue;
             }
         }
-        return $cleanItemIds;
+        return $__debugReturn = $cleanItemIds;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function deleteSelectedItems(array $itemIds, string $oneDeleteStatement)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['itemIds' => $itemIds, 'oneDeleteStatement' => $oneDeleteStatement]);
+        try {
         try {
             $placeholders = implode(',', array_fill(0, count($itemIds), '?'));
             $sqlParams = sprintf($oneDeleteStatement, $placeholders);
@@ -901,10 +1066,16 @@ class JobManager
             $this->message .= 'Error  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function getRules($force = false)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['force' => $force]);
+        $__debugReturn = null;
+        try {
         try {
             $sqlParams = '	SELECT name_slug 
 							FROM ruleorder
@@ -925,13 +1096,16 @@ class JobManager
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 
-            return false;
+            return $__debugReturn = false;
         }
         if (empty($ruleOrder)) {
-            return null;
+            return $__debugReturn = null;
         }
 
-        return $ruleOrder;
+        return $__debugReturn = $ruleOrder;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -939,6 +1113,9 @@ class JobManager
      */
     public function orderRules(): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
             // Récupération de toutes les règles avec leurs règles liées (si plusieurs elles sont toutes au même endroit)
@@ -1034,14 +1211,20 @@ class JobManager
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->message .= 'Failed to update table RuleOrder : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
-            return false;
+            return $__debugReturn = false;
         }
 
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function generateTemplate($nomTemplate, $descriptionTemplate, $rulesId): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['nomTemplate' => $nomTemplate, 'descriptionTemplate' => $descriptionTemplate, 'rulesId' => $rulesId]);
+        $__debugReturn = null;
+        try {
         try {
             // Init array
             $templateArray = [
@@ -1062,35 +1245,53 @@ class JobManager
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->message);
 
-            return ['success' => false, 'message' => $this->message];
+            return $__debugReturn = ['success' => false, 'message' => $this->message];
         }
 
-        return ['success' => true, 'message' => ''];
+        return $__debugReturn = ['success' => true, 'message' => ''];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Permet d'indiquer que le job est lancé manuellement
     protected function setManual()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         if ('background' == $this->env) {
             $this->manual = 0;
         } else {
             $this->manual = 1;
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
     // Set webserice flag
     public function setApi($value)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['value' => $value]);
+        try {
         // default value = 0
         $this->api = (!empty($value) ? $value : 0);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Myddleware upgrade
     public function upgrade($output)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['output' => $output]);
+        try {
         // $upgrade = new Upgrade($this->logger, $this->container, $this->connection);
         $upgrade = $this->upgrade;
         $this->message = $upgrade->processUpgrade($output);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -1100,7 +1301,9 @@ class JobManager
      * @throws Exception
      */
     public function clearData($actvieRule)
-    { 	
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['actvieRule' => $actvieRule]);
+        try { 	
 		$where = "ruleparam.name = 'delete'";
 		if (!empty($actvieRule)) {
 			$where .= " AND rule.active = '1' ";
@@ -1348,11 +1551,17 @@ class JobManager
 			$this->createLog($error, 'E');
             $this->logger->error($this->message);		
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Récupération des données du job
     public function getLogData()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
             // Récupération du nombre de document envoyé et en erreur pour ce job
             $this->logData['Close'] = 0;
@@ -1446,7 +1655,10 @@ class JobManager
             $this->logData['jobError'] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
 
-        return $this->logData;
+        return $__debugReturn = $this->logData;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Mise à jour de la table Job
@@ -1456,6 +1668,9 @@ class JobManager
      */
     protected function updateJob(): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
             $close = $this->logData['Close'];
             $cancel = $this->logData['Cancel'];
@@ -1488,9 +1703,12 @@ class JobManager
         } catch (Exception $e) {
             $this->logger->error('Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to update Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            return false;
+            return $__debugReturn = false;
         }
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1498,6 +1716,9 @@ class JobManager
      */
     protected function insertJob(): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
 			$job = new Job();
 			$job->setId($this->id);
@@ -1511,15 +1732,21 @@ class JobManager
         } catch (Exception $e) {
             $this->logger->error('Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $this->message .= 'Failed to create Job : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            return false;
+            return $__debugReturn = false;
         }
 
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     //check if the job is too long
     public function checkJob($period)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['period' => $period]);
+        $__debugReturn = null;
+        try {
         try {
 			$jobClosed = false;
 			$openJobs = array();
@@ -1613,15 +1840,21 @@ class JobManager
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            return false;
+            return $__debugReturn = false;
         }
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 	
 	
 	// Export data to monitoring tool
     public function monitoring()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
 			//Check if the parameter is a rule group 
 			if (!$this->toolsManager->isPremium()) {
@@ -1630,13 +1863,18 @@ class JobManager
         } catch (Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			$this->setMessage('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            return false;
+            return $__debugReturn = false;
         }
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 	
 	protected function createLog($message, $type = 'S')
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['message' => $message, 'type' => $type]);
+        try {
         try {
             $now = gmdate('Y-m-d H:i:s');
             $query_header = 'INSERT INTO log (created, type, msg, job_id) VALUES (:created,:typeError,:message,:job_id)';
@@ -1648,6 +1886,9 @@ class JobManager
             $result = $stmt->executeQuery();
         } catch (\Exception $e) {
             $this->logger->error($this->id.' - Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 }
