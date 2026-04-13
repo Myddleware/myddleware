@@ -358,7 +358,7 @@ div:has(> label + .form-control) > .form-control::placeholder {
     color: #595b5d !important;
     font-size: 13px !important;
     font-weight: 500 !important;
-    z-index: 5 !important;
+    z-index: 50 !important;
     text-transform: uppercase !important;
     margin-bottom: 0 !important;
     width: max-content !important;

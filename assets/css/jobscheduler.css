@@ -79,3 +79,9 @@
 #crontabList thead tr:first-child th:last-child {
     border-top-right-radius: 15px;
 }
+
+.button_plus_message, 
+.button_minus_message {
+    display: block;
+    margin: 8px auto 0 auto;
+}
