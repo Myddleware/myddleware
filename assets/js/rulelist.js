@@ -29,7 +29,7 @@ $(function(){
     $("#clear_rule_search").show();
   }
 
-  $("#rule_name_searchbar").on("change", function () {
+  $("#rule_name_searchbar").on("input", function () {
     var q = $.trim($(this).val());
     var url = $(this).data("url");
 
@@ -37,13 +37,20 @@ $(function(){
       $("#clear_rule_search").show();
     } else {
       $("#clear_rule_search").hide();
-      clearTimeout(debounceTimer);
-      if (currentXhr) { currentXhr.abort(); currentXhr = null; }
-      return; 
     }
 
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(function () {
+
+      if (q.length === 0) {
+        if (currentXhr) { currentXhr.abort(); currentXhr = null; }
+        // Show loader before redirect
+        $("#tbody_rule_list").html('<tr><td colspan="100%" class="text-center py-3"><div class="spinner-border spinner-border-sm" role="status"></div> Loading…</td></tr>');
+        // Redirect to base URL to clear all params (rule_name, page, etc.)
+        var baseUrl = $("#rule_name_searchbar").data("url");
+        window.location.href = baseUrl;
+        return;
+      }
 
       // Cancel request
       if (currentXhr) { currentXhr.abort(); }

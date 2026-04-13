@@ -472,7 +472,7 @@ delete_connector:
         success: Connector deleted successfully
 
 list_flux:
-    more_filter: More filter
+    more_filter: More filters
     start: Start
     end: End
     total: Number of documents
