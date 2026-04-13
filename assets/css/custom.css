@@ -392,3 +392,32 @@ div:has(> label + .form-control) > .form-control::placeholder {
     box-shadow: none !important;
     min-height: 0 !important;
 }
+
+.workflow-field-container .form-control:not(textarea),
+.workflow-field-container .form-select,
+.workflow-field-container .selectize-input {
+    min-height: 42px;
+}
+
+.workflow-field-container .selectize-control {
+    margin-bottom: 0;
+}
+
+.workflow-field-container .selectize-input > input {
+    margin: 0 !important;
+}
+
+.workflow-field-container .form-control,
+.workflow-field-container .form-select,
+.workflow-field-container .selectize-input {
+    background-color: #ffffff !important;
+    border: 1px solid #cccccc !important;
+    border-radius: 8px !important;
+}
+
+.workflow-field-container .mdw-floating-field .form-select {
+    box-shadow: none !important;
+    padding: 9px 15px !important;
+    margin-top: 0 !important;
+    width: 100%;
+}

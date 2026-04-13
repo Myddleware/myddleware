@@ -36,7 +36,7 @@
                         <img class="vignette" src="{{ asset('build/images/solution/' ~connector.solution.name~'.png')}}" alt="{{ connector.solution.name }}" />
                     </div>
                 </div>
-                <h3 class="mt-3" style="color: #555; text-align: center;">{{ connector.solution.name }}</h3>
+                <h3 class="mt-3" style="color: #555; text-align: center;">{{ connector.solution.name | capitalize }}</h3>
             </div>
 
             {# Formulaire and Boutons #}
