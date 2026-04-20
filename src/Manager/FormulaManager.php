@@ -382,7 +382,7 @@ class FormulaManager
             if (!empty($matches[1])) {
                 $allowedFunctions = $this->secureFunction();
                 foreach ($matches[1] as $calledFunction) {
-                    $isInternal = strpos($calledFunction, 'App\Manager\FormulaFunctionManager::') !== false;
+                    $isInternal = str_contains($string, '::'.$calledFunction.'(') || str_contains($string, '::'.$calledFunction.' (');
 
                     if (!$isInternal && !in_array($calledFunction, $allowedFunctions)) {
                         $this->parse['error']++;
