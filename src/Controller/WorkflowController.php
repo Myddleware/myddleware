@@ -447,7 +447,7 @@ class WorkflowController extends AbstractController
     /**
     * @Route("/new/{rule_id}", name="workflow_create_from_rule")
     */
-    public function WorkflowCreateFromRuleAction(Request $request, $rule_id, TranslatorInterface $translator)
+   public function WorkflowCreateFromRuleAction(Request $request, $rule_id, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'rule_id' => $rule_id, 'translator' => $translator]);
         $__debugReturn = null;
@@ -467,31 +467,30 @@ class WorkflowController extends AbstractController
                 ]);
                 $form->handleRequest($request);
 
-                if ($form->isSubmitted() && $form->isValid()) {
-                    $workflowName = $workflow->getName();
-                    $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
-                    if ($workflowExists) {
-                        $this->addFlash('workflow.createFromRule.danger', $translator->trans('edit_workflow.name_already_exists'));
-                        return $__debugReturn = $this->redirectToRoute('workflow_create_from_rule', ['rule_id' => $rule_id]);
+                if ($form->isSubmitted()) {
+                    if ($form->isValid()) {
+                        $workflowName = $workflow->getName();
+                        $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
+                        if ($workflowExists) {
+                            $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                            return $__debugReturn = $this->redirectToRoute('workflow_create_from_rule', ['rule_id' => $rule_id]);
+                        }
+                        $workflow->setCreatedBy($this->getUser());
+                        $workflow->setModifiedBy($this->getUser());
+                        $em->persist($workflow);
+                        $em->flush();
+
+                        $this->saveWorkflowAudit($workflow->getId());
+                        $this->addFlash('workflow.createFromRule.success', 'Workflow created successfully');
+
+                        return $__debugReturn = $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
+                    } else {
+                        // Message flash si la condition (ou autre champ) est invalide
+                        $this->addFlash('error_workflow_condition', $translator->trans('new_workflow_view.condition_error'));
                     }
-                    $workflow->setCreatedBy($this->getUser());
-                    $workflow->setModifiedBy($this->getUser());
-                    $em->persist($workflow);
-                    $em->flush();
-
-                    $this->saveWorkflowAudit($workflow->getId());
-
-                    $this->addFlash('workflow.createFromRule.success', 'Workflow created successfully');
-
-                    return $__debugReturn = $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
                 }
 
-                return $__debugReturn = $this->render(
-                    'Workflow/new.html.twig',
-                    [
-                        'form' => $form->createView(),
-                    ]
-                );
+                return $__debugReturn = $this->render('Workflow/new.html.twig', ['form' => $form->createView()]);
             } catch (Exception $e) {
                 throw $this->createNotFoundException('Error : ' . $e);
             }
@@ -499,13 +498,12 @@ class WorkflowController extends AbstractController
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
-
     
     // public function to create a new workflow
     /**
      * @Route("/new", name="workflow_create")
      */
-    public function WorkflowCreateAction(Request $request, TranslatorInterface $translator)
+  public function WorkflowCreateAction(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
         $__debugReturn = null;
@@ -515,8 +513,6 @@ class WorkflowController extends AbstractController
             }
 
             try {
-                $rules = RuleRepository::findActiveRulesNames($this->entityManager);
-
                 $em = $this->entityManager;
                 $workflow = new Workflow();
                 $workflow->setId(uniqid());
@@ -525,31 +521,29 @@ class WorkflowController extends AbstractController
                 ]);
                 $form->handleRequest($request);
 
-                if ($form->isSubmitted() && $form->isValid()) {
-                    $workflowName = $workflow->getName();
-                    $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
-                    if ($workflowExists) {
-                        $this->addFlash('workflow.create.danger', $translator->trans('edit_workflow.name_already_exists'));
-                        return $__debugReturn = $this->redirectToRoute('workflow_create');
+                if ($form->isSubmitted()) {
+                    if ($form->isValid()) {
+                        $workflowName = $workflow->getName();
+                        $workflowExists = $em->getRepository(Workflow::class)->findOneBy(['name' => $workflowName, 'deleted' => 0]);
+                        if ($workflowExists) {
+                            $this->addFlash('error_workflow_name', $translator->trans('edit_workflow.name_already_exists'));
+                            return $__debugReturn = $this->redirectToRoute('workflow_create');
+                        }
+                        $workflow->setCreatedBy($this->getUser());
+                        $workflow->setModifiedBy($this->getUser());
+                        $em->persist($workflow);
+                        $em->flush();
+
+                        $this->saveWorkflowAudit($workflow->getId());
+                        $this->addFlash('workflow.create.success', $translator->trans('new_workflow_view.created_successfully'));
+
+                        return $__debugReturn = $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
+                    } else {
+                        $this->addFlash('error_workflow_condition', $translator->trans('new_workflow_view.condition_error'));
                     }
-                    $workflow->setCreatedBy($this->getUser());
-                    $workflow->setModifiedBy($this->getUser());
-                    $em->persist($workflow);
-                    $em->flush();
-
-                    $this->saveWorkflowAudit($workflow->getId());
-
-                    $this->addFlash('workflow.create.success', $translator->trans('new_workflow_view.created_successfully'));
-
-                    return $__debugReturn = $this->redirectToRoute('workflow_show', ['id' => $workflow->getId()]);
                 }
 
-                return $__debugReturn = $this->render(
-                    'Workflow/new.html.twig',
-                    [
-                        'form' => $form->createView(),
-                    ]
-                );
+                return $__debugReturn = $this->render('Workflow/new.html.twig', ['form' => $form->createView()]);
             } catch (Exception $e) {
                 throw $this->createNotFoundException('Error : ' . $e);
             }
