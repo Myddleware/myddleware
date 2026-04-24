@@ -372,7 +372,7 @@ class FormulaManager
             $string = str_replace('[', '(', $string);
             $string = str_replace(']', ')', $string);
 
-            if (preg_match('/[;<>?]|(\x3c\x3fphp)/i', $string)) {
+            if (preg_match('/;|(\x3c\x3fphp)/i', $string)) {
                 $this->parse['error']++;
                 return;
             }
