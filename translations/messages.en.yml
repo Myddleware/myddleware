@@ -1462,6 +1462,7 @@ rule_execute_by_id:
 new_workflow_view:
     save: Save
     created_successfully: Workflow created successfully.
+    condition_error: The condition is incomplete or empty.
 
 delete_workflow_view:
     deleted_successfully: Workflow deleted successfully.

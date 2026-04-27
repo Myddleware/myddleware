@@ -269,11 +269,9 @@ td > a {
 /* Page View Rule : Validation Tab */
 #ruleparams,
 #simuleRuleFluxContainer {
-	background: rgb(233, 233, 233);
     color: black;
     margin-bottom: 20px;
     padding: 30px;
-	max-width: 30vw;
 	border-radius: 8px;
 	padding: 20px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -304,7 +302,6 @@ td > a {
 
 #ruleparams .form-control,
 #validRuleParams .form-control {
-	max-width: 250px;
 	margin-bottom: 5px;
 }
 

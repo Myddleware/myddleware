@@ -426,13 +426,20 @@
 }
 
 .link-help > a, .link-help-view > a {
+	background-color: #05bae313 !important; 
 	color: #0069b4;
 }
 
 .link-help > a:hover, .link-help-view > a:hover  {
-	color: #38a9ff;
+	color: #0069b4; 
 	text-decoration: none;
 	cursor: pointer;
+}
+
+#help-content-param{
+	font-weight: 600; 
+	border-radius: 6px; 
+	padding: 6px 12px;
 }
 
 .help-content > h2, .help-content > p{
@@ -1592,4 +1599,8 @@ body.menu-is-open {
 
 .more-actions-dropdown-documents .dropdown-item.text-danger {
 	color: #dc3545 !important;
+}
+
+#saveRuleParams{
+	max-width: 10%;
 }
