@@ -363,36 +363,28 @@ class FormulaManager
         }
     }
 
+    // Transformation et securite de la formule
     private function secureFormule()
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
         try {
             $string = str_replace('{', '$', $this->parse['formuleConvert']);
-            $string = str_replace('}', '', $string);
+            $tab = ['}'];
+            $string = str_replace($tab, '', $string);
+
+            // méthodes
             $string = str_replace('[', '(', $string);
             $string = str_replace(']', ')', $string);
 
-            if (preg_match('/;|(\x3c\x3fphp)/i', $string)) {
-                $this->parse['error']++;
-                return;
-            }
-
-            preg_match_all('/([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)\s*\(/', $string, $matches);
-
-            if (!empty($matches[1])) {
-                $allowedFunctions = $this->secureFunction();
-                foreach ($matches[1] as $calledFunction) {
-                    $isInternal = str_contains($string, '::'.$calledFunction.'(') || str_contains($string, '::'.$calledFunction.' (');
-
-                    if (!$isInternal && !in_array($calledFunction, $allowedFunctions)) {
-                        $this->parse['error']++;
-                        return;
-                    }
-                }
-            }
-
+            // ----------- secure
             $string = trim($string);
-            $string = str_replace(["\r", "\n", "\t"], '', $string);
+
+            // ----- remove control characters -----
+            $string = str_replace("\r", '', $string);    // --- replace with empty space
+            $string = str_replace("\n", '', $string);   // --- replace with empty space
+            $string = str_replace("\t", '', $string);   // --- replace with empty space
+
+            // ----- remove multiple spaces -----
             $string = trim(preg_replace('/ {2,}/', ' ', $string));
 
             $this->parse['formuleConvert'] = $string;
