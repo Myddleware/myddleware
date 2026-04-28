@@ -128,7 +128,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     protected string $date_format = 'd/m/Y';
 
-    #[ORM\Column(name: "deleted", type: "boolean", options: ["default" => 0])]
+    /**
+     * @ORM\Column(name="deleted", type="boolean", options={"default": 0})
+     */
     protected bool $deleted = false;
 
     /**
