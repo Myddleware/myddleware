@@ -128,6 +128,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     protected string $date_format = 'd/m/Y';
 
+    #[ORM\Column(name: "deleted", type: "boolean", options: ["default" => 0])]
+    protected bool $deleted = false;
+
     /**
      * @ORM\OneToOne(targetEntity=TwoFactorAuth::class, mappedBy="user", cascade={"remove"})
      */
@@ -547,6 +550,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setDateFormat(string $date_format): self
     {
         $this->date_format = $date_format;
+
+        return $this;
+    }
+
+    public function getDeleted(): bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): self
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }

@@ -35,7 +35,7 @@ class UserManagerController extends AbstractController
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['userRepository' => $userRepository]);
         $__debugReturn = null;
         try {
-            $users = $userRepository->findAll();
+            $users = $userRepository->findBy(['deleted' => false]);
 
             return $__debugReturn = $this->render('UserManager/list.html.twig', [
                 'users' => $users,
@@ -146,7 +146,8 @@ class UserManagerController extends AbstractController
         $__debugReturn = null;
         try {
             try {
-                $em->remove($user);
+                $user->setDeleted(true);
+                $user->setEnabled(false);
                 $em->flush();
 
                 $this->addFlash('user_manager.delete.success', $translator->trans('success_deleted_user'));

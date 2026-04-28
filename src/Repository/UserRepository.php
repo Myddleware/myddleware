@@ -46,7 +46,8 @@ class UserRepository extends ServiceEntityRepository
         $__debugReturn = null;
         try {
             return $__debugReturn = $this->createQueryBuilder('u')
-                ->where('u.username = :username OR u.email = :email')
+                ->where('(u.username = :username OR u.email = :email)')
+                ->andWhere('u.deleted = false')
                 ->setParameter('username', $username)
                 ->setParameter('email', $username)
                 ->getQuery()
@@ -65,6 +66,7 @@ class UserRepository extends ServiceEntityRepository
                 ->select('u.email')
                 ->where('u.roles LIKE :role')
                 ->andWhere('u.enabled = 1')
+                ->andWhere('u.deleted = false')
                 ->setParameter('role', '%ADMIN%')
                 ->getQuery()
                 ->getResult();
