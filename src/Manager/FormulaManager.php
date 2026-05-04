@@ -179,7 +179,7 @@ class FormulaManager
         try {
             $pathFunctions = $this->formulaFunctionManager->getPathFunctions();
 
-            $array = ['mb_strtolower', 'trim', 'ltrim', 'rtrim', 'mb_strtoupper', 'round', 'ceil', 'abs', 'mb_substr', 'str_replace', 'preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode', 'html_entity_decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'json_decode', 'json_encode', 'empty', 'isset'];
+            $array = ['mb_strtolower', 'trim', 'ltrim', 'rtrim', 'mb_strtoupper', 'round', 'ceil', 'abs', 'mb_substr', 'str_replace', 'preg_replace', 'strip_tags', 'date', 'utf8_encode', 'utf8_decode', 'html_entity_decode', 'htmlentities', 'htmlspecialchars', 'strlen', 'urlencode', 'json_decode', 'json_encode'];
             $const = ['ENT_COMPAT', 'ENT_QUOTES', 'ENT_NOQUOTES', 'ENT_HTML401', 'ENT_XML1', 'ENT_XHTML', 'ENT_HTML5'];
 
             return $__debugReturn = array_merge($array, $const, $pathFunctions);
