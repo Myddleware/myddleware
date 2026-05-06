@@ -74,7 +74,9 @@ class hubspot extends solution
         try {
             $this->hubspot = \HubSpot\Factory::createWithAccessToken($this->paramConnexion['accesstoken']);
             // Call the standard API. OK if no exception.
+            $this->logDebug('hubspot login request');
             $response = $this->hubspot->crm()->contacts()->basicApi()->getPage();
+            $this->logDebug('hubspot login response', ['success' => true]);
 
             $this->connexion_valide = true;
         } catch (\Exception $e) {
@@ -110,7 +112,9 @@ class hubspot extends solution
 				$this->moduleFields = $moduleFields[$module];
 				return $this->moduleFields;
 			}
+            $this->logDebug('hubspot get_module_fields request', ['module' => $module]);
             $properties = $this->hubspot->crm()->properties()->coreApi()->getAll($module)->getResults();
+            $this->logDebug('hubspot get_module_fields response', ['count' => count($properties)]);
             if (!empty($properties)){
                 foreach($properties as $property) {
                     // List value
@@ -197,10 +201,14 @@ class hubspot extends solution
 
                 // Search records from Hubspot
                 if (!empty($param['query']['id'])) {
+                    $this->logDebug('hubspot read getById request', ['id' => $param['query']['id']]);
                     $records[0] = $this->hubspot->crm()->contacts()->basicApi()->getById($param['query']['id']);
+                    $this->logDebug('hubspot read getById response', ['found' => !empty($records[0])]);
                 } else {
+                    $this->logDebug('hubspot read doSearch request', ['module' => $param['module']]);
                     $recordList = $this->hubspot->crm()->contacts()->searchApi()->doSearch($searchRequest);
                     $records = $recordList->getResults();
+                    $this->logDebug('hubspot read doSearch response', ['count' => count($records)]);
                 }
                 
                 // Format results
@@ -289,13 +297,15 @@ class hubspot extends solution
 		// Prepare data to be sent
 		$simplePublicObjectInputForCreate = new SimplePublicObjectInputForCreateCall($data);
 		// Create the call to Hubspot
+		$this->logDebug('hubspot createCall request', ['properties' => $properties]);
 		$apiResponse = $this->hubspot->crm()->objects()->calls()->basicApi()->create($simplePublicObjectInputForCreate);
+		$this->logDebug('hubspot createCall response', ['id' => $apiResponse->getId()]);
 		if (!empty($apiResponse->getId())) {
 			return $apiResponse->getId();
 		}
-		return null;        
+		return null;
     }
-    
+
 	protected function createNote($param, $record, $idDoc = null)
     {		
 		$associationSpec = new AssociationSpecNote([
@@ -326,11 +336,13 @@ class hubspot extends solution
 		// Prepare data to be sent
 		$simplePublicObjectInputForCreate = new SimplePublicObjectInputForCreateNote($data);
 		// Create the note to Hubspot
+		$this->logDebug('hubspot createNote request', ['properties' => $properties]);
 		$apiResponse = $this->hubspot->crm()->objects()->notes()->basicApi()->create($simplePublicObjectInputForCreate);
+		$this->logDebug('hubspot createNote response', ['id' => $apiResponse->getId()]);
 		if (!empty($apiResponse->getId())) {
 			return $apiResponse->getId();
 		}
-		return null;        
+		return null;
     }
 
 	protected function createEmail($param, $record, $idDoc = null)
@@ -364,11 +376,13 @@ class hubspot extends solution
 		// Prepare data to be sent
 		$simplePublicObjectInputForCreate = new SimplePublicObjectInputForCreate($data);
 		// Create the email to Hubspot
+		$this->logDebug('hubspot createEmail request', ['properties' => $properties]);
 		$apiResponse = $this->hubspot->crm()->objects()->emails()->basicApi()->create($simplePublicObjectInputForCreate);
+		$this->logDebug('hubspot createEmail response', ['id' => $apiResponse->getId()]);
 		if (!empty($apiResponse->getId())) {
 			return $apiResponse->getId();
 		}
-		return null;        
+		return null;
     }
 
     public function getRuleMode($module, $type): array

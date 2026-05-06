@@ -31,6 +31,7 @@ Encore
     .addEntry('account', './assets/js/account.js')
     .addEntry('flux', './assets/flux.js')
     .addEntry('settings', './assets/js/settings.js')
+    .addEntry('tasklist', './assets/js/tasklist.js')
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
     .splitEntryChunks()

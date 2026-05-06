@@ -26,13 +26,17 @@
 namespace App\Repository;
 
 use App\Entity\ConnectorParam;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class ConnectorParamRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, ConnectorParam::class);
+        $this->debugLogger = $debugLogger;
     }
 }

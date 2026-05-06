@@ -214,21 +214,41 @@ li span {
 }
 
 .table-wrapper {
+    position: relative;
     border: 1px solid #ccc;
     border-radius: 15px;
-    overflow: hidden;
+    overflow: visible; 
     box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px;
-}
-
-.table-wrapper-task, .table-wrapper-workflow{
-    display: inline-block;
-    width: auto;
-}
-
-.shadow-table {
     background-color: white;
-    margin-bottom: 0 !important;
+    margin-bottom: 20px;
+}
+
+.table-wrapper table thead th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    border-bottom: 1px solid #ccc !important;
+    padding: 12px 8px;
+}
+
+.table-wrapper table {
+    border-collapse: separate;
+    border-spacing: 0;
     width: 100%;
+}
+
+.table-wrapper thead tr:first-child th:first-child {
+    border-top-left-radius: 15px;
+}
+.table-wrapper thead tr:first-child th:last-child {
+    border-top-right-radius: 15px;
+}
+
+.invisibele-row-bottom th:first-child {
+    border-bottom-left-radius: 15px;
+}
+.invisibele-row-bottom th:last-child {
+    border-bottom-right-radius: 15px;
 }
 
 .tooltip {
@@ -278,14 +298,8 @@ li span {
 }
 
 /* Flux Table Styling */
-#flux-table {
-    width: 100%;
-    border-collapse: collapse;
-    background-color: white;
-}
 
-#flux-table th {
-    background: white;
+#flux-table th, .table-task-detail th{
     height: 40px;
     padding: 8px 12px;
     text-align: center;
@@ -296,7 +310,7 @@ li span {
     border-right: 1px solid #ddd;
 }
 
-#flux-table th:last-child {
+#flux-table th:last-child, .table-task-detail th:last-child{
     border-right: none;
 }
 
@@ -938,4 +952,18 @@ li span {
 #combined_filter_document_reference,
 #combined_filter_document_sourceId{  
     min-height: 48px !important;
+}
+
+#clear_rule_search {
+    box-shadow: none;
+    padding: 0 !important;
+}
+
+#clear_rule_search svg {
+    width: 36px;
+    height: 16px;
+}
+
+.table-doc-tr{
+    white-space: nowrap;
 }

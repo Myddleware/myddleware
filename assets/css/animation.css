@@ -476,14 +476,8 @@ h2 { margin-top: 50px;}
     padding-top: 5px;
 }
 
-#workflow_name, #rule_name {
-    height: 35px;
-    min-height: 35px !important;
-}
-
 #rulesearchbarcontainer {
     display: flex;
-    margin-left: 4.9vw !important;
 }
 
 #dropdown-rulegroup {

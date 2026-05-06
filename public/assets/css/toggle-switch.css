@@ -144,6 +144,10 @@
   opacity: 1;
 }
 
+.toggle-switch.debug-toggle input:checked + .toggle-slider {
+  background-color: #198BCA !important;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .toggle-switch-container {

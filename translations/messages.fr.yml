@@ -170,6 +170,7 @@ create_rule:
             empty: "Aucun filtre n'a encore été défini."
     step5:
         back: Retour à la liste
+        back_to_rule: Retour à la règle
         simulation: Simulation
         title: Mappage des champs
         formula:
@@ -217,6 +218,8 @@ view_rule:
         confirm_delete_rule: Souhaitez-vous supprimer cette règle ?
         displayflux: Voir les documents
         new_rule: Créer une règle
+        simulation: Simulation
+        more: Plus...
     tabs:
         info: Informations
         mapping: Mapping des champs
@@ -450,7 +453,6 @@ list_connector:
 view_connector:
     btn:
         edit: Editer
-        back: Retour
         save: Sauvegarder
         delete: Supprimer
         confirm_delete: Confirmez-vous la suppression de ce connecteur ?
@@ -471,6 +473,7 @@ delete_connector:
         success: Connecteur supprimé avec succès
 
 list_flux:
+    more_filter: Plus de filtres
     start: Début
     end: Fin
     total: Nombre de documents
@@ -683,8 +686,10 @@ view_workflow:
     title2: Condition de champs
     condition: Le champ de condition est automatiquement généré avec la chaîne {état} == « , et la parenthèse ouvrante ainsi que l'opérateur ternaire ?"1":"0") seront ajoutés automatiquement.
     condition2: En bref, il vous suffit d'écrire le nom du statut et nous nous occupons du reste !
-    back: Retour
     delete: Supprimer le workflow
+    duplicate: Dupliquer le workflow
+    duplicate_success: Workflow dupliqué avec succès
+    duplication_workflow_deactivated : Le workflow a été dupliqué mais il est désactivé à la création. Veuillez l'activer pour pouvoir l'utiliser.
     description: Description
     rule: Règle
     conditions: Conditions
@@ -724,7 +729,6 @@ view_workflow_action:
     workflow: Workflow
     action: Action
     order: Ordre
-    back_to_workflow: Retour au workflow
     create: Créer une action
     multiple_runs: Multiple Runs
     multiple_runs_yes: Oui
@@ -917,6 +921,7 @@ error:
         target_module_load_list: Erreur de chargement des modules cible
         edit_document_error_open: Impossible d'éditer la règle car au moins un document est ouvert ou en erreur sur cette règle. Veuillez annuler ou relancer ces documents pour pouvoir éditer cette règle.
         edit_document_error_open_admin: Au moins un document est ouvert ou en erreur sur cette règle. Il est recommandé de traiter ces documents avant d'éditer la règle.
+        edit_connection_failed: "Impossible d'éditer la règle car la connexion avec un connecteur a échoué :"
         edit_rule_deleted: Impossible d'éditer la règle car elle est supprimée.
         delete_document: Impossible de supprimer la règle car au moins un document de données existe sur cette règle. Veuillez supprimer ces documents pour pouvoir supprimer cette règle.
         delete_relationship_exists: "Impossible de supprimer la règle car elle est liée à une autre règle. Supprimer premièrement la règle liée ou bien la relation avec cette règle. Règle liée: "
@@ -1186,11 +1191,25 @@ settings:
         elasticsearch_label: Statut Elasticsearch
         enable_elasticsearch: Activer Elastic Search
         elasticsearch_hint: Elasticsearch permet de meilleures performances lors de la recherche de chaines parmi de tres grandes quantites de documents (+100k)
+    logs:
+        title: Logs
+        enable_debug: Activer les logs de debug
+        debug_hint: Lorsque active, les informations de debug detaillees (reponses API, requetes SQL) seront ecrites dans le fichier de logs.
+        choose_level: Choisir le niveau de logs
+        level_hint: Selectionnez le niveau de log minimum. Les niveaux inferieurs incluent plus de details mais generent des fichiers de logs plus volumineux.
+        download_logs: Telecharger les derniers logs
+        empty_logs: Vider le fichier de logs
+        confirm_empty_logs: Etes-vous sur de vouloir vider le fichier de logs ? Cette action est irreversible.
     messages:
         save_success: Parametres enregistres avec succes
         save_error: Echec de l'enregistrement des parametres
         elasticsearch_enabled: Elasticsearch a ete active
         elasticsearch_disabled: Elasticsearch a ete desactive
+        debug_enabled: Les logs de debug ont ete actives
+        debug_disabled: Les logs de debug ont ete desactives
+        log_level_updated: Niveau de log mis a jour a %level%
+        logs_emptied: Logs vides avec succes
+        logs_empty_error: Echec du vidage des logs
 
 login:
     title: Connexion
@@ -1326,7 +1345,6 @@ variable:
   deleted_successfully: "Variable supprimée avec succès."
   name_already_exists: Le nom de la variable existe déjà. Veuillez choisir un autre nom.
   edit: Modification de la variable
-  back_to_list: Retour à la liste des variables
   editing: Modification de la variable
   save: Enregistrer
   total: Total des Variables
@@ -1444,6 +1462,7 @@ rule_execute_by_id:
 new_workflow_view:
     save: Enregistrer
     created_successfully: Workflow créé avec succès.
+    condition_error: La condition est incomplète ou vide.
 
 delete_workflow_view:
     deleted_successfully: Workflow supprimé avec succès.

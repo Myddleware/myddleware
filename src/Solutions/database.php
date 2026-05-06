@@ -101,6 +101,7 @@ class database extends solution
             $modules = [];
 
             // Send the query to the database
+            $this->logDebug('database get_modules query', ['query' => $this->get_query_show_tables($type)]);
             $q = $this->pdo->prepare($this->get_query_show_tables($type));
             $exec = $q->execute();
             // Error management
@@ -129,6 +130,7 @@ class database extends solution
         try {
             // parent::get_module_fields($module, $type);
             // Get all fields of the table in input
+            $this->logDebug('database get_module_fields query', ['query' => $this->get_query_describe_table($module)]);
             $q = $this->pdo->prepare($this->get_query_describe_table($module));
             $exec = $q->execute();
             if (!$exec) {
@@ -314,6 +316,7 @@ class database extends solution
             $requestSQL = $this->queryValidation($param, 'read', $requestSQL, '');
 
             // Appel de la requête
+            $this->logDebug('database readData query', ['query' => $requestSQL]);
             $q = $this->pdo->prepare($requestSQL);
             $exec = $q->execute();
 
@@ -322,6 +325,7 @@ class database extends solution
                 throw new Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
             $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
+            $this->logDebug('database readData result', ['count' => count($fetchAll)]);
 
             $row = [];
             if (!empty($fetchAll)) {
@@ -436,6 +440,7 @@ class database extends solution
         // Query validation
         $sql = $this->queryValidation($param, 'create', $sql, $record);
 
+        $this->logDebug('database create query', ['query' => $sql]);
         $q = $this->pdo->prepare($sql);
         $exec = $q->execute();
         if (!$exec) {
@@ -495,10 +500,9 @@ class database extends solution
         $sql .= ' WHERE '.$this->stringSeparatorOpen.$param['ruleParams']['targetFieldId'].$this->stringSeparatorClose."='".$record['target_id']."'";
         // Query validation
         $sql = $this->queryValidation($param, 'update', $sql, $record);
-        // Execute the query
+        $this->logDebug('database update query', ['query' => $sql]);
         $q = $this->pdo->prepare($sql);
         $exec = $q->execute();
-        // Query error
         if (!$exec) {
             $errorInfo = $this->pdo->errorInfo();
             throw new Exception('Update: '.$errorInfo[2].' . Query : '.$sql);
@@ -534,7 +538,7 @@ class database extends solution
         // Query validation
         $sql = $this->queryValidation($param, 'delete', $sql, $record);
 
-        // Execute the query
+        $this->logDebug('database delete query', ['query' => $sql]);
         $q = $this->pdo->prepare($sql);
         $exec = $q->execute();
         if (!$exec) {

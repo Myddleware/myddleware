@@ -30,30 +30,25 @@ $(function () {
 
         var datas = '';
         var parent = 'source';
-        var status = $('#source_status img');
+        var status = $('#source_status');
 
         $('.title').each(function() {
 
             if ($(this).text() != 'solution' && $(this).text() != 'nom') {
 
-                var input = $(this).parent().find('.params'); 
+                var dataElement = $(this).parent().find('[data-param]'); 
 
-                if (input.length > 0) {
-                    if (input.is('input')) {
-                        if (input.attr('data-param') != undefined) {
-                            datas += input.attr('data-param') + "::" + input.val().replace(/;/g, "") + ";";
-                        }
-                    } else {
-                    	 var dataParam = input.attr('data-param');
-						 var textValue = input.text().trim();
+                if (dataElement.length > 0) {
+                    var dataParam = dataElement.attr('data-param');
+                    var textValue = dataElement.is('input') ? dataElement.val() : dataElement.text().trim();
 
-                        if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
-                            const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
-                            textValue = window[matchedKeyword];
-                        }
-						if (dataParam !== undefined) {
-							datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";
-						}
+                   if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
+                        const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
+                        textValue = window[matchedKeyword];
+                    }
+                    if (dataParam !== undefined) {
+                        datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";
+                        
                     }
                 }
             }
@@ -69,13 +64,11 @@ $(function () {
                 mod: 2
             },
             beforeSend: function () {
-                status.removeAttr("src");
-                status.attr("src", "../" + path_img + "loader.gif");
+                status.empty().append('<i class="fa fa-spinner fa-spin status-loader"></i>');
             },
             success: function (json) {
                 if (!json.success) {
-                    status.removeAttr("src");
-                    status.attr("src", "../" + path_img + "status_offline.png");
+                    status.empty().append('<i class="fa fa-lightbulb status-offline"></i>');
                     $('#msg_status span.error').html(json.message);
                     $('#msg_status').show();
                     return false;
@@ -108,7 +101,6 @@ $(function () {
                                             var timer = setInterval(function () {
                                                 if (win.closed) {
                                                     clearInterval(timer);
-                                                    // console.log('Popup window closed');
                                                     if (confirm("Reconnect")) {
                                                         $('#connexion_detail').trigger();
                                                     }
@@ -117,9 +109,14 @@ $(function () {
                                         } else {
                                             $('#connexion_detail').trigger();
                                         }
+
+                                        status.empty().append('<i class="fa fa-lightbulb status-offline"></i>');
+                                        
+                                        var r = data.split(';');
+                                        $('#msg_status span.error').html(r[0]);
+                                        $('#msg_status').show();
                                     } else {
-                                        status.removeAttr("src");
-                                        status.attr("src", "../" + path_img + "status_online.png");
+                                        status.empty().append('<i class="fa fa-lightbulb status-online"></i>');
                                         $('#msg_status').hide();
                                         $('#msg_status span.error').html('');
                                         $('#step_modules_confirme').removeAttr('disabled');
@@ -128,20 +125,14 @@ $(function () {
                             });
                         } else {
                             if (!json.success) {
-                               status.removeAttr("src");
-                                status.attr("src", "../" + path_img + "status_offline.png");
-                                $('#msg_status span.error').html(r[0]);
+                                status.empty().append('<i class="fa fa-lightbulb status-offline"></i>');
+                                $('#msg_status span.error').html(json.message);
                                 $('#msg_status').show();
                             } else {
-                                let pathString = "../";
-                                // if the window path contains index.php (docker)
-                                if (window.location.pathname.includes("index.php")) {
-                                    pathString = "../../../../";
-                                }
-                                status.removeAttr("src");
-                                status.attr("src", pathString + path_img + "status_online.png");
+                                status.empty().append('<i class="fa fa-lightbulb status-online"></i>');
                                 $('#msg_status').hide();
                                 $('#msg_status span.error').html('');
+                                $('#step_modules_confirme').removeAttr('disabled');
                             }
                         }
                     }

@@ -2,90 +2,90 @@
 // 1. UTILITIES (Helper functions for DOM and Selectize manipulation)
 // ============================================================
 const UI = {
-  // Shortcut for document.getElementById
-  get: (id) => document.getElementById(id),
-  
-  // Show or hide an element (and handle specific opacity for step-2)
-  toggle: (el, show) => {
-    if (!el) return;
-    show ? el.classList.remove('d-none') : el.classList.add('d-none');
-    if (show && el.id === 'step-2') el.style.opacity = '1'; 
-  },
-  
-  // Resets an HTML <select> and its Selectize instance if it exists
-  resetSelect: (el, placeholder = '') => {
-    if (!el) return;
-    el.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
-    el.disabled = true;
-    
-    // Selectize reset (clear cache and disable)
-    if (el.selectize) {
-      el.selectize.clear();
-      el.selectize.clearOptions();
-      el.selectize.disable();
-      if (placeholder) {
-          el.selectize.settings.placeholder = placeholder;
-          el.selectize.updatePlaceholder();
-      }
-    }
-  },
-  
-  // Re-enables a select (native + Selectize)
-  enableSelect: (el) => {
-    if (!el) return;
-    el.disabled = false;
-    if (el.selectize) el.selectize.enable();
-  },
+  // Shortcut for document.getElementById
+  get: (id) => document.getElementById(id),
+  
+  // Show or hide an element (and handle specific opacity for step-2)
+  toggle: (el, show) => {
+    if (!el) return;
+    show ? el.classList.remove('d-none') : el.classList.add('d-none');
+    if (show && el.id === 'step-2') el.style.opacity = '1'; 
+  },
+  
+  // Resets an HTML <select> and its Selectize instance if it exists
+  resetSelect: (el, placeholder = '') => {
+    if (!el) return;
+    el.innerHTML = `<option value="" disabled selected>${placeholder}</option>`;
+    el.disabled = true;
+    
+    // Selectize reset (clear cache and disable)
+    if (el.selectize) {
+      el.selectize.clear();
+      el.selectize.clearOptions();
+      el.selectize.disable();
+      if (placeholder) {
+          el.selectize.settings.placeholder = placeholder;
+          el.selectize.updatePlaceholder();
+      }
+    }
+  },
+  
+  // Re-enables a select (native + Selectize)
+  enableSelect: (el) => {
+    if (!el) return;
+    el.disabled = false;
+    if (el.selectize) el.selectize.enable();
+  },
 
-  // Sets a value (useful for editing)
-  setValue: (el, value) => {
-      if (!el) return;
-      el.value = String(value);
-      if (el.selectize) {
-          el.selectize.setValue(String(value), false); 
-      }
-  },
+  // Sets a value (useful for editing)
+  setValue: (el, value) => {
+      if (!el) return;
+      el.value = String(value);
+      if (el.selectize) {
+          el.selectize.setValue(String(value), false); 
+      }
+  },
 
-  // Synchronizes native HTML options to the Selectize instance
-  // Selectize does not automatically detect .innerHTML changes
-  syncSelectize: (el) => {
-      if (el && el.selectize) {
-          const selectize = el.selectize;
-          selectize.clearOptions();
-          
-          // Repopulate Selectize with DOM options
-          Array.from(el.options).forEach(opt => {
-              if (opt.value) {
-                  selectize.addOption({
-                      value: opt.value,
-                      text: opt.text
-                  });
-              }
-          });
-          selectize.refreshOptions(false);
-      }
-  },
+  // Synchronizes native HTML options to the Selectize instance
+  // Selectize does not automatically detect .innerHTML changes
+  syncSelectize: (el) => {
+      if (el && el.selectize) {
+          const selectize = el.selectize;
+          selectize.clearOptions();
+          
+          // Repopulate Selectize with DOM options
+          Array.from(el.options).forEach(opt => {
+              if (opt.value) {
+                  selectize.addOption({
+                      value: opt.value,
+                      text: opt.text
+                  });
+              }
+          });
+          selectize.refreshOptions(false);
+      }
+  },
 
-  // Wrapper for fetch that handles HTTP errors and returns text/HTML
-  fetchHtml: async (url, params = {}) => {
-      const query = new URLSearchParams(params).toString();
-      const target = query ? `${url}?${query}` : url;
-      try {
-          const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
-          if (!res.ok) {
-              const errorMsg = await res.text();
-              throw new Error(errorMsg || `HTTP Error ${res.status}`);
-          }
-          return await res.text();
-      } catch (err) {
-          throw err;
-      }
-    }
+  // Wrapper for fetch that handles HTTP errors and returns text/HTML
+  fetchHtml: async (url, params = {}) => {
+      const query = new URLSearchParams(params).toString();
+      const target = query ? `${url}?${query}` : url;
+      try {
+          const res = await fetch(target, { headers: { 'X-Requested-With': 'XMLHttpRequest' } });
+          if (!res.ok) {
+              const errorMsg = await res.text();
+              throw new Error(errorMsg || `HTTP Error ${res.status}`);
+          }
+          return await res.text();
+      } catch (err) {
+          throw err;
+      }
+    }
 };
 
 /* ============================================================
- * STEP 1 — NAME VALIDATION (Rule name verification)
- * ============================================================ */
+ * STEP 1 — NAME VALIDATION (Rule name verification)
+ * ============================================================ */
 (function () {
   const isEdit       = !!window.__EDIT_MODE__;
   const inputName    = UI.get('rulename');
@@ -93,113 +93,113 @@ const UI = {
   const spinner      = UI.get('rulename-spinner');
   const step2Section = UI.get('step-2');
 
-  if (!inputName || !feedback) return;
+  if (!inputName || !feedback) return;
 
-  let debounceTimer = null;
-  let lastValueSent = '';
+  let debounceTimer = null;
+  let lastValueSent = '';
   let step2Shown    = false;
 
-  const toggleSpinner = (show) => UI.toggle(spinner, show);
+  const toggleSpinner = (show) => UI.toggle(spinner, show);
 
-  // Displays validation status (green/red) under the input
-  function setStatus(status, msg) {
-    toggleSpinner(false);
-    inputName.classList.remove('is-invalid', 'is-valid');
-    feedback.className = 'form-text';
-    
-    if (status === 'error') {
-      inputName.classList.add('is-invalid');
-      feedback.classList.add('text-danger');
-    } else if (status === 'success') {
-      inputName.classList.add('is-valid');
-      feedback.classList.add('text-success');
-      revealStep2();
-    }
-    feedback.textContent = msg || '';
-  }
+  // Displays validation status (green/red) under the input
+  function setStatus(status, msg) {
+    toggleSpinner(false);
+    inputName.classList.remove('is-invalid', 'is-valid');
+    feedback.className = 'form-text';
+    
+    if (status === 'error') {
+      inputName.classList.add('is-invalid');
+      feedback.classList.add('text-danger');
+    } else if (status === 'success') {
+      inputName.classList.add('is-valid');
+      feedback.classList.add('text-success');
+      revealStep2();
+    }
+    feedback.textContent = msg || '';
+  }
 
-  // Reveals the rest of the form (Step 2) with an animation
-  function revealStep2() {
-    if (step2Shown || !step2Section) return;
-    step2Shown = true;
-    UI.toggle(step2Section, true);
-    step2Section.style.opacity = 0;
-    step2Section.style.transition = 'opacity .25s ease';
-    requestAnimationFrame(() => { step2Section.style.opacity = 1; });
-    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
-  }
+  // Reveals the rest of the form (Step 2) with an animation
+  function revealStep2() {
+    if (step2Shown || !step2Section) return;
+    step2Shown = true;
+    UI.toggle(step2Section, true);
+    step2Section.style.opacity = 0;
+    step2Section.style.transition = 'opacity .25s ease';
+    requestAnimationFrame(() => { step2Section.style.opacity = 1; });
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
+  }
 
-  // Calls the server to check if the name is unique
-  async function checkUniqueness(nameVal) {
-    const url = inputName.getAttribute('data-check-url');
-    if (!url) return setStatus('error', 'Validation URL missing.');
+  // Calls the server to check if the name is unique
+  async function checkUniqueness(nameVal) {
+    const url = inputName.getAttribute('data-check-url');
+    if (!url) return setStatus('error', 'Validation URL missing.');
 
-    try {
-      const res = await fetch(url, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
-        body: new URLSearchParams({ name: nameVal })
-      });
-      const text = await res.text();
-      let existsFlag;
-      try { existsFlag = JSON.parse(text); } catch { existsFlag = text; }
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+        body: new URLSearchParams({ name: nameVal })
+      });
+      const text = await res.text();
+      let existsFlag;
+      try { existsFlag = JSON.parse(text); } catch { existsFlag = text; }
 
-      if (existsFlag === 0 || existsFlag === '0') {
-        setStatus('success', window.transRuleNameAvailable || 'Name is available.');
-      } else {
-        setStatus('error', window.transRuleNameTaken || 'This name is already taken.');
-      }
-    } catch {
-      setStatus('error', window.transRuleNameNetworkErr || 'Network error.');
-    }
-  }
+      if (existsFlag === 0 || existsFlag === '0') {
+        setStatus('success', window.transRuleNameAvailable || 'Name is available.');
+      } else {
+        setStatus('error', window.transRuleNameTaken || 'This name is already taken.');
+      }
+    } catch {
+      setStatus('error', window.transRuleNameNetworkErr || 'Network error.');
+    }
+  }
 
-  if (isEdit) return;
+  if (isEdit) return;
 
-  // Validation on Enter key press
-  inputName.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const v = inputName.value.trim();
-      if (v.length < 3) return setStatus('error', window.transRuleNameTooShort || 'Min 3 chars.');
-      toggleSpinner(true);
-      lastValueSent = v;
-      checkUniqueness(v);
-    }
-  });
+  // Validation on Enter key press
+  inputName.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const v = inputName.value.trim();
+      if (v.length < 3) return setStatus('error', window.transRuleNameTooShort || 'Min 3 chars.');
+      toggleSpinner(true);
+      lastValueSent = v;
+      checkUniqueness(v);
+    }
+  });
 
-  // Validation on typing (with Debounce to avoid spamming the server)
-  inputName.addEventListener('input', () => {
-    clearTimeout(debounceTimer);
-    setStatus('neutral');
-    const v = inputName.value.trim();
-    if (!v) { toggleSpinner(false); return; }
-    toggleSpinner(true);
+  // Validation on typing (with Debounce to avoid spamming the server)
+  inputName.addEventListener('input', () => {
+    clearTimeout(debounceTimer);
+    setStatus('neutral');
+    const v = inputName.value.trim();
+    if (!v) { toggleSpinner(false); return; }
+    toggleSpinner(true);
 
-    if (v.length < 3) {
-      debounceTimer = setTimeout(() => {
-        setStatus('error', window.transRuleNameTooShort || 'Min 3 chars.');
-      }, 300);
-      return;
-    }
+    if (v.length < 3) {
+      debounceTimer = setTimeout(() => {
+        setStatus('error', window.transRuleNameTooShort || 'Min 3 chars.');
+      }, 300);
+      return;
+    }
 
-    if (v === lastValueSent && inputName.classList.contains('is-valid')) {
-      toggleSpinner(false);
-      revealStep2();
-      return;
-    }
+    if (v === lastValueSent && inputName.classList.contains('is-valid')) {
+      toggleSpinner(false);
+      revealStep2();
+      return;
+    }
 
-    debounceTimer = setTimeout(() => {
-      lastValueSent = v;
-      checkUniqueness(v);
-    }, 400);
-  });
+    debounceTimer = setTimeout(() => {
+      lastValueSent = v;
+      checkUniqueness(v);
+    }, 400);
+  });
 })();
 
 /* ============================================================
- * STEP 2 + 3 + 4 + 5 (CORE LOGIC & LOADERS)
- * Managing cascading dropdowns (Solution -> Connector -> Module)
- * ============================================================ */
+ * STEP 2 + 3 + 4 + 5 (CORE LOGIC & LOADERS)
+ * Managing cascading dropdowns (Solution -> Connector -> Module)
+ * ============================================================ */
 (function () {
   const step2 = UI.get('step-2');
   if (!step2) return;
@@ -210,7 +210,7 @@ const UI = {
   };
 
  // References to DOM elements for Source (src) and Target (tgt)
- const EL = {
+ const EL = {
     src: { sol: UI.get('source-solution'), conn: UI.get('source-connector'), mod: UI.get('source-module'), spin: UI.get('source-connector-spinner'), modSpin: UI.get('source-module-spinner'), feed: UI.get('source-connector-feedback') },
     tgt: { sol: UI.get('target-solution'), conn: UI.get('target-connector'), mod: UI.get('target-module'), spin: UI.get('target-connector-spinner'), modSpin: UI.get('target-module-spinner'), feed: UI.get('target-connector-feedback') },
     step3: UI.get('step-3'),
@@ -249,8 +249,8 @@ const UI = {
       }
       const html = await response.text();
 
-      // Update native HTML
-      targetSelect.innerHTML = '';
+      // Update native HTML
+      targetSelect.innerHTML = '';
 
       if (html) {
         const temp = document.createElement('div');
@@ -263,9 +263,9 @@ const UI = {
         targetSelect.selectize.updatePlaceholder();
       }
 
-      // synchronization with Selectize
-      UI.syncSelectize(targetSelect);
-      UI.enableSelect(targetSelect);
+      // synchronization with Selectize
+      UI.syncSelectize(targetSelect);
+      UI.enableSelect(targetSelect);
 
     } catch (e) {
       console.warn("Loading error:", e.message);
@@ -281,20 +281,20 @@ const UI = {
     }
   }
 
-  // Loads connectors for a given solution
-  const loadConnectorsFor = (side, solutionId) => {
-    if (!solutionId) return Promise.resolve();
-    const group = side === 'source' ? EL.src : EL.tgt;
-    return loadSelectData('connectors', PATHS.connectors, { solution_id: solutionId }, group.conn, group.spin, group.feed);
-  };
+  // Loads connectors for a given solution
+  const loadConnectorsFor = (side, solutionId) => {
+    if (!solutionId) return Promise.resolve();
+    const group = side === 'source' ? EL.src : EL.tgt;
+    return loadSelectData('connectors', PATHS.connectors, { solution_id: solutionId }, group.conn, group.spin, group.feed);
+  };
 
-  // Loads modules for a given connector
-  const loadModulesFor = (side, connectorId) => {
-    if (!connectorId) return Promise.resolve();
-    const group = side === 'source' ? EL.src : EL.tgt;
-    const type = side === 'source' ? 'source' : 'cible';
-    return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, group.feed);
-  };
+  // Loads modules for a given connector
+  const loadModulesFor = (side, connectorId) => {
+    if (!connectorId) return Promise.resolve();
+    const group = side === 'source' ? EL.src : EL.tgt;
+    const type = side === 'source' ? 'source' : 'cible';
+    return loadSelectData('modules', PATHS.modules, { id: connectorId, type: type }, group.mod, group.modSpin, group.feed);
+  };
 
 // Loads specific Step 3 parameters (date fields, limit, etc.)
   async function loadStep3Params() {
@@ -387,7 +387,10 @@ const UI = {
 
             vals.forEach(v => {
               if (v && v.trim() !== '') {
-                addBadge(v.trim(), v.trim());
+                let label = v.trim();
+                const opt = Array.from(dupSelect.options).find(o => o.value === label);
+                if(opt) label = opt.text;
+                addBadge(v.trim(), label);
               }
             });
             if (dupSelect && vals.length > 0) {
@@ -418,8 +421,8 @@ const UI = {
     return !!(getVal(EL.src.mod) && getVal(EL.tgt.mod));
   }
 
-  // Progressive display of steps
-  function revealStep3() {
+  // Progressive display of steps
+  function revealStep3() {
     if (!EL.step3) return;
     UI.toggle(EL.step3, true);
     if (window.updateRuleNavLinks) window.updateRuleNavLinks();
@@ -469,24 +472,24 @@ const UI = {
   }
 
   
-  // Reset lower steps if a parent module changes
-  function resetStep3AndBelow() {
-    if (EL.paramsContainer) EL.paramsContainer.innerHTML = '';
-    if (EL.step4Body) EL.step4Body.innerHTML = '';
-    filtersLoaded = false;
-    const mapBody = UI.get('rule-mapping-body');
-    if (mapBody) {
-      mapBody.innerHTML = '';
-      mapBody.removeAttribute('data-loaded-module');
-    }
-    if (window.resetTargetFieldsCache) window.resetTargetFieldsCache();
+  // Reset lower steps if a parent module changes
+  function resetStep3AndBelow() {
+    if (EL.paramsContainer) EL.paramsContainer.innerHTML = '';
+    if (EL.step4Body) EL.step4Body.innerHTML = '';
+    filtersLoaded = false;
+    const mapBody = UI.get('rule-mapping-body');
+    if (mapBody) {
+      mapBody.innerHTML = '';
+      mapBody.removeAttribute('data-loaded-module');
+    }
+    if (window.resetTargetFieldsCache) window.resetTargetFieldsCache();
 
-    UI.toggle(EL.step3, false);
-    UI.toggle(EL.step4, false);
-    UI.toggle(EL.step5, false);
-  }
+    UI.toggle(EL.step3, false);
+    UI.toggle(EL.step4, false);
+    UI.toggle(EL.step5, false);
+  }
 
-  // Loads the Filters UI (Step 4)
+  // Loads the Filters UI (Step 4)
   const loadFiltersUI = async () => {
     if (!EL.step4 || !EL.step4Body) return;
     const pathFilter = EL.step4.getAttribute('data-path-filters');
@@ -553,75 +556,75 @@ const UI = {
       }
     }
  if (EL.step5) {
-      UI.toggle(EL.step5, true);
-      updateMappingHeaders();
-      // initMappingUI is called from loadFiltersUI after fields are loaded
-    }
-    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
-  }
+      UI.toggle(EL.step5, true);
+      updateMappingHeaders();
+      // initMappingUI is called from loadFiltersUI after fields are loaded
+    }
+    if (window.updateRuleNavLinks) window.updateRuleNavLinks();
+  }
 
-  // --- LISTENERS ---
-  EL.src.sol?.addEventListener('change', () => {
-    UI.resetSelect(EL.src.conn); UI.resetSelect(EL.src.mod);
-    loadConnectorsFor('source', EL.src.sol.value);
-  });
-  EL.tgt.sol?.addEventListener('change', () => {
-    UI.resetSelect(EL.tgt.conn); UI.resetSelect(EL.tgt.mod);
-    loadConnectorsFor('cible', EL.tgt.sol.value);
-  });
-  EL.src.conn?.addEventListener('change', () => loadModulesFor('source', EL.src.conn.value));
-  EL.tgt.conn?.addEventListener('change', () => {
-    loadModulesFor('cible', EL.tgt.conn.value);
-    if (EL.tgt.mod.value) tryRevealStep3();
-  });
-  EL.src.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
-  EL.tgt.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
+  // --- LISTENERS ---
+  EL.src.sol?.addEventListener('change', () => {
+    UI.resetSelect(EL.src.conn); UI.resetSelect(EL.src.mod);
+    loadConnectorsFor('source', EL.src.sol.value);
+  });
+  EL.tgt.sol?.addEventListener('change', () => {
+    UI.resetSelect(EL.tgt.conn); UI.resetSelect(EL.tgt.mod);
+    loadConnectorsFor('cible', EL.tgt.sol.value);
+  });
+  EL.src.conn?.addEventListener('change', () => loadModulesFor('source', EL.src.conn.value));
+  EL.tgt.conn?.addEventListener('change', () => {
+    loadModulesFor('cible', EL.tgt.conn.value);
+    if (EL.tgt.mod.value) tryRevealStep3();
+  });
+  EL.src.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
+  EL.tgt.mod?.addEventListener('change', () => { resetStep3AndBelow(); tryRevealStep3(); });
 
-  // Expose globally for Edit mode
-  window.loadConnectorsFor = loadConnectorsFor;
-  window.loadModulesFor = loadModulesFor;
-  window.tryRevealStep3 = tryRevealStep3;
-  window.loadStep3Params = loadStep3Params;
+  // Expose globally for Edit mode
+  window.loadConnectorsFor = loadConnectorsFor;
+  window.loadModulesFor = loadModulesFor;
+  window.tryRevealStep3 = tryRevealStep3;
+  window.loadStep3Params = loadStep3Params;
 })();
 
 /* ============================================================
- * FILTERS & MAPPING UI FUNCTIONS (Global)
- * ============================================================ */
+ * FILTERS & MAPPING UI FUNCTIONS (Global)
+ * ============================================================ */
 (function() {
 // Retrieves JSON attributes (data-fields) from options
-  const getJsonAttr = (el, attr) => {
-    if (!el || !el.value) return null;
-    const opt = el.options[el.selectedIndex];
-    try { return JSON.parse(opt.getAttribute(attr)); } catch { return null; }
-  };
+  const getJsonAttr = (el, attr) => {
+    if (!el || !el.value) return null;
+    const opt = el.options[el.selectedIndex];
+    try { return JSON.parse(opt.getAttribute(attr)); } catch { return null; }
+  };
 
-  // Builds the filter field select options
-  window.buildFilterFieldOptions = function() {
-    const filterSelect = UI.get("rule-filter-field");
-    if (!filterSelect) return;
+  // Builds the filter field select options
+  window.buildFilterFieldOptions = function() {
+    const filterSelect = UI.get("rule-filter-field");
+    if (!filterSelect) return;
 
-    if (filterSelect.selectize) {
-      UI.syncSelectize(filterSelect);
-    } else {
-      $(filterSelect).selectize({
-        sortField: "text",
-        lockOptgroupOrder: true,
-        placeholder: "Choose a field...",
-        dropdownParent: "body"
-      });
-    }
-  };
+    if (filterSelect.selectize) {
+      UI.syncSelectize(filterSelect);
+    } else {
+      $(filterSelect).selectize({
+        sortField: "text",
+        lockOptgroupOrder: true,
+        placeholder: "Choose a field...",
+        dropdownParent: "body"
+      });
+    }
+  };
 
 window.autoMapRequiredFields = async function() {
-  const tgtConn = document.getElementById('target-connector')?.value;
-  const tgtMod  = document.getElementById('target-module')?.value;
-  const srcConn = document.getElementById('source-connector')?.value;
-  const srcMod  = document.getElementById('source-module')?.value;
+  const targetConnector = document.getElementById('target-connector')?.value;
+  const targetModule  = document.getElementById('target-module')?.value;
+  const sourceConnector = document.getElementById('source-connector')?.value;
+  const sourceModule  = document.getElementById('source-module')?.value;
   const tbody   = document.getElementById('rule-mapping-body');
   const step5   = document.getElementById('step-5');
 
-  if (!tgtConn || !tgtMod || !tbody || !step5) return;
-  if (tbody.getAttribute('data-loaded-module') === tgtMod) return;
+  if (!targetConnector || !targetModule || !tbody || !step5) return;
+  if (tbody.getAttribute('data-loaded-module') === targetModule) return;
 
   const urlBase = step5.getAttribute('data-path-mapping-initial');
   if (!urlBase) return;
@@ -637,10 +640,10 @@ window.autoMapRequiredFields = async function() {
 
   try {
     const params = new URLSearchParams({
-      connector_id: tgtConn,
-      module: tgtMod,
-      src_connector_id: srcConn,
-      src_module: srcMod
+      connector_id: targetConnector,
+      module: targetModule,
+      src_connector_id: sourceConnector,
+      src_module: sourceModule
     });
 
     const res = await fetch(`${urlBase}?${params.toString()}`, {
@@ -678,7 +681,7 @@ window.autoMapRequiredFields = async function() {
     }
 
     initNewRows(tbody);
-    tbody.setAttribute('data-loaded-module', tgtMod);
+    tbody.setAttribute('data-loaded-module', targetModule);
     window.refreshTargetDropdowns();
 
   } catch (e) {
@@ -751,7 +754,10 @@ function initNewRows(container) {
             
             modal.dataset.currentRowId = tr.dataset.rowId;
             modal.dataset.currentFormulaInputId = hidden.id;
-            if (area) area.value = hidden.value || '';
+            if (area) {
+                area.value = hidden.value || '';
+                area.dispatchEvent(new Event('input', { bubbles: true }));
+            }
         }
     });
     $(container).find('.rule-mapping-delete').off('click').on('click', function() {
@@ -863,20 +869,20 @@ function initNewRows(container) {
       });
   };
 
-  function createMappingSelect(fields) {
-    const sel = document.createElement('select');
-    sel.appendChild(new Option('', '', true, true));
-    if (fields) Object.entries(fields).forEach(([v, t]) => sel.appendChild(new Option(v, v)));
-    return sel;
-  }
+  function createMappingSelect(fields) {
+    const sel = document.createElement('select');
+    sel.appendChild(new Option('', '', true, true));
+    if (fields) Object.entries(fields).forEach(([v, t]) => sel.appendChild(new Option(v, v)));
+    return sel;
+  }
 
-  function genRowId() {
-    return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
-  }
+  function genRowId() {
+    return 'row-' + Date.now() + '-' + Math.random().toString(36).substr(2, 9);
+  }
 
 // Adds a row to the Mapping table (Step 5)
 window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = false) {
-    // Read fields from embedded JSON (from filter template)
+    // Read fields from embedded JSON (from filter template)
     let srcFields = {}, tgtFields = {};
     const fieldsDataEl = document.getElementById('rule-fields-data');
     if (fieldsDataEl) {
@@ -890,7 +896,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
     const tr = document.createElement('tr');
     tr.dataset.rowId = genRowId();
 
-    // Target Select
+    // Target Select
     const tdTgt = document.createElement('td');
     const tgtSel = createMappingSelect(tgtFields);
     tgtSel.classList.add('rule-mapping-target', 'js-select-search');
@@ -910,7 +916,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
     const badgesDiv = document.createElement('div');
     badgesDiv.className = 'mapping-src-badges pt-1';
 
-    // Manage multiple addition (Badges)
+    // Manage multiple addition (Badges)
     srcSel.addEventListener('change', () => {
       const val = srcSel.value;    
       if (!val || badgesDiv.querySelector(`[data-field="${CSS.escape(val)}"]`)) {
@@ -938,7 +944,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
     srcWrapper.append(srcSel, badgesDiv);
     tdSrc.appendChild(srcWrapper);
 
-   // Actions (Formula Button)
+   // Actions (Formula Button)
     const tdAct = document.createElement('td');
     tdAct.className = 'd-flex align-items-center';
     const slot = document.createElement('div');
@@ -959,7 +965,7 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
 
     tdAct.append(slot, btn, hidden);
 
-    // Open formula modal with row context
+    // Open formula modal with row context
     btn.onclick = () => {
       const container = UI.get('formula-selected-fields');
       const modal = UI.get('mapping-formula');
@@ -980,11 +986,14 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
         modal.dataset.currentRowId = tr.dataset.rowId;
         modal.dataset.currentFormulaInputId = hidden.id;
         const area = UI.get('area_insert');
-        if (area) area.value = hidden.value || '';
+        if (area) {
+          area.value = hidden.value || '';
+          area.dispatchEvent(new Event('input', { bubbles: true }));
+        }
       }
     };
     
-    // Delete Row
+    // Delete Row
     const tdDel = document.createElement('td');
     tdDel.className = 'text-start';
     const delBtn = document.createElement('button');
@@ -1114,24 +1123,24 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
 })();
 
 /* ============================================================
- * EDIT MODE (Data hydration)
- * ============================================================ */
+ * EDIT MODE (Data hydration)
+ * ============================================================ */
 (function () {
-  const ruleData = window.initialRule || null;
-  if (!ruleData) {
-    if (typeof window.ruleInitDone === 'function') window.ruleInitDone();
-    return;
-  }
+  const ruleData = window.initialRule || null;
+  if (!ruleData) {
+    if (typeof window.ruleInitDone === 'function') window.ruleInitDone();
+    return;
+  }
 
-  window.__EDIT_MODE__ = true;
-  const nameInput = UI.get('rulename');
+  window.__EDIT_MODE__ = true;
+  const nameInput = UI.get('rulename');
 
-  // Fills the form with JSON sent by the server
-  async function hydrateEditFromJson() {
-    try {
-      if (nameInput) {
-        nameInput.value = ruleData.name || '';
-        nameInput.classList.add('is-valid');
+  // Fills the form with JSON sent by the server
+  async function hydrateEditFromJson() {
+    try {
+      if (nameInput) {
+        nameInput.value = ruleData.name || '';
+        nameInput.classList.add('is-valid');
 
       }
       const descInput = UI.get('ruledescription');
@@ -1139,107 +1148,105 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
         descInput.value = ruleData.params.description;
       }
 
-      if (typeof window.__revealStep2 === 'function') window.__revealStep2();
-      else {
-          const s2 = UI.get('step-2');
-          if(s2) {
-              s2.classList.remove('d-none');
-              s2.style.opacity = '1';
-          }
-      }
+      if (typeof window.__revealStep2 === 'function') window.__revealStep2();
+      else {
+          const s2 = UI.get('step-2');
+          if(s2) {
+              s2.classList.remove('d-none');
+              s2.style.opacity = '1';
+          }
+      }
 
-      // Sequential filling and loading of dependent lists
-      const srcSol = UI.get('source-solution');
-      if (srcSol && ruleData.connection?.source?.solutionId) {
-        UI.setValue(srcSol, ruleData.connection.source.solutionId);
-        await window.loadConnectorsFor('source', srcSol.value);
-      }
-      
-      const tgtSol = UI.get('target-solution');
-      if (tgtSol && ruleData.connection?.target?.solutionId) {
-        UI.setValue(tgtSol, ruleData.connection.target.solutionId);
-        await window.loadConnectorsFor('cible', tgtSol.value);
-      }
+      // Sequential filling and loading of dependent lists
+      const srcSol = UI.get('source-solution');
+      if (srcSol && ruleData.connection?.source?.solutionId) {
+        UI.setValue(srcSol, ruleData.connection.source.solutionId);
+        await window.loadConnectorsFor('source', srcSol.value);
+      }
+      
+      const tgtSol = UI.get('target-solution');
+      if (tgtSol && ruleData.connection?.target?.solutionId) {
+        UI.setValue(tgtSol, ruleData.connection.target.solutionId);
+        await window.loadConnectorsFor('cible', tgtSol.value);
+      }
 
-      const srcConn = UI.get('source-connector');
-      if (srcConn && ruleData.connection?.source?.connectorId) {
-        UI.setValue(srcConn, ruleData.connection.source.connectorId);
-        await window.loadModulesFor('source', srcConn.value);
-      }
+      const srcConn = UI.get('source-connector');
+      if (srcConn && ruleData.connection?.source?.connectorId) {
+        UI.setValue(srcConn, ruleData.connection.source.connectorId);
+        await window.loadModulesFor('source', srcConn.value);
+      }
 
-      const tgtConn = UI.get('target-connector');
-      if (tgtConn && ruleData.connection?.target?.connectorId) {
-        UI.setValue(tgtConn, ruleData.connection.target.connectorId);
-        await window.loadModulesFor('cible', tgtConn.value);
-      }
+      const tgtConn = UI.get('target-connector');
+      if (tgtConn && ruleData.connection?.target?.connectorId) {
+        UI.setValue(tgtConn, ruleData.connection.target.connectorId);
+        await window.loadModulesFor('cible', tgtConn.value);
+      }
 
-      const srcMod = UI.get('source-module');
-      if (srcMod && ruleData.connection?.source?.module) {
-        UI.setValue(srcMod, ruleData.connection.source.module);
-      }
+      const srcMod = UI.get('source-module');
+      if (srcMod && ruleData.connection?.source?.module) {
+        UI.setValue(srcMod, ruleData.connection.source.module);
+      }
 
-      const tgtMod = UI.get('target-module');
-      if (tgtMod && ruleData.connection?.target?.module) {
-        UI.setValue(tgtMod, ruleData.connection.target.module);
-      }
+      const tgtMod = UI.get('target-module');
+      if (tgtMod && ruleData.connection?.target?.module) {
+        UI.setValue(tgtMod, ruleData.connection.target.module);
+      }
 
-      // Disable structural fields in edit mode
-      [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod].forEach(el => {
-        if (!el) return;
-        el.disabled = true;
-        if (el.selectize) el.selectize.disable();
-      });
+      // Disable structural fields in edit mode
+      [srcSol, tgtSol, srcConn, tgtConn, srcMod, tgtMod].forEach(el => {
+        if (!el) return;
+        el.disabled = true;
+        if (el.selectize) el.selectize.disable();
+      });
 
-      // Step 3 Hydration
-      const step3 = UI.get('step-3');
-      if(step3) {
-          UI.toggle(step3, true);
-          await window.loadStep3Params();
+      // Step 3 Hydration
+      const step3 = UI.get('step-3');
+      if(step3) {
+          UI.toggle(step3, true);
+          await window.loadStep3Params();
 
-          if (ruleData.syncOptions?.type) {
-             UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
-          }
-          if (ruleData.syncOptions?.duplicateField) {
-            const d = UI.get('duplicate-field');
-            if (d) { 
-                d.disabled = false; 
-                UI.setValue(d, ruleData.syncOptions.duplicateField); 
-            }
-          }
-          if (ruleData.params) {
-            Object.entries(ruleData.params).forEach(([k, v]) => {
-              UI.setValue(UI.get(k), v);
-            });
-          }
-      }
+          if (ruleData.syncOptions?.type) {
+              UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
+          }
+          if (ruleData.syncOptions?.duplicateField) {
+            const d = UI.get('duplicate-field');
+            if (d) { 
+                d.disabled = false; 
+                UI.setValue(d, ruleData.syncOptions.duplicateField); 
+            }
+          }
+          if (ruleData.params) {
+            Object.entries(ruleData.params).forEach(([k, v]) => {
+              UI.setValue(UI.get(k), v);
+            });
+          }
+      }
 
-      // Step 4 Hydration (Filters)
-      const step4 = UI.get('step-4');
-      if(step4) {
-          UI.toggle(step4, true);
-          await window.mydLoadRuleFilters();
-          
-          if (ruleData.filters && ruleData.filters.length > 0) {
-              if (typeof window.addFilterRow === 'function') {
-                  ruleData.filters.forEach(f => {
-                      window.addFilterRow(f.field, f.operator, f.value);
-                  });
-              } else {
-                  console.error('Function addFilterRow not found');
-              }
-          }
-      }
+      // Step 4 Hydration (Filters)
+      const step4 = UI.get('step-4');
+      if(step4) {
+          UI.toggle(step4, true);
+          await window.mydLoadRuleFilters();
+          
+          if (ruleData.filters && ruleData.filters.length > 0) {
+              if (typeof window.addFilterRow === 'function') {
+                  ruleData.filters.forEach(f => {
+                      window.addFilterRow(f.field, f.operator, f.value);
+                  });
+              }
+          }
+      }
 
-      // Step 5 Hydration (Mapping)
-      const step5 = UI.get('step-5');
-      if(step5) {
-          UI.toggle(step5, true);
-          window.initMappingUI();
-          
-          const tbody = UI.get('rule-mapping-body');
-          if (tbody) tbody.innerHTML = ''; 
+      // Step 5 Hydration (Mapping)
+      const step5 = UI.get('step-5');
+      if(step5) {
+          UI.toggle(step5, true);
+          window.initMappingUI();
+          
+          const tbody = UI.get('rule-mapping-body');
+          if (tbody) tbody.innerHTML = ''; 
 
-          (ruleData.mapping || []).forEach(row => {
+          (ruleData.mapping || []).forEach(row => {
             window.addMappingRow(tbody);
             const tr = tbody.lastElementChild;
             if(!tr) return;
@@ -1277,8 +1284,8 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
               slot.classList.remove('is-empty');
             }
           });
-        window.refreshTargetDropdowns();
-      }
+        window.refreshTargetDropdowns();
+      }
     if (ruleData.syncOptions?.duplicateField && typeof window.ensureDuplicateMappingRow === 'function') {
           let raw = ruleData.syncOptions.duplicateField;
           let values = [];
@@ -1297,18 +1304,18 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
               step5El.scrollIntoView({ behavior: 'smooth', block: 'start' });
           }, 300);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      if (typeof window.ruleInitDone === 'function') window.ruleInitDone();
-    }
-  }
+    } catch (e) {
+      console.error(e);
+    } finally {
+      if (typeof window.ruleInitDone === 'function') window.ruleInitDone();
+    }
+  }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', hydrateEditFromJson, { once: true });
-  } else {
-    hydrateEditFromJson();
-  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', hydrateEditFromJson, { once: true });
+  } else {
+    hydrateEditFromJson();
+  }
 })();
 
 /* ===========================================
@@ -1321,6 +1328,7 @@ $(function () {
     el.value = el.value.substring(0, start) + text + el.value.substring(end);
     el.selectionStart = el.selectionEnd = start + text.length;
     el.focus();
+    el.dispatchEvent(new Event('input', { bubbles: true }));
   };
 
   const UI_WIZ = {
@@ -1505,7 +1513,7 @@ $(function () {
   });
 
   // Saves the formula into the hidden field of the mapping row
-  $('#mapping-formula-save').on('click', function () {
+  $('#mapping-formula-save').on('click', function () {
     const modal = document.getElementById('mapping-formula');
     const id = modal.dataset.currentRowId;
     const inputId = modal.dataset.currentFormulaInputId;
@@ -1653,85 +1661,85 @@ $(document).ready(function() {
 });
 
 /* ===========================================
- * SIMULATION (Debug Version)
- * =========================================== */
+ * SIMULATION (Debug Version)
+ * =========================================== */
 (function () {
-  const modal = UI.get('mapping-simulation');
-  if (!modal) return;
+  const modal = UI.get('mapping-simulation');
+  if (!modal) return;
 
-  const endpoints = { run: modal.getAttribute('data-endpoint-run'), count: modal.getAttribute('data-endpoint-count') };
-  const EL = { res: modal.querySelector('#sim-result'), alert: modal.querySelector('#sim-alert'), input: modal.querySelector('#sim-record-id') };
+  const endpoints = { run: modal.getAttribute('data-endpoint-run'), count: modal.getAttribute('data-endpoint-count') };
+  const EL = { res: modal.querySelector('#sim-result'), alert: modal.querySelector('#sim-alert'), input: modal.querySelector('#sim-record-id') };
 
-  const showAlert = (msg, type = 'danger') => {
-    EL.alert.className = `alert alert-${type}`;
-    EL.alert.textContent = msg;
-    EL.alert.classList.remove('d-none');
-  };
+  const showAlert = (msg, type = 'danger') => {
+    EL.alert.className = `alert alert-${type}`;
+    EL.alert.textContent = msg;
+    EL.alert.classList.remove('d-none');
+  };
 
-  async function runSim(manual) {
-    EL.alert.classList.add('d-none');
-    if (!endpoints.run) return showAlert('Missing endpoint');
+  async function runSim(manual) {
+    EL.alert.classList.add('d-none');
+    if (!endpoints.run) return showAlert('Missing endpoint');
 
-    const fd = new FormData();
-    const getVal = (id) => UI.get(id)?.value || '';
-    const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text?.trim().toLowerCase() || ''; };
+    const fd = new FormData();
+    const getVal = (id) => UI.get(id)?.value || '';
+    const getTxt = (id) => { const el = UI.get(id); return el?.options[el.selectedIndex]?.text?.trim().toLowerCase() || ''; };
 
-    fd.append('src_solution_id', getVal('source-solution'));
-    fd.append('tgt_solution_id', getVal('target-solution'));
-    fd.append('src_solution_name', getTxt('source-solution'));
-    fd.append('tgt_solution_name', getTxt('target-solution'));
-    fd.append('src_connector_id', getVal('source-connector'));
-    fd.append('tgt_connector_id', getVal('target-connector'));
-    fd.append('src_module', getVal('source-module'));
-    fd.append('tgt_module', getVal('target-module'));
+    fd.append('src_solution_id', getVal('source-solution'));
+    fd.append('tgt_solution_id', getVal('target-solution'));
+    fd.append('src_solution_name', getTxt('source-solution'));
+    fd.append('tgt_solution_name', getTxt('target-solution'));
+    fd.append('src_connector_id', getVal('source-connector'));
+    fd.append('tgt_connector_id', getVal('target-connector'));
+    fd.append('src_module', getVal('source-module'));
+    fd.append('tgt_module', getVal('target-module'));
 
-    const pContainer = UI.get('step-3-params-container');
-    if (pContainer) {
-      pContainer.querySelectorAll('input, select').forEach(el => {
-        if(el.name) {
-            fd.append(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
-        }
-      });
-    }
+    const pContainer = UI.get('step-3-params-container');
+    if (pContainer) {
+      pContainer.querySelectorAll('input, select').forEach(el => {
+        if(el.name) {
+            fd.append(el.name === 'mode' ? 'sync_mode' : el.name, el.value);
+        }
+      });
+    }
 
-    const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
-    
-    rows.forEach(tr => {
-        const tgt = tr.querySelector('.rule-mapping-target')?.value;
-        if(!tgt) return;
-        
-        const badges = Array.from(tr.querySelectorAll('.mapping-src-badge'));
-        badges.forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));  
-        const form = tr.querySelector('.rule-mapping-formula-input')?.value;
-        if(form) fd.append(`formules[${tgt}][]`, form);
-    });
+    const rows = Array.from(document.querySelectorAll('#rule-mapping-body tr'));
+    
+    rows.forEach(tr => {
+        const tgt = tr.querySelector('.rule-mapping-target')?.value;
+        if(!tgt) return;
+        
+        const badges = Array.from(tr.querySelectorAll('.mapping-src-badge'));
+        badges.forEach(b => fd.append(`champs[${tgt}][]`, b.dataset.field));  
+        const form = tr.querySelector('.rule-mapping-formula-input')?.value;
+        if(form) fd.append(`formules[${tgt}][]`, form);
+    });
 
-    if (manual) {
-      const id = EL.input.value.trim();
-      if (!id) return showAlert('ID required', 'warning');
-      fd.append('query', id);
-    }
-    
-    try {
-      
-      const res = await fetch(endpoints.run, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });      
-      const text = await res.text();
-      EL.res.innerHTML = text;
-      
-    } catch (e) {
-      EL.res.innerHTML = '';
-      showAlert('Simulation network error');
-    } finally {
-        console.groupEnd();
-    }
-  }
+    if (manual) {
+      const id = EL.input.value.trim();
+      if (!id) return showAlert('ID required', 'warning');
+      fd.append('query', id);
+    }
+    
+    try {
+      
+      const res = await fetch(endpoints.run, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest' }, body: fd });      
+      const text = await res.text();
+      EL.res.innerHTML = text;
+      
+    } catch (e) {
+      EL.res.innerHTML = '';
+      showAlert('Simulation network error');
+    } finally {
+        console.groupEnd();
+    }
+  }
 
-  modal.querySelector('#sim-run-manual')?.addEventListener('click', () => runSim(true));
-  modal.querySelector('#sim-run-simple')?.addEventListener('click', () => runSim(false));
+  modal.querySelector('#sim-run-manual')?.addEventListener('click', () => runSim(true));
+  modal.querySelector('#sim-run-simple')?.addEventListener('click', () => runSim(false));
 })();
 /* ===========================================
- * SELECTIZE INIT (Global initialization)
- * =========================================== */
+ * SELECTIZE INIT (Global initialization)
+ * =========================================== */
 $(document).ready(function() {
     var renderSolution = function(item, escape) {
         if (!item.value || item.value === '') return '<div style="display:none !important;"></div>';
@@ -2049,6 +2057,7 @@ $switchEl.on('change', function() {
 
     const newPos = start + textToInsert.length;
     textarea.setSelectionRange(newPos, newPos);
+    textarea.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
   window.loadPlValues = function (side, fieldName) {

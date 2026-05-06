@@ -56,6 +56,7 @@ use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Service\DebugLogger;
 // use App\Service\DocumentElasticsearchService;
 
 /**
@@ -63,6 +64,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
  */
 class FilterController extends AbstractController
 {
+    private DebugLogger $debugLogger;
     private const FILTER_MAP = [
         'reference' => 'FluxFilterReference',
         'operators' => 'FluxFilterOperators',
@@ -131,7 +133,9 @@ class FilterController extends AbstractController
         AlertBootstrapInterface $alert,
         DocumentRepository $documentRepository,
         // ?DocumentElasticsearchService $elasticsearchService = null,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->sessionService = $sessionService;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
@@ -158,6 +162,9 @@ class FilterController extends AbstractController
  */
 public function emptySearchAction(Request $request): Response
 {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
     $formFilter = $this->createForm(FilterType::class, null);
     $form = $this->createForm(CombinedFilterType::class, null, [
         'entityManager' => $this->entityManager,
@@ -176,7 +183,7 @@ public function emptySearchAction(Request $request): Response
         'page' => 1,
     ], false);
 
-    return $this->render('documentFilter.html.twig', [
+    return $__debugReturn = $this->render('documentFilter.html.twig', [
         'form' => $form->createView(),
         'formFilter'=> $formFilter->createView(),
         'documents' => $documents,
@@ -189,22 +196,31 @@ public function emptySearchAction(Request $request): Response
         'nbDocuments' => 0,
         'clearStorageScript' => null,
     ]);
-}
+} finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
 
 /**
  * @Route("/remove-filter", name="remove_filter", methods={"POST"})
  */
 public function removeFilter(Request $request): JsonResponse
 {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
     $filterName = $request->request->get('filterName');
 
     if ($filterName) {
         $this->sessionService->{'remove'.$filterName}();
-        return new JsonResponse(['status' => 'success']);
+        return $__debugReturn = new JsonResponse(['status' => 'success']);
     }
 
-    return new JsonResponse(['status' => 'error', 'message' => 'No filter name provided']);
-}
+    return $__debugReturn = new JsonResponse(['status' => 'error', 'message' => 'No filter name provided']);
+} finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
 
     // Function to disylay the documents with filters
 
@@ -214,6 +230,9 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page, 'search' => $search]);
+        $__debugReturn = null;
+        try {
         $clearStorageScript = null;
 
         if ($request->query->has('source_id')) {
@@ -353,7 +372,7 @@ public function removeFilter(Request $request): JsonResponse
                 // redirect to the list page
                 // add a flash errore message that says there are not enough results for pagination
                 $this->addFlash('filter.document.danger', 'Pagination error, return to page 1');
-                return $this->redirectToRoute('document_empty_search');
+                return $__debugReturn = $this->redirectToRoute('document_empty_search');
             }
 
             // If everything is ok with the pagination
@@ -384,7 +403,7 @@ public function removeFilter(Request $request): JsonResponse
             $csvdocumentids .= $document['id'].',';
         }
 
-        return $this->render('documentFilter.html.twig', [
+        return $__debugReturn = $this->render('documentFilter.html.twig', [
             'form' => $form->createView(),
             'formFilter'=> $formFilter->createView(),
             'documents' => $documents,
@@ -397,6 +416,9 @@ public function removeFilter(Request $request): JsonResponse
             'nbDocuments' => $nbDocuments,
             'clearStorageScript' => $clearStorageScript,
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -404,13 +426,19 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function getLatestLogMsg($docId)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['docId' => $docId]);
+        $__debugReturn = null;
+        try {
         $uniqueDocument = $this->entityManager->getRepository(Document::class)->findOneBy(['id' => $docId]);
 
         $latestLog = $this->entityManager->getRepository(Log::class)->findOneBy(['document' => $uniqueDocument, 'type' => 'E'], ['created' => 'DESC']);
         if ($latestLog) {
-            return new Response($latestLog->getMessage());
+            return $__debugReturn = new Response($latestLog->getMessage());
         }
-        return new Response('');
+        return $__debugReturn = new Response('');
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -418,6 +446,9 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function updateDescription(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $ruleId = $request->request->get('ruleId');
         $description = $request->request->get('description');
         $entityManager = $this->entityManager;
@@ -444,11 +475,17 @@ public function removeFilter(Request $request): JsonResponse
         $descriptionRuleParam->setValue($description);
         $entityManager->flush();
 
-        return new Response('', Response::HTTP_OK);
+        return $__debugReturn = new Response('', Response::HTTP_OK);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     
     public function sortDocuments(array $documents, string $sortField, string $sortOrder){
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents, 'sortField' => $sortField, 'sortOrder' => $sortOrder]);
+        $__debugReturn = null;
+        try {
         // Sort the arrray of documents according to the sortField and sortOrder
         $sort = array();
         foreach ($documents as $key => $value) {
@@ -460,26 +497,38 @@ public function removeFilter(Request $request): JsonResponse
             array_multisort($sort, SORT_DESC, $documents);
         }
 
-        return $documents;
+        return $__debugReturn = $documents;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Verify if each filter is empty, and return true if all filters are empty
     public function verifyIfEmptyFilters()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $filterMap = self::FILTER_MAP;
 
         foreach ($filterMap as $dataKey => $filterName) {
             $value = $this->sessionService->{'get' . $filterName}();
 
             if (!empty($value)) {
-                return false;
+                return $__debugReturn = false;
             }
         }
-        return true;
+        return $__debugReturn = true;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the session service and return an array
     public function getFluxFilterData() {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $data = [];
         $filterMap = self::FILTER_MAP;
 
@@ -488,12 +537,17 @@ public function removeFilter(Request $request): JsonResponse
                 $data[$dataKey] = $value;
         }
 
-        return $data;
+        return $__debugReturn = $data;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the form and return an array
     public function getDataFromForm($documentFormData, $ruleFormData, $sourceFormData, $ruleName, $operators)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documentFormData' => $documentFormData, 'ruleFormData' => $ruleFormData, 'sourceFormData' => $sourceFormData, 'ruleName' => $ruleName, 'operators' => $operators]);
+        try {
         try {
             $data = [
                 'reference' => ($documentFormData['reference']) ? $documentFormData['reference'] : null,
@@ -519,19 +573,30 @@ public function removeFilter(Request $request): JsonResponse
         } catch (\Exception $e) {
             throw new \Exception('Failed to create data from form: ' . $e->getMessage());
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Get the names of the rules
     public function getRuleNameData($ruleFormData, $ruleName)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleFormData' => $ruleFormData, 'ruleName' => $ruleName]);
+        try {
         if ($ruleFormData->isNameSet()) {
             return $ruleName[$ruleFormData->getName()];
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
     // Get the data from the statuses
     public function getStatusData($documentFormData)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documentFormData' => $documentFormData]);
+        $__debugReturn = null;
+        try {
         $statusIndex = $documentFormData['status'];
 
         $statuses =   [
@@ -554,12 +619,18 @@ public function removeFilter(Request $request): JsonResponse
             'flux.status.not_found' => 'Not_found',
         ];
 
-        return $statuses[$statusIndex];
+        return $__debugReturn = $statuses[$statusIndex];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the global statuses
     public function getGlobalStatusData($documentFormData)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documentFormData' => $documentFormData]);
+        $__debugReturn = null;
+        try {
         $statusList = [
             'flux.gbl_status.open' => 'Open',
             'flux.gbl_status.close' => 'Close',
@@ -578,12 +649,18 @@ public function removeFilter(Request $request): JsonResponse
             $data['gblstatus'] = null;
         }
 
-        return $data;   
+        return $__debugReturn = $data;   
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the document type
     public function getDocumentType($documentFormData)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documentFormData' => $documentFormData]);
+        $__debugReturn = null;
+        try {
         $listOfTypes = 
         [
             'flux.type.create' => 'C',
@@ -592,44 +669,68 @@ public function removeFilter(Request $request): JsonResponse
             'flux.type.search' => 'S',
         ];
 
-        return $listOfTypes[$documentFormData['type']];
+        return $__debugReturn = $listOfTypes[$documentFormData['type']];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the module source
     public function getModuleSourceData($ruleFormData)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleFormData' => $ruleFormData]);
+        $__debugReturn = null;
+        try {
         $sourceModules = RuleRepository::findModuleSource($this->entityManager);
         $inversedModules = array_flip($sourceModules);
 
-        return $inversedModules[$ruleFormData->getModuleSource()];
+        return $__debugReturn = $inversedModules[$ruleFormData->getModuleSource()];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the module target
     public function getModuleTargetData($ruleFormData)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleFormData' => $ruleFormData]);
+        $__debugReturn = null;
+        try {
         $targetModules = RuleRepository::findModuleTarget($this->entityManager);
         $inversedModules = array_flip($targetModules);
 
-        return $inversedModules[$ruleFormData->getModuleTarget()];
+        return $__debugReturn = $inversedModules[$ruleFormData->getModuleTarget()];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Get the data from the configuration of the limimt of the search
     public function getLimitConfig()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // Get the limit parameter
         $configRepository = $this->entityManager->getRepository(Config::class);
         $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
         if (!empty($searchLimit)) {
             $limit = $searchLimit->getValue();
         }
-        return $limit;
+        return $__debugReturn = $limit;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Initialize the search for pagination and limit and launch the search of the documents
     public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['cleanData' => $cleanData, 'page' => $page, 'limit' => $limit]);
+        $__debugReturn = null;
+        try {
         if (empty($cleanData) && $page === 1) {
-            return [
+            return $__debugReturn = [
                 'documents' => [],
                 'total' => 0,
                 'page' => $page,
@@ -637,16 +738,22 @@ public function removeFilter(Request $request): JsonResponse
             ];
         }
         $searchResult = $this->searchDocuments($cleanData, $page, $limit);
-        return [
+        return $__debugReturn = [
             'documents' => $searchResult['results'],
             'total' => $searchResult['total'],
             'page' => $searchResult['page'],
             'limit' => $limit,
         ];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Search the documents using Elasticsearch or fallback to SQL
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data, 'page' => $page, 'limit' => $limit]);
+        $__debugReturn = null;
+        try {
         // // Check if Elasticsearch is enabled in database config
         // $elasticsearchEnabled = ($this->params['elasticsearch_enabled'] ?? '0') === '1';
 
@@ -663,8 +770,10 @@ public function removeFilter(Request $request): JsonResponse
         // }
 
         // Fallback to SQL
-        $this->logger->info('Using SQL for document search');
-        return $this->searchDocumentsWithSql($data, $page, $limit);
+        return $__debugReturn = $this->searchDocumentsWithSql($data, $page, $limit);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // /**
@@ -720,6 +829,9 @@ public function removeFilter(Request $request): JsonResponse
      * Search documents using SQL (original implementation)
      */
     protected function searchDocumentsWithSql($data, $page = 1, $limit = 1000) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data, 'page' => $page, 'limit' => $limit]);
+        $__debugReturn = null;
+        try {
 
         $join = '';
         $where = '';
@@ -1035,18 +1147,27 @@ public function removeFilter(Request $request): JsonResponse
         $totalCount = $countStmt->executeQuery()->fetchAssociative()['total'];
 
         // Return results with metadata
-        return [
+        return $__debugReturn = [
             'results' => $results,
             'total' => $totalCount,
             'page' => $page,
             'perPage' => $perPage
         ];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getSingleRuleIdFromRuleName($ruleName)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleName' => $ruleName]);
+        $__debugReturn = null;
+        try {
         $ruleRepository = $this->entityManager->getRepository(Rule::class);
-        return $ruleRepository->findOneBy(['name' => $ruleName])->getId();
+        return $__debugReturn = $ruleRepository->findOneBy(['name' => $ruleName])->getId();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1055,6 +1176,9 @@ public function removeFilter(Request $request): JsonResponse
      */
     private function addDocumentUrls(array $documents): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
+        $__debugReturn = null;
+        try {
         // Get user preferences once (not per document)
         $user = $this->getUser();
         $dateFormat = $user ? $user->getDateFormat() . ' H:i:s' : 'Y-m-d H:i:s';
@@ -1084,7 +1208,10 @@ public function removeFilter(Request $request): JsonResponse
                 $document['source_date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
             );
         }
-        return $documents;
+        return $__debugReturn = $documents;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1093,8 +1220,11 @@ public function removeFilter(Request $request): JsonResponse
      */
     private function formatDateCompensated(?string $date, string $format, \DateTimeZone $utcTz, \DateTimeZone $targetTz): string
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['date' => $date, 'format' => $format, 'utcTz' => $utcTz, 'targetTz' => $targetTz]);
+        $__debugReturn = null;
+        try {
         if (empty($date)) {
-            return '';
+            return $__debugReturn = '';
         }
 
         try {
@@ -1102,15 +1232,21 @@ public function removeFilter(Request $request): JsonResponse
             $dateObj = new \DateTime($date, $utcTz);
             // Convert to target timezone
             $dateObj->setTimezone($targetTz);
-            return $dateObj->format($format);
+            return $__debugReturn = $dateObj->format($format);
         } catch (\Exception $e) {
-            return $date; // Return original if parsing fails
+            return $__debugReturn = $date; // Return original if parsing fails
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     //Create pagination using the Pagerfanta Bundle based on a request
     private function nav_pagination(array $params, bool $orm = true): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['params' => $params, 'orm' => $orm]);
+        $__debugReturn = null;
+        try {
         /*
          * adapter_em_repository = requete
          * maxPerPage = integer
@@ -1145,7 +1281,10 @@ public function removeFilter(Request $request): JsonResponse
             throw $this->createNotFoundException(sprintf('Page not found. %s %s %d', $e->getMessage(), $e->getFile(), $e->getLine()));
         }
 
-        return $compact;
+        return $__debugReturn = $compact;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1153,6 +1292,9 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function exportDocumentsToCsv(): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
 
         $timezone = $this->getUser()?->getTimezone() ?: 'UTC';
         $myUser = $this->getUser();
@@ -1295,7 +1437,10 @@ public function removeFilter(Request $request): JsonResponse
         $response->headers->set('Pragma', 'no-cache');
         $response->headers->set('Expires', '0');
 
-        return $response;
+        return $__debugReturn = $response;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1303,7 +1448,13 @@ public function removeFilter(Request $request): JsonResponse
      */
     public function getRuleNames(EntityManagerInterface $entityManager): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entityManager' => $entityManager]);
+        $__debugReturn = null;
+        try {
         $ruleNames = RuleRepository::findActiveRulesNames($entityManager, true);
-        return new JsonResponse($ruleNames);
+        return $__debugReturn = new JsonResponse($ruleNames);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

@@ -62,6 +62,7 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use App\Service\DebugLogger;
 
 #[Route("/rule")]
 class RuleController extends AbstractController
@@ -83,7 +84,8 @@ class RuleController extends AbstractController
         private RulePersistenceService $rulePersistenceService,
         private RuleQueryService $ruleQueryService,
         private RuleStepService $ruleStepService,
-        private RuleSimulationService $ruleSimulationService
+        private RuleSimulationService $ruleSimulationService,
+        private DebugLogger $debugLogger
     ) {}
 
     // =========================================================================
@@ -94,6 +96,9 @@ class RuleController extends AbstractController
     #[Route('/list/page-{page}', name: 'regle_list_page', requirements: ['page' => '\d+'])]
     public function ruleListAction(Request $request, int $page = 1): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page]);
+        $__debugReturn = null;
+        try {
         try {
             $ruleName = $request->query->get('rule_name');
             $limit = $this->tools->getParamValue('ruleListPager') ?? 20;
@@ -106,7 +111,7 @@ class RuleController extends AbstractController
             $pagerfanta->setMaxPerPage($limit);
             $pagerfanta->setCurrentPage($page);
 
-            return $this->render('Rule/list.html.twig', [
+            return $__debugReturn = $this->render('Rule/list.html.twig', [
                 'nb_rule'  => $pagerfanta->getNbResults(),
                 'entities' => iterator_to_array($pagerfanta->getCurrentPageResults()),
                 'pager'    => $pagerfanta,
@@ -114,33 +119,44 @@ class RuleController extends AbstractController
         } catch (\Exception $e) {
             throw $this->createNotFoundException('Error : ' . $e->getMessage());
         }
+    } finally {
+        $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+    }
     }
 
     #[Route('/delete/{id}', name: 'regle_delete', methods: ['GET', 'POST'])]
     public function deleteRule(Rule $rule): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         if (!$this->getUser()->isAdmin() && $rule->getCreatedBy()->getId() !== $this->getUser()->getId()) {
-            return $this->redirect($this->generateUrl('regle_list'));
+            return $__debugReturn = $this->redirect($this->generateUrl('regle_list'));
         }
 
         try {
             $this->rulePersistenceService->deleteRule($rule);
             $this->addFlash('rule.delete.success', $this->translator->trans('rule.delete.success'));
-            return $this->redirect($this->generateUrl('regle_list'));
+            return $__debugReturn = $this->redirect($this->generateUrl('regle_list'));
         } catch (Exception $e) {
             $parts = explode('|', $e->getMessage());
             $msg = $this->translator->trans($parts[0]) . (isset($parts[1]) ? ' ' . $parts[1] : '');
             $this->addFlash('rule.error', $msg);
-            return $this->redirect($this->generateUrl('regle_list'));
+            return $__debugReturn = $this->redirect($this->generateUrl('regle_list'));
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/duplic_rule/{id}', name: 'duplic_rule')]
     public function duplicateRule(Rule $rule, Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule, 'request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $newRule = new Rule();
-            // Récupération sécurisée des IDs solutions
             $srcSolId = $rule->getConnectorSource()?->getSolution()?->getId();
             $tgtSolId = $rule->getConnectorTarget()?->getSolution()?->getId();
 
@@ -156,32 +172,41 @@ class RuleController extends AbstractController
                     'connectorSource' => $form->get('connectorSource')->getData(),
                     'connectorTarget' => $form->get('connectorTarget')->getData(),
                 ];
-                
+
                 $this->rulePersistenceService->duplicateRule($rule, $data, $this->getUser());
                 $this->addFlash('rule.duplicate.success', $this->translator->trans('duplicate_rule.success_duplicate'));
-                
-                return $this->redirect($this->generateUrl('regle_list'));
+
+                return $__debugReturn = $this->redirect($this->generateUrl('regle_list'));
             }
 
-            return $this->render('Rule/create/duplic.html.twig', [
+            return $__debugReturn = $this->render('Rule/create/duplic.html.twig', [
                 'rule' => $rule,
                 'connectorSourceUser' => $rule->getConnectorSource()?->getName(),
                 'connectorTarget' => $rule->getConnectorTarget()?->getName(),
                 'form' => $form->createView(),
             ]);
         } catch (Exception $e) {
-            return new JsonResponse($e->getMessage());
+            return $__debugReturn = new JsonResponse($e->getMessage());
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/update/{id}', name: 'regle_update', methods: ['GET', 'POST'])]
     public function ruleUpdActive(Rule $rule): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         try {
             $r = $this->rulePersistenceService->toggleActive($rule);
-            return new Response((string)$r);
+            return $__debugReturn = new Response((string)$r);
         } catch (Exception $e) {
-            return new JsonResponse($e->getMessage());
+            return $__debugReturn = new JsonResponse($e->getMessage());
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -192,96 +217,135 @@ class RuleController extends AbstractController
     #[Route('/create', name: 'regle_stepone_animation', methods: ['GET'])]
     public function create(): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
         $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);
         $ruleKey = $this->sessionService->getParamRuleLastKey();
         $lstFunctions = $this->entityManager->getRepository(Functions::class)->findAll();
 
-        return $this->render('Rule/create/index.html.twig', [
+        return $__debugReturn = $this->render('Rule/create/index.html.twig', [
             'solutions' => $solutions,
             'ruleKey'   => $ruleKey,
             'lst_functions' => $lstFunctions,
             'rule' => null
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/rule/create/save', name: 'rule_create_save', methods: ['POST'])]
     public function ruleCreateSave(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $result = $this->rulePersistenceService->saveRule($request->request->all(), $this->getUser());
-            
+
             $msg = $result['is_edit'] ? 'edit_rule.success' : 'create_rule.success';
             $flash = $result['is_edit'] ? 'rule.edit.success' : 'rule.create.success';
             $this->addFlash($flash, $this->translator->trans($msg));
 
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'ok' => true,
                 'id' => $result['id'],
                 'redirect' => $this->generateUrl('regle_open', ['id' => $result['id']]),
             ]);
         } catch (\Throwable $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/inputs', name: 'regle_inputs', methods: ['POST'], options: ['expose' => true])]
     public function ruleInputs(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $result = $this->ruleStepService->handleConnectionInput($request->request->all());
-            
+
             if (isset($result['type']) && $result['type'] === 'form') {
-                return $this->render('Ajax/result_liste_inputs.html.twig', [
+                return $__debugReturn = $this->render('Ajax/result_liste_inputs.html.twig', [
                     'form' => $result['form'],
                     'parent' => $result['parent'],
                 ]);
             }
-            return new JsonResponse($result);
+            return $__debugReturn = new JsonResponse($result);
         } catch (Exception $e) {
-            return new JsonResponse(['success' => false, 'message' => $e->getMessage()]);
+            return $__debugReturn = new JsonResponse(['success' => false, 'message' => $e->getMessage()]);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/inputs/name_unique/', name: 'regle_inputs_name_unique', methods: ['POST'], options: ['expose' => true])]
     public function ruleNameUniq(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $exists = $this->ruleStepService->checkNameUniqueness((string)$request->request->get('name'));
-            return new JsonResponse($exists);
+            return $__debugReturn = new JsonResponse($exists);
         } catch (Exception $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/create/list-connectors', name: 'regle_list_connectors', methods: ['GET'])]
     public function listConnectors(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $solutionId = $request->query->getInt('solution_id');
         $connectors = $this->ruleStepService->getActiveConnectors($solutionId);
         $solution = $this->entityManager->getRepository(Solution::class)->find($solutionId);
 
-        return $this->render('Rule/create/ajax_step1/_options_connectors.html.twig', [
+        return $__debugReturn = $this->render('Rule/create/ajax_step1/_options_connectors.html.twig', [
             'connectors' => $connectors,
             'solutionSlug' => $solution ? strtolower($solution->getName()) : '',
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/create/list-module', name: 'regle_list_module', methods: ['GET'])]
     public function listModules(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $data = $this->ruleStepService->getAvailableModules($request->query->getInt('id'), $request->query->get('type', 'source'));
-            return $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
+            return $__debugReturn = $this->render('Rule/create/ajax_step1/_options_modules.html.twig', [
                 'modules' => $data['modules'],
             ]);
         } catch (\Throwable $e) {
-            return new Response($e->getMessage(), 400);
+            return $__debugReturn = new Response($e->getMessage(), 400);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/create/module-fields', name: 'regle_module_fields', methods: ['GET'])]
     public function getModuleFields(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $connectorId = $request->query->getInt('connector_id');
             $module      = (string) $request->query->get('module', '');
@@ -289,13 +353,13 @@ class RuleController extends AbstractController
             $withPicklists = $request->query->getBoolean('with_picklists', false);
 
             if ($connectorId <= 0 || $module === '') {
-                return new JsonResponse(['error' => 'Missing connector_id or module'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Missing connector_id or module'], 400);
             }
 
             if ($withPicklists) {
                 $data = $this->ruleStepService->getModuleFieldsWithPicklists($connectorId, $module, $type);
 
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'fields'    => $data['fields'] ?? [],
                     'picklists' => $data['picklists'] ?? [],
                     'meta'      => $data['meta'] ?? [],
@@ -304,61 +368,60 @@ class RuleController extends AbstractController
 
             $fields = $this->ruleStepService->getModuleFields($connectorId, $module, $type);
 
-            return new JsonResponse(['fields' => $fields]);
+            return $__debugReturn = new JsonResponse(['fields' => $fields]);
         } catch (\Throwable $e) {
-            return new JsonResponse(['error' => $e->getMessage()], 400);
+            return $__debugReturn = new JsonResponse(['error' => $e->getMessage()], 400);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/create/filters', name: 'regle_step_filters', methods: ['GET'])]
     public function ruleStepFilters(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $fieldsGrouped = $this->ruleStepService->getFieldsForFilters($request->query->all());
-        
-        $operators = [
-            $this->translator->trans('filter.content')    => 'content',
-            $this->translator->trans('filter.notcontent') => 'notcontent',
-            $this->translator->trans('filter.begin')      => 'begin',
-            $this->translator->trans('filter.end')        => 'end',
-            $this->translator->trans('filter.gt')         => 'gt',
-            $this->translator->trans('filter.lt')         => 'lt',
-            $this->translator->trans('filter.equal')      => 'equal',
-            $this->translator->trans('filter.different')  => 'different',
-            $this->translator->trans('filter.gteq')       => 'gteq',
-            $this->translator->trans('filter.lteq')       => 'lteq',
-            $this->translator->trans('filter.in')         => 'in',
-            $this->translator->trans('filter.notin')      => 'notin',
-        ];
+        $ruleId = $request->query->get('rule_id');
 
-        // Charger les filtres existants si mode edit (rule_id présent)
-        $filters = [];
-        if ($ruleId = $request->query->get('rule_id')) {
-            $filters = $this->entityManager->getRepository(\App\Entity\RuleFilter::class)->findBy(['rule' => $ruleId]);
+        if ($ruleId) {
+            $rule = $this->entityManager->getRepository(Rule::class)->find($ruleId);
+            if ($rule && !$this->getUser()->isAdmin() && $rule->getCreatedBy()->getId() !== $this->getUser()->getId()) {
+                return $__debugReturn = new Response('Access denied', 403);
+            }
         }
 
-        return $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+        return $__debugReturn = $this->render('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
             'fieldsGrouped' => $fieldsGrouped,
-            'operators'     => $operators,
-            'filters'       => $filters,
+            'operators'     => $this->ruleStepService->getFilterOperators(),
+            'filters'       => $this->ruleStepService->getFiltersByRuleId($ruleId),
             'ruleKey'       => $ruleId,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/create/mapping-initial-rows', name: 'rule_step_mapping_initial', methods: ['GET'])]
     public function getMappingInitialRows(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $connectorId = $request->query->getInt('connector_id');
         $module = $request->query->get('module');
         $srcConnectorId = $request->query->getInt('src_connector_id');
         $srcModule = $request->query->get('src_module');
 
         if (!$connectorId || !$module) {
-            return new Response('');
+            return $__debugReturn = new Response('');
         }
 
         try {
             $targetFields = $this->ruleStepService->getModuleFieldsExtended($connectorId, $module);
-            
+
             $sourceFields = [];
             if ($srcConnectorId && $srcModule) {
                 $sourceFields = $this->ruleStepService->getModuleFields($srcConnectorId, $srcModule, 'source');
@@ -368,19 +431,25 @@ class RuleController extends AbstractController
                 return (isset($f['required']) && ($f['required'] === true || $f['required'] === 1 || $f['required'] === '1'));
             });
 
-            return $this->render('Rule/create/ajax_step5/_mapping_rows.html.twig', [
+            return $__debugReturn = $this->render('Rule/create/ajax_step5/_mapping_rows.html.twig', [
                 'requiredFields' => $requiredFields,
                 'sourceFields'   => $sourceFields,
             ]);
 
         } catch (\Exception $e) {
-            return new Response('');
+            return $__debugReturn = new Response('');
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/create/params/fields', name: 'regle_params_fields', methods: ['GET'])]
     public function getParamsFields(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $data = $this->ruleStepService->getStep3Params(
                 (int)$request->query->get('src_connector'),
@@ -389,21 +458,83 @@ class RuleController extends AbstractController
                 (string)$request->query->get('tgt_module')
             );
 
-            return $this->render('Rule/create/ajax_step3/_options_params.html.twig', [
+            return $__debugReturn = $this->render('Rule/create/ajax_step3/_options_params.html.twig', [
                 'rule_params'      => $data['rule_params'],
                 'duplicate_target' => $data['duplicate_target'],
             ]);
         } catch (\Throwable $e) {
-            return new Response('<div class="alert alert-danger">' . $e->getMessage() . '</div>', 500);
+            return $__debugReturn = new Response('<div class="alert alert-danger">' . $e->getMessage() . '</div>', 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    /**
+     * Combined endpoint for edit mode: returns step3 params HTML + step4 filters HTML
+     * in a single request with only one login per external system.
+     */
+    #[Route('/create/edit-init', name: 'rule_edit_init', methods: ['GET'])]
+    public function editInit(Request $request): JsonResponse
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
+        try {
+            $srcConnectorId = $request->query->getInt('src_connector_id');
+            $tgtConnectorId = $request->query->getInt('tgt_connector_id');
+            $srcModule = (string) $request->query->get('src_module', '');
+            $tgtModule = (string) $request->query->get('tgt_module', '');
+            $ruleId = $request->query->get('rule_id');
+
+            if ($ruleId) {
+                $rule = $this->entityManager->getRepository(Rule::class)->find($ruleId);
+                if ($rule && !$this->getUser()->isAdmin() && $rule->getCreatedBy()->getId() !== $this->getUser()->getId()) {
+                    return $__debugReturn = new JsonResponse(['error' => 'Access denied'], 403);
+                }
+            }
+
+            $data = $this->ruleStepService->getEditInitData(
+                $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule, $ruleId
+            );
+
+            $step3Html = $this->renderView('Rule/create/ajax_step3/_options_params.html.twig', [
+                'rule_params'      => $data['step3']['rule_params'],
+                'duplicate_target' => $data['step3']['duplicate_target'],
+            ]);
+
+            // Render step4 HTML
+            $step4Html = $this->renderView('Rule/create/ajax_step4/_options_fields_filters.html.twig', [
+                'fieldsGrouped' => $data['step4']['fieldsGrouped'],
+                'operators'     => $data['step4']['operators'],
+                'filters'       => $data['step4']['filters'],
+                'ruleKey'       => $ruleId,
+            ]);
+
+            return $__debugReturn = new JsonResponse([
+                'step3Html' => $step3Html,
+                'step4Html' => $step4Html,
+            ]);
+        } catch (\Throwable $e) {
+            return $__debugReturn = new JsonResponse(['error' => $e->getMessage()], 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/create/step3/formula/', name: 'regle_formula', methods: ['POST'])]
     public function ruleVerifFormula(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $this->formuleManager->init($request->request->get('formula'));
         $this->formuleManager->generateFormule();
-        return new JsonResponse($this->formuleManager->parse['error']);
+        return $__debugReturn = new JsonResponse($this->formuleManager->parse['error']);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // =========================================================================
@@ -413,11 +544,14 @@ class RuleController extends AbstractController
     #[Route('/create/step3/simulation/', name: 'regle_simulation', methods: ['POST'])]
     public function ruleSimulation(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $ruleKey = $this->sessionService->getParamRuleLastKey();
         $simulationData = $this->ruleSimulationService->simulatePreview($request->request->all(), $ruleKey);
 
         if (isset($simulationData['error'])) {
-            return new Response(json_encode(['error' => $simulationData['error']]), 400);
+            return $__debugReturn = new Response(json_encode(['error' => $simulationData['error']]), 400);
         }
 
         $paramsForView = [
@@ -425,19 +559,60 @@ class RuleController extends AbstractController
             'cible'  => ['solution' => $request->request->get('tgt_solution_name'), 'module' => $request->request->get('tgt_module')],
         ];
 
-        return $this->render('Rule/_simulation_tab.html.twig', array_merge($simulationData, [
+        return $__debugReturn = $this->render('Rule/_simulation_tab.html.twig', array_merge($simulationData, [
             'params' => $paramsForView
         ]));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/simule/{id}', name: 'path_fiche_params_simulate', methods: ['GET'])]
     public function ruleSimulateTransfers(Rule $rule): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         try {
             $count = $this->ruleSimulationService->simulateCount($rule);
-            return new Response((string) $count);
+            return $__debugReturn = new Response((string) $count);
         } catch (Exception $e) {
-            return new Response(json_encode(['error' => $e->getMessage()]));
+            return $__debugReturn = new Response(json_encode(['error' => $e->getMessage()]));
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    #[Route('/{id}/simulation/run', name: 'rule_simulation_run', methods: ['POST'])]
+    public function ruleSimulationRun(Rule $rule, Request $request): Response
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule, 'request' => $request]);
+        $__debugReturn = null;
+        try {
+        $requestData = $this->ruleSimulationService->buildRequestDataFromRule($rule);
+
+        $query = $request->request->get('query');
+        if (!empty($query)) {
+            $requestData['query'] = $query;
+        }
+
+        $simulationData = $this->ruleSimulationService->simulatePreview($requestData, $rule->getId());
+
+        if (isset($simulationData['error'])) {
+            return $__debugReturn = new Response(json_encode(['error' => $simulationData['error']]), 400);
+        }
+
+        $paramsForView = [
+            'source' => ['solution' => $requestData['src_solution_name'], 'module' => $requestData['src_module']],
+            'cible'  => ['solution' => $requestData['tgt_solution_name'], 'module' => $requestData['tgt_module']],
+        ];
+
+        return $__debugReturn = $this->render('Rule/_simulation_tab.html.twig', array_merge($simulationData, [
+            'params' => $paramsForView,
+        ]));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -448,35 +623,58 @@ class RuleController extends AbstractController
     #[Route('/{id}/edit', name: 'rule_edit', methods: ['GET'])]
     public function edit(Rule $rule): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         if ($rule->getDeleted()) {
             throw $this->createNotFoundException(sprintf('Rule "%s" has been deleted', $rule->getId()));
+        }
+
+        $connectionCheck = $this->ruleStepService->validateConnections(
+            $rule->getConnectorSource()->getId(),
+            $rule->getConnectorTarget()->getId()
+        );
+
+        if (!$connectionCheck['success']) {
+            $this->addFlash('rule.error', $connectionCheck['error']);
+
+            return $__debugReturn = $this->redirectToRoute('regle_open', ['id' => $rule->getId()]);
         }
 
         $initialRuleJson = $this->ruleQueryService->prepareJsonForEdit($rule);
         $lst_functions = $this->entityManager->getRepository(Functions::class)->findAll();
         $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);
 
-        return $this->render('Rule/create/index.html.twig', [
+        return $__debugReturn = $this->render('Rule/create/index.html.twig', [
             'initialRuleJson' => $initialRuleJson,
             'rule'            => $rule,
             'lst_functions'   => $lst_functions,
             'solutions'       => $solutions,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/view/{id}', name: 'regle_open', methods: ['GET'])]
     public function ruleOpenAction(Rule $rule): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         if (!$this->getUser()->isAdmin() && $rule->getCreatedBy()->getId() !== $this->getUser()->getId()) {
              throw $this->createNotFoundException('Access denied');
         }
 
         $viewData = $this->ruleQueryService->prepareDataForView($rule);
 
-        return $this->render('Rule/detail/fiche.html.twig', array_merge([
+        return $__debugReturn = $this->render('Rule/detail/fiche.html.twig', array_merge([
             'rule' => $rule,
             'id'   => $rule->getId(),
         ], $viewData));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // =========================================================================
@@ -486,6 +684,9 @@ class RuleController extends AbstractController
     #[Route('/update/params/{id}', name: 'path_fiche_params_update', methods: ['POST'])]
     public function ruleUpdParams(Rule $rule, Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule, 'request' => $request]);
+        $__debugReturn = null;
+        try {
         $params = $request->request->all('params');
         if (is_array($params)) {
             foreach ($params as $p) {
@@ -494,55 +695,82 @@ class RuleController extends AbstractController
                 }
             }
         }
-        return new Response('1');
+        return $__debugReturn = new Response('1');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/rule/update_name', name: 'update_rule_name', methods: ['POST'])]
     public function updateRuleName(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $ruleId = $request->request->get('ruleId');
         $name = $request->request->get('ruleName');
         $rule = $this->entityManager->getRepository(Rule::class)->find($ruleId);
-        
+
         if ($rule) {
             $this->rulePersistenceService->updateName($rule, (string)$name);
-            return new Response('Update successful', Response::HTTP_OK);
+            return $__debugReturn = new Response('Update successful', Response::HTTP_OK);
         }
-        return new Response('Rule not found', 404);
+        return $__debugReturn = new Response('Rule not found', 404);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/rule/update_description', name: 'update_rule_description', methods: ['POST'])]
     public function updateDescription(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $ruleId = $request->request->get('ruleId');
         $desc = (string) $request->request->get('description', '');
         $rule = $this->entityManager->getRepository(Rule::class)->find($ruleId);
-        
+
         if ($rule) {
             $this->rulePersistenceService->updateDescription($rule, $desc);
-            return new JsonResponse(['ok' => true]);
+            return $__debugReturn = new JsonResponse(['ok' => true]);
         }
-        return new JsonResponse(['error' => 'Rule not found'], 404);
+        return $__debugReturn = new JsonResponse(['error' => 'Rule not found'], 404);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/check-rule-name', name: 'check_rule_name', methods: ['GET'])]
     public function checkRuleName(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $name = $request->query->get('ruleName');
         $ruleId = $request->query->get('ruleId');
         $existingRule = $this->entityManager->getRepository(Rule::class)->findOneBy(['name' => $name]);
 
         if ($existingRule && $existingRule->getId() !== $ruleId) {
-            return new JsonResponse(['exists' => true]);
+            return $__debugReturn = new JsonResponse(['exists' => true]);
         }
-        return new JsonResponse(['exists' => false]);
+        return $__debugReturn = new JsonResponse(['exists' => false]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/rulefield/{id}/comment', name: 'rulefield_update_comment', methods: ['POST'])]
     public function updateComment(RuleField $ruleField, Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleField' => $ruleField, 'request' => $request]);
+        $__debugReturn = null;
+        try {
         $this->rulePersistenceService->updateFieldComment($ruleField, (string)$request->request->get('comment'));
-        return new Response('Update successful', Response::HTTP_OK);
+        return $__debugReturn = new Response('Update successful', Response::HTTP_OK);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // =========================================================================
@@ -555,16 +783,22 @@ class RuleController extends AbstractController
     #[Route('/view/cancel/documents/{id}', name: 'rule_cancel_all_transfers', methods: ['GET', 'POST'])]
     public function cancelRuleTransfers(string $id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             $this->ruleManager->setRule($id);
             // 'runMyddlewareJob' avec l'option 'cancelDocumentJob'
             $this->ruleManager->actionRule('runMyddlewareJob', 'cancelDocumentJob');
-            
-            $this->addFlash('success', $this->translator->trans('Transfers cancelled successfully')); // (Ajoutez la clé de trad si elle existe)
+
+            $this->addFlash('success', $this->translator->trans('Transfers cancelled successfully'));
         } catch (Exception $e) {
             $this->addFlash('error', $e->getMessage());
         }
-        return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+        return $__debugReturn = $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -573,88 +807,132 @@ class RuleController extends AbstractController
     #[Route('/view/delete/documents/{id}', name: 'rule_delete_all_transfers', methods: ['GET', 'POST'])]
     public function deleteRuleTransfers(string $id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             $this->ruleManager->setRule($id);
             // 'runMyddlewareJob' avec l'option 'deleteDocumentJob'
             $this->ruleManager->actionRule('runMyddlewareJob', 'deleteDocumentJob');
-            
+
             $this->addFlash('success', $this->translator->trans('Transfers deleted successfully'));
         } catch (Exception $e) {
             $this->addFlash('error', $e->getMessage());
         }
-        return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+        return $__debugReturn = $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/exec/{id}', name: 'regle_exec', methods: ['GET','POST'])]
     public function ruleExecAction($id, $documentId = null): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'documentId' => $documentId]);
+        $__debugReturn = null;
+        try {
         try {
             $this->ruleManager->setRule($id);
             if ($documentId !== null) {
                 $this->ruleManager->actionRule('runRuleByDocId', 'execrunRuleByDocId', $documentId);
             } elseif ($id === 'ALL' || $id === 'ERROR') {
                 $this->ruleManager->actionRule($id);
-                return $this->redirect($this->generateUrl('regle_list'));
+                return $__debugReturn = $this->redirect($this->generateUrl('regle_list'));
             } else {
                 $this->ruleManager->actionRule('runMyddlewareJob');
             }
-            return $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
+            return $__debugReturn = $this->redirect($this->generateUrl('regle_open', ['id' => $id]));
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
-            return $this->redirect($this->generateUrl('regle_list'));
+            return $__debugReturn = $this->redirect($this->generateUrl('regle_list'));
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/executebyid/{id}', name: 'run_by_id', methods: ['GET', 'POST'])]
     public function execRuleById($id, Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
+        $__debugReturn = null;
+        try {
         $form = $this->createFormBuilder()->add('id', TextareaType::class)->getForm();
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $ids = str_replace(["\r\n", "\r", "\n", " "], [',', ',', ',', ''], $form->get('id')->getData());
-            return $this->ruleExecAction($id, trim($ids, ", \r\n\t"));
+            return $__debugReturn = $this->ruleExecAction($id, trim($ids, ", \r\n\t"));
         }
-        return $this->render('Rule/byIdForm.html.twig', ['formIdBatch' => $form->createView()]);
+        return $__debugReturn = $this->render('Rule/byIdForm.html.twig', ['formIdBatch' => $form->createView()]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/displayflux/{id}', name: 'regle_displayflux', methods: ['GET'])]
     public function displayFlux(Rule $rule): RedirectResponse
     {
-        // Clear all existing filters before setting the rule name filter
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         $this->sessionService->removeAllFluxFilters();
         $this->sessionService->setFluxFilterWhere(['rule' => $rule->getName()]);
         $this->sessionService->setFluxFilterRuleName($rule->getName());
-        return $this->redirect($this->generateUrl('document_list_page', ['from_rule' => 1]));
+        return $__debugReturn = $this->redirect($this->generateUrl('document_list_page', ['from_rule' => 1]));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/get-rule-name/{id}', name: 'get_rule_name', methods: ['GET'])]
     public function getRuleNameById(Rule $rule): Response
     {
-        return new Response($rule->getName());
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = new Response($rule->getName());
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/get-first-part-of-lookup-formula/{formula}', name: 'get_first_part_of_lookup_formula')]
     public function getFirstPartOfLookupFormula($formula): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['formula' => $formula]);
+        $__debugReturn = null;
+        try {
         if (preg_match('/lookup\(\{[^}]+\},\s*/', $formula, $matches)) {
-            return new Response($matches[0]);
+            return $__debugReturn = new Response($matches[0]);
         }
-        return new Response('');
+        return $__debugReturn = new Response('');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/get-second-part-of-lookup-formula/{formula}', name: 'get_second_part_of_lookup_formula')]
     public function getSecondPartOfLookupFormula($formula): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['formula' => $formula]);
+        $__debugReturn = null;
+        try {
         if (preg_match('/",\s*(.+)\)/', $formula, $matches)) {
-            return new Response(', ' . $matches[1] . ')');
+            return $__debugReturn = new Response(', ' . $matches[1] . ')');
         }
-        return new Response('');
+        return $__debugReturn = new Response('');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/get-rules-for-lookup', name: 'get_rules_for_lookup', methods: ['GET'])]
     public function getRulesForLookup(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $sourceConnector = $request->query->getInt('arg1', 0);
         $targetConnector = $request->query->getInt('arg2', 0);
 
@@ -698,12 +976,18 @@ class RuleController extends AbstractController
             }
         }
 
-        return new JsonResponse(array_map(fn($r) => ['id' => $r->getId(), 'name' => $r->getName()], $uniqueRules));
+        return $__debugReturn = new JsonResponse(array_map(fn($r) => ['id' => $r->getId(), 'name' => $r->getName()], $uniqueRules));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/get-fields-for-rule', name: 'rule_get_fields_for_rule', methods: ['GET'])]
     public function getFieldsForRule(): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
         $fields = $this->entityManager->getRepository(RuleField::class)->findAll();
         $data = array_map(fn($f) => [
             'id' => $f->getId(),
@@ -711,29 +995,40 @@ class RuleController extends AbstractController
             'rule' => $f->getRule()->getName(),
             'rule_id' => $f->getRule()->getId()
         ], $fields);
-        return new JsonResponse($data);
+        return $__debugReturn = new JsonResponse($data);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/get-lookup-rule-from-field-name', name: 'get_lookup_rule_from_field_name', methods: ['GET'])]
     public function getLookupRuleFromFieldName(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $currentRule = $this->entityManager->getRepository(Rule::class)->find($request->query->get('currentRule'));
         $formula = $currentRule?->getFormulaByFieldName($request->query->get('lookupfieldName'));
 
-        if (empty($formula)) return new JsonResponse(['rule' => '']);
+        if (empty($formula)) return $__debugReturn = new JsonResponse(['rule' => '']);
 
-        // Extraction ID règle liée (simple regex plus robuste que explode)
         if (preg_match('/lookup\([^{]*\{[^}]+\},\s*"([^"]+)"/', $formula, $m)) {
              $lookupRuleId = $m[1];
              $lookupRule = $this->entityManager->getRepository(Rule::class)->find($lookupRuleId);
-             return new JsonResponse(['rule' => $lookupRule?->getName() ?? '']);
+             return $__debugReturn = new JsonResponse(['rule' => $lookupRule?->getName() ?? '']);
         }
-        return new JsonResponse(['rule' => '']);
+        return $__debugReturn = new JsonResponse(['rule' => '']);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/api/field-info/{type}/{field}/', name: 'api_field_info', methods: ['GET'])]
     public function getFieldInfo(Request $request, $field, $type): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'field' => $field, 'type' => $type]);
+        $__debugReturn = null;
+        try {
         $session = $request->getSession();
         $myddlewareSession = $session->get('myddlewareSession');
         // Refresh session
@@ -769,14 +1064,23 @@ class RuleController extends AbstractController
                 ];
             }
         }
-        return new JsonResponse($fieldInfo);
+        return $__debugReturn = new JsonResponse($fieldInfo);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     #[Route('/assets/solution-icon/{slug}', name: 'rule_solution_icon', methods: ['GET'])]
     public function getSolutionIcon(string $slug): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['slug' => $slug]);
+        $__debugReturn = null;
+        try {
         $projectDir = $this->getParameter('kernel.project_dir');
         $filePath = $projectDir . '/assets/images/solution/' . $slug . '.png';
-        return new BinaryFileResponse($filePath);
+        return $__debugReturn = new BinaryFileResponse($filePath);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

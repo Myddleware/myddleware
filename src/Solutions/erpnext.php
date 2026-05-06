@@ -494,7 +494,9 @@ class erpnext extends solution
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
         curl_setopt($ch, CURLOPT_TIMEOUT, $timeout);
+        $this->logDebug('erpnext request', ['url' => $url, 'method' => $method]);
         $response = curl_exec($ch);
+        $this->logDebug('erpnext response', ['response' => $response]);
 
         // if Traceback found, we have an error
         if (

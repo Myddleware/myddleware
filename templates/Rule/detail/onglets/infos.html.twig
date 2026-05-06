@@ -22,46 +22,51 @@
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #}
 {% block body %}
-	<div class="link-help-view text-end">
-		<a href="#help-content-info">
-			<i class="fa fa-info-circle" aria-hidden="true"></i>
-			{{ 'rule.help' | trans }}
+	<div class="link-help-view text-end mt-3 me-3">
+		<a href="#help-content-info" class="btn btn-sm text-decoration-none">
+			<i class="fa-solid fa-book me-1"></i>{{ 'rule.help'|trans }}
 		</a>
 	</div>
 
-	<div class="rule-details-buttons block-btn-infos mb-4">
-		<a class="btn_action_loading btn btn-outline-success mb-2 mx-3" href="{{ path('regle_exec', {'id': rule.GetId }) }}" role="button">
+	<div class="rule-details-buttons block-btn-infos mb-4 d-flex justify-content-center flex-wrap align-items-center">
+		<a class="btn_action_loading me-3 btn btn-outline-success" href="{{ path('regle_exec', {'id': rule.GetId }) }}" role="button">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat" viewbox="0 0 16 16">
 				<path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
 				<path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
 			</svg>
 			{{ 'view_rule.action.exec_rule' | trans }}
 		</a>
-		<a class="btn_action_loading btn btn-outline-success mb-2" href="{{ path('run_by_id', {'id': rule.GetId }) }}" role="button">
+		<a class="btn_action_loading me-3 btn btn-outline-success" href="{{ path('run_by_id', {'id': rule.GetId }) }}" role="button">
 			<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewbox="0 0 16 16">
 				<path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
 				<path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
 			</svg>
 			{{ 'Run the rule by id' }}
 		</a>
-	</div>
-
-	<div class="rule-connectors-buttons block-btn-infos mb-4 mx-3">
-		<a href="{{ path('regle_displayflux', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-success mb-2">
+		<a href="{{ path('regle_displayflux', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-success me-3">
 			{{ 'view_rule.action.displayflux' | trans }}
 		</a>
 		{% if is_granted('ROLE_SUPER_ADMIN') %}
-			<a href="{{ path('rule_cancel_all_transfers', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'list_flux.btn.mass_cancel_confirm' | trans }}'));" role="button" class="btn btn-outline-warning mb-2 mx-3">
-				{{ 'list_flux.btn.cancel' | trans }}
-			</a>
-			<form method="post" action="{{ path('rule_delete_all_transfers', {'id': rule.GetId }) }}" style="display: inline;">
-				<button type="submit"
-						class="btn btn-outline-danger mb-2"
-						onclick="return confirm('{{ 'list_flux.btn.mass_delete_confirm' | trans }}');"
-						title="{{'list_flux.btn.delete'|trans}}">
-					{{ 'list_flux.btn.delete' | trans }}
+			<div class="more-actions-wrapper-documents">
+				<button type="button" class="btn">
+					{{ 'view_rule.action.more' | trans }}
+					<i class="fa-solid fa-caret-down ms-1"></i>
 				</button>
-			</form>
+				<div class="more-actions-dropdown-documents">
+					<a href="{{ path('rule_cancel_all_transfers', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'list_flux.btn.mass_cancel_confirm' | trans }}'));" class="dropdown-item text-warning">
+						<i class="fa-solid fa-ban"></i>
+						{{ 'list_flux.btn.cancel' | trans }}
+					</a>
+					<form method="post" action="{{ path('rule_delete_all_transfers', {'id': rule.GetId }) }}" style="margin: 0;">
+						<button type="submit"
+								class="dropdown-item text-danger"
+								onclick="return confirm('{{ 'list_flux.btn.mass_delete_confirm' | trans }}');">
+							<i class="fa-solid fa-trash"></i>
+							{{ 'list_flux.btn.delete' | trans }}
+						</button>
+					</form>
+				</div>
+			</div>
 		{% endif %}
 	</div>
 
@@ -81,15 +86,30 @@
 										{{ 'view_rule.title.rule' | trans }}
 									</p>
 									<div class="d-flex gap-2 mt-2 mt-md-0">	
-										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-success btn-sm">
+										<a href="{{ path('rule_edit', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_edit_rule' | trans }}'));" role="button" class="btn btn-outline-primary btn-sm">
+											<i class="fa fa-pen me-1"></i>
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
-										<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" role="button" class="btn btn-outline-primary btn-sm">
-											{{ 'view_rule.action.duplic_rule' | trans }}
-										</a>
-										<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" role="button" class="btn btn-outline-danger btn-sm">
-											{{ 'view_rule.action.delete_rule' | trans }}
-										</a>
+										<button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#simulationModal">
+											<i class="fa-solid fa-play me-1"></i>
+											{{ 'view_rule.action.simulation' | trans }}
+										</button>
+										<div class="more-actions-wrapper">
+											<button type="button" class="btn btn-sm">
+												{{ 'view_rule.action.more' | trans }}
+												<i class="fa-solid fa-caret-down ms-1"></i>
+											</button>
+											<div class="more-actions-dropdown">
+												<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" class="dropdown-item text-primary">
+													<i class="fa-regular fa-copy"></i>
+													{{ 'view_rule.action.duplic_rule' | trans }}
+												</a>
+												<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" class="dropdown-item text-danger">
+													<i class="fa-solid fa-trash"></i>
+													{{ 'view_rule.action.delete_rule' | trans }}
+												</a>
+											</div>
+										</div>
 									</div>
 								</div>
 							</th>
@@ -369,6 +389,61 @@
 			</div>
 		</div>
 	</div>
+	{# Simulation Modal in rule detail view #}
+	<div class="modal fade" id="simulationModal" tabindex="-1" aria-labelledby="simulationModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-xl">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h2 class="modal-title fs-5" id="simulationModalLabel">
+						{{ 'create_rule.step5.simulation'|trans }}
+					</h2>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row g-3 align-items-end mb-3">
+						<div class="col-12 col-md-6">
+							<label class="form-label" for="simulation-query">
+								{{ 'create_rule.step3.manual_data_simulation_choose_id'|trans }}
+							</label>
+							<input id="simulation-query" class="form-control" type="text" inputmode="numeric" placeholder="example: 5" aria-describedby="sim-id-help-detail">
+							<div id="sim-id-help-detail" class="form-text">
+								{{ 'create_rule.step3.manual_data_simulation_help_text'|trans }}
+							</div>
+						</div>
+						<div class="col-12 col-md-6 d-flex gap-2 justify-content-md-end">
+							<button type="button" id="btn-manual-simulation" class="btn btn-outline-success">
+								<i class="fa fa-keyboard me-2" aria-hidden="true"></i>{{ 'create_rule.step3.data_manual'|trans }}
+							</button>
+							<button type="button" id="btn-simple-simulation" class="btn btn-outline-success">
+								<i class="fa fa-bolt me-2" aria-hidden="true"></i>{{ 'create_rule.step3.data'|trans }}
+							</button>
+						</div>
+					</div>
+
+					<div id="simulation-spinner" class="text-center py-5" style="display: none;">
+						<div class="spinner-border text-primary" role="status">
+							<span class="visually-hidden">Loading...</span>
+						</div>
+						<p class="mt-2 text-muted">Running simulation...</p>
+					</div>
+
+					<div id="simulation-error" class="alert alert-danger" style="display: none;" role="alert"></div>
+
+					<div id="simulation-results" class="border rounded p-3" style="min-height:180px;">
+						<div class="text-center text-muted" id="sim-empty-detail">
+							{{ 'create_rule.step3.empty_simulate'|trans }}
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">
+						{{ 'create_rule.step5.formula.close'|trans }}
+					</button>
+				</div>
+			</div>
+		</div>
+	</div>
+
 	<div id="help-content-info" class="help-content">
 		<h2>
 			{{ 'help.title' | trans }}
@@ -379,11 +454,88 @@
 	{% block javascripts %}
 		{{ encore_entry_script_tags('fiche') }}
 	{% endblock %}
+	<script>
+	</script>
 	<script type="text/javascript">
 		var read_job_lock_success = "{{ 'view_rule.infos.read_job_lock_success' | trans }}";
 var read_job_lock_error = "{{ 'view_rule.infos.read_job_lock_error' | trans }}";
 var clearReadJobLockUrl = "{{ path('clear_read_job_lock', {'id': 'PLACEHOLDER_ID'}) }}";
 var checkRuleNameUrl = "{{ path('check_rule_name') }}";
 var workflowListUrl = "{{ path('workflow_list') }}";
+	</script>
+	<script>
+	(function() {
+		var runUrl = "{{ path('rule_simulation_run', {'id': rule.getId}) }}";
+		var spinner = document.getElementById('simulation-spinner');
+		var errorBox = document.getElementById('simulation-error');
+		var results = document.getElementById('simulation-results');
+		var emptyMsg = document.getElementById('sim-empty-detail');
+		var queryInput = document.getElementById('simulation-query');
+
+		function runSimulation(query) {
+			spinner.style.display = '';
+			errorBox.style.display = 'none';
+			if (emptyMsg) emptyMsg.style.display = 'none';
+
+			var body = new URLSearchParams();
+			if (query) {
+				body.append('query', query);
+			}
+
+			fetch(runUrl, {
+				method: 'POST',
+				headers: { 'X-Requested-With': 'XMLHttpRequest' },
+				body: body
+			})
+			.then(function(response) {
+				if (!response.ok) {
+					return response.text().then(function(text) {
+						var msg = 'Simulation error';
+						try { msg = JSON.parse(text).error || msg; } catch(e) {}
+						throw new Error(msg);
+					});
+				}
+				return response.text();
+			})
+			.then(function(html) {
+				spinner.style.display = 'none';
+				if (emptyMsg) emptyMsg.style.display = 'none';
+				results.innerHTML = html;
+			})
+			.catch(function(err) {
+				spinner.style.display = 'none';
+				if (emptyMsg) emptyMsg.style.display = '';
+				errorBox.textContent = err.message;
+				errorBox.style.display = '';
+			});
+		}
+
+		document.getElementById('btn-simple-simulation').addEventListener('click', function() {
+			runSimulation('');
+		});
+
+		document.getElementById('btn-manual-simulation').addEventListener('click', function() {
+			var id = queryInput.value.trim();
+			if (!id) {
+				errorBox.className = 'alert alert-warning';
+				errorBox.textContent = 'ID required';
+				errorBox.style.display = '';
+				return;
+			}
+			errorBox.className = 'alert alert-danger';
+			runSimulation(id);
+		});
+
+		document.getElementById('simulationModal').addEventListener('hidden.bs.modal', function() {
+			results.innerHTML = '';
+			if (emptyMsg) {
+				results.appendChild(emptyMsg);
+				emptyMsg.style.display = '';
+			}
+			errorBox.style.display = 'none';
+			spinner.style.display = 'none';
+			queryInput.value = '';
+		});
+	})();
 	</script>
 {% endblock %}

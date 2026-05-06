@@ -26,37 +26,52 @@
 namespace App\Repository;
 
 use App\Entity\WorkflowLog;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class WorkflowLogRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, WorkflowLog::class);
+        $this->debugLogger = $debugLogger;
     }
 
     public function findLogsByWorkflowId(string $workflowId)
     {
-        return $this->createQueryBuilder('wl')
-            ->where('wl.workflow = :workflowId')
-            ->setParameter('workflowId', $workflowId)
-            ->orderBy('wl.dateCreated', 'DESC')
-            ->getQuery();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['workflowId' => $workflowId]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('wl')
+                ->where('wl.workflow = :workflowId')
+                ->setParameter('workflowId', $workflowId)
+                ->orderBy('wl.dateCreated', 'DESC')
+                ->getQuery();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function findLogsByActionId(string $actionId, ?int $limit = null)
     {
-        $qb = $this->createQueryBuilder('wl')
-            ->where('wl.action = :actionId')
-            ->setParameter('actionId', $actionId)
-            ->orderBy('wl.dateCreated', 'DESC');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['actionId' => $actionId, 'limit' => $limit]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('wl')
+                ->where('wl.action = :actionId')
+                ->setParameter('actionId', $actionId)
+                ->orderBy('wl.dateCreated', 'DESC');
 
-        if ($limit !== null) {
-            $qb->setMaxResults($limit);
+            if ($limit !== null) {
+                $qb->setMaxResults($limit);
+            }
+
+            return $__debugReturn = $qb->getQuery();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        return $qb->getQuery();
     }
 }
-

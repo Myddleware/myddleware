@@ -822,7 +822,9 @@ class magento extends solution
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonArgs);
             }
             curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            $this->logDebug('magento request', ['url' => $url, 'method' => $method]);
             $result = curl_exec($ch);
+            $this->logDebug('magento response', ['response' => $result]);
             curl_close($ch);
 
             return $result ? json_decode($result, true) : false;

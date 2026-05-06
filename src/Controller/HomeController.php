@@ -36,8 +36,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 
+use App\Service\DebugLogger;
 class HomeController extends AbstractController
 {
+    private DebugLogger $debugLogger;
     private EntityManagerInterface $entityManager;
     private LoggerInterface $logger;
     private TwoFactorAuthService $twoFactorAuthService;
@@ -49,8 +51,10 @@ class HomeController extends AbstractController
         LoggerInterface $logger,
         TwoFactorAuthService $twoFactorAuthService,
         DocumentRepository $documentRepository,
-        RuleRepository $ruleRepository
+        RuleRepository $ruleRepository,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->entityManager = $entityManager;
         $this->logger = $logger;
         $this->twoFactorAuthService = $twoFactorAuthService;
@@ -60,6 +64,11 @@ class HomeController extends AbstractController
 
     protected function getInstanceBdd()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
     /**
      * TABLEAU DE BORD.
@@ -67,6 +76,9 @@ class HomeController extends AbstractController
     #[Route('/rule/panel', name: 'regle_panel')]
     public function panel(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $session = $request->getSession();
 
         // Check if the user has completed 2FA
@@ -86,7 +98,7 @@ class HomeController extends AbstractController
             } else {
                 // Otherwise, redirect to verification
                 $this->logger->debug('Redirecting to verification page');
-                return $this->redirectToRoute('two_factor_auth_verify');
+                return $__debugReturn = $this->redirectToRoute('two_factor_auth_verify');
             }
         }
 
@@ -107,12 +119,15 @@ class HomeController extends AbstractController
 
         $countNbDocuments = $this->documentRepository->countNbDocuments();
 
-        return $this->render('Home/index.html.twig', [
+        return $__debugReturn = $this->render('Home/index.html.twig', [
             'errorByRule' => $this->ruleRepository->errorByRule($user),
             'solutions' => $lstArray,
             'locale' => $language,
             'countNbDocuments' => $countNbDocuments,
         ]
         );
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

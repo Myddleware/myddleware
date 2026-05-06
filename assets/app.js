@@ -41,6 +41,7 @@ const isCreateRule = /\/rule\/[a-zA-Z0-9]{13}\/create/.test(path);
 if (isEditRule || isCreateRule) {
     require('./js/mapping-target-dedup.js');
     require('./js/rule-create.js');
+    require('./js/formula-editor.js');
 }
 
 if (window.location.href.includes('rule/create/step3') || window.location.href.includes('rule/view')) {
@@ -58,7 +59,8 @@ if (window.location.href.includes('rule/document/list')) {
 
 if (window.location.href.includes('rule/')) {
     require('./js/mapping-target-dedup.js');
-    require('./js/rule-create.js')
+    require('./js/rule-create.js');
+    require('./js/formula-editor.js');
 }
 
 if (window.location.href.includes('workflowAction') || window.location.href.includes('workflow')) {
@@ -117,7 +119,8 @@ if (window.location.href.includes('managementsmtp')) {
 if (
     (
         window.location.href.includes('rule/connector/create') ||
-        window.location.href.match(/rule\/connector\/\d+\/detail/)
+        window.location.href.match(/rule\/connector\/\d+\/detail/)||
+        window.location.href.match(/rule\/connector\/view\/\d+/)
     )
     && 
     !(window.location.href.includes('install')) 

@@ -374,9 +374,6 @@
     text-decoration: none;
 }
 
-.icon_history_nav_bar{
-    left:200px;
-}
 .social-bar {
     display: flex;
     align-items: center;
@@ -434,10 +431,6 @@
 	.icon_navbar{
 		margin-left: 220px;
 	}
-
-	.icon_history_nav_bar {
-		left: 305px;
-	}
     .logo-nav {
         margin-right: 265px;
     }
@@ -448,13 +441,15 @@
 		margin-left: 580px;
 	}
 
-	.icon_history_nav_bar {
-		left: 680px;
-	}
     .logo-nav {
         margin-right: 557px;
         margin-left: 70px;
     }
+}
+
+.icon-nav-bar{
+    left: 120px;
+    width: 3rem;
 }
 
 .error-card {

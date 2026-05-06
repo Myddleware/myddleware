@@ -90,6 +90,7 @@ class dynamicsbusiness extends solution
         $tokenUrl = "https://login.microsoftonline.com/{$tenantId}/oauth2/v2.0/token";
 
         $client = $this->getApiClient();
+        $this->logDebug('dynamicsbusiness login request', ['url' => $tokenUrl, 'method' => 'POST']);
         $response = $client->post($tokenUrl, [
             'form_params' => [
                 'grant_type' => 'client_credentials',
@@ -100,6 +101,7 @@ class dynamicsbusiness extends solution
         ]);
 
         $data = json_decode($response->getBody(), true);
+        $this->logDebug('dynamicsbusiness login response', ['status' => $response->getStatusCode()]);
 
         if (isset($data['access_token'])) {
             $this->token = $data['access_token'];
@@ -218,9 +220,11 @@ class dynamicsbusiness extends solution
                 'Authorization' => "Bearer {$this->token}",
                 'Accept' => 'application/xml',
             ];
+            $this->logDebug('dynamicsbusiness get_module_fields request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $responseBody = $response->getBody()->getContents();
-    
+            $this->logDebug('dynamicsbusiness get_module_fields response', ['status' => $response->getStatusCode(), 'body_length' => strlen($responseBody)]);
+
             $xml = simplexml_load_string($responseBody);
 
             // register the namespaces in order to be able to use xpath so we can dynamically get the entity type
@@ -315,8 +319,10 @@ class dynamicsbusiness extends solution
 
         $url = $this->getBaseApiUrl() . "companies";
 
+        $this->logDebug('dynamicsbusiness getCompanies request', ['url' => $url, 'method' => 'GET']);
         $response = $client->get($url, ['headers' => $headers]);
         $data = json_decode($response->getBody(), true);
+        $this->logDebug('dynamicsbusiness getCompanies response', ['status' => $response->getStatusCode(), 'company_count' => isset($data['value']) ? count($data['value']) : 0]);
 
         foreach ($data['value'] as $company) {
             $result[$company['id']] = $company['name'];
@@ -378,8 +384,10 @@ class dynamicsbusiness extends solution
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}?%24filter={$filterValue}";
 
         try {
+            $this->logDebug('dynamicsbusiness read request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicsbusiness read response', ['status' => $response->getStatusCode(), 'record_count' => isset($data['value']) ? count($data['value']) : 0]);
 
             if (!isset($data['value']) || !is_array($data['value'])) {
                 $this->logger->error("Invalid response format: missing or invalid 'value' array");
@@ -468,17 +476,19 @@ class dynamicsbusiness extends solution
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}";
         
+            $this->logDebug('dynamicsbusiness create request', ['url' => $url, 'method' => 'POST']);
             $response = $client->post($url, [
                 'headers' => $headers,
                 'json' => $record
             ]);
-            
+
             $data = json_decode($response->getBody(), true);
-            
+            $this->logDebug('dynamicsbusiness create response', ['status' => $response->getStatusCode(), 'id' => $data['id'] ?? null]);
+
             if (!isset($data['id'])) {
                 throw new \Exception('No ID returned from API response');
             }
-            
+
             return $data['id'];
             
         } catch (\Exception $e) {
@@ -539,12 +549,12 @@ class dynamicsbusiness extends solution
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
-            // First get the current record to obtain its ETag
+            $this->logDebug('dynamicsbusiness update GET request', ['url' => $url, 'method' => 'GET']);
             $getResponse = $client->get($url, ['headers' => $headers]);
-            
-            // Get response body content once
+
             $responseBody = $getResponse->getBody()->getContents();
             $responseData = json_decode($responseBody, true);
+            $this->logDebug('dynamicsbusiness update GET response', ['status' => $getResponse->getStatusCode()]);
             
             // Get ETag from response body, it is used by the PATCH request to update the record and that's how we do optimistic concurrency control
             $etag = $responseData['@odata.etag'] ?? null;
@@ -557,7 +567,7 @@ class dynamicsbusiness extends solution
             $headers['If-Match'] = $etag;
             
 
-            // this is where the optimisitc concurrency is happening, we assume that conflicts are rare and only check for conflicts when actually saving the data. if the header matches, the data has not been modified since the last read so we can save the data.
+            $this->logDebug('dynamicsbusiness update PATCH request', ['url' => $url, 'method' => 'PATCH']);
             $response = $client->patch($url, [
                 'headers' => $headers,
                 'json' => $data
@@ -574,13 +584,14 @@ class dynamicsbusiness extends solution
             // The alternative (pessimistic concurrency control) would be to lock the record when User A starts reading it, preventing User B from even reading it until User A is done. This is more restrictive and can lead to performance issues in high-concurrency situations.
             
             $data = json_decode($response->getBody(), true);
-            
+            $this->logDebug('dynamicsbusiness update PATCH response', ['status' => $response->getStatusCode(), 'id' => $data['id'] ?? null]);
+
             if (!isset($data['id'])) {
                 throw new \Exception('No ID returned from API response');
             }
-            
+
             return $data['id'];
-            
+
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
@@ -615,10 +626,12 @@ class dynamicsbusiness extends solution
         
         $url = $this->getBaseApiUrl() . "{$parentmodule}({$parentmoduleId})/{$module}({$targetId})";
         
+            $this->logDebug('dynamicsbusiness delete request', ['url' => $url, 'method' => 'DELETE']);
             $response = $client->delete($url, [
                 'headers' => $headers
             ]);
-            
+            $this->logDebug('dynamicsbusiness delete response', ['status' => $response->getStatusCode()]);
+
             if ($response->getStatusCode() === 204) { // 204 No Content is the standard response for successful deletion
                 return $targetId;
             } else {
@@ -701,10 +714,11 @@ class dynamicsbusiness extends solution
         // $url = "https://api.businesscentral.dynamics.com/v2.0/{$tenantId}/{$env}/api/v2.0/companies({$companyId})/\$metadata"; // Original problematic URL
         $url = $this->getBaseApiUrl() . "\$metadata";
 
-            // Make the API request to fetch metadata
+            $this->logDebug('dynamicsbusiness getEntityListFromMetadata request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $statusCode = $response->getStatusCode();
             $xmlString = $response->getBody()->getContents();
+            $this->logDebug('dynamicsbusiness getEntityListFromMetadata response', ['status' => $statusCode, 'body_length' => strlen($xmlString)]);
 
             // Validate response size - small responses likely indicate errors
             // OData metadata is typically large, so responses under 500 chars are suspicious

@@ -1,190 +1,262 @@
 {% extends 'base.html.twig' %}
 {% block title %}
-	{{ parent() }}
-	|
-	{{ 'view_workflow_action.create'| trans}}
+    {{ parent() }}
+    |
+    {{ 'view_workflow_action.create'| trans}}
 {% endblock %}
 {% block titlesm %}
-	{{ 'view_workflow_action.create'| trans}}
+    {{ 'view_workflow_action.create'| trans}}
 {% endblock titlesm %}
 {% block body %}
-	<div class="container mt-5">
-		{{ form_start(form) }}
-		<div class="text-center mb-4">
-			<button type="submit" name="submit" class="btn btn-primary m-2">{{ 'view_workflow_action.save'|trans }}</button>
-			<a href="{{ path('workflow_list') }}" class="btn btn-outline-warning m-2">{{ 'view_workflow_action.cancel'|trans }}</a>
-		</div>
+    <div class="container mt-5">
+        {{ form_start(form) }}
+        <div class="text-center mb-4">
+            <button type="submit" name="submit" class="btn btn-primary m-2">{{ 'view_workflow_action.save'|trans }}</button>
+            <a href="{{ path('workflow_list') }}" class="btn btn-outline-warning m-2">{{ 'view_workflow_action.cancel'|trans }}</a>
+        </div>
 
-		<div class="card mb-3 pb-3">
-			<div class="card-header">
-				{{ 'view_workflow_action.edit'|trans }}
-			</div>
-			<div class="card-body m-3">
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-name" id="name-container">
-							{{ form_row(form.name) }}
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-workflow" id="workflow-container">
-							{{ form_row(form.Workflow) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-description" id="description-container">
-							{{ form_row(form.description) }}
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-action" id="action-container">
-							{{ form_row(form.action) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="order-container">
-							{{ form_row(form.order) }}
-						</div>
-					</div>
-					{% if form.multipleRuns is defined %}
-						<div class="col-md-6">
-							<div class="workflow-field-container form-group-workflow-action" id="multiple-runs-container">
-								{{ form_row(form.multipleRuns) }}
-							</div>
-						</div>
-					{% endif %}
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-status" id="status-container">
-							{{ form_row(form.status) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="active-container">
-							{{ form_row(form.active) }}
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="rule-change-container">
-							{{ form_row(form.ruleChangeData) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-to" id="to-container">
-							{{ form_row(form.to) }}
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-subject" id="subject-container">
-							{{ form_row(form.subject) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-12">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-message" id="message-container">
-							{{ form_row(form.message) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="rule-generate-container">
-							{{ form_row(form.ruleGenerate) }}
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchfield" id="search-field-container">
-							{{ form_row(form.searchField) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action workflow-action-new-searchvalue" id="search-value-container">
-							{{ form_row(form.searchValue) }}
-						</div>
-					</div>
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="rerun-container">
-							{{ form_row(form.rerun) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4">
-					<div class="col-md-6">
-						<div class="workflow-field-container form-group-workflow-action" id="document-type-container">
-							{{ form_row(form.documentType) }}
-						</div>
-					</div>
-				</div>
-				<div class="row mb-4" style="display: none;">
-					<div class="col-md-6" id="targetFieldContainer">
-						<div class="workflow-field-container form-group-workflow-action">
-							{{ form_row(form.targetField) }}
-						</div>
-					</div>
-					<div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
-						<div class="workflow-field-container form-group-workflow-action">
-							<label for="form_targetFieldValue">New value</label>
-							<input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
-						</div>
-					</div>
-				</div>
-				<div id="dynamicFieldsContainer"></div>
-				<button type="button" class="btn btn-primary mt-3" id="addFieldButton">Add field</button>
-			</div>
-		</div>
-		<div class="text-center">
-			{{ form_row(form.submit) }}
-		</div>
-		{{ form_end(form, {'render_rest': false}) }}
-	</div>
+        <div class="card mb-3 pb-3 shadow-sm border-0">
+            <div class="card-header bg-white fw-bold pt-3 pb-3">
+                {{ 'view_workflow_action.create'|trans }}
+            </div>
+            <div class="card-body m-3">
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-name" id="name-container">
+                                {{ form_label(form.name) }}
+                                {{ form_widget(form.name) }}
+                                {{ form_errors(form.name) }}
+                            </div>
+                        </div>
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-workflow" id="workflow-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.Workflow) }}
+                                {{ form_widget(form.Workflow) }}
+                                {{ form_errors(form.Workflow) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-description" id="description-container">
+                                {{ form_label(form.description) }}
+                                {{ form_widget(form.description) }}
+                                {{ form_errors(form.description) }}
+                            </div>
+                        </div>
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-action" id="action-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.action) }}
+                                {{ form_widget(form.action) }}
+                                {{ form_errors(form.action) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action" id="order-container">
+                                {{ form_label(form.order) }}
+                                {{ form_widget(form.order) }}
+                                {{ form_errors(form.order) }}
+                            </div>
+                        </div>
+                    {% if form.multipleRuns is defined %}
+                        <div class="col-md-6">
+                            <div class="workflow-field-container form-group-workflow-action" id="multiple-runs-container">
+                                <div class="mdw-floating-field">
+                                    {{ form_label(form.multipleRuns) }}
+                                    {{ form_widget(form.multipleRuns) }}
+                                    {{ form_errors(form.multipleRuns) }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-status" id="status-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.status) }}
+                                {{ form_widget(form.status) }}
+                                {{ form_errors(form.status) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action" id="active-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.active) }}
+                                {{ form_widget(form.active) }}
+                                {{ form_errors(form.active) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action" id="rule-change-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.ruleChangeData) }}
+                                {{ form_widget(form.ruleChangeData) }}
+                                {{ form_errors(form.ruleChangeData) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-to" id="to-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.to) }}
+                                {{ form_widget(form.to) }}
+                                {{ form_errors(form.to) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-subject" id="subject-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.subject) }}
+                                {{ form_widget(form.subject) }}
+                                {{ form_errors(form.subject) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-message" id="message-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.message) }}
+                                {{ form_widget(form.message) }}
+                                {{ form_errors(form.message) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action" id="rule-generate-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.ruleGenerate) }}
+                                {{ form_widget(form.ruleGenerate) }}
+                                {{ form_errors(form.ruleGenerate) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-searchfield" id="search-field-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.searchField) }}
+                                {{ form_widget(form.searchField) }}
+                                {{ form_errors(form.searchField) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action workflow-action-new-searchvalue" id="search-value-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.searchValue) }}
+                                {{ form_widget(form.searchValue) }}
+                                {{ form_errors(form.searchValue) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action" id="rerun-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.rerun) }}
+                                {{ form_widget(form.rerun) }}
+                                {{ form_errors(form.rerun) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-	<script type="text/javascript">
-		var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
-		window.workflowRuleMap = {
-		{% for wf in workflows %}
-			"{{ wf.id }}": "{{ wf.rule ? wf.rule.id : '' }}"{% if not loop.last %},{% endif %}
-		{% endfor %}
-		};
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <div class="workflow-field-container form-group-workflow-action" id="document-type-container">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.documentType) }}
+                                {{ form_widget(form.documentType) }}
+                                {{ form_errors(form.documentType) }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-		function syncRuleFromWorkflow(){
-			var wf = document.getElementById('form_Workflow');
-			var rid = (wf && window.workflowRuleMap) ? (window.workflowRuleMap[wf.value] || '') : '';
-			var selChange = document.getElementById('form_ruleChangeData');
-			if (selChange) {
-				selChange.value = rid || '';
-				selChange.dispatchEvent(new Event('change', { bubbles: true }));
-			}
-		}
+                <div class="row mb-4" style="display: none;">
+                    <div class="col-md-6" id="targetFieldContainer">
+                        <div class="workflow-field-container form-group-workflow-action">
+                            <div class="mdw-floating-field">
+                                {{ form_label(form.targetField) }}
+                                {{ form_widget(form.targetField) }}
+                                {{ form_errors(form.targetField) }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6" id="targetFieldValueContainer" style="display: none;">
+                        <div class="workflow-field-container form-group-workflow-action">
+                            <div class="mdw-floating-field">
+                                <label for="form_targetFieldValue">New value</label>
+                                <input type="text" id="form_targetFieldValue" name="form[targetFieldValue][]" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="dynamicFieldsContainer"></div>
+                <button type="button" class="btn btn-outline-primary mt-3" id="addFieldButton">
+                    <i class="fa-solid fa-plus me-1"></i> Add field
+                </button>
+            </div>
+        </div>
+        <div class="text-center mb-5">
+            {{ form_row(form.submit) }}
+        </div>
+        {{ form_end(form, {'render_rest': false}) }}
+    </div>
 
-		function toggleRuleRows(){
-			var action = document.getElementById('form_action');
-			var genRow = document.getElementById('rule-generate-container');
-			var chgRow = document.getElementById('rule-change-container');
-			if (!action || !genRow || !chgRow) return;
-			var v = action.value;
-			genRow.style.display = (v === 'generateDocument') ? '' : 'none';
-			chgRow.style.display = (v === 'changeData') ? '' : 'none';
-			if (v === 'changeData') syncRuleFromWorkflow();
-		}
+    <script type="text/javascript">
+        var workflowTargetFieldUrl = "{{ path('get_target_fields', { 'ruleId': 'ruleFields' }) }}";
+        window.workflowRuleMap = {
+        {% for wf in workflows %}
+            "{{ wf.id }}": "{{ wf.rule ? wf.rule.id : '' }}"{% if not loop.last %},{% endif %}
+        {% endfor %}
+        };
 
-		document.addEventListener('DOMContentLoaded', function(){
-			var wf = document.getElementById('form_Workflow');
-			var action = document.getElementById('form_action');
-			if (wf) wf.addEventListener('change', syncRuleFromWorkflow);
-			if (action) action.addEventListener('change', toggleRuleRows);
-			syncRuleFromWorkflow();
-			toggleRuleRows();
-		});
-	</script>
+        function syncRuleFromWorkflow(){
+            var wf = document.getElementById('form_Workflow');
+            var rid = (wf && window.workflowRuleMap) ? (window.workflowRuleMap[wf.value] || '') : '';
+            var selChange = document.getElementById('form_ruleChangeData');
+            if (selChange) {
+                selChange.value = rid || '';
+                selChange.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        function toggleRuleRows(){
+            var action = document.getElementById('form_action');
+            var genRow = document.getElementById('rule-generate-container');
+            var chgRow = document.getElementById('rule-change-container');
+            if (!action || !genRow || !chgRow) return;
+            var v = action.value;
+            genRow.style.display = (v === 'generateDocument') ? '' : 'none';
+            chgRow.style.display = (v === 'changeData') ? '' : 'none';
+            if (v === 'changeData') syncRuleFromWorkflow();
+        }
+
+        document.addEventListener('DOMContentLoaded', function(){
+            var wf = document.getElementById('form_Workflow');
+            var action = document.getElementById('form_action');
+            if (wf) wf.addEventListener('change', syncRuleFromWorkflow);
+            if (action) action.addEventListener('change', toggleRuleRows);
+            syncRuleFromWorkflow();
+            toggleRuleRows();
+        });
+    </script>
 
 {% endblock %}

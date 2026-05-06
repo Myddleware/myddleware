@@ -8,18 +8,16 @@ use App\Entity\Solution;
 use App\Form\ConnectorType;
 use App\Manager\SolutionManager;
 use App\Repository\ConnectorRepository;
+use App\Repository\RuleFilterRepository;
 use App\Repository\SolutionRepository;
 use App\Manager\RuleManager;
 use App\Service\ConnectorService;
 use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use Illuminate\Encryption\Encrypter;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\FormFactoryInterface;
-use Symfony\Component\Form\FormView;
-use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -34,6 +32,7 @@ class RuleStepService
         private SessionService $sessionService,
         private ConnectorService $connectorService,
         private ConnectorRepository $connectorRepository,
+        private RuleFilterRepository $ruleFilterRepository,
         private SolutionRepository $solutionRepository,
         private TranslatorInterface $translator,
         private FormFactoryInterface $formFactory,
@@ -82,6 +81,46 @@ class RuleStepService
             return [];
         }
         return $this->connectorRepository->findActiveBySolution($solution);
+    }
+
+    public function validateConnections(int $srcConnectorId, int $tgtConnectorId): array
+    {
+        $errors = [];
+
+        foreach (['source' => $srcConnectorId, 'target' => $tgtConnectorId] as $side => $connectorId) {
+            $connector = $this->connectorRepository->find($connectorId);
+            if (!$connector || !$connector->getSolution()) {
+                $errors[] = ucfirst($side) . ': connector not found';
+                continue;
+            }
+
+            try {
+                $solutionName = $connector->getSolution()->getName();
+                $solution = $this->solutionManager->get($solutionName);
+                $params = $this->connectorService->resolveParams($connectorId);
+                $loginResult = $solution->login($params);
+
+                if (empty($solution->connexion_valide)) {
+                    $detail = '';
+                    if (is_array($loginResult) && !empty($loginResult['error'])) {
+                        $detail = $loginResult['error'];
+                    }
+                    $errors[] = ucfirst($side) . ' (' . $connector->getName() . '): '
+                        . $this->translator->trans('error.connexion')
+                        . ($detail ? ' - ' . $detail : '');
+                }
+            } catch (\Throwable $e) {
+                $errors[] = ucfirst($side) . ' (' . $connector->getName() . '): ' . $e->getMessage();
+            }
+        }
+
+        if (!empty($errors)) {
+            $message = $this->translator->trans('error.rule.edit_connection_failed')
+                . '<br>' . implode('<br>', $errors);
+            return ['success' => false, 'error' => $message];
+        }
+
+        return ['success' => true, 'error' => ''];
     }
 
     /**
@@ -280,15 +319,13 @@ class RuleStepService
         ];
     }
 
-    private function validateNewConnector(array $data, ?string $ruleKey): array
+   private function validateNewConnector(array $data, ?string $ruleKey): array
     {
         $classe = strtolower($data['solution']);
-        $solution = $this->solutionManager->get($classe);
         $param = [];
 
-        // Parsing des champs envoyés (format "key::value;key2::value2")
-        $champs = explode(';', $data['champs']);
-        if ($champs) {
+        if (!empty($data['champs'])) {
+            $champs = explode(';', $data['champs']);
             foreach ($champs as $key) {
                 $input = explode('::', $key);
                 if (!empty($input[0]) && (isset($input[1]) || is_numeric($input[1]))) {
@@ -299,21 +336,15 @@ class RuleStepService
         }
         $this->sessionService->setParamConnectorParentType($data['parent'], 'solution', $classe);
 
-        // Validation du nombre de champs
-        $nonRequiredFields = $this->getNonRequiredFields();
-        $requiredCount = count($solution->getFieldsLogin());
-        
-        // Ajustement approximatif pour la validation (logique héritée)
-        $isValidCount = (count($param) == $requiredCount || count($param) == ($requiredCount - count($nonRequiredFields)));
-
-        if ($isValidCount) {
-            $result = $solution->login($param);
-            if (!empty($solution->connexion_valide)) {
+        if (count($param) > 0) {
+            $testResult = $this->connectorService->testConnection($classe, $param);
+            
+            if ($testResult['success']) {
                 return ['success' => true];
             }
             
             $this->sessionService->removeParamRule($ruleKey);
-            return ['success' => false, 'message' => $result['error'] ?? 'Connection failed'];
+            return $testResult; 
         }
 
         return ['success' => false, 'message' => 'create_connector.form_error'];
@@ -330,7 +361,6 @@ class RuleStepService
 
         $this->sessionService->removeParamParentRule($ruleKey, $data['parent']);
         $classe = strtolower($params[0]);
-        $solution = $this->solutionManager->get($classe);
         $connectorId = $params[1];
 
         $connector = $this->connectorRepository->find($connectorId);
@@ -344,33 +374,13 @@ class RuleStepService
 
         $this->sessionService->setParamRuleName($ruleKey, $data['name']);
         $this->sessionService->setParamRuleConnectorParent($ruleKey, $data['parent'], $connectorId);
-        
-        // Déchiffrement et connexion
-        $decryptedParams = $this->decryptParams($this->sessionService->getParamParentRule($ruleKey, $data['parent']));
         $this->sessionService->setParamRuleParentName($ruleKey, $data['parent'], 'solution', $classe);
+        
+        // Déchiffrement et connexion via le ConnectorService
+        $encryptedParams = $this->sessionService->getParamParentRule($ruleKey, $data['parent']);
+        $decryptedParams = $this->connectorService->decryptParams($encryptedParams, $this->secret);
 
-        $result = $solution->login($decryptedParams);
-
-        if (!empty($solution->connexion_valide)) {
-            return ['success' => true];
-        }
-
-        return ['success' => false, 'message' => $result['error'] ?? 'Connection error'];
-    }
-
-    private function decryptParams($tab_params)
-    {
-        $encrypter = new Encrypter(substr($this->secret, -16));
-        if (is_array($tab_params)) {
-            $return_params = [];
-            foreach ($tab_params as $key => $value) {
-                if (is_string($value) && !in_array($key, ['solution', 'module'])) {
-                    $return_params[$key] = $encrypter->decrypt($value);
-                }
-            }
-            return $return_params;
-        }
-        return $encrypter->decrypt($tab_params);
+        return $this->connectorService->testConnection($classe, $decryptedParams);
     }
 
     private function getNonRequiredFields()
@@ -421,6 +431,10 @@ class RuleStepService
             throw new \Exception('Connector not found');
         }
 
+        if (!$srcConnector->getSolution() || !$tgtConnector->getSolution()) {
+            throw new \Exception('Connector has no associated solution');
+        }
+
         $srcSolutionName = $srcConnector->getSolution()->getName();
         $tgtSolutionName = $tgtConnector->getSolution()->getName();
 
@@ -452,6 +466,18 @@ class RuleStepService
 
         // Gestion des doublons
         $fieldsDuplicateTarget = $tgtSolution->getFieldsDuplicate($tgtModule) ?? [];
+        if (!empty($fieldsDuplicateTarget)) {
+            $tgtModuleFields = $tgtSolution->get_module_fields($tgtModule, 'target') ?? [];
+            if (!empty($tgtModuleFields)) {
+                $validDuplicateFields = [];
+                foreach ($fieldsDuplicateTarget as $field) {
+                    if (array_key_exists($field, $tgtModuleFields)) {
+                        $validDuplicateFields[] = $field;
+                    }
+                }
+                $fieldsDuplicateTarget = $validDuplicateFields;
+            }
+        }
         if (!empty($fieldsDuplicateTarget)) {
             // Si gestion de doublon possible, on active le mode Search
             $intersectMode['S'] = 'search_only';
@@ -515,6 +541,194 @@ class RuleStepService
         return [
             'rule_params'      => array_values($ruleParams),
             'duplicate_target' => $fieldsDuplicateTarget,
+        ];
+    }
+
+    public function getFilterOperators(): array
+    {
+        return [
+            $this->translator->trans('filter.content')    => 'content',
+            $this->translator->trans('filter.notcontent') => 'notcontent',
+            $this->translator->trans('filter.begin')      => 'begin',
+            $this->translator->trans('filter.end')        => 'end',
+            $this->translator->trans('filter.gt')         => 'gt',
+            $this->translator->trans('filter.lt')         => 'lt',
+            $this->translator->trans('filter.equal')      => 'equal',
+            $this->translator->trans('filter.different')  => 'different',
+            $this->translator->trans('filter.gteq')       => 'gteq',
+            $this->translator->trans('filter.lteq')       => 'lteq',
+            $this->translator->trans('filter.in')         => 'in',
+            $this->translator->trans('filter.notin')      => 'notin',
+        ];
+    }
+
+    public function getFiltersByRuleId(?string $ruleId): array
+    {
+        if (!$ruleId) {
+            return [];
+        }
+
+        return $this->ruleFilterRepository->findBy(['rule' => $ruleId]);
+    }
+
+    /**
+     * Combined data loader for edit mode: fetches step3 params + step4 filter fields
+     * with a SINGLE login per external system instead of separate logins per endpoint.
+     */
+    public function getEditInitData(int $srcConnectorId, int $tgtConnectorId, string $srcModule, string $tgtModule, ?string $ruleId = null): array
+    {
+        if (!$srcConnectorId || !$tgtConnectorId || empty($srcModule) || empty($tgtModule)) {
+            throw new \InvalidArgumentException('Missing parameters');
+        }
+
+        $srcConnector = $this->connectorRepository->find($srcConnectorId);
+        $tgtConnector = $this->connectorRepository->find($tgtConnectorId);
+
+        if (!$srcConnector || !$tgtConnector) {
+            throw new \Exception('Connector not found');
+        }
+
+        if (!$srcConnector->getSolution() || !$tgtConnector->getSolution()) {
+            throw new \Exception('Connector has no associated solution');
+        }
+
+        $srcSolutionName = $srcConnector->getSolution()->getName();
+        $tgtSolutionName = $tgtConnector->getSolution()->getName();
+
+        $srcSolution = $this->solutionManager->get($srcSolutionName);
+        $tgtSolution = $this->solutionManager->get($tgtSolutionName);
+
+        // === ONE login per system ===
+        $srcSolution->login($this->connectorService->resolveParams($srcConnectorId));
+        $tgtSolution->login($this->connectorService->resolveParams($tgtConnectorId));
+
+        // STEP 3: Params
+        $sourceParams = (array) $srcSolution->getFieldsParamUpd('source', $srcModule);
+        $targetParams = (array) $tgtSolution->getFieldsParamUpd('target', $tgtModule);
+        $ruleParams = array_merge($sourceParams, $targetParams);
+
+        $sourceMode = (array) $srcSolution->getRuleMode($srcModule, 'source');
+        $targetMode = (array) $tgtSolution->getRuleMode($tgtModule, 'target');
+
+        if (array_key_exists('S', $targetMode)) {
+            $sourceMode['S'] = 'search_only';
+        }
+
+        $intersectMode = array_intersect_key($targetMode, $sourceMode);
+        if (empty($intersectMode)) {
+            $intersectMode = ['C' => 'create_only'];
+        }
+
+        $fieldsDuplicateTarget = $tgtSolution->getFieldsDuplicate($tgtModule) ?? [];
+
+        $modeTranslate = [];
+
+        $readDeletion = $srcSolution->getReadDeletion($srcModule) ?? false;
+        $sendDeletion = $tgtSolution->getSendDeletion($tgtModule) ?? false;
+
+        if ($readDeletion && $sendDeletion) {
+            $ruleParams[] = [
+                'id'       => 'deletion',
+                'name'     => 'deletion',
+                'required' => false,
+                'type'     => 'option',
+                'label'    => $this->translator->trans('create_rule.step3.deletion.label'),
+                'option'   => [
+                    0 => $this->translator->trans('create_rule.step3.deletion.no'),
+                    1 => $this->translator->trans('create_rule.step3.deletion.yes'),
+                ],
+            ];
+        }
+
+        $bidirectionalParams = [
+            'connector' => ['source' => $srcConnectorId, 'cible' => $tgtConnectorId],
+            'module'    => ['source' => $srcModule, 'cible' => $tgtModule],
+        ];
+
+        $bidirectional = RuleManager::getBidirectionalRules(
+            $this->connection,
+            $bidirectionalParams,
+            $srcSolution,
+            $tgtSolution
+        );
+
+        if (!empty($bidirectional)) {
+            $ruleParams = array_merge($ruleParams, $bidirectional);
+        }
+
+        // STEP 4: Filter fields (reuse same logged-in solutions)
+        $fieldsGrouped = [
+            'Source Fields'   => [],
+            'Target Fields'   => [],
+            'Relation Fields' => [],
+        ];
+
+        try {
+            $sourceFields = $srcSolution->get_module_fields($srcModule, 'source') ?? [];
+            foreach ($sourceFields as $key => $value) {
+                $label = is_array($value) ? ($value['label'] ?? $key) : (string) $key;
+                $fieldsGrouped['Source Fields'][$key] = $label;
+                if (is_array($value) && !empty($value['relate'])) {
+                    $fieldsGrouped['Relation Fields'][$key] = $label;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error getting source fields: ' . $e->getMessage());
+        }
+
+        try {
+            $targetFields = $tgtSolution->get_module_fields($tgtModule, 'target') ?? [];
+            foreach ($targetFields as $key => $value) {
+                $label = is_array($value) ? ($value['label'] ?? $key) : (string) $key;
+                $fieldsGrouped['Target Fields'][$key] = $label;
+            }
+        } catch (\Throwable $e) {
+            $this->logger->error('Error getting target fields: ' . $e->getMessage());
+        }
+
+        if (!empty($fieldsDuplicateTarget) && !empty($targetFields)) {
+            $validDuplicateFields = [];
+            foreach ($fieldsDuplicateTarget as $field) {
+                if (array_key_exists($field, $targetFields)) {
+                    $validDuplicateFields[] = $field;
+                }
+            }
+            $fieldsDuplicateTarget = $validDuplicateFields;
+        }
+
+        if (!empty($fieldsDuplicateTarget)) {
+            $intersectMode['S'] = 'search_only';
+        }
+
+        foreach ($intersectMode as $key => $value) {
+            $modeTranslate[$key] = $this->translator->trans('create_rule.step3.syncdata.' . $value);
+        }
+
+        $ruleParams[] = [
+            'id'       => 'mode',
+            'name'     => 'mode',
+            'required' => true,
+            'type'     => 'option',
+            'label'    => $this->translator->trans('create_rule.step3.syncdata.label'),
+            'option'   => $modeTranslate,
+            'value'    => '',
+        ];
+
+        foreach ($fieldsGrouped as &$group) {
+            asort($group, SORT_STRING | SORT_FLAG_CASE);
+        }
+        unset($group);
+
+        return [
+            'step3' => [
+                'rule_params'      => array_values($ruleParams),
+                'duplicate_target' => $fieldsDuplicateTarget,
+            ],
+            'step4' => [
+                'fieldsGrouped' => $fieldsGrouped,
+                'operators'     => $this->getFilterOperators(),
+                'filters'       => $this->getFiltersByRuleId($ruleId),
+            ],
         ];
     }
 

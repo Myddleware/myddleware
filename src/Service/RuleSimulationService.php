@@ -214,6 +214,40 @@ public function simulatePreview(array $requestData, ?string $ruleKey = null): ar
     return $this->transformRecord($record, $mapping, $ruleKey, $queryVal);
 }
 
+    public function buildRequestDataFromRule(Rule $rule): array
+    {
+        $connectorSource = $rule->getConnectorSource();
+        $connectorTarget = $rule->getConnectorTarget();
+
+        $champs = [];
+        $formules = [];
+
+        foreach ($rule->getFields() as $field) {
+            $target = $field->getTarget();
+            $sources = explode(';', $field->getSource());
+            foreach ($sources as $src) {
+                $src = trim($src);
+                if (!empty($src) && $src !== 'my_value') {
+                    $champs[$target][] = $src;
+                }
+            }
+            $formula = $field->getFormula();
+            if (!empty($formula)) {
+                $formules[$target][] = $formula;
+            }
+        }
+
+        return [
+            'src_connector_id'   => $connectorSource->getId(),
+            'src_solution_name'  => $connectorSource->getSolution()->getName(),
+            'src_module'         => (string) $rule->getModuleSource(),
+            'tgt_solution_name'  => $connectorTarget->getSolution()->getName(),
+            'tgt_module'         => (string) $rule->getModuleTarget(),
+            'champs'             => $champs,
+            'formules'           => $formules,
+        ];
+    }
+
     private function transformRecord(array $record, array $mapping, ?string $ruleKey, ?string $queryVal): array
     {
         if ($ruleKey) $this->documentManager->setRuleId($ruleKey);
