@@ -113,7 +113,13 @@ class DocumentManager
         'Error_expected' => 'Error',
         'Not_found' => 'Error',
     ];
+
     private array $notSentFields = [];
+	private array $documentBatch = [];
+	private array $documentDataBatch = [];
+	private array $statusBatch = [];
+	private array $logBatch = [];
+	private int $batchSize = 1000;
 
     // Instanciation de la classe de génération de log Symfony
     public function __construct(
@@ -384,42 +390,106 @@ class DocumentManager
         $this->ruleDocuments = [];
     }
 
+	// Document creation
     public function createDocument(): bool
     {
-        // On ne fait pas de beginTransaction ici car on veut pouvoir tracer ce qui a été fait ou non. Si le créate n'est pas du tout fait alors les données sont perdues
-        // L'enregistrement même partiel d'un document nous permet de tracer l'erreur.
-        try {
-			// Check on current document before any action
-			$this->checkDocumentBeforeAction();
-			
-            // Return false if job has been manually stopped
-            if (!$this->jobActive) {
-                $this->message .= 'Job is not active. ';
-                return false;
-            }
-            // Création du header de la requête
-            $query_header = 'INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock) VALUES';
-            // Création de la requête d'entête
-            $date_modified = $this->data['date_modified'];
-            // Source_id could contain accent
-            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
-            $stmt = $this->connection->prepare($query_header);
-            $result = $stmt->executeQuery();
-            // Insert source data
-            $insertDataTable = $this->insertDataTable($this->data, 'S');
-            $this->updateStatus('New');
-
-            // // Dispatch event for Elasticsearch sync
-            // $this->dispatchDocumentEvent(DocumentEvent::CREATED);
-
-			return $insertDataTable;
-        } catch (\Exception $e) {
-            $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($this->id.' - '.$this->message);
-			$this->updateStatus('Create_KO');
-            return false;
-        }
+		// Check on current document before any action
+		$this->checkDocumentBeforeAction();
+		
+		// Return false if job has been manually stopped
+		if (!$this->jobActive) {
+			throw new \Exception('Job is not active, probably manually stopped. ');
+		}
+		
+		// Prepare document data
+		$this->documentBatch[] = [
+			'id' => $this->id,
+			'rule_id' => $this->ruleId,
+			'date_created' => $this->dateCreated,
+			'date_modified' => $this->dateCreated,
+			'created_by' => $this->userId,
+			'modified_by' => $this->userId,
+			'source_id' => utf8_encode($this->sourceId),
+			'source_date_modified' => $this->data['date_modified'],
+			'mode' => $this->ruleMode,
+			'type' => $this->documentType,
+			'parent_id' => $this->parentId,
+			'job_lock' => ''
+		];		
+		// Préparer documentData (S uniquement ici)
+		$dataInsert = $this->prepareDataInsert($this->data, 'S');
+		
+		$this->documentDataBatch[] = [
+			'doc_id' => $this->id,
+			'type' => 'S',
+			'data' => serialize(json_encode($dataInsert))
+		];				
+		// Flush if batch limit reached
+		if (count($this->documentBatch) >= $this->batchSize) {
+			$this->flushBatchCreateDocuments();		
+			$this->flushStatusBatch();
+			$this->flushLogBatch();
+		}
+		$this->updateStatusBatch('New');
+		return true;
     }
+	
+	// Mass insert for document creation
+	public function flushBatchCreateDocuments(): void
+	{
+		if (empty($this->documentBatch)) {
+			return;
+		}
+		// -------------------------
+		// INSERT DOCUMENT
+		// -------------------------
+		$values = [];
+		$params = [];
+
+		// Prepare insert query for document table
+		foreach ($this->documentBatch as $doc) {
+			$values[] = "(?,?,?,?,?,?,?,?,?,?,?,?)";
+			$params[] = $doc['id'];
+			$params[] = $doc['rule_id'];
+			$params[] = $doc['date_created'];
+			$params[] = $doc['date_modified'];
+			$params[] = $doc['created_by'];
+			$params[] = $doc['modified_by'];
+			$params[] = $doc['source_id'];
+			$params[] = $doc['source_date_modified'];
+			$params[] = $doc['mode'];
+			$params[] = $doc['type'];
+			$params[] = $doc['parent_id'];
+			$params[] = $doc['job_lock'];
+		}
+		$sql = "
+			INSERT INTO document 
+			(id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock)
+			VALUES ".implode(',', $values);
+		// Execute query for document table
+		$this->connection->executeStatement($sql, $params);
+
+		// -------------------------
+		// INSERT DOCUMENT DATA
+		// -------------------------
+		$values = [];
+		$params = [];
+		// Prepare insert query for document data table
+		foreach ($this->documentDataBatch as $data) {
+			$values[] = "(?,?,?)";
+			$params[] = $data['doc_id'];
+			$params[] = $data['type'];
+			$params[] = $data['data'];
+		}
+		$sql = "INSERT INTO documentData (doc_id, type, data)
+				VALUES ".implode(',', $values);
+		// Execute query for document data table
+		$this->connection->executeStatement($sql, $params);
+
+		// Reset buffers
+		$this->documentBatch = [];
+		$this->documentDataBatch = [];
+	}
 
     // Permet de filtrer ou non un document
     public function filterDocument($ruleFilters)
@@ -1478,6 +1548,94 @@ class DocumentManager
         return true;
     }
 
+	// Insert source data in table documentData
+    protected function prepareDataInsert($data, $type)
+    {
+        try {
+            // We retrieve all the target fields (not just the rule flieds) before deleting data to the target solution to create a backup
+            if (
+                    'D' == $this->documentType
+                and 'H' == $type
+            ) {
+                // Get all module fields
+                $targetFields = $this->getTargetFields(true);
+                // Format these target fields
+                if (!empty($targetFields)) {
+                    foreach ($targetFields as $targetField) {
+                        $fields[] = ['target_field_name' => $targetField];
+                    }
+                }
+            } else {
+                $fields = $this->ruleFields;
+            }
+            // We save only fields which belong to the rule
+            if (!empty($fields)) {
+                foreach ($fields as $ruleField) {
+                    if ('S' == $type) {
+                        // We don't create entry in the array dataInsert when the filed is my_value because there is no filed in the source, just a formula to the target application
+                        if ('my_value' == $ruleField['source_field_name']) {
+                            continue;
+                        }
+                        // It could be several fields in the source fields (in case of formula)
+                        $sourceFields = explode(';', $ruleField['source_field_name']);
+                        foreach ($sourceFields as $sourceField) {
+                            // if Myddleware_element_id is present, we transform it into id
+                            if ('Myddleware_element_id' == $sourceField) {
+                                $sourceField = 'id';
+                            }
+							if (array_key_exists($sourceField,$data)) {
+								$dataInsert[$sourceField] = $data[$sourceField];
+							} else {
+								throw new \Exception('The field '.$sourceField.' is missing in the source values. ');
+							}
+                        }
+                    } else {
+                        // Some field can't be retrived from the target application (history). For example the field password on the module user of Moodle
+                        if (
+                                !array_key_exists($ruleField['target_field_name'], $data)
+                            and 'H' == $type
+                        ) {
+                            continue;
+                        }
+                        // foreach field of $this->notSentFields, we remove it from the data to send (Target only)
+                        if (
+                                !empty($this->notSentFields)
+                            and in_array($ruleField['target_field_name'], $this->notSentFields)
+							and $type == 'T'
+                        ) {
+                            continue;
+                        }
+                        $dataInsert[$ruleField['target_field_name']] = $data[$ruleField['target_field_name']];
+                    }
+                }
+            }
+		
+			// We save the filter fields too (if not already in the list)
+            if (!empty($this->ruleFilters)) {
+                foreach ($this->ruleFilters as $ruleFilter) {
+                    if (!array_key_exists($ruleFilter['target'],$dataInsert)) {
+                        $dataInsert[$ruleFilter['target']] = (!empty($data[$ruleFilter['target']]) ? $data[$ruleFilter['target']] : '');
+                    } 
+                }
+            }
+			return $dataInsert;
+        } catch (\Exception $e) {
+            $this->typeError = 'E';
+			// Change status depending on the data type inserted
+			if($type == 'S') {
+				throw new \Exception('Failed - Create_KO : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			} elseif($type == 'T') {
+				$this->message .= 'Failed - Error_transformed : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->updateStatus('Error_transformed');
+			} elseif($type == 'H') {
+				$this->message .= 'Failed - Error_checking : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->updateStatus('Error_checking');
+			}
+            $this->logger->error($this->id.' - '.$this->message);
+			return false;
+        }
+    }
+	
     // Mise à jour de la table des données source
     protected function updateHistoryTable($dataTarget): bool
     {
@@ -2263,6 +2421,125 @@ class DocumentManager
 			return false;
 		}
     }
+	
+	 /**
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function updateStatusBatch($new_status, $workflow = false)
+    {
+        try {
+            // On ajoute un contôle dans le cas on voudrait changer le statut
+            $new_status = $this->beforeStatusChange($new_status);
+			$this->message .= 'Status : '.$new_status;
+            $now = gmdate('Y-m-d H:i:s');
+            // Récupération du statut global
+            $globalStatus = $this->globalStatus[$new_status];
+            // Ajout d'un essai si erreur
+            if ('Error' == $globalStatus || 'Close' == $globalStatus) {
+                ++$this->attempt;
+            }
+			
+			// Save update for the batch
+			$this->statusBatch[] = [
+				'id' => $this->id,
+				'date_modified' => $now,
+				'global_status' => $globalStatus,
+				'attempt' => $this->attempt,
+				'status' => $new_status
+			];
+			
+			// Save log for the batch
+			$this->logBatch[] = [
+				'created' => $now,
+				'type' => $this->typeError,
+				'msg' => str_replace("'", '', utf8_encode($this->message)),
+				'rule_id' => $this->ruleId,
+				'doc_id' => $this->id,
+				'ref_doc_id' => $this->docIdRefError,
+				'job_id' => $this->jobId
+			];
+			// Reset local memory
+			$this->message = '';
+			$this->docIdRefError = '';
+
+            // We don't send output for the API and Myddleware UI
+			if (
+					!$this->api
+				AND $this->env == 'background'
+			) {
+                echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
+            }
+			return true;
+        } catch (\Exception $e) {
+            $this->message .= 'Error status update : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+            $this->typeError = 'E';
+            $this->logger->error($this->id.' - '.$this->message);
+            $this->createDocLog();
+			return false;
+		}
+    }
+	
+	// Update status using batch
+	public function flushStatusBatch(): void
+	{
+		if (empty($this->statusBatch)) {
+			return;
+		}
+		$ids = [];
+		$casesStatus = '';
+		$casesGlobal = '';
+		$casesAttempt = '';
+		$casesDate = '';
+
+		// Prepare mass update
+		foreach ($this->statusBatch as $row) {
+			$id = $row['id'];
+			$ids[] = "'$id'";
+			$casesStatus .= "WHEN id = '$id' THEN '{$row['status']}' ";
+			$casesGlobal .= "WHEN id = '$id' THEN '{$row['global_status']}' ";
+			$casesAttempt .= "WHEN id = '$id' THEN {$row['attempt']} ";
+			$casesDate .= "WHEN id = '$id' THEN '{$row['date_modified']}' ";
+		}
+		$sql = "
+			UPDATE document SET
+				status = CASE $casesStatus END,
+				global_status = CASE $casesGlobal END,
+				attempt = CASE $casesAttempt END,
+				date_modified = CASE $casesDate END
+			WHERE id IN (".implode(',', $ids).")
+		";
+		// Execute query
+		$this->connection->executeStatement($sql);
+		$this->statusBatch = [];
+	}
+	
+	// Add logs using batch
+	public function flushLogBatch(): void
+	{
+		if (empty($this->logBatch)) {
+			return;
+		}
+		$values = [];
+		$params = [];
+
+		// Prepare mass creation
+		foreach ($this->logBatch as $log) {
+			$values[] = "(?,?,?,?,?,?,?)";
+			$params[] = $log['created'];
+			$params[] = $log['type'];
+			$params[] = $log['msg'];
+			$params[] = $log['rule_id'];
+			$params[] = $log['doc_id'];
+			$params[] = $log['ref_doc_id'];
+			$params[] = $log['job_id'];
+		}
+		$sql = "
+			INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id)
+			VALUES ".implode(',', $values);
+		// Execute query
+		$this->connection->executeStatement($sql, $params);
+		$this->logBatch = [];
+	}
 
     /**
      * @throws \Doctrine\DBAL\Exception
