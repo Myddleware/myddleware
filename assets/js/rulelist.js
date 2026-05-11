@@ -1,14 +1,14 @@
 const $ = require('jquery');
 
 $(function(){
-    $(".form-check-input.toggle-switch-rule").on('change', function(e) {
+    $(document).on('change', '.form-check-input.toggle-switch-rule', function(e) {
         path_fiche_update = $(this).attr('title');
         $.ajax({
             type: "POST",
-            url: path_fiche_update,						
-                success: function(data){                 
-            }			
-        });	
+            url: path_fiche_update,
+                success: function(data){
+            }
+        });
     });
 });
 
@@ -103,19 +103,19 @@ $(function(){
   });
 
 // --For 'rule name' in the list view
-$('.edit-button-name-list').on('click', function () {        
-    var field = $(this).closest('td'); 
-    var editFormContainer = field.find('.edit-form-container'); 
+$(document).on('click', '.edit-button-name-list', function () {
+    var field = $(this).closest('td');
+    var editFormContainer = field.find('.edit-form-container');
     editFormContainer.show();
 });
 
 
-$('.close-button-name-list').on('click', function () {
+$(document).on('click', '.close-button-name-list', function () {
     var editFormContainer = $(this).closest('.edit-form-container');
     editFormContainer.css('display', 'none');
 });
 
-$('.edit-form-name-list').on('submit', function (event) {
+$(document).on('submit', '.edit-form-name-list', function (event) {
     event.preventDefault();
 
     var editForm = $(this);
