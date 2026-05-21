@@ -39,10 +39,15 @@ const UI = {
 
   // Sets a value (useful for editing)
   setValue: (el, value) => {
-      if (!el) return;
-      el.value = String(value);
+      
+      const strVal = String(value);
       if (el.selectize) {
-          el.selectize.setValue(String(value), false); 
+        if (!el.selectize.options[strVal]) {
+              el.selectize.addOption({ value: strVal, text: strVal });
+          }
+          el.selectize.setValue(strVal, true); 
+      } else {
+          el.value = strVal;
       }
   },
 
@@ -298,7 +303,9 @@ const UI = {
 
 // Loads specific Step 3 parameters (date fields, limit, etc.)
   async function loadStep3Params() {
-    if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) return;
+    if (!EL.step3 || !step3ParamsPath || !EL.paramsContainer) {
+        return;
+    }
 
     const valSrcConn = getVal(EL.src.conn);
     const valTgtConn = getVal(EL.tgt.conn);
@@ -316,6 +323,13 @@ const UI = {
       src_module: valSrcMod,
       tgt_module: valTgtMod
     };
+
+    const rid = new URLSearchParams(location.search).get('rule_id');
+    if (rid) {
+        params.rule_id = rid;
+    } else if (window.initialRule && window.initialRule.id) {
+        params.rule_id = window.initialRule.id;
+    }
 
     try {
       EL.paramsContainer.innerHTML = '<div class="text-center py-3"><div class="spinner-border text-primary" role="status"></div></div>';
@@ -1138,14 +1152,24 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
   // Fills the form with JSON sent by the server
   async function hydrateEditFromJson() {
     try {
+      let flatParams = {};
+      if (ruleData.params) {
+          Object.entries(ruleData.params).forEach(([k, v]) => {
+              if (v && typeof v === 'object' && v.name !== undefined) {
+                  flatParams[v.name] = v.value;
+              } else {
+                  flatParams[k] = v;
+              }
+          });
+      }
       if (nameInput) {
         nameInput.value = ruleData.name || '';
         nameInput.classList.add('is-valid');
 
       }
       const descInput = UI.get('ruledescription');
-      if (descInput && ruleData.params?.description) {
-        descInput.value = ruleData.params.description;
+      if (descInput && flatParams.description) {
+        descInput.value = flatParams.description;
       }
 
       if (typeof window.__revealStep2 === 'function') window.__revealStep2();
@@ -1215,9 +1239,13 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
                 UI.setValue(d, ruleData.syncOptions.duplicateField); 
             }
           }
-          if (ruleData.params) {
-            Object.entries(ruleData.params).forEach(([k, v]) => {
-              UI.setValue(UI.get(k), v);
+          
+          if (Object.keys(flatParams).length > 0) {
+            Object.entries(flatParams).forEach(([k, v]) => {
+              const elementHtml = UI.get(k);
+              if (elementHtml) {
+                  UI.setValue(elementHtml, v);
+              }
             });
           }
       }

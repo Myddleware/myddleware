@@ -575,7 +575,7 @@ class RuleStepService
      * Combined data loader for edit mode: fetches step3 params + step4 filter fields
      * with a SINGLE login per external system instead of separate logins per endpoint.
      */
-    public function getEditInitData(int $srcConnectorId, int $tgtConnectorId, string $srcModule, string $tgtModule, ?string $ruleId = null): array
+public function getEditInitData(int $srcConnectorId, int $tgtConnectorId, string $srcModule, string $tgtModule, ?string $ruleId = null): array
     {
         if (!$srcConnectorId || !$tgtConnectorId || empty($srcModule) || empty($tgtModule)) {
             throw new \InvalidArgumentException('Missing parameters');
@@ -713,6 +713,25 @@ class RuleStepService
             'option'   => $modeTranslate,
             'value'    => '',
         ];
+
+        $savedParams = [];
+        if ($ruleId) {
+            $rows = $this->connection->fetchAllAssociative(
+                'SELECT name, value FROM ruleparam WHERE rule_id = ?',
+                [$ruleId]
+            );
+            foreach ($rows as $row) {
+                $savedParams[$row['name']] = $row['value'];
+            }
+        }
+
+        foreach ($ruleParams as &$param) {
+            if (isset($param['name']) && isset($savedParams[$param['name']])) {
+                $param['class'] = 'js-select-search';
+                $param['value'] = $savedParams[$param['name']];
+            }
+        }
+        unset($param);
 
         foreach ($fieldsGrouped as &$group) {
             asort($group, SORT_STRING | SORT_FLAG_CASE);
