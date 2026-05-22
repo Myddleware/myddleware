@@ -422,14 +422,17 @@ class database extends solution
                 $idTarget = $value;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-            $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-
-            // Check if the field type is in the $ignoreQuotesOnQuery array
-            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
-                $values .= ('null' == $value ? 'null,' : $this->escape($value).',');
-            } else {
-                $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
-            }
+			$sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
+			if ($value === 'null') {
+				$values .= 'null,';
+			} elseif (is_bool($value)) {
+				$values .= ($value ? 1 : 0).',';
+			// Check if the field type is in the $ignoreQuotesOnQuery array
+			} elseif (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+				$values .= $this->escape($value).',';
+			} else {
+				$values .= "'".$this->escape($value)."',";
+			}
         }
 
         // Remove the last coma
@@ -486,13 +489,17 @@ class database extends solution
                 continue;
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
-
-            // Check if the field type is in the $ignoreQuotesOnQuery array
-            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
-                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : $this->escape($value).',');
-            } else {
-                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
-            }
+			$field = $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose;
+			if ($value === 'null') {
+				$sql .= $field.'=null,';
+			} elseif (is_bool($value)) {
+				$sql .= $field.'='.($value ? 1 : 0).',';
+			// Check if the field type is in the $ignoreQuotesOnQuery array
+			} elseif (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+				$sql .= $field.'='.$this->escape($value).',';
+			} else {
+				$sql .= $field."='".$this->escape($value)."',";
+			}
         }
 
         // Remove the last coma

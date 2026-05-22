@@ -421,6 +421,11 @@ class sugarcrm extends solution
                     ) {
                         // Some fields can be an object like teamname field
                         if (is_object($record->$field[0])) {
+							// Email field
+							if (isset($record->$field[0]->email_address)) {
+								$result[$record->id][$field] = $record->$field[0]->email_address;
+								continue;
+							}
 							$fieldObjectList = array();
 							// Get all ids of the object list
 							foreach($record->$field as $fieldObject) {
