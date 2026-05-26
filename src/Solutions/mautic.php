@@ -1,0 +1,356 @@
+<?php
+
+/*********************************************************************************
+ * This file is part of Myddleware.
+ *
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2026  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com
+ *
+ * Myddleware is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Myddleware is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************************/
+
+namespace App\Solutions;
+
+use App\Solutions\Support\MauticApiHelper;
+use App\Solutions\Support\MauticConnectorHelper;
+use App\Solutions\Support\MauticRuntimeHelper;
+use Symfony\Component\Form\Extension\Core\Type\PasswordType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+
+/**
+ * Mautic 7 connector (REST API).
+ *
+ * Auth supported:
+ *  - OAuth2 (client_credentials) via POST /oauth/v2/token (recommended)
+ *  - Basic Auth (if enabled in Mautic configuration)
+ *
+ * Notes for Myddleware:
+ *  - This class follows the same interface used by the provided connectors:
+ *    getFieldsLogin(), login(), get_modules(), get_module_fields(), readData(),
+ *    createData(), updateData(), deleteData().
+ */
+class mautic extends solution
+{
+    protected bool $sendDeletion = true;
+
+    protected string $baseUrl = '';
+    protected string $apiBase = '';
+
+    protected ?string $accessToken = null;
+    protected int $tokenExpiresAt = 0;
+
+    protected array $required_fields = [
+        'default' => ['id', 'dateModified'],
+        'contacts' => ['id', 'dateModified', 'dateAdded'],
+        'companies' => ['id', 'dateModified', 'dateAdded'],
+        'segments' => ['id', 'dateModified', 'dateAdded'],
+    ];
+
+    protected array $FieldsDuplicate = [
+        'contacts' => [],
+        'companies' => [],
+        'segments' => [],
+    ];
+
+    protected array $moduleConfiguration = [
+        'contacts' => [
+            'endpoint' => 'contacts',
+            'item_key' => 'contact',
+            'items_key' => 'contacts',
+        ],
+        'companies' => [
+            'endpoint' => 'companies',
+            'item_key' => 'company',
+            'items_key' => 'companies',
+        ],
+        'segments' => [
+            'endpoint' => 'segments',
+            'item_key' => 'list',
+            'items_key' => 'lists',
+        ],
+    ];
+
+    protected array $metadataFields = [
+        'segments' => [
+            'id' => ['label' => 'ID', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'name' => ['label' => 'Name', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'alias' => ['label' => 'Alias', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'description' => ['label' => 'Description', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'isPublished' => ['label' => 'Is published', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+            'isGlobal' => ['label' => 'Is global', 'type' => 'varchar(255)', 'type_bdd' => 'varchar(255)', 'required' => 0],
+        ],
+    ];
+
+    public function getFieldsLogin(): array
+    {
+        return [
+            [
+                'name' => 'url',
+                'type' => TextType::class,
+                'label' => 'solution.fields.url',
+            ],
+            [
+                'name' => 'client_id',
+                'type' => TextType::class,
+                'label' => 'solution.fields.client_id',
+            ],
+            [
+                'name' => 'client_secret',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.client_secret',
+            ],
+            [
+                'name' => 'login',
+                'type' => TextType::class,
+                'label' => 'solution.fields.login',
+            ],
+            [
+                'name' => 'password',
+                'type' => PasswordType::class,
+                'label' => 'solution.fields.password',
+            ],
+        ];
+    }
+
+    public function login($paramConnexion)
+    {
+        parent::login($paramConnexion);
+
+        try {
+            $this->baseUrl = rtrim((string) $this->paramConnexion['url'], '/');
+            if ('' === $this->baseUrl) {
+                throw new \Exception('Missing Mautic URL.');
+            }
+
+            $this->apiBase = $this->baseUrl.'/api';
+
+            $result = $this->call($this->apiBase.'/contacts?limit=1&minimal=1', 'GET');
+
+            if (!is_array($result) || (!isset($result['total']) && !isset($result['contacts']))) {
+                throw new \Exception('Login error: unexpected API response.');
+            }
+
+            $this->connexion_valide = true;
+        } catch (\Exception $exception) {
+            $errorMessage = $exception->getMessage();
+            $this->logger->error($errorMessage);
+
+            return ['error' => $errorMessage];
+        }
+    }
+
+    public function get_modules($type = 'source')
+    {
+        unset($type);
+
+        try {
+            return [
+                'contacts' => 'Contacts',
+                'companies' => 'Companies',
+                'segments' => 'Segments',
+            ];
+        } catch (\Exception $exception) {
+            $errorMessage = $exception->getMessage();
+            $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
+
+            return ['error' => $errorMessage];
+        }
+    }
+
+    public function get_module_fields($module, $type = 'source', $param = null): array
+    {
+        unset($param);
+        parent::get_module_fields($module, $type);
+
+        try {
+            $this->moduleFields = $this->addRequiredField($this->moduleFields, $module);
+            $metadataFields = (new MauticConnectorHelper())->getMetadataFields($this->metadataFields, $module);
+
+            if (!empty($metadataFields)) {
+                $this->moduleFields = array_merge($this->moduleFields, $metadataFields);
+            }
+
+            $this->moduleFields = (new MauticConnectorHelper())->normalizeModuleFields($this->moduleFields);
+
+            return $this->moduleFields;
+        } catch (\Exception $exception) {
+            $errorMessage = $exception->getMessage();
+            $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
+
+            return ['error' => $errorMessage];
+        }
+    }
+
+    public function readData($param): array
+    {
+        try {
+            $connectorHelper = new MauticConnectorHelper();
+            $normalizedParameters = $connectorHelper->prepareReadParameters(
+                $param,
+                fn (array $fields) => $this->cleanMyddlewareElementId($fields),
+                fn (array $fields, string $module) => $this->addRequiredField($fields, $module),
+            );
+            $endpointName = $connectorHelper->resolveEndpointName($this->moduleConfiguration, $normalizedParameters['module']);
+            $referenceField = 'C' === ($normalizedParameters['ruleParams']['mode'] ?? '0') ? 'dateAdded' : 'dateModified';
+            $queryParams = $connectorHelper->buildReadQueryParams($normalizedParameters, $referenceField);
+            $requestUrl = $this->apiBase.'/'.$endpointName.'?'.$connectorHelper->createUrlParam($queryParams);
+            $responseData = $this->call($requestUrl, 'GET');
+
+            return $connectorHelper->formatReadResult(
+                $normalizedParameters,
+                $responseData,
+                $connectorHelper->getModuleConfiguration($this->moduleConfiguration, $normalizedParameters['module'])['items_key'],
+            );
+        } catch (\Exception $exception) {
+            $errorMessage = $exception->getMessage();
+            $this->logger->error($errorMessage, ['exception_file' => $exception->getFile(), 'exception_line' => $exception->getLine()]);
+
+            return ['error' => $errorMessage];
+        }
+    }
+
+    public function createData($param): array
+    {
+        $result = [];
+
+        foreach ($param['data'] as $documentId => $payloadData) {
+            try {
+                $moduleName = $param['module'];
+                $moduleConfiguration = (new MauticRuntimeHelper())->getModuleConfiguration($this->moduleConfiguration, $moduleName, $this->logger);
+                $responsePayload = (new MauticConnectorHelper())->formatWriteResponse(
+                    $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/new', 'POST', $payloadData),
+                    $moduleConfiguration['item_key'],
+                );
+                $recordId = $responsePayload['id'] ?? null;
+
+                if (empty($recordId)) {
+                    throw new \Exception('Mautic create did not return an id.');
+                }
+
+                $result[$documentId] = [
+                    'id' => (string) $recordId,
+                ];
+            } catch (\Exception $exception) {
+                $result[$documentId] = (new MauticRuntimeHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData, $this->logger);
+            }
+
+            $this->updateDocumentStatus($documentId, $result[$documentId], $param);
+        }
+
+        return $result;
+    }
+
+    public function updateData($param): array
+    {
+        $result = [];
+
+        foreach ($param['data'] as $documentId => $payloadData) {
+            try {
+                $moduleName = $param['module'];
+                $recordId = (new MauticRuntimeHelper())->extractTargetRecordId($payloadData, 'update', $this->logger);
+                $moduleConfiguration = (new MauticRuntimeHelper())->getModuleConfiguration($this->moduleConfiguration, $moduleName, $this->logger);
+                (new MauticConnectorHelper())->formatWriteResponse(
+                    $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/edit', 'PATCH', $payloadData),
+                    $moduleConfiguration['item_key'],
+                );
+
+                $result[$documentId] = [
+                    'id' => (string) $recordId,
+                ];
+            } catch (\Exception $exception) {
+                $result[$documentId] = (new MauticRuntimeHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData, $this->logger);
+            }
+
+            $this->updateDocumentStatus($documentId, $result[$documentId], $param);
+        }
+
+        return $result;
+    }
+
+    public function deleteData($param): array
+    {
+        $result = [];
+
+        foreach ($param['data'] as $documentId => $payloadData) {
+            try {
+                $moduleName = $param['module'];
+                $recordId = (new MauticRuntimeHelper())->extractTargetRecordId($payloadData, 'delete', $this->logger);
+                $moduleConfiguration = (new MauticRuntimeHelper())->getModuleConfiguration($this->moduleConfiguration, $moduleName, $this->logger);
+                $this->call($this->apiBase.'/'.$moduleConfiguration['endpoint'].'/'.$recordId.'/delete', 'DELETE');
+
+                $result[$documentId] = [
+                    'id' => (string) $recordId,
+                ];
+            } catch (\Exception $exception) {
+                $result[$documentId] = (new MauticRuntimeHelper())->buildWriteErrorResult($exception, $documentId, $param, $payloadData, $this->logger);
+            }
+
+            $this->updateDocumentStatus($documentId, $result[$documentId], $param);
+        }
+
+        return $result;
+    }
+
+    public function getDirectLink($rule, $document, $type)
+    {
+        unset($rule, $document, $type);
+
+        return null;
+    }
+
+    /**
+     * @throws ClientExceptionInterface
+     * @throws DecodingExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function call($url, $method = 'GET', $data = null): array
+    {
+        $authHeader = (new MauticRuntimeHelper())->buildAuthHeader(
+            $this->paramConnexion,
+            function (string $clientId, string $clientSecret): string {
+                $tokenData = (new MauticApiHelper())->getOAuth2AccessToken(
+                    $this->baseUrl,
+                    $clientId,
+                    $clientSecret,
+                    time(),
+                    $this->accessToken,
+                    $this->tokenExpiresAt,
+                    $this->logger,
+                );
+
+                $this->accessToken = $tokenData['access_token'];
+                $this->tokenExpiresAt = $tokenData['token_expires_at'];
+
+                return $this->accessToken;
+            },
+        );
+
+        return (new MauticApiHelper())->call(
+            (string) $url,
+            (string) $method,
+            $data,
+            (new MauticApiHelper())->buildRequestHeaders($authHeader),
+            $this->logger,
+        );
+    }
+}
