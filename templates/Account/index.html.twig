@@ -93,27 +93,6 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
                 </a>
             </div>
             
-            <!-- Log Management -->
-            <h3>Logs</h3>
-            <div class="form-group">
-                <label>Download the latest logs</label>
-                <div>
-                    <a href="{{path('download_log')}}">
-                        <button type="button" class="btn-log btn-download">Download</button>
-                    </a>
-                </div>
-            </div>
-            
-            {% if is_granted('ROLE_SUPER_ADMIN') %}
-            <div class="form-group">
-                <label>Empty the log file</label>
-                <div>
-                    <a href="{{path('empty_log')}}">
-                        <button type="button" class="btn-log btn-delete">Empty</button>
-                    </a>
-                </div>
-            </div>
-            {% endif %}
         </div>
         
         <!-- Security Tab -->
@@ -219,7 +198,7 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
             formData.append('plainPassword', newPassword);
             
             // Send request
-            fetch('/rule/api/account/password/update', {
+            fetch('/account/api/account/password/update', {
                 method: 'POST',
                 body: formData,
                 headers: {

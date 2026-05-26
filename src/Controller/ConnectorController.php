@@ -53,11 +53,11 @@ use Symfony\Component\Yaml\Yaml;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Illuminate\Encryption\Encrypter;
 
-/**
- * @Route("/rule")
- */
+use App\Service\DebugLogger;
+#[Route('/rule')]
 class ConnectorController extends AbstractController
 {
+    private DebugLogger $debugLogger;
     protected $params;
     private SessionService $sessionService;
     private TranslatorInterface $translator;
@@ -70,8 +70,10 @@ class ConnectorController extends AbstractController
         SessionService $sessionService,
         TranslatorInterface $translator,
         EntityManagerInterface $entityManager,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->solutionManager = $solutionManager;
         $this->sessionService = $sessionService;
         $this->translator = $translator;
@@ -89,15 +91,17 @@ class ConnectorController extends AbstractController
 
     /**
      * CALLBACK POUR LES APIS.
-     *
-     * @Route("/connector/callback/", name="connector_callback", options={"expose"=true})
      */
+    #[Route('/connector/callback/', name: 'connector_callback', options: ['expose' => true])]
     public function callBack()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
             // Nom de la solution
             if (!$this->sessionService->isSolutionNameExist()) {
-                return new Response('');
+                return $__debugReturn = new Response('');
             }
 
             $solution_name = $this->sessionService->getSolutionName();
@@ -124,7 +128,7 @@ class ConnectorController extends AbstractController
                     $this->sessionService->setParamConnectorSourceRefreshToken($solution->getRefreshToken());
                 }
 
-                return $this->redirect($this->generateUrl('connector_callback'));
+                return $__debugReturn = $this->redirect($this->generateUrl('connector_callback'));
             }
 
             // SOLUTION AVEC POPUP ---------------------------------------------------------------------
@@ -146,7 +150,7 @@ class ConnectorController extends AbstractController
 
                 // Gestion des erreurs retour méthode login
                 if (!empty($error)) {
-                    return new Response('');
+                    return $__debugReturn = new Response('');
                 }
 
                 // Autorisation de l'application
@@ -159,7 +163,7 @@ class ConnectorController extends AbstractController
                         }
                         // Redirection vers une autorisation manuel
                         else {
-                            return new Response($solution->js.';'.urldecode($callbackUrl)); // Url de l'authentification prêt à être ouvert en popup
+                            return $__debugReturn = new Response($solution->js.';'.urldecode($callbackUrl)); // Url de l'authentification prêt à être ouvert en popup
                         }
 
                         // 1er test de validité du Token
@@ -170,11 +174,11 @@ class ConnectorController extends AbstractController
                                 $this->sessionService->setParamConnectorSourceToken(null);
                                 $url = $solution->getCreateAuthUrl($callbackUrl);
 
-                                return new Response($solution->js.';'.urldecode($url)); // Url de l'authentification prêt à être ouvert en popup
+                                return $__debugReturn = new Response($solution->js.';'.urldecode($url)); // Url de l'authentification prêt à être ouvert en popup
                             }
                         }
 
-                        return new Response($solution->js.';'.$callbackUrl);	// tentative de connexion
+                        return $__debugReturn = new Response($solution->js.';'.$callbackUrl);	// tentative de connexion
                     } // detect js
 
                     if ($this->sessionService->isParamConnectorSourceTokenExist()) {
@@ -185,43 +189,48 @@ class ConnectorController extends AbstractController
 
                     // Erreur sans ouvrir la popup
                     if (404 == $testToken['error']['code'] || 0 === $testToken['error']['code']) {
-                        return new Response('2;'.$testToken['error']['message']); // Error Not Found
+                        return $__debugReturn = new Response('2;'.$testToken['error']['message']); // Error Not Found
                     }
 
                     if (isset($testToken['error']['code']) && !empty($testToken['error']['code']) && !empty($testToken['error']['message'])) {
-                        return new Response($testToken['error']['code'].';'.$testToken['error']['message']);
+                        return $__debugReturn = new Response($testToken['error']['code'].';'.$testToken['error']['message']);
                     }
 
                     if ($this->sessionService->isParamConnectorSourceTokenExist()) {
                         if (isset($testToken['error']['message']) && !empty($testToken['error']['message'])) {
-                            return new Response($testToken['error']['message'].';'); // Erreur de connexion
+                            return $__debugReturn = new Response($testToken['error']['message'].';'); // Erreur de connexion
                         }
 
                         $solution->connexion_valide = true;
 
-                        return new Response(1); // Connexion réussi
+                        return $__debugReturn = new Response(1); // Connexion réussi
                     }
                 }
 
-                return new Response('<script type="text/javascript" language="javascript">window.close();</script>'); // Ferme la popup automatiquement
+                return $__debugReturn = new Response('<script type="text/javascript" language="javascript">window.close();</script>'); // Ferme la popup automatiquement
             } // fin
             // SOLUTION AVEC POPUP ---------------------------------------------------------------------
 
                 throw new Exception('Failed load class');
         } catch (Exception $e) {
-            return new Response($e->getMessage());
+            return $__debugReturn = new Response($e->getMessage());
         }
 
-        return new Response('');
+        return $__debugReturn = new Response('');
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Contrôle si le fichier upload est valide puis le déplace.
-     *
-     * @Route("/connector/upload/{solution}", name="upload", options={"expose"=true})
      */
+    #[Route('/connector/upload/{solution}', name: 'upload', options: ['expose' => true])]
     public function upload($solution): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['solution' => $solution]);
+        $__debugReturn = null;
+        try {
         if (isset($solution)) {
             $output_dir = __DIR__.'/../Custom/Solutions/'.trim($solution).'/file/';
             // Get canonicalized absolute pathname
@@ -240,14 +249,22 @@ class ConnectorController extends AbstractController
             }
         }
 
-        // Supprime ancien fichier de config s'il existe
-        if (isset($_GET['file']) && '' != $_GET['file']) {
-            $name_without_space = str_replace(' ', '_', $_GET['file']);
-            $path_delete_old = $output_dir.$name_without_space;
-            if (file_exists($path_delete_old)) {
-                unlink($path_delete_old);
-                echo '<br/><br/><p><span class="label label-warning">'.$this->translator->trans('create_connector.upload_delete').' : '.htmlentities($name_without_space).'</span></p>';
-            }
+        //Make sure the input is treated only as a filename (removes ../ and /)
+        $safe_filename = basename($_GET['file']);
+
+        // Remove the spaces
+        $name_without_space = str_replace(' ', '_', $safe_filename);
+
+        // Make the absolute path
+        $path_delete_old = $output_dir . $name_without_space;
+
+        // Make sure the path is actually inside the directory
+        $real_output_dir = realpath($output_dir);
+        $real_target_path = realpath(dirname($path_delete_old));
+
+        if ($real_target_path === $real_output_dir && file_exists($path_delete_old)) {
+            unlink($path_delete_old);
+            echo '<br/><br/><p><span class="label label-warning">'.$this->translator->trans('create_connector.upload_delete').' : '.htmlentities($name_without_space).'</span></p>';
         }
 
         if ('all' == $solution) {
@@ -301,18 +318,23 @@ class ConnectorController extends AbstractController
                 exit;
             }
         } else {
-            return $this->render('Connector/upload.html.twig', ['solution' => $solution]
+            return $__debugReturn = $this->render('Connector/upload.html.twig', ['solution' => $solution]
             );
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     /**
      * CREATION D UN CONNECTEUR LISTE.
-     *
-     * @Route("/connector/create", name="regle_connector_create")
      */
+    #[Route('/connector/create', name: 'regle_connector_create')]
     public function create(): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $solutions = $this->entityManager->getRepository(Solution::class)->solutionActive();
         $lstArray = [];
         if (!empty($solutions)) {
@@ -331,30 +353,39 @@ class ConnectorController extends AbstractController
         // use yaml file which is assets/controller-config.yaml
         $nonRequiredFields = $this->getNonRequiredFields();
 
-        return $this->render('Connector/index.html.twig', [
+        return $__debugReturn = $this->render('Connector/index.html.twig', [
             'solutions'         => $lst_solution,
             'nonRequiredFields' => $nonRequiredFields,
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     private function getNonRequiredFields()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $yamlFile = __DIR__ . '/../../assets/connector-non-required-fields.yaml';
         $yaml = Yaml::parseFile($yamlFile);
-        return $yaml['non-required-fields'];
+        return $__debugReturn = $yaml['non-required-fields'];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * CREATION D'UN CONNECTEUR.
      *
      * @return RedirectResponse|Response
-     *
-     * @Route("/connector/insert", name="regle_connector_insert")
-     *
      * @throws Exception
      */
+    #[Route('/connector/insert', name: 'regle_connector_insert')]
     public function connectorInsert(Request $request)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        try {
         $type = '';
 
         $solution = $this->entityManager
@@ -454,16 +485,21 @@ class ConnectorController extends AbstractController
                 throw $this->createNotFoundException('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
             }
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
      * LISTE DES CONNECTEURS.
-     *
-     * @Route("/connector/list", name="regle_connector_list", defaults={"page"=1})
-     * @Route("/connector/list/page-{page}", name="regle_connector_page", requirements={"page"="\d+"})
      */
+    #[Route('/connector/list', name: 'regle_connector_list', defaults: ['page' => 1])]
+    #[Route('/connector/list/page-{page}', name: 'regle_connector_page', requirements: ['page' => '\d+'])]
     public function connectorList($page = 1): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['page' => $page]);
+        $__debugReturn = null;
+        try {
         try {
             // ---------------
             $compact['nb'] = 0;
@@ -483,7 +519,7 @@ class ConnectorController extends AbstractController
                     $compact['pager'] = '';
                 }
 
-                return $this->render('Connector/list.html.twig', [
+                return $__debugReturn = $this->render('Connector/list.html.twig', [
                     'nb' => $compact['nb'],
                     'entities' => $compact['entities'],
                     'pager' => $compact['pager'],
@@ -496,16 +532,21 @@ class ConnectorController extends AbstractController
         } catch (Exception $e) {
             throw $this->createNotFoundException('Error : '.$e);
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * SUPPRESSION DU CONNECTEUR.
-     *
-     * @Route("/connector/delete/{id}", name="connector_delete", methods={"DELETE","POST"})
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[Route('/connector/delete/{id}', name: 'connector_delete', methods: ['DELETE', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function connectorDelete(Request $request, $id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         $session = $request->getSession();
         if (isset($id)) {
             // Check permission
@@ -524,7 +565,7 @@ class ConnectorController extends AbstractController
                         ->findOneBy($list_fields_sql);
 
             if (null === $connector) {
-                return $this->redirect($this->generateUrl('regle_connector_list'));
+                return $__debugReturn = $this->redirect($this->generateUrl('regle_connector_list'));
             }
             try {
                 /** @var RuleRepository $ruleRepository */
@@ -556,21 +597,25 @@ class ConnectorController extends AbstractController
                 $session->set('error', [$e->getPrevious()->getMessage()]);
             }
 
-            return $this->redirect($this->generateUrl('regle_connector_list'));
+            return $__debugReturn = $this->redirect($this->generateUrl('regle_connector_list'));
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     /**
      * FICHE D'UN CONNECTEUR.
-     *
-     * @Route("/connector/view/{id}", name="connector_open")
-     *
      * @throws Exception
      * @throws NonUniqueResultException
      * @throws NonUniqueResultException
      */
+    #[Route('/connector/view/{id}', name: 'connector_open')]
     public function connectorOpen(Request $request, $id)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         // Load connector with proper permissions check
         $qb = $this->entityManager->getRepository(Connector::class)->createQueryBuilder('c');
         $qb->select('c', 'cp')->leftjoin('c.connectorParams', 'cp');
@@ -611,7 +656,7 @@ class ConnectorController extends AbstractController
                 if ($form->isSubmitted() && $form->isValid()) {
                     if (empty($connector->getName())) {
                         $request->getSession()->getFlashBag()->add('error', 'Connector name cannot be empty');
-                        return $this->render('Connector/edit/fiche.html.twig', [
+                        return $__debugReturn = $this->render('Connector/edit/fiche.html.twig', [
                             'connector' => $connector,
                             'form' => $form->createView(),
                             'connector_name' => $connector->getName() ?: 'Unnamed',
@@ -628,7 +673,7 @@ class ConnectorController extends AbstractController
 
                         if ($this->entityManager->getRepository(Connector::class)->existsActiveName($name, $connector->getId())) {
                                 $this->addFlash('connector.create.danger', $this->translator->trans('create_connector.duplicate_name'));
-                                return $this->render('Connector/edit/fiche.html.twig', [
+                                return $__debugReturn = $this->render('Connector/edit/fiche.html.twig', [
                                 'connector' => $connector,
                                 'form' => $form->createView(),
                                 'connector_name' => $connector->getName() ?: 'Unnamed',
@@ -644,7 +689,7 @@ class ConnectorController extends AbstractController
                         $this->addFlash('connector.edit.success', $this->translator->trans('edit_connector.saved_successfully'));
                         
                         // Redirect to detail view after successful edit
-                        return $this->redirect($this->generateUrl('connector_detail', ['id' => $id]));
+                        return $__debugReturn = $this->redirect($this->generateUrl('connector_detail', ['id' => $id]));
                         
                     } catch (Exception $e) {
                         $this->entityManager->rollback();
@@ -667,22 +712,27 @@ class ConnectorController extends AbstractController
         }
 
         // Display the connector edit form
-        return $this->render('Connector/edit/fiche.html.twig', [
+        return $__debugReturn = $this->render('Connector/edit/fiche.html.twig', [
             'connector' => $connector,
             'form' => $form->createView(),
             'connector_name' => $connector->getName(),
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Get connector data from database as JSON.
      * Used to populate form fields from database values.
-     *
-     * @Route("/api/connector/get-data/{id}", name="connector_get_data", methods={"POST"})
-     * @IsGranted("ROLE_ADMIN")
      */
+    #[Route('/api/connector/get-data/{id}', name: 'connector_get_data', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function getConnectorData($id): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             // Load connector with proper permissions check
             $qb = $this->entityManager->getRepository(Connector::class)->createQueryBuilder('c');
@@ -691,13 +741,13 @@ class ConnectorController extends AbstractController
             if ($this->getUser()->isAdmin()) {
                 $qb->where('c.id = :id AND c.deleted = 0')->setParameter('id', $id);
             } else {
-                return $this->json(['success' => false, 'message' => 'User not admin'], 500);
+                return $__debugReturn = $this->json(['success' => false, 'message' => 'User not admin'], 500);
             }
 
             $connector = $qb->getQuery()->getOneOrNullResult();
 
             if (!$connector) {
-                return $this->json(['success' => false, 'message' => 'Connector not found'], 500);
+                return $__debugReturn = $this->json(['success' => false, 'message' => 'Connector not found'], 500);
             }
 
             // Initialize encrypter for decryption
@@ -718,99 +768,20 @@ class ConnectorController extends AbstractController
                     try {
                         $value = $encrypter->decrypt($value);
                     } catch (Exception $e) {
-                       return $this->json(['success' => false, 'message' => 'Error with the Decryption'], 500);
+                       return $__debugReturn = $this->json(['success' => false, 'message' => 'Error with the Decryption'], 500);
                     }
                 }
                 $data['params'][$param->getName()] = $value;
             }
 
-            return $this->json($data);
+            return $__debugReturn = $this->json($data);
         } catch (Exception $e) {
             $this->logger->error('Error fetching connector data: ' . $e->getMessage());
-            return $this->json(['success' => false, 'message' => 'Error fetching connector data'], 500);
+            return $__debugReturn = $this->json(['success' => false, 'message' => 'Error fetching connector data'], 500);
         }
-    }
-
-    /* ******************************************************
-     * ANIMATION
-     ****************************************************** */
-
-    /**
-     * LISTE DES CONNECTEURS POUR ANIMATION.
-     *
-     * @Route("/connector/list/solution", name="regle_connector_by_solution")
-     */
-    public function connectorListSolution(Request $request): Response
-    {
-        $id = $request->get('id', null);
-
-        if (null != $id) {
-            if ($this->getUser()->isAdmin()) {
-                $list_fields_sql = ['solution' => (int) $id,
-                    'deleted' => 0,
-                ];
-            } else {
-                $list_fields_sql =
-                    ['solution' => (int) $id,
-                        'deleted' => 0,
-                        'createdBy' => $this->getUser()->getId(),
-                    ];
-            }
-            $listConnector = $this->entityManager->getRepository(Connector::class)->findBy($list_fields_sql);
-            $lstArray = [];
-            foreach ($listConnector as $c) {
-                $lstArray[$c->getId()] = ucfirst($c->getName());
-            }
-            $lst = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.choose_connector'));
-
-            return new Response($lst);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        return new Response('');
-    }
-
-    /**
-     * CREATION D'UN CONNECTEUR LISTE animation.
-     *
-     * @Route("/connector/createout/{type}", name="regle_connector_create_out")
-     */
-    public function createOut($type): Response
-    {
-        $solution = $this->entityManager->getRepository(Solution::class)->solutionConnectorType($type);
-        $lstArray = [];
-        if ($solution) {
-            foreach ($solution as $s) {
-                $lstArray[$s['name']] = ucfirst($s['name']);
-            }
-        }
-
-        $lst_solution = ToolsManager::composeListHtml($lstArray, $this->translator->trans('create_rule.step1.list_empty'));
-
-        $this->sessionService->setConnectorAddMessage($this->translator->trans('create_rule.step1.connector'));
-        $this->sessionService->setParamConnectorAddType(strip_tags($type));
-        $this->sessionService->setConnectorAnimation(true);
-
-        return $this->render('Connector/createout.html.twig', [
-            'solutions' => $lst_solution,
-        ]
-        );
-    }
-
-    /**
-     * RETOURNE LES INFOS POUR L AJOUT D UN CONNECTEUR EN JQUERY.
-     *
-     * @Route("/connector/insert/solution", name="regle_connector_insert_solution")
-     */
-    public function connectorInsertSolutionAction(): Response
-    {
-        if ($this->sessionService->isConnectorValuesExist()) {
-            $values = $this->sessionService->getConnectorValues();
-            $this->sessionService->removeConnectorValues();
-
-            return new Response($values);
-        }
-
-        return new Response(0);
     }
 
     /* ******************************************************
@@ -820,6 +791,9 @@ class ConnectorController extends AbstractController
     // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
     private function nav_pagination($params, $orm = true)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['params' => $params, 'orm' => $orm]);
+        $__debugReturn = null;
+        try {
         /*
          * adapter_em_repository = requete
          * maxPerPage = integer
@@ -852,17 +826,21 @@ class ConnectorController extends AbstractController
                 throw $this->createNotFoundException('Page not found. '.$e->getMessage());
             }
 
-            return $compact;
+            return $__debugReturn = $compact;
         }
 
-        return false;
+        return $__debugReturn = false;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/connector/{id}/detail", name="connector_detail")
-     */
+    #[Route('/connector/{id}/detail', name: 'connector_detail')]
     public function detailAction(int $id)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
         
         $connector = $this->entityManager->getRepository(Connector::class)->find($id);
@@ -888,10 +866,13 @@ class ConnectorController extends AbstractController
         }
 
         // Passez les paramètres décryptés à la vue
-        return $this->render('Connector/detail/detail.html.twig', [
+        return $__debugReturn = $this->render('Connector/detail/detail.html.twig', [
             'connector' => $connector,
             'paramConnexion' => $paramConnexion, 
             'sensitiveFields' => $sensitiveFields,
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

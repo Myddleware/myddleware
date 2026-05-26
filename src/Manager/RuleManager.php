@@ -51,10 +51,12 @@ use Symfony\Component\HttpKernel\KernelInterface; // Tools
 use Symfony\Component\Routing\RouterInterface;
 use App\Manager\NotificationManager;
 use Symfony\Component\HttpFoundation\Session\Session;
+use App\Service\DebugLogger;
 
 
 class RuleManager
 {
+    private ?DebugLogger $debugLogger = null;
     protected Connection $connection;
     protected LoggerInterface $logger;
     protected $ruleId;
@@ -109,8 +111,10 @@ class RuleManager
         KernelInterface $kernel = null,
         RequestStack $requestStack = null,
         ToolsManager $tools = null,
-        NotificationManager $notificationManager = null
+        NotificationManager $notificationManager = null,
+        DebugLogger $debugLogger = null
     ) {
+        $this->debugLogger = $debugLogger;
         $this->logger = $logger;
         $this->connection = $connection;
         $this->entityManager = $entityManager;
@@ -134,6 +138,8 @@ class RuleManager
      */
     public function setRule($idRule)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['idRule' => $idRule]);
+        try {
         $this->ruleId = $idRule;
         if (!empty($this->ruleId)) {
             $rule = "	SELECT 
@@ -167,35 +173,68 @@ class RuleManager
             $this->setRuleField();
             $this->setVariable();
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function getRule()
     {
-        return $this->rule;
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->rule;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getSourceFields()
     {
-        return $this->sourceFields;
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->sourceFields;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function setJobId($jobId)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['jobId' => $jobId]);
+        try {
         $this->jobId = $jobId;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function setManual($manual)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['manual' => $manual]);
+        try {
         $this->manual = $manual;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function setApi($api)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['api' => $api]);
+        try {
         $this->api = $api;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Unset the lock on the rule
 	protected function setRuleLock() {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+		$__debugReturn = null;
+		try {
 		try {
 			// Get the rule details
 			$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
@@ -204,16 +243,22 @@ class RuleManager
 				$rule->setReadJobLock($this->jobId);
 				$this->entityManager->persist($rule);
 				$this->entityManager->flush();
-				return true;
-			}	
+				return $__debugReturn = true;
+			}
         } catch (Exception $e) {
             $this->logger->error('Failed set the lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
-		return false;
+		return $__debugReturn = false;
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 	
     // Unset the lock on the rule 
 	public function unsetRuleLock() {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+		$__debugReturn = null;
+		try {
 		try {
             // Get the rule details
             $rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
@@ -227,19 +272,28 @@ class RuleManager
                 $this->entityManager->persist($rule);
                 $this->entityManager->flush();
             }  elseif (!empty($readJobLock)) {
-                return false;
+                return $__debugReturn = false;
             }
         } catch (Exception $e) {
             $this->logger->error('Failed unset the lock on the rule '.$this->ruleId.' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            return false;
+            return $__debugReturn = false;
         }
-		return true;
+		return $__debugReturn = true;
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 	
 	protected function getRuleLock() {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+		$__debugReturn = null;
+		try {
 		// Get the rule details
 		$rule = $this->entityManager->getRepository(Rule::class)->findOneBy(['id' => $this->ruleId, 'deleted' => false]);
-		return $rule->getReadJobLock();
+		return $__debugReturn = $rule->getReadJobLock();
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 	
     /**
@@ -250,6 +304,9 @@ class RuleManager
      */
     public function generateDocuments($idSource, $readSource = true, $param = '', $idFiledName = 'id')
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['idSource' => $idSource, 'readSource' => $readSource, 'param' => $param, 'idFiledName' => $idFiledName]);
+        $__debugReturn = null;
+        try {
         try {
             $documents = [];
             if ($readSource) {
@@ -310,27 +367,33 @@ class RuleManager
                     $documents[] = $childDocument;
                 }
             }
-            return $documents;
+            return $__debugReturn = $documents;
         } catch (\Exception $e) {
             $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
             $errorObj = new \stdClass();
             $errorObj->error = $error;
 
-            return $errorObj;
+            return $__debugReturn = $errorObj;
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     // Connect to the source or target application
     public function connexionSolution($type): bool
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['type' => $type]);
+        $__debugReturn = null;
+        try {
         try {
             if ('source' == $type) {
                 $connId = $this->rule['conn_id_source'];
             } elseif ('target' == $type) {
                 $connId = $this->rule['conn_id_target'];
             } else {
-                return false;
+                return $__debugReturn = false;
             }
 
             // Get params connection
@@ -365,10 +428,13 @@ class RuleManager
                 throw new \Exception($loginResult['error']);
             }
 
-            return $c;
+            return $__debugReturn = $c;
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-            return false;
+            return $__debugReturn = false;
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -380,6 +446,9 @@ class RuleManager
      */
     public function createDocuments()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $readSource = null;
         // Si la lecture pour la règle n'est pas désactivée
         // Et si la règle est active et pas supprimée ou bien le lancement est en manuel
@@ -483,7 +552,10 @@ class RuleManager
             $readSource['error'] = 'The rule '.$this->rule['name_slug'].(1 == $this->rule['deleted'] ? ' is deleted.' : ' is disabled.');
         }
 
-        return $readSource;
+        return $__debugReturn = $readSource;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -491,16 +563,22 @@ class RuleManager
      */
     protected function getJobStatus()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $sqlJobDetail = 'SELECT * FROM job WHERE id = :jobId';
         $stmt = $this->connection->prepare($sqlJobDetail);
         $stmt->bindValue(':jobId', $this->jobId);
         $result = $stmt->executeQuery();
         $job = $result->fetchAssociative(); // 1 row
         if (!empty($job['status'])) {
-            return $job['status'];
+            return $__debugReturn = $job['status'];
         }
 
-        return false;
+        return $__debugReturn = false;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -510,6 +588,8 @@ class RuleManager
      */
     protected function updateReferenceDate()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $param = $this->entityManager->getRepository(RuleParam::class)
             ->findOneBy([
                     'rule' => $this->ruleId,
@@ -535,11 +615,16 @@ class RuleManager
             $this->entityManager->persist($param);
             $this->entityManager->flush();
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Update/create rule parameter
     protected function updateParams()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         if (!empty($this->dataSource['ruleParams'])) {
             foreach ($this->dataSource['ruleParams'] as $ruleParam) {
                 // Search to check if the param already exists
@@ -577,10 +662,16 @@ class RuleManager
                 $this->entityManager->flush();
             }
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     protected function readSource()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         $read['module'] = $this->rule['module_source'];
         $read['rule'] = $this->rule;
         $read['date_ref'] = $this->ruleParams['datereference'];
@@ -626,15 +717,18 @@ class RuleManager
                     }
                 }
 
-                return $this->dataSource;
+                return $__debugReturn = $this->dataSource;
             } elseif (!empty($connect['error'])) {
-                return $connect;
+                return $__debugReturn = $connect;
             } else {
-                return ['error' => 'Failed to connect to the source with rule : '.$this->ruleId.' .'];
+                return $__debugReturn = ['error' => 'Failed to connect to the source with rule : '.$this->ruleId.' .'];
             }
         }
 
-        return ['error' => 'No field to read in source system. '];
+        return $__debugReturn = ['error' => 'No field to read in source system. '];
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Check every record haven't the same reference date
@@ -642,6 +736,9 @@ class RuleManager
     // This function run only when the limit call has been reached
     protected function validateReadDataSource()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         if (!empty($this->dataSource['values'])) {
             $dataSourceValues = $this->dataSource['values'];
 
@@ -702,10 +799,13 @@ class RuleManager
                 $this->entityManager->persist($rule);
                 $this->entityManager->flush();
 
-                return ['error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes. The rule has been disabled. '];
+                return $__debugReturn = ['error' => 'All records read have the same reference date in rule '.$this->rule['name'].'. Myddleware cannot guarantee that all data will be read. Job interrupted. Please increase the number of data read by changing the limit attribute in job and rule classes. The rule has been disabled. '];
             }
 
-            return true;
+            return $__debugReturn = true;
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -714,6 +814,9 @@ class RuleManager
      */
     public function filterDocuments($documents = null): array
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
+        $__debugReturn = null;
+        try {
         // include_once 'document.php';
         $response = [];
 
@@ -753,7 +856,10 @@ class RuleManager
             }
         }
 
-        return $response;
+        return $__debugReturn = $response;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -764,6 +870,9 @@ class RuleManager
      */
     public function checkPredecessorDocuments($documents = null): array
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
+        $__debugReturn = null;
+        try {
         // include_once 'document.php';
         $response = [];
 
@@ -802,75 +911,12 @@ class RuleManager
             }
         }
 
-        return $response;
-    }
-
-    /**
-     * Permet de contrôler si un document de la même règle pour le même enregistrement n'est pas close
-     * Si un document n'est pas clos alors le statut du docuement est mis à "pending".
-     *
-     * @throws \Doctrine\DBAL\Exception
-     */
-    public function checkParentDocuments($documents = null): array
-    {
-        // include_once 'document.php';
-        // Permet de charger dans la classe toutes les relations de la règle
-        $response = [];
-
-        // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
-        if (empty($documents)) {
-            $documents = $this->selectDocuments('Predecessor_OK');
-        } else {
-			// Lock the documents in input parameter
-			foreach ($documents as $document) {
-				$this->setDocumentLock($document['id'], true);
-			}
-		}
-        if (!empty($documents)) {
-            $param['jobId'] = $this->jobId;
-            $param['ruleRelationships'] = $this->ruleRelationships;
-			$param['ruleWorkflows'] = $this->ruleWorkflows;
-            // Set all config parameters
-            $this->setConfigParam();
-            // If migration mode, we select all documents to improve performance. For example, we won't execute queries is method document->getTargetId
-            if (!empty($this->configParams['migration_mode'])) {
-                if (!empty($this->ruleRelationships)) {
-                    // Get all documents of every rules linked
-                    foreach ($this->ruleRelationships as $ruleRelationship) {
-                        // Get documents only if we don't have them yet (we could have several relationship to the same rule)
-                        if (empty($param['ruleDocuments'][$ruleRelationship['field_id']])) {
-                            $param['ruleDocuments'][$ruleRelationship['field_id']] = $this->getRuleDocuments($ruleRelationship['field_id'], true, true);
-                        }
-                    }
-                }
-            }
-            try {
-				if ('Start' != $this->getJobStatus()) {
-					throw new \Exception('The task has been stopped manually. No document generated. ');
-				}
-                // Pour tous les docuements sélectionnés on vérifie les parents
-                foreach ($documents as $document) {
-                    $param['id_doc_myddleware'] = $document['id'];
-                    $param['jobId'] = $this->jobId;
-                    $param['api'] = $this->api;
-                    $param['ruleRelationships'] = $this->ruleRelationships;
-					$param['ruleWorkflows'] = $this->ruleWorkflows;
-                    // Set the param values and clear all document attributes
-                    if($this->documentManager->setParam($param, true)) {
-                        // Check the document is in the right status
-						if (in_array($this->documentManager->getStatus(), array('Predecessor_OK', 'Relate_KO'))) {
-						    $response[$document['id']] = $this->documentManager->checkParentDocument();
-                        }
-					}
-                }
-            } catch (\Exception $e) {
-                $this->logger->error('Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-                $readSource['error'] = 'Failed to check parents : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            }
+        return $__debugReturn = $response;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        return $response;
     }
+
 
     /**
      * Permet de contrôler si un docuement de la même règle pour le même enregistrement n'est pas close
@@ -880,11 +926,14 @@ class RuleManager
      */
     public function transformDocuments($documents = null): array
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
+        $__debugReturn = null;
+        try {
         // Permet de charger dans la classe toutes les relations de la règle
         $response = [];
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
         if (empty($documents)) {
-            $documents = $this->selectDocuments('Relate_OK');
+            $documents = $this->selectDocuments('Predecessor_OK');
         } else {
 			// Lock the documents in input parameter
 			foreach ($documents as $document) {
@@ -923,7 +972,7 @@ class RuleManager
                     // Set the param values and clear all document attributes
                     if($this->documentManager->setParam($param, true)) {
                         // Check the document is in the right status
-                        if (in_array($this->documentManager->getStatus(), array('Relate_OK', 'Error_transformed'))) {
+                        if (in_array($this->documentManager->getStatus(), array('Predecessor_OK', 'Error_transformed'))) {
 						    $response[$document['id']] = $this->documentManager->transformDocument();
                         }
                     }
@@ -934,7 +983,10 @@ class RuleManager
             }
         }
 
-        return $response;
+        return $__debugReturn = $response;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -947,6 +999,9 @@ class RuleManager
      */
     public function getTargetDataDocuments($documents = null): array
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
+        $__debugReturn = null;
+        try {
         // include_once 'document.php';
 
         // Permet de charger dans la classe toutes les relations de la règle
@@ -993,11 +1048,17 @@ class RuleManager
             }
         }
 
-        return $response;
+        return $__debugReturn = $response;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function sendDocuments(): array
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // creation into the target application
         $sendTarget = $this->sendTarget('C');
         // Update into the target application
@@ -1015,7 +1076,10 @@ class RuleManager
                 $sendTarget['error'] .= 'Failed to logout from the target solution';
             }
         }
-        return $sendTarget;
+        return $__debugReturn = $sendTarget;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1023,40 +1087,52 @@ class RuleManager
      */
     public function actionDocument($id_document, $event, $param1 = null)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document, 'event' => $event, 'param1' => $param1]);
+        $__debugReturn = null;
+        try {
         switch ($event) {
             case 'rerun':
-                return $this->rerun($id_document);
+                return $__debugReturn = $this->rerun($id_document);
             case 'cancel':
-                return $this->cancel($id_document);
+                return $__debugReturn = $this->cancel($id_document);
             case 'remove':
-                return $this->changeDeleteFlag($id_document, true);
+                return $__debugReturn = $this->changeDeleteFlag($id_document, true);
             case 'restore':
-                return $this->changeDeleteFlag($id_document, false);
+                return $__debugReturn = $this->changeDeleteFlag($id_document, false);
             case 'changeStatus':
-                return $this->changeStatus($id_document, $param1);
+                return $__debugReturn = $this->changeStatus($id_document, $param1);
 			case 'unlock':
-                return $this->unlockDocument($id_document);
+                return $__debugReturn = $this->unlockDocument($id_document);
             case 'rerunWorkflow':
-                return $this->rerunWorkflowDocument($id_document);
+                return $__debugReturn = $this->rerunWorkflowDocument($id_document);
             default:
-                return 'Action '.$event.' unknown. Failed to run this action. ';
+                return $__debugReturn = 'Action '.$event.' unknown. Failed to run this action. ';
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     public function actionRule($event, $jobName = null, $documentId = null)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['event' => $event, 'jobName' => $jobName, 'documentId' => $documentId]);
+        $__debugReturn = null;
+        try {
         switch ($event) {
             case 'ALL':
-                return $this->runMyddlewareJob('ALL');
+                return $__debugReturn = $this->runMyddlewareJob('ALL');
             case 'ERROR':
-                return $this->runMyddlewareJob('ERROR');
+                return $__debugReturn = $this->runMyddlewareJob('ERROR');
             case 'runMyddlewareJob':
-                return $this->runMyddlewareJob($this->ruleId, $jobName);
+                return $__debugReturn = $this->runMyddlewareJob($this->ruleId, $jobName);
                 break;
             case 'runRuleByDocId':
-                return $this->runMyddlewareJob($this->ruleId, $jobName, $documentId);
+                return $__debugReturn = $this->runMyddlewareJob($this->ruleId, $jobName, $documentId);
             default:
-                return 'Action '.$event.' unknown. Failed to run this action. ';
+                return $__debugReturn = 'Action '.$event.' unknown. Failed to run this action. ';
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1127,6 +1203,9 @@ class RuleManager
      */
     protected function getRuleDocuments($ruleId, $sourceId = true, $targetId = false)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId, 'sourceId' => $sourceId, 'targetId' => $targetId]);
+        $__debugReturn = null;
+        try {
         $sql = 'SELECT id, source_id, target_id, status, global_status FROM document WHERE rule_id = :ruleId AND deleted = 0';
         $stmt = $this->connection->prepare($sql);
         $stmt->bindValue(':ruleId', $ruleId);
@@ -1143,7 +1222,10 @@ class RuleManager
                 }
             }
 
-            return $documentResult;
+            return $__debugReturn = $documentResult;
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1190,7 +1272,7 @@ class RuleManager
                             'name' => 'bidirectional',
                             'required' => false,
                             'type' => 'option',
-                            'label' => 'create_rule.step3.params.sync',
+                            'label' => 'Bidirectional synchronization',
                             'option' => $option,
                         ],
                     ];
@@ -1207,6 +1289,8 @@ class RuleManager
      */
     protected function cancel($id_document)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document]);
+        try {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
         $param['api'] = $this->api;
@@ -1233,13 +1317,18 @@ class RuleManager
                 $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
-	
+
 	/**
      * @throws \Doctrine\DBAL\Exception
      */
     protected function unlockDocument($id_document)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document]);
+        try {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
         $param['api'] = $this->api;
@@ -1269,6 +1358,9 @@ class RuleManager
                 $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
 	/**
@@ -1276,6 +1368,8 @@ class RuleManager
      */
     protected function rerunWorkflowDocument($id_document)
     {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document]);
+		try {
 		try {
 			$param['id_doc_myddleware'] = $id_document;
 			$param['jobId'] = $this->jobId;
@@ -1292,7 +1386,10 @@ class RuleManager
 		} catch (\Exception $e) {
 			$this->logger->error('Failed to rerun the workflow : '.$e->getMessage());
 			$this->documentManager->generateDocLog('E','Failed to rerun the workflow : '.$e->getMessage());
-		} 
+		}
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+		}
     }
 
     /**
@@ -1300,6 +1397,8 @@ class RuleManager
      */
     protected function changeDeleteFlag($id_document, $deleteFlag)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document, 'deleteFlag' => $deleteFlag]);
+        try {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
         $param['api'] = $this->api;
@@ -1322,6 +1421,9 @@ class RuleManager
                 $session->getFlashBag()->set('error', [$this->documentManager->getMessage()]);
             }
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -1329,6 +1431,8 @@ class RuleManager
      */
     protected function changeStatus($id_document, $toStatus, $message = null, $docIdRefError = null, $typeError = null)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document, 'toStatus' => $toStatus, 'message' => $message, 'docIdRefError' => $docIdRefError, 'typeError' => $typeError]);
+        try {
         $param['id_doc_myddleware'] = $id_document;
         $param['jobId'] = $this->jobId;
         $param['api'] = $this->api;
@@ -1344,10 +1448,16 @@ class RuleManager
             $this->documentManager->setDocIdRefError($docIdRefError);
         }
         $this->documentManager->updateStatus($toStatus);
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     protected function runMyddlewareJob($ruleId, $event = null, $documentId = null)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId, 'event' => $event, 'documentId' => $documentId]);
+        $__debugReturn = null;
+        try {
         try {
             // Check if exec function is disabled
             if (!function_exists('exec') || in_array('exec', array_map('trim', explode(',', ini_get('disable_functions'))))) {
@@ -1425,7 +1535,7 @@ class RuleManager
                 $session->set('error', [$result[1].(!empty($result[2]) ? '<a href="'.$this->router->generate('task_view', ['id' => trim($result[2])]).'" target="blank_">'.$this->tools->getTranslation(['messages', 'rule', 'open_running_task']).'</a>' : '')]);
             }
 
-            return $result[0];
+            return $__debugReturn = $result[0];
         } catch (\Exception $e) {
             // Get the request from RequestStack
             if (!empty($this->requestStack->getCurrentRequest())) {
@@ -1436,7 +1546,10 @@ class RuleManager
         }
             $this->logger->error($e->getMessage().' '.$e->getFile().' '.$e->getLine());
 
-            return false;
+            return $__debugReturn = false;
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1447,6 +1560,9 @@ class RuleManager
      */
     protected function rerun($id_document): array
     {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id_document' => $id_document]);
+		$__debugReturn = null;
+		try {
 		try {
 			
             // Get the request from RequestStack
@@ -1497,17 +1613,7 @@ class RuleManager
 				// Update status if an action has been executed
 				$status = $this->documentManager->getStatus();
 			}
-			if (in_array($status, ['Predecessor_OK', 'Relate_KO'])) {
-				$response = $this->checkParentDocuments([['id' => $id_document]]);
-				if (true === $response[$id_document]) {
-					$msg_success[] = 'Transfer id '.$id_document.' : Status change => Relate_OK';
-				} else {
-					$msg_error[] = 'Transfer id '.$id_document.' : Error, status transfer => Relate_KO';
-				}
-				// Update status if an action has been executed
-				$status = $this->documentManager->getStatus();
-			}
-			if (in_array($status, ['Relate_OK', 'Error_transformed'])) {
+			if (in_array($status, ['Predecessor_OK', 'Error_transformed'])) {
 				$response = $this->transformDocuments([['id' => $id_document]]);
 				if (true === $response[$id_document]) {
 					$msg_success[] = 'Transfer id '.$id_document.' : Status change : Transformed';
@@ -1576,12 +1682,18 @@ class RuleManager
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
             $msg_error[] = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
         }
-        return $msg_error;
+        return $__debugReturn = $msg_error;
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
     }
 
 
     protected function clearSendData($sendData)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['sendData' => $sendData]);
+        $__debugReturn = null;
+        try {
         if (!empty($sendData)) {
             foreach ($sendData as $key => $value) {
                 if (isset($value['source_date_modified'])) {
@@ -1594,18 +1706,30 @@ class RuleManager
                     unset($sendData[$key]['Myddleware_element_id']);
                 }     
             }
-            return $sendData;
+            return $__debugReturn = $sendData;
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     protected function beforeDelete($sendData)
     {
-        return $sendData;
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['sendData' => $sendData]);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $sendData;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Check if the rule is a child rule
     public function isChild(): bool
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
             $queryChild = '	SELECT rule.id 
 									FROM rulerelationship 
@@ -1621,18 +1745,24 @@ class RuleManager
             $result = $stmt->executeQuery();
             $rules = $result->fetchAllAssociative();
             if (!empty($rules)) {
-                return true;
+                return $__debugReturn = true;
             }
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
 
-        return false;
+        return $__debugReturn = false;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     protected function sendTarget($type, $documentId = null): array
     {
-        try {	
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['type' => $type, 'documentId' => $documentId]);
+        $__debugReturn = null;
+        try {
+        try {
             // Permet de charger dans la classe toutes les relations de la règle
             $response = [];
             $response['error'] = '';
@@ -1731,10 +1861,16 @@ class RuleManager
             }
             $this->logger->error($response['error']);
         }
-        return $response;
+        return $__debugReturn = $response;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
-	
-	protected function checkSourceBeforeSend($send) {	
+
+	protected function checkSourceBeforeSend($send) {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['send' => $send]);
+		$__debugReturn = null;
+		try {
 		if (empty($this->solutionSource)) {		
 			$this->solutionSource = $this->solutionManager->get($this->rule['solution_source_name']);
 		}
@@ -1752,11 +1888,17 @@ class RuleManager
 				throw new \Exception('Failed to connect to the source solution before sending data.');
 			}
 		}
-		return $send;
+		return $__debugReturn = $send;
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 
     protected function massSendTarget($type, $documentId = null)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['type' => $type, 'documentId' => $documentId]);
+        $__debugReturn = null;
+        try {
         try {
 
             if ((strpos($documentId, ',') !== false)) {
@@ -1849,12 +1991,18 @@ class RuleManager
             $this->logger->error($response['error']);
         }
 
-        return $response;
+        return $__debugReturn = $response;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Check before we send a record deletion
     protected function checkBeforeDelete($send)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['send' => $send]);
+        $__debugReturn = null;
+        try {
         // Check in case of several source records data point to the same target record
         // In this case we can't send the deletion as the record still exists in the source application
         // A merge action in the source application could have generated the deletion action but the deletion can't be sent.
@@ -1924,7 +2072,10 @@ class RuleManager
             }
         }
 
-        return $send;
+        return $__debugReturn = $send;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1932,9 +2083,12 @@ class RuleManager
      */
     protected function checkDuplicate($transformedData)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['transformedData' => $transformedData]);
+        $__debugReturn = null;
+        try {
         // Traitement si présence de champ duplicate
         if (empty($this->ruleParams['duplicate_fields'])) {
-            return $transformedData;
+            return $__debugReturn = $transformedData;
         }
         $duplicate_fields = explode(';', $this->ruleParams['duplicate_fields']);
         $searchDuplicate = [];
@@ -1995,14 +2149,20 @@ class RuleManager
             }
         }
         if (!empty($transformedData)) {
-            return $transformedData;
+            return $__debugReturn = $transformedData;
         }
 
-        return null;
+        return $__debugReturn = null;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     protected function selectDocuments($status, $type = '')
     {
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['status' => $status, 'type' => $type]);
+		$__debugReturn = null;
+		try {
 		$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
         try {
 			// Select documents depending of the status
@@ -2037,16 +2197,22 @@ class RuleManager
                 }
 			}
 			$this->connection->commit(); // -- COMMIT TRANSACTION - release documents
-            return $documents;
+            return $__debugReturn = $documents;
         } catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION - release documents
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
     }
 
     // Permet de récupérer les données d'un document
     protected function getDocumentHeader($documentId)
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documentId' => $documentId]);
+        $__debugReturn = null;
+        try {
         try {
             // We allow to get date from a document flagged deleted
             $query_document = 'SELECT * FROM document WHERE id = :documentId';
@@ -2055,12 +2221,15 @@ class RuleManager
             $result = $stmt->executeQuery();
             $document = $result->fetchAssociative();
             if (!empty($document)) {
-                return $document;
+                return $__debugReturn = $document;
             } else {
-                return false;
+                return $__debugReturn = false;
             }
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -2069,6 +2238,9 @@ class RuleManager
      */
     public function getSendDocuments($type, $documentId=null, $table = 'target', $parentDocId = '', $parentRuleId = ''): ?array
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['type' => $type, 'documentId' => $documentId, 'table' => $table, 'parentDocId' => $parentDocId, 'parentRuleId' => $parentRuleId]);
+        $__debugReturn = null;
+        try {
         // Init $limit parameter
         $limit = ' LIMIT '.$this->limit;
         // Si un document est en paramètre alors on filtre la requête sur le document
@@ -2172,14 +2344,20 @@ class RuleManager
             } 
         }
         if (!empty($return)) {
-            return $return;
+            return $__debugReturn = $return;
         }
 
-        return null;
+        return $__debugReturn = null;
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Set the document lock
     protected function setDocumentLock($docId, $check = true) {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['docId' => $docId, 'check' => $check]);
+        $__debugReturn = null;
+        try {
         try {
 			// Get the job lock on the document
 			if ($check) {
@@ -2195,7 +2373,7 @@ class RuleManager
 					$check
 				AND $documentData['job_lock'] == $this->jobId
 			) {
-                return array('success' => true);
+                return $__debugReturn = array('success' => true);
             // If document not locked, we lock it.
             } elseif (
 					!$check
@@ -2217,20 +2395,25 @@ class RuleManager
                 $stmt->bindValue(':job_id', $this->jobId);
                 $stmt->bindValue(':id', $docId);
                 $result = $stmt->executeQuery();
-                return array('success' => true);
+                return $__debugReturn = array('success' => true);
             // Error for all other cases
             } else {
-                return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
+                return $__debugReturn = array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
             }
         } catch (\Exception $e) {
             // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+            return $__debugReturn = array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Permet de charger tous les champs de la règle
     protected function setRuleField()
     {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         try {
             $this->sourceFields = [];
             // Lecture des champs de la règle
@@ -2273,13 +2456,16 @@ class RuleManager
             }
             if (!empty($this->sourceFields)) {
                 $this->sourceFields = array_unique($this->sourceFields);
+
             }
         } catch (\Exception $e) {
             $this->logger->error('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
         }
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
-    // Set rule param from the database
     protected function setRuleParam()
     {
         try {
@@ -2433,7 +2619,7 @@ class RuleManager
     }
 
     // Delete a document data
-    protected function deleteDocumentData($documentId, $type): bool
+    public function deleteDocumentData($documentId, $type): bool
     {
         try {
             $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)

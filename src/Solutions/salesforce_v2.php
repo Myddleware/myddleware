@@ -123,7 +123,9 @@ class salesforce_v2 extends salesforce {
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
 		}
 		
-		$query_request_body = curl_exec($ch);	 
+		$this->logDebug('salesforce_v2 call request', ['url' => $url, 'method' => $method ?? 'POST']);
+		$query_request_body = curl_exec($ch);
+		$this->logDebug('salesforce_v2 call response', ['response' => $query_request_body]);
 		// Si on est sur un update et que l'on a un retour 204 on renvoie true
 		if (!empty($method)) {		
 			if(curl_getinfo($ch, CURLINFO_HTTP_CODE) == '204') {

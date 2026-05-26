@@ -3,6 +3,7 @@
 namespace App\Repository;
 
 use App\Entity\Config;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\NonUniqueResultException;
 use Doctrine\ORM\NoResultException;
@@ -16,106 +17,224 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ConfigRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, Config::class);
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @throws NonUniqueResultException
-     * @throws NoResultException
-     */
     public function deleteAll(): int
     {
-        $qb = $this->createQueryBuilder('c');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('c');
 
-        $qb->delete();
+            $qb->delete();
 
-        return $qb->getQuery()->getSingleScalarResult() ?? 0;
+            return $__debugReturn = $qb->getQuery()->getSingleScalarResult() ?? 0;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @throws NonUniqueResultException
-     */
     public function findOneByAllowInstall($value): ?Config
     {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.name = :allow_install')
-            ->setParameter('allow_install', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['value' => $value]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('c')
+                ->andWhere('c.name = :allow_install')
+                ->setParameter('allow_install', $value)
+                ->getQuery()
+                ->getOneOrNullResult()
+            ;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function findAlertDateRef()
     {
-        return $this->createQueryBuilder('c')
-            ->select('c.value')
-            ->where('c.name = :name')
-            ->setParameter('name', 'alert_date_ref')
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('c')
+                ->select('c.value')
+                ->where('c.name = :name')
+                ->setParameter('name', 'alert_date_ref')
+                ->getQuery()
+                ->getOneOrNullResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function setAlertDateRef($newDate)
-{
-    $entityManager = $this->getEntityManager();
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['newDate' => $newDate]);
+        try {
+            $entityManager = $this->getEntityManager();
 
-    // Supposons que votre entité de configuration s'appelle Config
-    $config = $this->findOneBy(['name' => 'alert_date_ref']);
+            $config = $this->findOneBy(['name' => 'alert_date_ref']);
 
-    if ($config) {
-        $config->setValue($newDate);
-        $entityManager->persist($config);
-        $entityManager->flush();
+            if ($config) {
+                $config->setValue($newDate);
+                $entityManager->persist($config);
+                $entityManager->flush();
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
-}
 
     public function findPager()
     {
-        return $this->createQueryBuilder('c')
-            ->select('c.value')
-            ->where('c.name = :name')
-            ->setParameter('name', 'pager')
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('c')
+                ->select('c.value')
+                ->where('c.name = :name')
+                ->setParameter('name', 'pager')
+                ->getQuery()
+                ->getOneOrNullResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function setPager($newPager)
     {
-        $entityManager = $this->getEntityManager();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['newPager' => $newPager]);
+        try {
+            $entityManager = $this->getEntityManager();
 
-        // Supposons que votre entité de configuration s'appelle Config
-        $config = $this->findOneBy(['name' => 'pager']);
+            $config = $this->findOneBy(['name' => 'pager']);
 
-        if ($config) {
-            $config->setValue($newPager);
-            $entityManager->persist($config);
-            $entityManager->flush();
+            if ($config) {
+                $config->setValue($newPager);
+                $entityManager->persist($config);
+                $entityManager->flush();
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
     public function getSearchLimit()
     {
-        return $this->createQueryBuilder('c')
-            ->select('c.value')
-            ->where('c.name = :name')
-            ->setParameter('name', 'search_limit')
-            ->getQuery()
-            ->getOneOrNullResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('c')
+                ->select('c.value')
+                ->where('c.name = :name')
+                ->setParameter('name', 'search_limit')
+                ->getQuery()
+                ->getOneOrNullResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function setSearchLimit($newLimit)
     {
-        $entityManager = $this->getEntityManager();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['newLimit' => $newLimit]);
+        try {
+            $entityManager = $this->getEntityManager();
 
-        // Supposons que votre entité de configuration s'appelle Config
-        $config = $this->findOneBy(['name' => 'search_limit']);
+            $config = $this->findOneBy(['name' => 'search_limit']);
 
-        if ($config) {
-            $config->setValue($newLimit);
+            if ($config) {
+                $config->setValue($newLimit);
+                $entityManager->persist($config);
+                $entityManager->flush();
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
+    }
+
+    public function getDebugMode(): bool
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $result = $this->createQueryBuilder('c')
+                ->select('c.value')
+                ->where('c.name = :name')
+                ->setParameter('name', 'debug_mode')
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            return $__debugReturn = $result ? ($result['value'] === '1') : false;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    public function setDebugMode(bool $enabled): void
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['enabled' => $enabled]);
+        try {
+            $entityManager = $this->getEntityManager();
+            $config = $this->findOneBy(['name' => 'debug_mode']);
+
+            if ($config) {
+                $config->setValue($enabled ? '1' : '0');
+            } else {
+                $config = new Config();
+                $config->setName('debug_mode');
+                $config->setValue($enabled ? '1' : '0');
+            }
+
             $entityManager->persist($config);
             $entityManager->flush();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
+    }
+
+    public function getLogLevel(): string
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $result = $this->createQueryBuilder('c')
+                ->select('c.value')
+                ->where('c.name = :name')
+                ->setParameter('name', 'log_level')
+                ->getQuery()
+                ->getOneOrNullResult();
+
+            return $__debugReturn = $result ? $result['value'] : 'debug';
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    public function setLogLevel(string $level): void
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['level' => $level]);
+        try {
+            $entityManager = $this->getEntityManager();
+            $config = $this->findOneBy(['name' => 'log_level']);
+
+            if ($config) {
+                $config->setValue($level);
+            } else {
+                $config = new Config();
+                $config->setName('log_level');
+                $config->setValue($level);
+            }
+
+            $entityManager->persist($config);
+            $entityManager->flush();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 }

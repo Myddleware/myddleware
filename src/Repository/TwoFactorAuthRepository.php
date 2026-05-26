@@ -26,6 +26,7 @@ namespace App\Repository;
 
 use App\Entity\TwoFactorAuth;
 use App\Entity\User;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
@@ -37,18 +38,33 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class TwoFactorAuthRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, TwoFactorAuth::class);
+        $this->debugLogger = $debugLogger;
     }
 
     public function findByUser(User $user): ?TwoFactorAuth
     {
-        return $this->findOneBy(['user' => $user]);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user->getId()]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->findOneBy(['user' => $user]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function findByRememberToken(string $token): ?TwoFactorAuth
     {
-        return $this->findOneBy(['rememberToken' => $token]);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['token' => $token]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->findOneBy(['rememberToken' => $token]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
-} 
+}

@@ -1,0 +1,71 @@
+<!-- SMTP Management Section -->
+<div class="settings-section mt-4">
+    <h4>{{ 'management_smtp.title'|trans }}</h4>
+    <p class="text-muted">{{ 'management_smtp.description'|trans|raw }}</p>
+
+    {{ form_start(smtpForm) }}
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.transport, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.transport, { 'attr': {'class': 'form-select'} }) }}
+        {{ form_errors(smtpForm.transport) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.host, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.host, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(smtpForm.host) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.ApiKey, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.ApiKey, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(smtpForm.ApiKey) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.port, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.port, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(smtpForm.port) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.auth_mode, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.auth_mode, { 'attr': {'class': 'form-select'} }) }}
+        {{ form_errors(smtpForm.auth_mode) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.encryption, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.encryption, { 'attr': {'class': 'form-select'} }) }}
+        {{ form_errors(smtpForm.encryption) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.user, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.user, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(smtpForm.user) }}
+    </div>
+
+    <div class="mb-3">
+        {{ form_label(smtpForm.password, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.password, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(smtpForm.password) }}
+    </div>
+
+    <div class="mb-5">
+        {{ form_label(smtpForm.sender, null, {'label_attr': {'class': 'form-label'}}) }}
+        {{ form_widget(smtpForm.sender, { 'attr': {'class': 'form-control'} }) }}
+        {{ form_errors(smtpForm.sender) }}
+    </div>
+
+    <div class="d-grid">
+        {{ form_widget(smtpForm.submit) }}
+        {{ form_widget(smtpForm.submit_test) }}
+        <a id="link_button" role="button" class="btn btn-outline-danger" href="{{ path('regle_panel') }}">
+            {{ 'management_smtp.cancel'|trans }}
+        </a>
+    </div>
+
+    {{ form_end(smtpForm) }}
+</div>

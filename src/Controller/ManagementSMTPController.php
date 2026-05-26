@@ -3,6 +3,7 @@
 namespace App\Controller;
 
 use App\Form\ManagementSMTPType;
+use App\Service\DebugLogger;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -22,9 +23,7 @@ use Symfony\Component\Mailer\Transport;
 use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
-/**
- * @Route("/rule")
- */
+#[Route('/managementsmtp')]
 class ManagementSMTPController extends AbstractController
 {
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
@@ -34,54 +33,46 @@ class ManagementSMTPController extends AbstractController
     private TranslatorInterface $translator;
     private UserRepository $userRepository;
     private RequestStack $requestStack;
+    private DebugLogger $debugLogger;
 
 
     public function __construct(
-        LoggerInterface $logger, 
-        TranslatorInterface $translator, 
+        LoggerInterface $logger,
+        TranslatorInterface $translator,
         UserRepository $userRepository,
-        RequestStack $requestStack
+        RequestStack $requestStack,
+        DebugLogger $debugLogger
     )
     {
         $this->logger = $logger;
         $this->translator = $translator;
         $this->userRepository = $userRepository;
         $this->requestStack = $requestStack;
+        $this->debugLogger = $debugLogger;
     }
 
     // Function that loads the main smtp page, check for the api key and the mailer url when the user loads the page. 
     // Adds the authorized form fields to the page but not the sensitive content, ie password and api key.
     // If none of them are present then the default form is loaded.
 
-    /**
-     * @Route("/managementsmtp", name="management_smtp_index")
-     */
+    #[Route('/', name: 'management_smtp_index')]
     public function index(): Response
     {
-        $form = $this->createCreateForm();
-
-        // we prioritize the api key, so we start by checking if it's present
-        $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
-        if ($apiKeyFromEnv !== false) {
-            $form = $this->getParametersFromApiKey($form, $apiKeyFromEnv);
-        } else {
-            $mailerDsnFromEnv = $this->checkIfmailerDsnInEnv();
-        if ($mailerDsnFromEnv !== false) {
-            $form = $this->getParametersFromMailerDsn($form, $mailerDsnFromEnv);
+        // Redirect to the new centralized settings page with SMTP tab active
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->redirectToRoute('settings_index', ['tab' => 'smtp']);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-        }
-
-        // Load MAILER_FROM value if it exists
-        $mailerFromEnv = $this->checkIfMailerFromInEnv();
-        if ($mailerFromEnv !== false) {
-            $form->get('sender')->setData($mailerFromEnv);
-        }
-
-        return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
     }
 
     public function checkIfmailerDsnInEnv()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         error_log('checkIfmailerDsnInEnv');
         $mailerDsnEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
@@ -91,18 +82,23 @@ class ManagementSMTPController extends AbstractController
                 $mailerDsnEnv = false;
             }
         }
-        return $mailerDsnEnv;
+        return $__debugReturn = $mailerDsnEnv;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function checkIfApiKeyInEnv()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         error_log('checkIfApiKeyInEnv');
         $apiKeyEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
             (new Dotenv())->load(__DIR__ . '/../../.env.local');
             $apiKeyEnv = getenv('BREVO_APIKEY');
             if (!(isset($apiKeyEnv) && $apiKeyEnv !== '' && $apiKeyEnv !== false)) {
-                // as a fallback, check if the global variable $_ENV['BREVO_APIKEY'] is set
                 if (isset($_ENV['BREVO_APIKEY'])) {
                     $apiKeyEnv = $_ENV['BREVO_APIKEY'];
                 } else {
@@ -110,11 +106,17 @@ class ManagementSMTPController extends AbstractController
                 }
             }
         }
-        return $apiKeyEnv;
+        return $__debugReturn = $apiKeyEnv;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function checkIfMailerFromInEnv()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         error_log('checkIfMailerFromInEnv');
         $mailerFromEnv = false;
         if (file_exists(__DIR__ . '/../../.env.local')) {
@@ -124,12 +126,17 @@ class ManagementSMTPController extends AbstractController
                 $mailerFromEnv = false;
             }
         }
-        return $mailerFromEnv;
+        return $__debugReturn = $mailerFromEnv;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function removeMailerFromEnv()
     {
         // Finds the MAILER_FROM and removes it
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
         $linesEnv = explode("\n", $envFile);
         $lineCounter = 0;
@@ -145,30 +152,37 @@ class ManagementSMTPController extends AbstractController
         fclose($clearContentOfDotEnv);
         // Refills the content with everything but the MAILER_FROM
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function putMailerFromInDotEnv($sender)
     {
         // Remove existing MAILER_FROM if it exists
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['sender' => $sender]);
+        try {
         $this->removeMailerFromEnv();
 
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
-        // Ensure a newline separates the existing content (if any) and the new line
         if (!empty($envFile) && substr($envFile, -1) !== "\n") {
             $envFile .= "\n";
         }
         $envFile .= "MAILER_FROM=" . $sender;
         file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Function that creates a configuration for the smtp system. Creates a form and test the mail configuration.
     // Is called if you click on the Save SMTP config button OR the Send test mail button.
-
-    /**
-     * @Route("/managementsmtp/readConfig", name="management_smtp_create")
-     */
+    #[Route('/readConfig', name: 'management_smtp_create')]
     public function createConfig(Request $request)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $form = $this->createCreateForm();
             $form->handleRequest($request);
@@ -186,12 +200,343 @@ class ManagementSMTPController extends AbstractController
                         $this->addFlash('smtp.create.danger', $this->translator->trans('email_validation.error'));
                     }
                 }
-                return $this->redirect($this->generateUrl('management_smtp_index'));
+                return $__debugReturn = $this->redirectToRoute('settings_index', ['tab' => 'smtp']);
             }
         } catch (ParseException $exception) {
             printf('Unable to parse the YAML string: %s', $exception->getMessage());
         }
-        return $this->render('ManagementSMTP/index.html.twig', ['form' => $form->createView()]);
+        return $__debugReturn = $this->redirectToRoute('settings_index', ['tab' => 'smtp']);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    /**
+     * @Route("/api/smtp/save", name="api_smtp_save", methods={"POST"})
+     */
+    public function saveSmtpConfigAjax(Request $request): Response
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                return $__debugReturn = $this->json([
+                    'success' => false,
+                    'error' => $this->translator->trans('management_smtp.error')
+                ], 400);
+            }
+
+            // Save MAILER_FROM regardless of transport type
+            $sender = $data['sender'] ?? null;
+            if (!empty($sender)) {
+                $this->putMailerFromInDotEnv($sender);
+            }
+
+            $transport = $data['transport'] ?? null;
+
+            if ($transport === 'sendinblue') {
+                $apiKey = $data['ApiKey'] ?? '';
+
+                if (strlen($apiKey) <= 70) {
+                    return $__debugReturn = $this->json([
+                        'success' => false,
+                        'error' => $this->translator->trans('management_smtp.api_key_too_short')
+                    ], 400);
+                }
+
+                $apiKeyFromEnv = $this->checkIfApiKeyInEnv();
+
+                if ($apiKeyFromEnv === $apiKey) {
+                    return $__debugReturn = $this->json([
+                        'success' => true,
+                        'message' => $this->translator->trans('management_smtp.api_key_already_in_env')
+                    ]);
+                }
+
+                // Save the API key
+                $this->EmptyApiKeyEnv();
+                $this->EmptyMailerDsnEnv();
+                $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+                if (!empty($envFile) && substr($envFile, -1) !== "\n") {
+                    $envFile .= "\n";
+                }
+                $envFile .= "BREVO_APIKEY=" . $apiKey;
+                file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+
+                return $__debugReturn = $this->json([
+                    'success' => true,
+                    'message' => $this->translator->trans('management_smtp.success')
+                ]);
+            } else {
+                $host = $data['host'] ?? '';
+                $port = $data['port'] ?? '';
+                $user = $data['user'] ?? '';
+                $password = $data['password'] ?? '';
+                $encryption = $data['encryption'] ?? '';
+                $authMode = $data['auth_mode'] ?? '';
+
+                // Build MAILER_DSN
+                $dsn = $transport . '://';
+                if (!empty($user)) {
+                    $dsn .= urlencode($user);
+                    if (!empty($password)) {
+                        $dsn .= ':' . urlencode($password);
+                    } elseif ($existingDsn = $this->checkIfmailerDsnInEnv()) {
+                        // Use existing password if not provided
+                        $existingDsnArray = $this->envMailerDsnToArray($existingDsn);
+                        if (!empty($existingDsnArray[5])) {
+                            $dsn .= ':' . urlencode($existingDsnArray[5]);
+                        }
+                    }
+                    $dsn .= '@';
+                }
+                $dsn .= $host;
+                if (!empty($port)) {
+                    $dsn .= ':' . $port;
+                }
+
+                $queryParams = [];
+                if (!empty($encryption)) {
+                    $queryParams['encryption'] = $encryption;
+                }
+                if (!empty($authMode)) {
+                    $queryParams['auth_mode'] = $authMode;
+                }
+                if (!empty($queryParams)) {
+                    $dsn .= '?' . http_build_query($queryParams);
+                }
+
+                // Save to .env.local
+                $this->EmptyMailerDsnEnv();
+                $this->EmptyApiKeyEnv();
+                $envFile = file_get_contents(self::LOCAL_ENV_FILE);
+                if (!empty($envFile) && substr($envFile, -1) !== "\n") {
+                    $envFile .= "\n";
+                }
+                $envFile .= "MAILER_DSN=" . $dsn;
+                file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+
+                return $__debugReturn = $this->json([
+                    'success' => true,
+                    'message' => $this->translator->trans('management_smtp.success')
+                ]);
+            }
+        } catch (Exception $e) {
+            $this->logger->error('SMTP Config Error: ' . $e->getMessage());
+            return $__debugReturn = $this->json([
+                'success' => false,
+                'error' => $this->translator->trans('management_smtp.error')
+            ], 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    /**
+     * @Route("/api/smtp/test", name="api_smtp_test", methods={"POST"})
+     */
+    public function testSmtpConfigAjax(Request $request): Response
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
+        try {
+            $data = json_decode($request->getContent(), true);
+
+            if (!$data) {
+                return $__debugReturn = $this->json([
+                    'success' => false,
+                    'error' => $this->translator->trans('management_smtp.error')
+                ], 400);
+            }
+
+            $transport = $data['transport'] ?? null;
+
+            if ($transport === 'sendinblue') {
+                // Test Brevo/Sendinblue API
+                $apiKey = $data['ApiKey'] ?? '';
+                if (empty($apiKey)) {
+                    $apiKey = $this->checkIfApiKeyInEnv();
+                }
+
+                if (empty($apiKey)) {
+                    return $__debugReturn = $this->json([
+                        'success' => false,
+                        'error' => $this->translator->trans('management_smtp.api_key_required')
+                    ], 400);
+                }
+
+                $result = $this->testBrevoApiEmail($apiKey);
+
+                if ($result) {
+                    return $__debugReturn = $this->json([
+                        'success' => true,
+                        'message' => $this->translator->trans('email_validation.success')
+                    ]);
+                } else {
+                    return $__debugReturn = $this->json([
+                        'success' => false,
+                        'error' => $this->translator->trans('email_validation.error')
+                    ], 400);
+                }
+            } else {
+                // Test regular SMTP
+                $result = $this->testRegularSmtpEmail($data);
+
+                if ($result['success']) {
+                    return $__debugReturn = $this->json([
+                        'success' => true,
+                        'message' => $this->translator->trans('email_validation.success')
+                    ]);
+                } else {
+                    return $__debugReturn = $this->json([
+                        'success' => false,
+                        'error' => $result['error'] ?? $this->translator->trans('email_validation.error')
+                    ], 400);
+                }
+            }
+        } catch (Exception $e) {
+            $this->logger->error('SMTP Test Error: ' . $e->getMessage());
+            return $__debugReturn = $this->json([
+                'success' => false,
+                'error' => $this->translator->trans('management_smtp.sendtestmail_error') . ' (' . $e->getMessage() . ')'
+            ], 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    private function testBrevoApiEmail(string $apiKey): bool
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['apiKey' => $apiKey]);
+        $__debugReturn = null;
+        try {
+        try {
+            $user_email = $this->getUser()->getEmail();
+            $emailFrom = !empty($this->getParameter('email_from')) ? $this->getParameter('email_from') : 'no-reply@myddleware.com';
+
+            $emailData = [
+                'sender' => ['email' => $emailFrom],
+                'to' => [['email' => $user_email]],
+                'subject' => $this->translator->trans('management_smtp_sendmail.subject'),
+                'htmlContent' => $this->translator->trans('management_smtp_sendmail.textMail') . "\n" .
+                               $this->translator->trans('email_notification.best_regards') . "\n" .
+                               $this->translator->trans('email_notification.signature')
+            ];
+
+            $curl = curl_init();
+            curl_setopt_array($curl, [
+                CURLOPT_URL => "https://api.brevo.com/v3/smtp/email",
+                CURLOPT_RETURNTRANSFER => true,
+                CURLOPT_TIMEOUT => 30,
+                CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                CURLOPT_CUSTOMREQUEST => "POST",
+                CURLOPT_POSTFIELDS => json_encode($emailData),
+                CURLOPT_HTTPHEADER => [
+                    "accept: application/json",
+                    "api-key: " . $apiKey,
+                    "content-type: application/json"
+                ],
+                CURLOPT_SSL_VERIFYHOST => 2,
+                CURLOPT_SSL_VERIFYPEER => true,
+            ]);
+
+            $response = curl_exec($curl);
+            $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
+            curl_close($curl);
+
+            return $__debugReturn = ($httpCode >= 200 && $httpCode < 300);
+        } catch (Exception $e) {
+            $this->logger->error('Brevo API Error: ' . $e->getMessage());
+            return $__debugReturn = false;
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    private function testRegularSmtpEmail(array $data): array
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data]);
+        $__debugReturn = null;
+        try {
+        try {
+            $user = $this->getUser();
+            if (!$user instanceof \App\Entity\User) {
+                return $__debugReturn = ['success' => false, 'error' => 'No user email available'];
+            }
+            $user_email = $user->getEmail();
+
+            $dsn = $this->checkIfmailerDsnInEnv();
+
+            if ($dsn === false) {
+                $transport = $data['transport'] ?? 'smtp';
+                $host = $data['host'] ?? '';
+                $port = $data['port'] ?? '';
+                $user_smtp = $data['user'] ?? '';
+                $password = $data['password'] ?? '';
+                $encryption = $data['encryption'] ?? '';
+                $authMode = $data['auth_mode'] ?? '';
+
+                if (empty($host)) {
+                    return $__debugReturn = ['success' => false, 'error' => 'Host is required'];
+                }
+
+                $dsn = $transport . '://';
+                if (!empty($user_smtp)) {
+                    $dsn .= urlencode($user_smtp);
+                    if (!empty($password)) {
+                        $dsn .= ':' . urlencode($password);
+                    }
+                    $dsn .= '@';
+                }
+                $dsn .= $host;
+                if (!empty($port)) {
+                    $dsn .= ':' . $port;
+                }
+
+                $queryParams = [];
+                if (!empty($encryption)) {
+                    $queryParams['encryption'] = $encryption;
+                }
+                if (!empty($authMode)) {
+                    $queryParams['auth_mode'] = $authMode;
+                }
+                if (!empty($queryParams)) {
+                    $dsn .= '?' . http_build_query($queryParams);
+                }
+            }
+
+            $transport = Transport::fromDsn($dsn);
+            $mailer = new Mailer($transport);
+
+            $textMail = $this->translator->trans('management_smtp_sendmail.textMail') . "\n";
+            $textMail .= $this->translator->trans('email_notification.best_regards') . "\n" .
+                        $this->translator->trans('email_notification.signature');
+
+            $emailFrom = $this->getParameter('email_from') ?: 'no-reply@myddleware.com';
+
+            $email = (new Email())
+                ->from($emailFrom)
+                ->to($user_email)
+                ->subject($this->translator->trans('management_smtp_sendmail.subject'))
+                ->text($textMail);
+
+            $mailer->send($email);
+
+            return $__debugReturn = ['success' => true];
+        } catch (Exception $e) {
+            $this->logger->error('SMTP Test Error: ' . $e->getMessage());
+            return $__debugReturn = ['success' => false, 'error' => $e->getMessage()];
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Function to create the mail mailing form.
@@ -200,6 +545,9 @@ class ManagementSMTPController extends AbstractController
     // Is called twice when you click on Send test mail.
     private function createCreateForm(): \Symfony\Component\Form\FormInterface
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         error_log('createCreateForm');
         $form = $this->createForm(ManagementSMTPType::class, null, [
             'action' => $this->generateUrl('management_smtp_create'),
@@ -216,13 +564,17 @@ class ManagementSMTPController extends AbstractController
                 'class' => 'btn btn-outline-primary mb-2',
             ],
         ]);
-        return $form;
+        return $__debugReturn = $form;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Function to verify whether the Save SMTP config should write an api key into the .env or the mailer dsn
     public function envMailerDsnVsApiKey($form)
     {
-        // Save MAILER_FROM regardless of transport type
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['form' => $form]);
+        try {
         $sender = $form->get('sender')->getData();
         if (!empty($sender)) {
             $this->putMailerFromInDotEnv($sender);
@@ -249,12 +601,17 @@ class ManagementSMTPController extends AbstractController
         } else {
             $this->putRegularSmtpConfigToLocalEnv($form);
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
     public function EmptyApiKeyEnv()
     {
         // Finds the api key and removes it
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
         $linesEnv = explode("\n", $envFile);
         $lineCounter = 0;
@@ -270,11 +627,16 @@ class ManagementSMTPController extends AbstractController
         fclose($clearContentOfDotEnv);
         // Refills the content with everythintg but the api key
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Function to remove the api key from the .env, it actually clears the .env and refills it with everything but the api key
     public function EmptyMailerDsnEnv()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $envFile = file_get_contents(self::LOCAL_ENV_FILE);
         $linesEnv = explode("\n", $envFile);
         $lineCounter = 0;
@@ -288,6 +650,9 @@ class ManagementSMTPController extends AbstractController
         $clearContentOfDotEnv = fopen(self::LOCAL_ENV_FILE, "w");
         fclose($clearContentOfDotEnv);
         file_put_contents(self::LOCAL_ENV_FILE, $envFileFinal);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
 
@@ -296,6 +661,9 @@ class ManagementSMTPController extends AbstractController
     // Function to obtain parameters from the MAILER_DSN in .env and puts it in the form.
     public function getParametersFromMailerDsn($form, $mailerDsnFromEnv)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['form' => $form, 'mailerDsnFromEnv' => $mailerDsnFromEnv]);
+        $__debugReturn = null;
+        try {
         $mailerDsnArray = $this->envMailerDsnToArray($mailerDsnFromEnv);
         $form->get('transport')->setData('smtp');
         $form->get('host')->setData($mailerDsnArray[0]);
@@ -304,20 +672,32 @@ class ManagementSMTPController extends AbstractController
         $form->get('encryption')->setData($mailerDsnArray[2]);
         $form->get('user')->setData($mailerDsnArray[4]);
         $form->get('password')->setData($mailerDsnArray[5]);
-        return $form;
+        return $__debugReturn = $form;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Function to obtain parameters from the MAILER_URL in .env and puts it in the form.
     public function getParametersFromApiKey($form, $apiKeyFromEnv)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['form' => $form, 'apiKeyFromEnv' => $apiKeyFromEnv]);
+        $__debugReturn = null;
+        try {
         $form->get('transport')->setData('sendinblue');
         $form->get('ApiKey')->setData($apiKeyFromEnv);
-        return $form;
+        return $__debugReturn = $form;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Takes MAILER_DSN and turns it into an array with all parameters
     public function envMailerDsnToArray(string $envString): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['envString' => $envString]);
+        $__debugReturn = null;
+        try {
         try {
             // Initialize default values
             $result = [
@@ -375,11 +755,14 @@ class ManagementSMTPController extends AbstractController
                 $result[0] = $hostPart; // host only
             }
             
-            return $result;
+            return $__debugReturn = $result;
         } catch (Exception $e) {
             $this->logger->error('Error parsing DSN: ' . $e->getMessage());
             // Return array with empty values to prevent undefined index errors
-            return ['', '', '', '', '', ''];
+            return $__debugReturn = ['', '', '', '', '', ''];
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -388,6 +771,8 @@ class ManagementSMTPController extends AbstractController
      */
     private function putMailerConfig($form)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['form' => $form]);
+        try {
         $transport = $form->get('transport')->getData();
         if ($transport == 'sendinblue') {
             return;
@@ -445,6 +830,9 @@ class ManagementSMTPController extends AbstractController
         }
         $envFile .= "MAILER_DSN=" . $dsn;
         file_put_contents(self::LOCAL_ENV_FILE, $envFile);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // If there is no api key in the .env, takes data from swiftmailer and puts it in the .env as MAILER_URL
@@ -626,6 +1014,7 @@ class ManagementSMTPController extends AbstractController
                 // Send the email
                 $mailer->send($email);
                 $isRegularEmailSent = true;
+                $this->addFlash('smtp.test.success', $this->translator->trans('email_validation.success'));
 
             } catch (Exception $e) {
                 // Log the detailed error for debugging
@@ -723,6 +1112,7 @@ class ManagementSMTPController extends AbstractController
             }
 
             // All checks passed
+            $this->addFlash('smtp.test.success', $this->translator->trans('email_validation.success'));
             return true;
 
         } catch (Exception $e) {

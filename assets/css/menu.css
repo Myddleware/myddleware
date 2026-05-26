@@ -221,3 +221,7 @@ header{
 .star-icon:hover { 
 	transform: rotate(20deg) scale(1.2); 
 }
+
+.icon_navbar{
+	background-color: #0173d600;
+}

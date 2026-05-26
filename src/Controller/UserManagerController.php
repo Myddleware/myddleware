@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\User;
 use App\Form\UserType;
 use App\Repository\UserRepository;
+use App\Service\DebugLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -15,115 +16,148 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Psr\Log\LoggerInterface;
 
-
+#[Route('/user_manager')]
 class UserManagerController extends AbstractController
 {
 
     private LoggerInterface $logger;
+    private DebugLogger $debugLogger;
 
-    public function __construct(LoggerInterface $logger)
+    public function __construct(LoggerInterface $logger, DebugLogger $debugLogger)
     {
         $this->logger = $logger;
+        $this->debugLogger = $debugLogger;
     }
 
-    #[Route('/rule/user_manager', name: 'user_manager')]
+    #[Route('/', name: 'user_manager')]
     public function index(UserRepository $userRepository): Response
     {
-        $users = $userRepository->findAll();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['userRepository' => $userRepository]);
+        $__debugReturn = null;
+        try {
+            $users = $userRepository->findBy(['deleted' => false]);
 
-        return $this->render('UserManager/list.html.twig', [
-            'users' => $users,
-            'currentUser' => $this->getUser(),
-        ]);
+            return $__debugReturn = $this->render('UserManager/list.html.twig', [
+                'users' => $users,
+                'currentUser' => $this->getUser(),
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
-    #[Route('/rule/user_manager/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
+    #[Route('/{id}/edit', name: 'user_manager_edit', methods: ['GET'])]
     public function edit(UserRepository $userRepository, int $id, TranslatorInterface $translator): Response
     {
-        $user = $userRepository->find($id);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['userRepository' => $userRepository, 'id' => $id, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
+            $user = $userRepository->find($id);
 
-        if (!$user) {
-            $this->addFlash('user_manager.edit.danger', $translator->trans('user.not_found'));
-            return $this->redirectToRoute('user_manager');
+            if (!$user) {
+                $this->addFlash('user_manager.edit.danger', $translator->trans('user.not_found'));
+                return $__debugReturn = $this->redirectToRoute('user_manager');
+            }
+
+            $form = $this->createForm(UserType::class, $user, [
+                'action' => $this->generateUrl('user_manager_update', ['id' => $user->getId()]),
+                'method' => 'POST',
+                'current_user' => $this->getUser(),
+            ]);
+
+            return $__debugReturn = $this->render('UserManager/edit.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        $form = $this->createForm(UserType::class, $user, [
-            'action' => $this->generateUrl('user_manager_update', ['id' => $user->getId()]),
-            'method' => 'POST',
-            'current_user' => $this->getUser(),
-        ]);
-
-        return $this->render('UserManager/edit.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 
-    #[Route('/rule/user_manager/{id}/update', name: 'user_manager_update', methods: ['POST'])]
+    #[Route('/{id}/update', name: 'user_manager_update', methods: ['POST'])]
     public function update(Request $request, User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
-        $form = $this->createForm(UserType::class, $user);
-        $form->handleRequest($request);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'user' => $user, 'em' => $em, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
+            $form = $this->createForm(UserType::class, $user);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $em->flush();
-            $this->addFlash('user_manager.edit.success', $translator->trans('success_update_user'));
-            return $this->redirectToRoute('user_manager');
-        }
-        if ($form->isSubmitted() && !$form->isValid()) {
-            $this->addFlash('user_manager.edit.danger', $translator->trans('form.invalid'));
-        }
+            if ($form->isSubmitted() && $form->isValid()) {
+                $em->flush();
+                $this->addFlash('user_manager.edit.success', $translator->trans('success_update_user'));
+                return $__debugReturn = $this->redirectToRoute('user_manager');
+            }
+            if ($form->isSubmitted() && !$form->isValid()) {
+                $this->addFlash('user_manager.edit.danger', $translator->trans('form.invalid'));
+            }
 
-        return $this->render('UserManager/edit.html.twig', [
-            'form' => $form->createView(),
-        ]);
+            return $__debugReturn = $this->render('UserManager/edit.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    #[Route('/rule/user_manager/new', name: 'user_manager_create')]
+    #[Route('/new', name: 'user_manager_create')]
     public function create(Request $request, EntityManagerInterface $em, UserPasswordHasherInterface $passwordHasher, TranslatorInterface $translator): Response
     {
-        $user = new User();
-        $form = $this->createForm(UserType::class, $user, [
-            'include_password' => true,
-            'current_user' => $this->getUser()
-        ]);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'em' => $em, 'passwordHasher' => $passwordHasher, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
+            $user = new User();
+            $form = $this->createForm(UserType::class, $user, [
+                'include_password' => true,
+                'current_user' => $this->getUser()
+            ]);
 
-        $form->handleRequest($request);
+            $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
-            $user->setUsernameCanonical(strtolower($user->getUsername()));
-            $user->setEmailCanonical(strtolower($user->getEmail()));
-            $user->setEnabled(true);
+            if ($form->isSubmitted() && $form->isValid()) {
+                $user->setUsernameCanonical(strtolower($user->getUsername()));
+                $user->setEmailCanonical(strtolower($user->getEmail()));
+                $user->setEnabled(true);
 
-            $hashedPassword = $passwordHasher->hashPassword($user, $form->get('password')->getData());
-            $user->setPassword($hashedPassword);
+                $hashedPassword = $passwordHasher->hashPassword($user, $form->get('password')->getData());
+                $user->setPassword($hashedPassword);
 
-            $em->persist($user);
-            $em->flush();
+                $em->persist($user);
+                $em->flush();
 
-            $this->addFlash('user_manager.create.success', $translator->trans('success_create_user'));
-            return $this->redirectToRoute('user_manager');
+                $this->addFlash('user_manager.create.success', $translator->trans('success_create_user'));
+                return $__debugReturn = $this->redirectToRoute('user_manager');
+            }
+            if ($form->isSubmitted() && !$form->isValid()) {
+                $this->addFlash('user_manager.create.danger', $translator->trans('form.invalid'));
+            }
+
+            return $__debugReturn = $this->render('UserManager/create.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-        if ($form->isSubmitted() && !$form->isValid()) {
-            $this->addFlash('user_manager.create.danger', $translator->trans('form.invalid'));
-        }
-
-        return $this->render('UserManager/create.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 
-    #[Route('/rule/user/{id}/delete', name: 'user_manager_delete', methods: ['DELETE', 'POST'])]
+    #[Route('/{id}/delete', name: 'user_manager_delete', methods: ['DELETE', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function delete(User $user, EntityManagerInterface $em, TranslatorInterface $translator): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user, 'em' => $em, 'translator' => $translator]);
+        $__debugReturn = null;
         try {
-            $em->remove($user);
-            $em->flush();
+            try {
+                $user->setDeleted(true);
+                $user->setEnabled(false);
+                $em->flush();
 
-            $this->addFlash('user_manager.delete.success', $translator->trans('success_deleted_user'));
-        } catch (\Throwable $e) {
-            $this->logger->critical("Error deleting user ID {$user->getId()}: " . $e->getMessage());
-            $this->addFlash('user_manager.delete.danger', $translator->trans('failed_deleted_user'));
+                $this->addFlash('user_manager.delete.success', $translator->trans('success_deleted_user'));
+            } catch (\Throwable $e) {
+                $this->logger->critical("Error deleting user ID {$user->getId()}: " . $e->getMessage());
+                $this->addFlash('user_manager.delete.danger', $translator->trans('failed_deleted_user'));
+            }
+            return $__debugReturn = $this->redirectToRoute('user_manager');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-        return $this->redirectToRoute('user_manager');
     }
 }

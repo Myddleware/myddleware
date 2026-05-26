@@ -1,4 +1,3 @@
-
 {% include '_notifications.html.twig' with { filter_prefix: 'user_manager.create' } %}
 
 {{ form_start(form, {
@@ -6,13 +5,41 @@
     method: 'POST',
     attr: { class: 'user-create-form' }
 }) }}
-    {{ form_row(form.username) }}
-    {{ form_row(form.email) }}
-    {{ form_row(form.password) }}
-    {{ form_row(form.roles) }}
-    {{ form_row(form.timezone) }}
+    
+    <div class="mdw-floating-field">
+        {{ form_label(form.username) }}
+        {{ form_widget(form.username) }}
+        {{ form_errors(form.username) }}
+    </div>
 
-    <button type="submit" class="btn btn-success mt-3">
-        {{ 'user_manager.create'|trans }}
-    </button>
+    <div class="mdw-floating-field">
+        {{ form_label(form.email) }}
+        {{ form_widget(form.email) }}
+        {{ form_errors(form.email) }}
+    </div>
+
+    <div class="mdw-floating-field">
+        {{ form_label(form.password) }}
+        {{ form_widget(form.password) }}
+        {{ form_errors(form.password) }}
+    </div>
+
+    <div class="mdw-floating-field">
+        {{ form_label(form.roles) }}
+        {{ form_widget(form.roles) }}
+        {{ form_errors(form.roles) }}
+    </div>
+
+    <div class="mdw-floating-field">
+        {{ form_label(form.timezone) }}
+        {{ form_widget(form.timezone) }}
+        {{ form_errors(form.timezone) }}
+    </div>
+
+    <div class="text-end">
+        <button type="submit" class="btn btn-success mt-3">
+            {{ 'user_manager.create'|trans }}
+        </button>
+    </div>
+
 {{ form_end(form) }}

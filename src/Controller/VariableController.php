@@ -39,125 +39,135 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
+use App\Service\DebugLogger;
 use Exception;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 class VariableController extends AbstractController
 {
     protected ToolsManager $tools;
+    private DebugLogger $debugLogger;
 
-    public function __construct(ToolsManager $tools)
+    public function __construct(ToolsManager $tools, DebugLogger $debugLogger)
     {
         $this->tools = $tools;
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @return Response
-     */
     #[Route('variables', name: 'variable_list', defaults: ['page' => 1])]
     #[Route('variables/page-{page}', name: 'variable_list_page', requirements: ['page' => '\d+'])]
     public function listView(Request $request, EntityManagerInterface $em, int $page = 1): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'em' => $em, 'page' => $page]);
+        $__debugReturn = null;
         try {
-            $variables = $em->getRepository(Variable::class)->findBy([], ['id' => 'ASC']);
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
 
-            $adapter = new ArrayAdapter($variables);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
-            $pager->setCurrentPage($page);
+            try {
+                $variables = $em->getRepository(Variable::class)->findBy([], ['id' => 'ASC']);
 
-            return $this->render('variable/list.html.twig', [
-                'variables' => $pager->getCurrentPageResults(),
-                'pager' => $pager,
-                'nb_variables' => count($variables),
-            ]);
-        } catch (\Exception $e) {
-            throw $this->createNotFoundException('Error: ' . $e->getMessage());
+                $adapter = new ArrayAdapter($variables);
+                $pager = new Pagerfanta($adapter);
+                $pager->setMaxPerPage(10);
+                $pager->setCurrentPage($page);
+
+                return $__debugReturn = $this->render('variable/list.html.twig', [
+                    'variables' => $pager->getCurrentPageResults(),
+                    'pager' => $pager,
+                    'nb_variables' => count($variables),
+                ]);
+            } catch (\Exception $e) {
+                throw $this->createNotFoundException('Error: ' . $e->getMessage());
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
-  /**
+    /**
      * @Route("/variables/new", name="variable_create")
      */
     public function create(EntityManagerInterface $em, Request $request, TranslatorInterface $translator): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
-        $variable = new Variable();
-
-        $form = $this->createFormBuilder($variable)
-            ->add('name', TextType::class, [
-                'label' => $translator->trans('variable.table_headers.name'),
-                'attr' => [
-                    'class' => 'form-control variable-name-input',
-                    'pattern' => '^[A-Za-z0-9_]+$',
-                    'title' => 'Only letters, numbers, and “_” are allowed (no spaces, periods, or commas)',
-                    'maxlength' => 128,
-                    'spellcheck' => 'false',
-                    'autocapitalize' => 'none',
-                    'autocomplete' => 'off',
-                ],
-            ])
-            ->add('description', TextareaType::class, [
-                'label' => $translator->trans('variable.table_headers.description'),
-                'attr' => [
-                    'class' => 'form-control',
-                ],
-            ])
-            ->add('value', TextareaType::class, [
-                'label' => $translator->trans('variable.table_headers.value'),
-                'attr' => [
-                    'class' => 'form-control',
-                ],
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => $translator->trans('variable.save'),
-                'attr' => [
-                    'class' => 'btn btn-primary',
-                ],
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $variable->setCreatedBy($this->getUser());
-            $variable->setModifiedBy($this->getUser());
-
-            // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
-            $name = $variable->getName();
-            $variableExists = $this->verifyIfVariableNameExists($em, $name);
-            if ($variableExists) {
-                $this->addFlash('variable.create.danger', $translator->trans('variable.name_already_exists'));
-                return $this->redirectToRoute('variable_create');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
-            $this->addFlash('variable.create.success', $translator->trans('variable.created_successfully'));
+            $variable = new Variable();
 
-            $em->persist($variable);
-            $em->flush();
+            $form = $this->createFormBuilder($variable)
+                ->add('name', TextType::class, [
+                    'label' => $translator->trans('variable.table_headers.name'),
+                    'attr' => [
+                        'class' => 'form-control variable-name-input',
+                        'pattern' => '^[A-Za-z0-9_]+$',
+                        'title' => 'Only letters, numbers, and "_" are allowed (no spaces, periods, or commas)',
+                        'maxlength' => 128,
+                        'spellcheck' => 'false',
+                        'autocapitalize' => 'none',
+                        'autocomplete' => 'off',
+                    ],
+                ])
+                ->add('description', TextareaType::class, [
+                    'label' => $translator->trans('variable.table_headers.description'),
+                    'attr' => [
+                        'class' => 'form-control',
+                    ],
+                ])
+                ->add('value', TextareaType::class, [
+                    'label' => $translator->trans('variable.table_headers.value'),
+                    'attr' => [
+                        'class' => 'form-control',
+                    ],
+                ])
+                ->add('save', SubmitType::class, [
+                    'label' => $translator->trans('variable.save'),
+                    'attr' => [
+                        'class' => 'btn btn-primary',
+                    ],
+                ])
+                ->getForm();
 
-            // Create an audit entry
-            $audit = new VariableAudit();
-            $audit->setVariableId($variable->getId());
-            $audit->setDateModified(new \DateTime());
-            $audit->setAfter($variable->getValue());
-            $audit->setByUser($this->getUser()->getUsername());
+            $form->handleRequest($request);
 
-            $em->persist($audit);
-            $em->flush();
+            if ($form->isSubmitted() && $form->isValid()) {
+                $variable->setCreatedBy($this->getUser());
+                $variable->setModifiedBy($this->getUser());
 
-            return $this->redirectToRoute('variable_list');
+                $name = $variable->getName();
+                $variableExists = $this->verifyIfVariableNameExists($em, $name);
+                if ($variableExists) {
+                    $this->addFlash('variable.create.danger', $translator->trans('variable.name_already_exists'));
+                    return $__debugReturn = $this->redirectToRoute('variable_create');
+                }
+
+                $this->addFlash('variable.create.success', $translator->trans('variable.created_successfully'));
+
+                $em->persist($variable);
+                $em->flush();
+
+                $audit = new VariableAudit();
+                $audit->setVariableId($variable->getId());
+                $audit->setDateModified(new \DateTime());
+                $audit->setAfter($variable->getValue());
+                $audit->setByUser($this->getUser()->getUsername());
+
+                $em->persist($audit);
+                $em->flush();
+
+                return $__debugReturn = $this->redirectToRoute('variable_list');
+            }
+
+            return $__debugReturn = $this->render('variable/create.html.twig', [
+                'form' => $form->createView(),
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        return $this->render('variable/create.html.twig', [
-            'form' => $form->createView(),
-        ]);
     }
 
     /**
@@ -165,80 +175,84 @@ class VariableController extends AbstractController
      */
     public function edit(EntityManagerInterface $em, Request $request, Variable $variable, TranslatorInterface $translator): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
-        $originalValue = $variable->getValue();
-
-        $form = $this->createFormBuilder($variable)
-            ->add('name', TextType::class, [
-                'label' => $translator->trans('variable.table_headers.name'),
-                'attr' => [
-                    'class' => 'form-control variable-name-input',
-                    'pattern' => '^[A-Za-z0-9_]+$',
-                    'title' => 'Only letters, numbers, and “_” are allowed (no spaces, periods, or commas)',
-                    'maxlength' => 128,
-                    'spellcheck' => 'false',
-                    'autocapitalize' => 'none',
-                    'autocomplete' => 'off',
-                ],
-            ])
-            ->add('description', TextareaType::class, [
-                'label' => $translator->trans('variable.table_headers.description'),
-                'attr' => [
-                    'class' => 'form-control',
-                ],
-            ])
-            ->add('value', TextareaType::class, [
-                'label' => $translator->trans('variable.table_headers.value'),
-                'attr' => [
-                    'class' => 'form-control',
-                ],
-            ])
-            ->add('save', SubmitType::class, [
-                'label' => $translator->trans('variable.save'),
-                'attr' => [
-                    'class' => 'btn btn-primary',
-                ],
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-
-            $variable->setCreatedBy($this->getUser());
-            $variable->setModifiedBy($this->getUser());
-
-            // verify if the name doesn't already exist, for this call the function verifyIfVariableNameExists
-            $name = $variable->getName();
-            $variableExists = $this->verifyIfVariableNameExists($em, $name, $variable->getId());
-            if ($variableExists) {
-                $this->addFlash('variable.edit.danger', $translator->trans('variable.name_already_exists'));
-                return $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'request' => $request, 'variable' => $variable, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
-            // Create an audit entry
-            $audit = new VariableAudit();
-            $audit->setVariableId($variable->getId());
-            $audit->setDateModified(new \DateTime());
-            $audit->setBefore($originalValue);
-            $audit->setAfter($variable->getValue());
-            $audit->setByUser($this->getUser()->getUsername());
 
-            $this->addFlash('variable.edit.success', $translator->trans('variable.updated_successfully'));
-            $em->persist($audit);
-            $em->flush();
+            $originalValue = $variable->getValue();
 
-            $em->flush();
+            $form = $this->createFormBuilder($variable)
+                ->add('name', TextType::class, [
+                    'label' => $translator->trans('variable.table_headers.name'),
+                    'attr' => [
+                        'class' => 'form-control variable-name-input',
+                        'pattern' => '^[A-Za-z0-9_]+$',
+                        'title' => 'Only letters, numbers, and "_" are allowed (no spaces, periods, or commas)',
+                        'maxlength' => 128,
+                        'spellcheck' => 'false',
+                        'autocapitalize' => 'none',
+                        'autocomplete' => 'off',
+                    ],
+                ])
+                ->add('description', TextareaType::class, [
+                    'label' => $translator->trans('variable.table_headers.description'),
+                    'attr' => [
+                        'class' => 'form-control',
+                    ],
+                ])
+                ->add('value', TextareaType::class, [
+                    'label' => $translator->trans('variable.table_headers.value'),
+                    'attr' => [
+                        'class' => 'form-control',
+                    ],
+                ])
+                ->add('save', SubmitType::class, [
+                    'label' => $translator->trans('variable.save'),
+                    'attr' => [
+                        'class' => 'btn btn-primary',
+                    ],
+                ])
+                ->getForm();
 
-            return $this->redirectToRoute('variable_list');
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+
+                $variable->setCreatedBy($this->getUser());
+                $variable->setModifiedBy($this->getUser());
+
+                $name = $variable->getName();
+                $variableExists = $this->verifyIfVariableNameExists($em, $name, $variable->getId());
+                if ($variableExists) {
+                    $this->addFlash('variable.edit.danger', $translator->trans('variable.name_already_exists'));
+                    return $__debugReturn = $this->redirectToRoute('variable_edit', ['id' => $variable->getId()]);
+                }
+                $audit = new VariableAudit();
+                $audit->setVariableId($variable->getId());
+                $audit->setDateModified(new \DateTime());
+                $audit->setBefore($originalValue);
+                $audit->setAfter($variable->getValue());
+                $audit->setByUser($this->getUser()->getUsername());
+
+                $this->addFlash('variable.edit.success', $translator->trans('variable.updated_successfully'));
+                $em->persist($audit);
+                $em->flush();
+
+                $em->flush();
+
+                return $__debugReturn = $this->redirectToRoute('variable_list');
+            }
+
+            return $__debugReturn = $this->render('variable/edit.html.twig', [
+                'form' => $form->createView(),
+                'variable' => $variable,
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        return $this->render('variable/edit.html.twig', [
-            'form' => $form->createView(),
-            'variable' => $variable,
-        ]);
     }
 
     /**
@@ -246,20 +260,24 @@ class VariableController extends AbstractController
      */
     public function verifyIfVariableNameExists(EntityManagerInterface $em, string $name, ?int $excludeId = null): bool
     {
-        // First check with the exact name
-        $variable = $em->getRepository(Variable::class)->findOneByName($name);
-        if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
-            return true;
-        }
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'name' => $name, 'excludeId' => $excludeId]);
+        $__debugReturn = null;
+        try {
+            $variable = $em->getRepository(Variable::class)->findOneByName($name);
+            if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
+                return $__debugReturn = true;
+            }
 
-        // Second test with spaces replaced by underscores
-        $nameForBetterTesting = str_replace(' ', '_', $name);
-        $variable = $em->getRepository(Variable::class)->findOneByName($nameForBetterTesting);
-        if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
-            return true;
-        }
+            $nameForBetterTesting = str_replace(' ', '_', $name);
+            $variable = $em->getRepository(Variable::class)->findOneByName($nameForBetterTesting);
+            if ($variable && ($excludeId === null || $variable->getId() !== $excludeId)) {
+                return $__debugReturn = true;
+            }
 
-        return false;
+            return $__debugReturn = false;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -268,24 +286,29 @@ class VariableController extends AbstractController
      */
     public function delete(EntityManagerInterface $em, Variable $variable, TranslatorInterface $translator): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'variable' => $variable, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
+
+            $audit = new VariableAudit();
+            $audit->setVariableId($variable->getId());
+            $audit->setDateModified(new \DateTime());
+            $audit->setBefore($variable->getValue());
+            $audit->setAfter(null);
+            $audit->setByUser($this->getUser()->getUsername());
+
+            $em->persist($audit);
+            $em->remove($variable);
+            $em->flush();
+            $this->addFlash('variable.delete.success', $translator->trans('variable.deleted_successfully'));
+
+            return $__debugReturn = $this->redirectToRoute('variable_list');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        // Create an audit entry
-        $audit = new VariableAudit();
-        $audit->setVariableId($variable->getId());
-        $audit->setDateModified(new \DateTime());
-        $audit->setBefore($variable->getValue());
-        $audit->setAfter(null);
-        $audit->setByUser($this->getUser()->getUsername());
-
-        $em->persist($audit);
-        $em->remove($variable);
-        $em->flush();
-        $this->addFlash('variable.delete.success', $translator->trans('variable.deleted_successfully'));
-
-        return $this->redirectToRoute('variable_list');
     }
 
     /**
@@ -293,12 +316,18 @@ class VariableController extends AbstractController
      */
     public function show(Variable $variable): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['variable' => $variable]);
+        $__debugReturn = null;
+        try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
 
-        return $this->render('variable/show.html.twig', [
-            'variable' => $variable
-        ]);
+            return $__debugReturn = $this->render('variable/show.html.twig', [
+                'variable' => $variable
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

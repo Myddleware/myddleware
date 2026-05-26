@@ -77,10 +77,31 @@ function initDescriptionBlock() {
 	});
 }
 
+function initMoreActionsDropdowns() {
+	var selectors = [
+		{ wrapper: '.more-actions-wrapper', dropdown: '.more-actions-dropdown' },
+		{ wrapper: '.more-actions-wrapper-documents', dropdown: '.more-actions-dropdown-documents' }
+	];
+	selectors.forEach(function(sel) {
+		var wrapper = document.querySelector(sel.wrapper);
+		if (!wrapper) return;
+		var dropdown = wrapper.querySelector(sel.dropdown);
+		var btn = wrapper.querySelector('button');
+		function positionDropdown() {
+			var rect = btn.getBoundingClientRect();
+			dropdown.style.top = rect.bottom + 'px';
+			dropdown.style.left = (rect.right - dropdown.offsetWidth) + 'px';
+		}
+		wrapper.addEventListener('mouseenter', positionDropdown);
+		wrapper.addEventListener('focusin', positionDropdown);
+	});
+}
+
 function initUI() {
 	initTabsNavigation();
 	initTabsScroll();
 	initDescriptionBlock();
+	initMoreActionsDropdowns();
 }
 
 // Initialisation globale

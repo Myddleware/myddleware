@@ -51,9 +51,8 @@ rules:
         targetModule: OpportunityContactRole
         fields:
             - { target: Role, source: my_value, formula: '"Student"' }
-        relationships:
-            - { fieldNameSource: userid, fieldNameTarget: ContactId, fieldId: contact, parent: false }
-            - { fieldNameSource: courseid, fieldNameTarget: OpportunityId, fieldId: course, parent: false }
+            - { target: ContactId, source: userid, formula: 'lookup({userid}, "contact", 0, 1)' }
+            - { target: OpportunityId, source: courseid, formula: 'lookup({courseid}, "course", 0, 1)' }
         params:
             - { name: limit, value: '100' }
             - { name: delete, value: '60' }

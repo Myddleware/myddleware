@@ -47,10 +47,12 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use App\Service\DebugLogger;
 
 
 class NotificationManager
 {
+    private DebugLogger $debugLogger;
     protected EntityManagerInterface $entityManager;
     protected $emailAddresses = array();
     protected $configParams;
@@ -80,9 +82,11 @@ class NotificationManager
         ToolsManager $tools,
         ParameterBagInterface $params,
         Environment $twig,
-        ConfigRepository $configRepository, 
-        LogRepository $logRepository
+        ConfigRepository $configRepository,
+        LogRepository $logRepository,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->logger = $logger;
         $this->connection = $connection;
         $this->translator = $translator;
@@ -105,17 +109,23 @@ class NotificationManager
      */
     public function sendAlert(): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
         try {
+            try {
 
-            $this->sendAlertTaskTooLong();
-            // $this->sendAlertLimitReached();
+                $this->sendAlertTaskTooLong();
+                // $this->sendAlertLimitReached();
 
-            return true;
+                return $__debugReturn = true;
 
-        } catch (Exception $e) {
-            $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->logger->error($error);
-            throw new Exception($error);
+            } catch (Exception $e) {
+                $error = 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+                $this->logger->error($error);
+                throw new Exception($error);
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -126,6 +136,9 @@ class NotificationManager
      */
     public function sendAlertTaskTooLong()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // Set all config parameters
         $this->setConfigParam();
         if (empty($this->configParams['alert_time_limit'])) {
@@ -144,10 +157,13 @@ class NotificationManager
                 '%min%' => $this->configParams['alert_time_limit'],
                 '%begin%' => $job->getBegin()->format('Y-m-d H:i:s'),
                 '%id%' => $job->getId(),
-                '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$job->getId().'/log' : ''),
+                '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'task/view/'.$job->getId().'/log' : ''),
             ]);
 
-            return $this->send($textMail, $this->translator->trans('email_alert.subject'));
+            return $__debugReturn = $this->send($textMail, $this->translator->trans('email_alert.subject'));
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -158,17 +174,22 @@ class NotificationManager
      */
     public function sendAlertSameDocReference(array $JobSettings): bool
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['JobSettings' => $JobSettings]);
+        $__debugReturn = null;
+        try {
         $this->setConfigParam();
         // we create a text mail with the rule id, the job id and the reference date, they are contained in the JobSettings array
         $textMail = $this->translator->trans('email_alert_same_doc_reference.body', [
             '%rule_id%' => $JobSettings['rule_id'],
             '%job_id%' => $JobSettings['job_id'],
             '%reference_date%' => $JobSettings['reference_date'],
-            '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'rule/task/view/'.$JobSettings['job_id'].'/log' : ''),
+            '%base_uri%' => (!empty($this->configParams['base_uri']) ? $this->configParams['base_uri'].'task/view/'.$JobSettings['job_id'].'/log' : ''),
         ]);
 
-        return $this->send($textMail, $this->translator->trans('email_alert_same_doc_reference.subject'));
-
+        return $__debugReturn = $this->send($textMail, $this->translator->trans('email_alert_same_doc_reference.subject'));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 
@@ -179,6 +200,9 @@ class NotificationManager
      */
     public function sendAlertLimitReached()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // Get alert_date_ref
         $alertDateRef = $this->configRepository->findAlertDateRef();
 
@@ -205,10 +229,15 @@ class NotificationManager
         // Update alert_date_ref
         $currentDate = new \DateTime();
         $this->configRepository->setAlertDateRef($currentDate->format('Y-m-d H:i:s'));
-
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
 	}
 		
 	protected function send($textMail, $subject) {
+		$this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['textMail' => $textMail, 'subject' => $subject]);
+		$__debugReturn = null;
+		try {
 		// Get the email adresses of all ADMIN
 		$this->setEmailAddresses();
 		// Check that we have at least one email address
@@ -261,13 +290,19 @@ class NotificationManager
                 }
             }
         }
-        return true;
+        return $__debugReturn = true;
+		} finally {
+			$this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 
 
     // Send notification to receive statistique about myddleware data transfer
     public function sendNotification()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
             // Set all config parameters
             $this->setConfigParam();
@@ -340,22 +375,30 @@ class NotificationManager
             // Create text
             $textMail .= '<br/>' . $this->tools->getTranslation(['email_notification', 'best_regards']) . '<br/>' . $this->tools->getTranslation(['email_notification', 'signature']);
 
-            return $this->send($textMail, $this->tools->getTranslation(['email_notification', 'subject']));
+            return $__debugReturn = $this->send($textMail, $this->tools->getTranslation(['email_notification', 'subject']));
         } catch (Exception $e) {
             $error = 'Error : ' . $e->getMessage() . ' ' . $e->getFile() . ' Line : ( ' . $e->getLine() . ' )';
             $this->logger->error($error);
             throw new Exception($error);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
 	// Add every admin email in the notification list
     protected function setEmailAddresses()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $users = $this->userRepository->findEmailsToNotification();
         foreach ($users as $user) {
 			if (!in_array($user['email'],$this->emailAddresses)) { 
 				$this->emailAddresses[] = $user['email'];
 			}
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
@@ -367,6 +410,9 @@ class NotificationManager
      */
     public function resetPassword(User $user)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user]);
+        $__debugReturn = null;
+        try {
         try {
             $this->setConfigParam();
             $template = $this->twig->load('Email/reset_password.html.twig');
@@ -408,15 +454,20 @@ class NotificationManager
                 
                 $this->mailer->send($email);
             }
-            return true;
+            return $__debugReturn = true;
         } catch (Exception $e) {
             throw new Exception('Failed to send reset password email : '.$e->getMessage());
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     // Get the content of the table config
     protected function setConfigParam()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         if (empty($this->configParams)) {
             $configRepository = $this->entityManager->getRepository(Config::class);
             $configs = $configRepository->findAll();
@@ -426,11 +477,17 @@ class NotificationManager
                 }
             }
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Takes MAILER_URL and turns it into an array with all parameters
     public function envMailerUrlToArray(string $envString): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['envString' => $envString]);
+        $__debugReturn = null;
+        try {
         $delimiters = ['?', '?encryption=', '&auth_mode=', '&username=', '&password='];
         $envStringQuestionMarks = str_replace($delimiters, $delimiters[0], $envString);
         $envArrayBeforeSplitHostPort = explode($delimiters[0], $envStringQuestionMarks);
@@ -443,6 +500,9 @@ class NotificationManager
 
         $removeFirstElement = array_shift($envArrayBeforeSplitHostPort);
         $envArray = array_merge($hostAndPort, $envArrayBeforeSplitHostPort);
-        return $envArray;
+        return $__debugReturn = $envArray;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

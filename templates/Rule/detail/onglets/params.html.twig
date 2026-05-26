@@ -1,0 +1,128 @@
+{#/*********************************************************************************
+ * This file is part of Myddleware.
+
+ * @package Myddleware
+ * @copyright Copyright (C) 2013 - 2015  Stéphane Faure - CRMconsult EURL
+ * @copyright Copyright (C) 2015 - 2016  Stéphane Faure - Myddleware ltd - contact@myddleware.com
+ * @link http://www.myddleware.com  
+ 
+ This file is part of Myddleware.
+ 
+ Myddleware is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
+
+ Myddleware is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
+
+ You should have received a copy of the GNU General Public License
+ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
+*********************************************************************************/ #} 
+<head>
+    {% block stylesheets %}
+            {{ encore_entry_link_tags('app') }}
+    {% endblock %}
+</head>
+
+<div class="container-fluid py-3">
+    <div class="card border-0" style="border-radius: 12px;">
+        <div class="card-body p-4 p-md-5">
+			<div class="link-help-view d-flex justify-content-between align-items-center mb-5">
+				<h3 class="h4 fw-bold mb-0">Rule Parameters</h3>
+				<a href="#help-content-param" class="btn btn-sm text-decoration-none">
+					<i class="fa-solid fa-book me-1"></i>{{'rule.help'|trans}}
+				</a>
+			</div>
+
+            <div id="ruleparams" class="row g-4 mb-4">
+                {% if params %}
+                    {% for c, p in params %}
+                            <div class="mdw-floating-field">
+                                <label>{{ p.label|trans }}</label>
+                                
+                                {% if p.type != 'option' %}
+                                    <input data-id="{{ p.id_bdd }}" {{ p.required ? 'class="require params form-control"' : 'class="params form-control"' }} type="{{ p.type == 'Symfony\\Component\\Form\\Extension\\Core\\Type\\TextType' ? 'text' : p.type }}" id="{{ p.name }}" name="{{ p.name }}" value="{{ p.value_bdd }}"/>
+                                {% else %}
+                                    <select data-id="{{ p.id_bdd }}" class="params {{ p.required ? 'require' }} {{ p.name != 'delete' ? 'form-select' : 'form-control' }}" name="{{ p.name }}" id="{{ p.name }}">
+                                        {% for opt_value, opt_name in p.option %}
+                                            <option value="{{ opt_value }}" {{ opt_value == p.value_bdd ? 'selected' : '' }}>
+                                                {{ opt_name|trans }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                {% endif %}
+
+                                {% if p.name == 'datereference' %}
+                                    <div class="form-text mt-1 ms-1 text-muted" style="font-size: 12px;">
+                                        <i class="fa-regular fa-clock me-1"></i> {{'view_rule.params.daterefence'|trans}}
+                                    </div>
+                                {% endif %}
+                            </div>
+                    {% endfor %}
+                {% endif %}
+                
+                    <button id="saveRuleParams" type="button" class="btn btn-success ms-2">
+                        {{'view_rule.params.save'|trans}}
+                    </button>
+            </div>
+
+            <hr class="my-4" style="border-color: #e0e0e0;">
+
+            <div id="simuleRuleFlux">
+                <h3 class="h5 fw-bold">Simulation Tool</h3>
+                
+                <div id="simuleRuleFluxContainer" class="row">
+                    <div class="col-md-5">
+                        <div class="mdw-floating-field">
+                            <label>{{'view_rule.params.result'|trans}}*</label>
+                            <input type="text" class="simuleRuleFluxResult form-control" id="simuleRuleFluxResult" style="background-color: #f1f3f4 !important; border-color: #ced4da !important; font-weight: bold; color: #555;" readonly placeholder="Estimated documents">
+                        </div>
+                        <p id="simuleRuleFluxDetails" class="text-muted mt-2 mb-0" style="font-size: 12px; line-height: 1.5;">
+                            *{{'view_rule.params.details'|trans}}
+                        </p>
+                    </div>
+                </div>
+
+                <div id="simuleRuleFluxError" class="alert alert-danger mt-3" role="alert" style="display: none;"></div>
+
+                <div class="d-flex justify-content-end align-items-center mt-4 gap-3">
+                    
+                    <div class="simuleRuleFluxLoading">
+                        <img id="simuleRuleFluxLoading_img" src="" style="display: none;" />
+                    </div>
+                    <button id="simuleRuleFluxAction" type="button" class="btn btn-primary" style="border-radius: 20px; font-weight: 500; padding: 8px 24px;">
+                        <i class="fa-solid fa-play me-2"></i> {{'view_rule.params.simule'|trans}}
+                    </button>
+                    
+                    <div class="myd_loading d-inline-block align-middle" style="display: none;">
+                        <img id="myd_loading_img" src="" />
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<div class="clr"></div>
+
+<div id="help-content-param" class="help-content mt-5">
+    <h2>{{'help.title'|trans}} 
+        <i class="fa fa-info-circle" aria-hidden="true"></i>
+    </h2>
+    <p>{{'help.viewrule.param'|trans|raw}}</p>
+</div>
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+{% block javascripts %}
+    {{ encore_entry_script_tags('app') }}
+{% endblock %}
+<script type="text/javascript"> 
+    var path_img = "{{ asset('build/images/regle/') }}";    
+    instance = new dtsel.DTS('input[id="datereference"]',  {
+        showTime: true
+    });
+</script>

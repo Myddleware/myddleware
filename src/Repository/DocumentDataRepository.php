@@ -27,28 +27,38 @@ namespace App\Repository;
 
 use App\Entity\DocumentData;
 use App\Entity\Rule;
+use App\Service\DebugLogger;
 use DateTime;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class DocumentDataRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, DocumentData::class);
+        $this->debugLogger = $debugLogger;
     }
 
     public function findDataToRemoveByRule(Rule $rule, DateTime $limitDate)
     {
-        return $this->createQueryBuilder('dd')
-            ->select('dd')
-            ->join('dd.doc_id', 'document')
-            ->where('document.rule = :rule')
-            ->andWhere('document.deleted = 0')
-            ->andWhere('document.date_modified <= :limitDate')
-            ->setParameter('rule', $rule)
-            ->setParameter('limitDate', $limitDate)
-            ->getQuery()
-            ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule, 'limitDate' => $limitDate]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('dd')
+                ->select('dd')
+                ->join('dd.doc_id', 'document')
+                ->where('document.rule = :rule')
+                ->andWhere('document.deleted = 0')
+                ->andWhere('document.date_modified <= :limitDate')
+                ->setParameter('rule', $rule)
+                ->setParameter('limitDate', $limitDate)
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

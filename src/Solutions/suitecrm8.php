@@ -68,7 +68,9 @@ class suitecrm8 extends solution
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $postStr);
 			curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 			curl_setopt($ch, CURLOPT_HTTPHEADER, $header);
+			$this->logDebug('suitecrm8 login request', ['url' => $this->baseUrl.'access_token']);
 			$output = curl_exec($ch);
+			$this->logDebug('suitecrm8 login response', ['response' => $output]);
 			preg_match('/\{[^}]*"access_token"[^}]*\}/', $output, $matches);
 			$authOut = json_decode($matches[0], true);
 			// Manage return : token or error
@@ -299,6 +301,24 @@ class suitecrm8 extends solution
         throw new \Exception("$param[ruleParams][mode] is not a correct Rule mode.");
     }
 
+    // Build the direct link to the record (used in data transfer view)
+    public function getDirectLink($rule, $document, $type): string
+    {
+        // Get url, module and record ID depending on the type
+        if ('source' == $type) {
+            $url = $this->getConnectorParam($rule->getConnectorSource(), 'url');
+            $module = $rule->getModuleSource();
+            $recordId = $document->getSource();
+        } else {
+            $url = $this->getConnectorParam($rule->getConnectorTarget(), 'url');
+            $module = $rule->getModuleTarget();
+            $recordId = $document->gettarget();
+        }
+
+        // Build the URL (delete if exists / to be sure to not have 2 / in a row)
+        return rtrim($url, '/').'/#/'.strtolower($module).'/record/'.$recordId;
+    }
+
 	// Convert date to Myddleware format
     // 2020-07-08T12:33:06+02:00 to 2020-07-08 10:33:06
     /**
@@ -345,7 +365,9 @@ class suitecrm8 extends solution
 			if (curl_errno($ch)) {
 				throw new \Exception('cURL error: ' . curl_error($ch));
 			}
+			$this->logDebug('suitecrm8 call request', ['url' => $this->baseUrl.$suffixUrl, 'method' => $method]);
 			$output = curl_exec($ch);
+			$this->logDebug('suitecrm8 call response', ['response' => $output]);
 			preg_match('/(\{.*\})/s', $output, $matches);
 			$response = json_decode($matches[1], true);
 			

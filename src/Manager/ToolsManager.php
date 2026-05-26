@@ -37,9 +37,11 @@ use Swift_Message;
 use Swift_SmtpTransport;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
+use App\Service\DebugLogger;
 
 class ToolsManager
 {
+    private DebugLogger $debugLogger;
     protected Connection $connection;
     protected $container;
     protected LoggerInterface $logger;
@@ -59,8 +61,10 @@ class ToolsManager
         Connection $connection,
         KernelInterface $kernel,
         RequestStack $requestStack,
-        MailerInterface $mailer
+        MailerInterface $mailer,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->logger = $logger;
         $this->connection = $connection;
         $this->kernel = $kernel;
@@ -123,17 +127,32 @@ class ToolsManager
 
     public function beforeRuleEditViewRender($data)
     {
-        return $data;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data]);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $data;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getRuleParam(): array
     {
-        return $this->ruleParam;
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->ruleParam;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Allow translation from php classes
     public function getTranslation($textArray)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['textArray' => $textArray]);
+        $__debugReturn = null;
+        try {
         try {
             $result = '';
             // Search the translation
@@ -161,12 +180,17 @@ class ToolsManager
             $result = implode(' - ', $textArray);
         }
 
-        return $result;
+        return $__debugReturn = $result;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Change Myddleware parameters
     public function changeMyddlewareParameter($nameArray, $value)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['nameArray' => $nameArray, 'value' => $value]);
+        try {
         $myddlewareParameters = Yaml::parse(file_get_contents($this->projectDir.'/config/packages/public/parameters_public.yml'));
         // Search the translation
         if (!empty($myddlewareParameters)) {
@@ -185,6 +209,9 @@ class ToolsManager
         }
         $new_yaml = Yaml::dump($myddlewareParameters, 4);
         file_put_contents($this->projectDir.'/config/packages/public/parameters_public.yml', $new_yaml);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -192,6 +219,9 @@ class ToolsManager
      */
     public function getPhpVersion()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // Get the custom php version first
         $select = "SELECT * FROM config WHERE name = 'php'";
         $stmt = $this->connection->prepare($select);
@@ -208,15 +238,21 @@ class ToolsManager
 
         // If no executable found we return 'php'
         if (empty($php)) {
-            return 'php';
+            return $__debugReturn = 'php';
         }
 
-        return $php;
+        return $__debugReturn = $php;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 	
 	
 	public function getParamValue($paramName)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['paramName' => $paramName]);
+        $__debugReturn = null;
+        try {
         // Get the custom php version first
         $select = "SELECT * FROM config WHERE name = :param_name";
         $stmt = $this->connection->prepare($select);
@@ -224,13 +260,19 @@ class ToolsManager
         $result = $stmt->executeQuery();
         $config = $result->fetchAssociative();
         if (!empty($config['value'])) {
-            return $config['value'];
-        } 
-        return null;
+            return $__debugReturn = $config['value'];
+        }
+        return $__debugReturn = null;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 	
 	// Send a message using Brevo or SMTP parameters
 	public function sendMessage($to, $subject, $message) {
+		$this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['to' => $to, 'subject' => $subject, 'message' => $message]);
+		$__debugReturn = null;
+		try {
 		// Use Brevo if the key is set
 		if (!empty($_ENV['BREVO_APIKEY'])) {
             try {
@@ -270,9 +312,9 @@ class ToolsManager
             if ($err) {
                 $session = $this->requestStack->getSession();
                 $session->set('error', ["workflow notification error"]);
-                return false;
+                return $__debugReturn = false;
             } else {
-                return true;
+                return $__debugReturn = true;
             }
 
             } catch (Exception $e) {
@@ -298,13 +340,28 @@ class ToolsManager
                 throw new Exception('Failed to send email: ' . $e->getMessage());
             }
         }
-        return true;
+        return $__debugReturn = true;
+		} finally {
+			$this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
-	
+
 	public function isPremium() {
+		$this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+		$__debugReturn = null;
+		try {
+		} finally {
+			$this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 	
 	public function getRulesFromGroup($ruleGroup, $force = false) {
-		return array();
+		$this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleGroup' => $ruleGroup, 'force' => $force]);
+		$__debugReturn = null;
+		try {
+		return $__debugReturn = array();
+		} finally {
+			$this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+		}
 	}
 }

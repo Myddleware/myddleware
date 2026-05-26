@@ -55,8 +55,12 @@ panel:
     graph_job_histo:
         title: Jobs history
     rule_deleted: This rule has been deleted. It cannot be used anymore
+edit_rule:
+    success: Your rule has been successfully edited.
 create_rule:
     error_name: A connector already has that name.
+    success: Your rule has been successfully created
+    loading: Loading rule...
     tabs:
         one: Connection
         two: Modules selection
@@ -95,6 +99,7 @@ create_rule:
         previous: Previous step
         next: Next step       
         syncdata:
+            title: Sync options
             label: Synchronization type
             create_modify: Create and update data
             create_only: Create data only
@@ -103,6 +108,7 @@ create_rule:
         deletion:
             label: Allow deletion from target application
             yes: Yes
+            no: No
         data_wait: Loading... Please wait
         title: Fields
         placeholder: Please drag your fields here
@@ -147,7 +153,28 @@ create_rule:
             yes: Yes
             no : No
             behavior: Behavior
-            
+    step4:
+        title: Filter
+        filters:
+            field: "Field"
+            choose_field: "Choose a field"
+            operator: "Operator"
+            choose_operator: "Choose an operator"
+            value: "Value"
+            current: "Current filters"
+            empty: "No filters have been defined yet."
+    step5:
+        back: Back to list
+        back_to_rule: Back to rule
+        simulation: Simulation
+        title: Mapping field    
+        formula:
+            title: Compose your formula
+            selected_field: Selected fields
+            fonctionw: Fonction Wizard
+            formula: Formule
+            close: Close
+            save: Save     
         params:
             duplicate: Fields to avoid duplicates
             sync: Bidirectional synchronization
@@ -190,6 +217,8 @@ view_rule:
         confirm_delete_rule: Do you want to delete this rule?
         displayflux: Display the documents
         new_rule: Create a new rule
+        simulation: Simulation
+        more: More...
     tabs:
         info: Overview
         mapping: Field Mapping
@@ -255,6 +284,8 @@ rule:
     help: What should I do ?
     select_group: Select a group
     select_value: Select a value
+    delete:
+        success: Rule deleted successfully
 
 rulegroup:  
   create: "Create a rule group"
@@ -266,7 +297,11 @@ rulegroup:
   rule_removed_successfully: "Rule removed from the group successfully."
   rule_added_successfully: "Rule added to the group successfully."
   confirm_transfer_title: "Confirm rule transfer"
+  confirm_transfer: "Confirm rule transfer"
+  cancel: "Cancel"
   confirm_transfer_text: "This rule already belongs to another group. Do you want to transfer it to this group?"
+  confirm_transfer_message: "This rule is already on another group. Are you sure you want to transfer it to this group?"
+  confirm_transfer_final: "Confirm and transfer the rule"
   title_one: "Rule group"
   back: "Back to list"
   edit: "Edit a rule group"
@@ -350,11 +385,19 @@ actions: "Actions"
 pagination:
     previous: Previous
     next: Next
-    go_to_page: Go to page
+    go_to_page: Go to
     page_number: Page number
 
 animate:
-    rulename: Name of your rule 
+    template:
+        title: Use a Template
+        success: Your template worked successfully
+        rule: rules
+        other_rule: other rule
+        use: Use this template
+    ruleconnection: Rule connection
+    rulename: Name of your rule
+    title: Rule Details
     wait: Please wait...
     solution:
         source: Source
@@ -373,7 +416,7 @@ animate:
         textlink: Do you need help ? Read our tutorial.
 
 create_connector:    
-    title: Creation of a connector
+    title: Creation connector
     save: Save the connection
     connexion: Name of the connection
     test: Test
@@ -409,7 +452,6 @@ list_connector:
 view_connector:
     btn:
         edit: Edit
-        back: Back to the list
         save: Save
         delete: Delete
         confirm_delete: Do you confirm that this connector should be deleted ?
@@ -430,6 +472,7 @@ delete_connector:
         success: Connector deleted successfully
 
 list_flux:
+    more_filter: More filters
     start: Start
     end: End
     total: Number of documents
@@ -641,8 +684,10 @@ view_workflow:
     title2: Condition Field
     condition: The condition field is automatically generated with the string {status} == ", and the opening parenthesis as well as the ternary operator  ?"1":"0") will be added automatically.
     condition2: In short, all you need is to write the status name and we do the rest !
-    back: Back to the list
     delete: Delete the workflow
+    duplicate: Duplicate the workflow
+    duplicate_success: Workflow duplicated successfully
+    duplication_workflow_deactivated : The workflow has been duplicated but it is deactivated upon creation. Please activate it to use it.
     description: Description
     rule: Rule
     conditions: Conditions
@@ -682,7 +727,6 @@ view_workflow_action:
     workflow: Workflow
     action: Action
     order: Order
-    back_to_workflow: Back to the workflow
     create: Create a new action
     multiple_runs: Multiple Runs
     multiple_runs_yes: Yes
@@ -834,6 +878,7 @@ solution:
         client_id: Client ID
         client_secret: Client Secret
         environment: Environment
+        org_url: Organization URL
     params: 
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
@@ -874,6 +919,7 @@ error:
         target_module_load_list: Target modules loading error
         edit_document_error_open: Failed to edit the rule because there is at least one document open or in error in this rule. Close or cancel these documents to be able to edit this rule.
         edit_document_error_open_admin: There is at least one document open or in error in this rule. We advise you to manage these documents before editing this rule.
+        edit_connection_failed: "Failed to edit the rule because the connection to the connector failed:"
         edit_rule_deleted: Failed to edit the rule because this rule is deleted.
         delete_document: Failed to delete the rule because there is at least one document not deleted on this rule. Remove these documents to be able to delete this rule.
         delete_relationship_exists: "Failed to delete the rule because it is linked to another rule. Delete first the rule related or just the relationship with the current rule. Rule related:  "
@@ -897,13 +943,14 @@ title:
         btn: Start now !
     rule:
         create_name: Editing of the rule
-        create: Creation of a rule
-        edit: Editing the rule
+        create: Create rule
+        edit: Edit rule
         list: Rules
         view: Rule
+        success_edit_params:
     connector:
-        create: Creation of a connector
-        edit: Editing the connector
+        create: Create connector
+        edit: Edit connector
         list: Connectors
     flux: 
         list: Documents
@@ -962,6 +1009,7 @@ menu_user:
     management_smtp: SMTP config
     logout: Logout
     user_manager: UserManager
+    settings: Settings
 
 help:
     title: Help
@@ -1121,9 +1169,48 @@ management_smtp:
     error: Failed to save SMTP config
     api_key_already_in_env: This API key is already in the .env file.
     api_key_too_short: The API key is too short. Are you sure it's an BREVO API key in the form ? Be careful about your browser autofilling.
+    api_key_required: API key is required for Brevo/Sendinblue.
+    sendtestmail_error: Failed to send test email
 management_smtp_sendmail:
     subject: Myddleware - email configuration test
     textMail: This test message has been sent by Myddleware.
+
+settings:
+    title: System Settings
+    save: Save
+    tabs:
+        general: Preferences
+        smtp: SMTP Management
+    table_settings:
+        title: Table settings
+        description: Configure how tables display data across the application.
+        rows_per_page: Rows per page
+        maximum_results: Maximum results
+    search_settings:
+        title: Search Settings
+        description: Configure search behavior and Elasticsearch integration.
+        elasticsearch_label: Elasticsearch Status
+        enable_elasticsearch: Enable Elastic Search
+        elasticsearch_hint: Elasticsearch enables greater performance when searching for strings among very large amounts of document (+100k)
+    logs:
+        title: Logs
+        enable_debug: Enable Debug Logs
+        debug_hint: When enabled, detailed debug information (API responses, SQL queries) will be written to the log file.
+        choose_level: Choose debug logs
+        level_hint: Select the minimum log level. Lower levels include more detail but generate larger log files.
+        download_logs: Download Latest Logs
+        empty_logs: Empty Log File
+        confirm_empty_logs: Are you sure you want to empty the log file? This action cannot be undone.
+    messages:
+        save_success: Settings saved successfully
+        save_error: Failed to save settings
+        elasticsearch_enabled: Elasticsearch has been enabled
+        elasticsearch_disabled: Elasticsearch has been disabled
+        debug_enabled: Debug logging has been enabled
+        debug_disabled: Debug logging has been disabled
+        log_level_updated: Log level updated to %level%
+        logs_emptied: Logs emptied successfully
+        logs_empty_error: Failed to empty logs
 
 login:
     title: Connection
@@ -1256,10 +1343,9 @@ variable:
   updated_successfully: "Variable updated successfully."
   deleted_successfully: "Variable deleted successfully."
   name_already_exists: The name of the variable already exists. Please choose another name.
-  edit: Editing of a variable
-  back_to_list: Back to the list
+  edit: Edit variable
   save: Save
-  editing: Editing of a variable
+  editing: Edit variable
   total: Total of Variables
   btn:
     edit: Edit
@@ -1376,6 +1462,7 @@ rule_execute_by_id:
 new_workflow_view:
     save: Save
     created_successfully: Workflow created successfully.
+    condition_error: The condition is incomplete or empty.
 
 delete_workflow_view:
     deleted_successfully: Workflow deleted successfully.

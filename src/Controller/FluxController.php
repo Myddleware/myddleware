@@ -64,11 +64,13 @@ use Doctrine\DBAL\Connection;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Psr\Log\LoggerInterface;
 
+use App\Service\DebugLogger;
 /**
  * @Route("/rule")
  */
 class FluxController extends AbstractController
 {
+    private DebugLogger $debugLogger;
     protected Connection $connection;
     protected $params;
     private SessionService $sessionService;
@@ -89,8 +91,10 @@ class FluxController extends AbstractController
         EntityManagerInterface $entityManager,
         ToolsManager $toolsManager,
         Connection $connection,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->sessionService = $sessionService;
         $this->translator = $translator;
         $this->jobManager = $jobManager;
@@ -120,6 +124,9 @@ class FluxController extends AbstractController
      */
     public function fluxErrorByRule($id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         $em = $this->entityManager;
 
         if ($this->getUser()->isAdmin()) {
@@ -149,7 +156,10 @@ class FluxController extends AbstractController
             $this->sessionService->removeFluxFilter();
         }
 
-        return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
+        return $__debugReturn = $this->redirect($this->generateUrl('document_list', ['search' => 1]));
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -158,6 +168,9 @@ class FluxController extends AbstractController
      */
     public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page, 'search' => $search]);
+        $__debugReturn = null;
+        try {
         //--- Liste status traduction
         $lstStatusTwig = DocumentManager::lstStatus();
         foreach ($lstStatusTwig as $key => $value) {
@@ -430,7 +443,7 @@ class FluxController extends AbstractController
                 $timezone = $this->getUser()->getTimezone();
             }
 
-            return $this->render(
+            return $__debugReturn = $this->render(
                 'Flux/list.html.twig',
                 [
                     'nb' => $compact['nb'],
@@ -444,10 +457,16 @@ class FluxController extends AbstractController
         }
 
         throw $this->createNotFoundException('Error');
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data, 'page' => $page, 'limit' => $limit]);
+        $__debugReturn = null;
+        try {
         $join = '';
         $where = '';
 
@@ -588,7 +607,10 @@ class FluxController extends AbstractController
             $stmt->bindValue(':source_id', $data['source_id']);
         }
         // Run the query and return the results
-        return $stmt->executeQuery()->fetchAllAssociative();
+        return $__debugReturn = $stmt->executeQuery()->fetchAllAssociative();
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -596,11 +618,17 @@ class FluxController extends AbstractController
      */
     public function fluxListDeleteFilter(): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         if ($this->sessionService->isFluxFilterExist()) {
             $this->sessionService->removeFluxFilter();
         }
 
-        return $this->redirect($this->generateUrl('document_list', ['search' => 1]));
+        return $__debugReturn = $this->redirect($this->generateUrl('document_list', ['search' => 1]));
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 /**
@@ -610,6 +638,8 @@ class FluxController extends AbstractController
 public function fluxInfo(Request $request, $id, $page, $logPage)
 
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id, 'page' => $page, 'logPage' => $logPage]);
+        try {
         try {
 
             $documentPage = $request->attributes->get('page', 1);
@@ -890,21 +920,33 @@ $logPagination = $this->nav_pagination_logs($logParams, false);
         } catch (Exception $e) {
             throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     public function extractDirectLink($sourceData): string {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['sourceData' => $sourceData]);
+        $__debugReturn = null;
+        try {
 
         if (!isset($sourceData['direct_link'])) {
-            return '';
+            return $__debugReturn = '';
         }
         $link = $sourceData['direct_link'];
         $extractedLeftPortionOfLink = explode('#', $link);
         $updatedLink = str_replace('index.php', '', $extractedLeftPortionOfLink[0]);
 
-        return $updatedLink;
+        return $__debugReturn = $updatedLink;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function generateLinkToSource($sourceData, $mappedData, $extractedDirectLink): array {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['sourceData' => $sourceData, 'mappedData' => $mappedData, 'extractedDirectLink' => $extractedDirectLink]);
+        $__debugReturn = null;
+        try {
 
 $result = [];
 
@@ -918,7 +960,10 @@ $result = [];
             $result[$item['field']] = $link;
         }
 
-        return $result;
+        return $__debugReturn = $result;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     function extractFieldAndRule($lookupData) {
@@ -941,6 +986,9 @@ $result = [];
     
 
     public function ruleHasLookups($rule): bool {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule]);
+        $__debugReturn = null;
+        try {
         // Prepare the SQL query to fetch rows from rulefield where rule_id matches
         $sql = 'SELECT formula FROM rulefield WHERE rule_id = :rule_id';
         $stmt = $this->connection->prepare($sql);
@@ -953,15 +1001,21 @@ $result = [];
         // Check if any formula contains the string "lookup"
         foreach ($results as $result) {
             if (!empty($result['formula']) && strpos($result['formula'], 'lookup') !== false) {
-                return true;
+                return $__debugReturn = true;
             }
         }
         
         // Return false if no formula contains "lookup"
-        return false;
+        return $__debugReturn = false;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function getLookupData($rule, $sourceData): array {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule, 'sourceData' => $sourceData]);
+        $__debugReturn = null;
+        try {
         // in this function, we will want to obtain a link that leads to the actual data in the source solution
         // for instance, if we have a lookup on the field assigned_user_id, we will want to get a link to the user record in SuiteCRM following the formula lookup({assigned_user_id},"66b3539fde732")
         // it will be the module user because we will find in the rule 66b3539fde732 the associated module
@@ -982,7 +1036,10 @@ $result = [];
             }
         }
 
-        return $resultsNonEmpty;
+        return $__debugReturn = $resultsNonEmpty;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -990,6 +1047,8 @@ $result = [];
      */
     public function fluxSave(Request $request)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        try {
         if ('POST' == $request->getMethod()) {
             // Get the field and value from the request
             $fields = trim(strip_tags($request->request->get('fields')));
@@ -1030,6 +1089,9 @@ $result = [];
             }
         }
         throw $this->createNotFoundException('Failed to modify the field '.$fields);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -1037,14 +1099,20 @@ $result = [];
      */
     public function fluxRerun($id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             if (!empty($id)) {
                 $this->jobManager->actionMassTransfer('rerun', 'document', [$id]);
             }
 
-            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
+            return $__debugReturn = $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            return $__debugReturn = $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1053,14 +1121,20 @@ $result = [];
      */
     public function fluxCancel($id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             if (!empty($id)) {
                 $this->jobManager->actionMassTransfer('cancel', 'document', [$id]);
             }
 
-            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
+            return $__debugReturn = $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            return $__debugReturn = $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1069,6 +1143,9 @@ $result = [];
      */
     public function fluxReadRecord($id): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             if (!empty($id)) {
                 // Get the rule id and the source_id from the document id
@@ -1084,9 +1161,12 @@ $result = [];
 				 
             }
 
-            return $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
+            return $__debugReturn = $this->redirect($this->generateURL('flux_modern', ['id' => $id]));
         } catch (Exception $e) {
-            return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+            return $__debugReturn = $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1097,10 +1177,16 @@ $result = [];
      */
     public function fluxBtnDyn($method, $id, $solution): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['method' => $method, 'id' => $id, 'solution' => $solution]);
+        $__debugReturn = null;
+        try {
         $solution_ws = $this->solutionManager->get(mb_strtolower($solution));
         $solution_ws->documentAction($id, $method);
 
-        return $this->redirect($this->generateUrl('flux_modern', ['id' => $id]));
+        return $__debugReturn = $this->redirect($this->generateUrl('flux_modern', ['id' => $id]));
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1108,6 +1194,8 @@ $result = [];
      */
     public function fluxMassCancelAction(?Request $request = null)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        try {
 
         // if we are not premium, then return
         if (!$this->toolsManager->isPremium()) {
@@ -1121,6 +1209,9 @@ $result = [];
         }
 
         exit;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -1128,6 +1219,8 @@ $result = [];
      */
     public function fluxMassRunAction()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
 
         if (!$this->toolsManager->isPremium()) {
             exit;
@@ -1138,6 +1231,9 @@ $result = [];
         }
 
         exit;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /* *******************************************************
@@ -1147,6 +1243,9 @@ $result = [];
     // Crée la pagination avec le Bundle Pagerfanta en fonction d'une requete
     private function nav_pagination($params, $orm = true)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['params' => $params, 'orm' => $orm]);
+        $__debugReturn = null;
+        try {
         /*
             * adapter_em_repository = requete
             * maxPerPage = integer
@@ -1173,15 +1272,21 @@ $result = [];
                 throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
-            return $compact;
+            return $__debugReturn = $compact;
         }
 
-        return false;
+        return $__debugReturn = false;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 
     private function nav_pagination_documents($params, $orm = true)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['params' => $params, 'orm' => $orm]);
+        $__debugReturn = null;
+        try {
         /*
             * adapter_em_repository = requete
             * maxPerPage = integer
@@ -1212,15 +1317,21 @@ $result = [];
                 throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
-            return $compact;
+            return $__debugReturn = $compact;
         }
 
-        return false;
+        return $__debugReturn = false;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 
     private function nav_pagination_logs($params, $orm = true)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['params' => $params, 'orm' => $orm]);
+        $__debugReturn = null;
+        try {
         /*
             * adapter_em_repository = requete
             * maxPerPage = integer
@@ -1251,15 +1362,20 @@ $result = [];
                 throw $this->createNotFoundException('Page not found.'.$e->getMessage().' '.$e->getFile().' '.$e->getLine());
             }
 
-            return $compact;
+            return $__debugReturn = $compact;
         }
 
-        return false;
+        return $__debugReturn = false;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Liste tous les flux d'un type
     private function listeFluxTable($id, $type)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'type' => $type]);
+        try {
         try {
             // Get document data
             $documentDataEntity = $this->entityManager->getRepository(DocumentData::class)
@@ -1287,12 +1403,17 @@ $result = [];
         } catch (Exception $e) {
             return false;
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
      * @Route("/document/unlock/{id}", name="document_view")
      */
     public function unlockDocument($id) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        try {
         try{
             $this->jobManager->massAction('unlock', 'document', [$id], false, null, null);
 
@@ -1300,12 +1421,17 @@ $result = [];
         } catch (Exception $e) {
             return $this->redirect($this->generateUrl('flux_list', ['search' => 1]));
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
      * @Route("/flux/unlock", name="flux_mass_unlock")
      */
     public function unlockDocuments(Request $request) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        try {
         try {
 
             if (!$this->toolsManager->isPremium()) {
@@ -1328,18 +1454,26 @@ $result = [];
         } catch (\Exception $e) {
             return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
      * @Route("/read_job_lock/clear/{id}", name="clear_read_job_lock", methods={"POST"})
      */
     public function clearReadJobLock($id) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        try {
         try {
             $this->jobManager->clearLock('rule', [$id]);
 
             return new JsonResponse(['status' => 'success', 'message' => 'Verrouillage effacé avec succès.']);
         } catch (Exception $e) {
             return new JsonResponse(['status' => 'error', 'message' => 'Erreur lors de la suppression du verrouillage.'], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
@@ -1350,7 +1484,13 @@ $result = [];
      */
     public function fluxModern(?string $id = null): Response
     {
-        return $this->render('Flux/flux-js.html.twig');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->render('Flux/flux-js.html.twig');
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1358,10 +1498,13 @@ $result = [];
      */
     public function getFluxInfo(Request $request, ?string $id = null): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
         
         if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+            return $__debugReturn = new JsonResponse(['error' => 'User not authenticated'], 401);
         }
 
         // Get current locale
@@ -1404,11 +1547,14 @@ $result = [];
             ];
         }
 
-        return new JsonResponse([
+        return $__debugReturn = new JsonResponse([
             'translations' => $translations,
             'fluxData' => $fluxData,
             'currentLocale' => $locale
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // function to get the rule name from the document id
@@ -1416,6 +1562,9 @@ $result = [];
      * @Route("/api/flux/rule-get/{id}", name="api_flux_rule", methods={"GET"})
      */
     public function getRuleName($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             // Log the incoming request
             error_log("getRuleName called with document ID: " . $id);
@@ -1423,7 +1572,7 @@ $result = [];
             // Validate the document ID
             if (empty($id)) {
                 error_log("getRuleName: Empty document ID provided");
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
             // Find the document by ID (not the rule directly)
@@ -1431,7 +1580,7 @@ $result = [];
             
             if (!$document) {
                 error_log("getRuleName: Document not found with ID: " . $id);
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
             
             // Get the rule from the document
@@ -1439,13 +1588,13 @@ $result = [];
             
             if (!$rule) {
                 error_log("getRuleName: No rule associated with document ID: " . $id);
-                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'No rule associated with this document'], 404);
             }
             
             $ruleName = $rule->getName();
             error_log("getRuleName: Successfully found rule name: " . $ruleName . " for document ID: " . $id);
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'rule_name' => $ruleName,
                 'rule_id' => $rule->getId(),
@@ -1455,7 +1604,10 @@ $result = [];
         } catch (\Exception $e) {
             error_log("getRuleName: Exception occurred: " . $e->getMessage());
             error_log("getRuleName: Stack trace: " . $e->getTraceAsString());
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1464,19 +1616,21 @@ $result = [];
      * @Route("/api/flux/document-data/{id}", name="api_flux_document_data", methods={"GET"})
      */
     public function getDocumentData($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
 
             // Validate the document ID
             if (empty($id)) {
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
 
             // Find the document by ID
             $document = $this->entityManager->getRepository(Document::class)->find($id);
 
             if (!$document) {
-                $this->logger->critical("[DATE-FLOW-PHP-1] Document not found with ID: " . $id);
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
 
             // Log raw date values from database
@@ -1485,8 +1639,7 @@ $result = [];
             $rule = $document->getRule();
 
             if (!$rule) {
-                $this->logger->critical("[DATE-FLOW-PHP-1] No rule associated with document ID: " . $id);
-                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'No rule associated with this document'], 404);
             }
             
             // Get status display information
@@ -1502,7 +1655,7 @@ $result = [];
             $targetDirectLink = null;
             try {
                 $sourceSolutionName = $rule->getConnectorSource()->getSolution()->getName();
-                $allowedSolutions = ['suitecrm', 'airtable', 'sugarcrm', 'salesforce', 'moodle'];
+                $allowedSolutions = ['suitecrm', 'suitecrm8', 'airtable', 'sugarcrm', 'salesforce', 'moodle'];
 
                 if (in_array(strtolower($sourceSolutionName), $allowedSolutions)) {
                     $sourceSolution = $this->solutionManager->get($sourceSolutionName);
@@ -1599,7 +1752,7 @@ $result = [];
 
 
 
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $responseData
             ]);
@@ -1607,7 +1760,10 @@ $result = [];
         } catch (\Exception $e) {
             error_log("getDocumentData: Exception occurred: " . $e->getMessage());
             error_log("getDocumentData: Stack trace: " . $e->getTraceAsString());
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1617,6 +1773,9 @@ $result = [];
      * @return string - Formatted date string in Y-m-d H:i:s format
      */
     private function formatDateInUserTimezone(\DateTime $date): string {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['date' => $date]);
+        $__debugReturn = null;
+        try {
         $userTimezone = $this->getUser()->getTimezone();
 
         // COMPENSATION FIX: Database stores dates in UTC, but Doctrine reads them with server timezone
@@ -1636,13 +1795,19 @@ $result = [];
         // Return formatted string
         $result = $dateInUserTz->format('Y-m-d H:i:s');
 
-        return $result;
+        return $__debugReturn = $result;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Helper method to get document status display information
      */
     private function getDocumentStatusInfo($document): array {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['document' => $document]);
+        $__debugReturn = null;
+        try {
         $status = $document->getStatus();
         $globalStatus = $document->getGlobalStatus();
         
@@ -1650,24 +1815,30 @@ $result = [];
         $statusInfo = $this->getStatusDisplayInfo($status);
         $globalStatusInfo = $this->getStatusDisplayInfo($globalStatus);
         
-        return [
+        return $__debugReturn = [
             'status' => $statusInfo['status'],
             'status_class' => $statusInfo['status_class'],
             'global_status' => $globalStatusInfo['status'],
             'global_status_class' => $globalStatusInfo['status_class']
         ];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Helper method to get status display info with proper color coding
      */
     private function getStatusDisplayInfo($statusValue): array {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['statusValue' => $statusValue]);
+        $__debugReturn = null;
+        try {
         // Normalize status value for comparison
         $statusLower = strtolower(trim($statusValue));
         
         // Yellow statuses: cancel, filter, no send, error expected
         if (in_array($statusLower, ['c', 'cancel', 'cancelled', 'filter', 'no_send', 'error_expected', 'cancel !'])) {
-            return [
+            return $__debugReturn = [
                 'status' => $this->getStatusLabel($statusValue),
                 'status_class' => 'status-yellow'
             ];
@@ -1675,7 +1846,7 @@ $result = [];
         
         // Green statuses: send, sent, success
         if (in_array($statusLower, ['found', 'close', 's', 'send', 'sent', 'success', 'send ✓'])) {
-            return [
+            return $__debugReturn = [
                 'status' => $this->getStatusLabel($statusValue),
                 'status_class' => 'status-green'
             ];
@@ -1686,23 +1857,29 @@ $result = [];
             strpos($statusLower, 'error') !== false || 
             strpos($statusLower, 'ko') !== false ||
             strpos($statusLower, 'fail') !== false) {
-            return [
+            return $__debugReturn = [
                 'status' => $this->getStatusLabel($statusValue),
                 'status_class' => 'status-red'
             ];
         }
         
         // Blue statuses: all others (new, transform, open, etc.)
-        return [
+        return $__debugReturn = [
             'status' => $this->getStatusLabel($statusValue),
             'status_class' => 'status-blue'
         ];
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Helper method to get human-readable status labels
      */
     private function getStatusLabel($statusValue): string {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['statusValue' => $statusValue]);
+        $__debugReturn = null;
+        try {
         // Map common status codes to readable labels with icons
         $statusLabels = [
             'S' => 'Send ✓',
@@ -1716,28 +1893,40 @@ $result = [];
             'Close' => 'Close ✓'
         ];
         
-        return $statusLabels[$statusValue] ?? $statusValue;
+        return $__debugReturn = $statusLabels[$statusValue] ?? $statusValue;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Helper method to get latest error message from logs
      */
     private function getLatestErrorMessage($document): ?string {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['document' => $document]);
+        $__debugReturn = null;
+        try {
         $logs = $document->getLogs();
         
         foreach ($logs as $log) {
             if ($log->getType() === 'E') { // Error type
-                return $log->getMessage();
+                return $__debugReturn = $log->getMessage();
             }
         }
         
-        return null;
+        return $__debugReturn = null;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
      * Helper method to get type label
      */
     private function getTypeLabel($type): string {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['type' => $type]);
+        $__debugReturn = null;
+        try {
         // Map common type codes to readable labels with icons
         $typeLabels = [
             'S' => 'Send',
@@ -1751,7 +1940,10 @@ $result = [];
             'Close' => 'Close'
         ];
         
-        return $typeLabels[$type] ?? $type;
+        return $__debugReturn = $typeLabels[$type] ?? $type;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -1759,13 +1951,16 @@ $result = [];
      * @Route("/api/flux/document-history/{id}", name="api_flux_document_history", methods={"GET"})
      */
     public function getDocumentHistory($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             // error_log("getDocumentHistory called with document ID: " . $id);
             
             // Validate the document ID
             if (empty($id)) {
                 error_log("getDocumentHistory: Empty document ID provided");
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
             // Find the document by ID
@@ -1773,7 +1968,7 @@ $result = [];
             
             if (!$document) {
                 error_log("getDocumentHistory: Document not found with ID: " . $id);
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
             
             // Get the rule from the document
@@ -1781,7 +1976,7 @@ $result = [];
             
             if (!$rule) {
                 // error_log("getDocumentHistory: No rule associated with document ID: " . $id);
-                return new JsonResponse(['error' => 'No rule associated with this document'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'No rule associated with this document'], 404);
             }
             
             // Get history documents (all documents for the same source and rule)
@@ -1821,7 +2016,7 @@ $result = [];
             
             // error_log("getDocumentHistory: Successfully retrieved " . count($historyData) . " history documents for document ID: " . $id);
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $historyData
             ]);
@@ -1829,7 +2024,10 @@ $result = [];
         } catch (\Exception $e) {
             // error_log("getDocumentHistory: Exception occurred: " . $e->getMessage());
             // error_log("getDocumentHistory: Stack trace: " . $e->getTraceAsString());
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1838,13 +2036,16 @@ $result = [];
      * @Route("/api/flux/document-parents/{id}", name="api_flux_document_parents", methods={"GET"})
      */
     public function getDocumentParents($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             if (empty($id)) {
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
             if (!$this->entityManager->getRepository(Document::class)->find($id)) {
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
             
             $qb = $this->entityManager->createQueryBuilder();
@@ -1893,13 +2094,16 @@ $result = [];
                 }
             }
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $parentData
             ]);
             
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1908,13 +2112,16 @@ $result = [];
      * @Route("/api/flux/document-children/{id}", name="api_flux_document_children", methods={"GET"})
      */
     public function getDocumentChildren($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             if (empty($id)) {
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
             if (!$this->entityManager->getRepository(Document::class)->find($id)) {
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
             
             $childData = [];
@@ -1967,13 +2174,16 @@ $result = [];
                 }
             }
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $childData
             ]);
             
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -1982,13 +2192,16 @@ $result = [];
      * @Route("/api/flux/document-posts/{id}", name="api_flux_document_posts", methods={"GET"})
      */
     public function getDocumentPosts($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             if (empty($id)) {
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
 
             if (!$this->entityManager->getRepository(Document::class)->find($id)) {
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
 
             // Get post documents where parentId equals the current document ID
@@ -2016,13 +2229,16 @@ $result = [];
                 ];
             }
 
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $postData
             ]);
 
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -2031,13 +2247,16 @@ $result = [];
      * @Route("/api/flux/document-logs/{id}", name="api_flux_document_logs", methods={"GET"})
      */
     public function getDocumentLogs($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             error_log("getDocumentLogs called with document ID: " . $id);
             
             // Validate the document ID
             if (empty($id)) {
                 error_log("getDocumentLogs: Empty document ID provided");
-                return new JsonResponse(['error' => 'Document ID is required'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Document ID is required'], 400);
             }
             
             // Find the document by ID
@@ -2045,7 +2264,7 @@ $result = [];
             
             if (!$document) {
                 error_log("getDocumentLogs: Document not found with ID: " . $id);
-                return new JsonResponse(['error' => 'Document not found'], 404);
+                return $__debugReturn = new JsonResponse(['error' => 'Document not found'], 404);
             }
             
             // Get the logs for this document
@@ -2078,7 +2297,7 @@ $result = [];
             
             error_log("getDocumentLogs: Successfully processed " . count($logsData) . " logs for document ID: " . $id);
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $logsData
             ]);
@@ -2086,7 +2305,10 @@ $result = [];
         } catch (\Exception $e) {
             error_log("getDocumentLogs: Exception occurred: " . $e->getMessage());
             error_log("getDocumentLogs: Stack trace: " . $e->getTraceAsString());
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -2096,11 +2318,14 @@ $result = [];
      * @IsGranted("ROLE_ADMIN")
      */
     public function getUserPermissions(): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         try {
             $user = $this->getUser();
             
             if (!$user) {
-                return new JsonResponse(['error' => 'User not authenticated'], 401);
+                return $__debugReturn = new JsonResponse(['error' => 'User not authenticated'], 401);
             }
             
             $permissions = [
@@ -2110,13 +2335,16 @@ $result = [];
                 'username' => $user->getUsername()
             ];
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'permissions' => $permissions
             ]);
             
         } catch (\Exception $e) {
-            return new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+            return $__debugReturn = new JsonResponse(['error' => 'Internal server error: ' . $e->getMessage()], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -2124,17 +2352,23 @@ $result = [];
      * Helper method to format log types with icons and colors
      */
     private function formatLogType($type): string {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['type' => $type]);
+        $__debugReturn = null;
+        try {
         switch (strtoupper($type)) {
             case 'S':
-                return 'S ✓'; // Success - green
+                return $__debugReturn = 'S ✓'; // Success - green
             case 'E':
-                return 'E ✗'; // Error - red  
+                return $__debugReturn = 'E ✗'; // Error - red  
             case 'W':
-                return 'W ⚠'; // Warning - yellow
+                return $__debugReturn = 'W ⚠'; // Warning - yellow
             case 'I':
-                return 'I ℹ'; // Info - blue
+                return $__debugReturn = 'I ℹ'; // Info - blue
             default:
-                return $type; // Return original if unknown
+                return $__debugReturn = $type; // Return original if unknown
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -2143,10 +2377,13 @@ $result = [];
      * @Route("/flux/update-field", name="flux_update_field", methods={"POST"})
      */
     public function updateField(Request $request): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             // Check if user is admin
             if (!$this->getUser() || !$this->getUser()->isAdmin()) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => 'Insufficient permissions. Admin access required.'
                 ], 403);
@@ -2156,7 +2393,7 @@ $result = [];
             $data = json_decode($request->getContent(), true);
             
             if (!$data) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => 'Invalid JSON data'
                 ], 400);
@@ -2164,7 +2401,7 @@ $result = [];
 
             // Validate required fields
             if (empty($data['documentId']) || empty($data['fieldName']) || !isset($data['fieldValue'])) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => 'Missing required fields: documentId, fieldName, fieldValue'
                 ], 400);
@@ -2180,7 +2417,7 @@ $result = [];
             $document = $this->entityManager->getRepository(Document::class)->find($documentId);
             
             if (!$document) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => 'Document not found'
                 ], 404);
@@ -2194,7 +2431,7 @@ $result = [];
                 ]);
                 
             if (!$documentDataEntity) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => 'Target data not found for this document'
                 ], 404);
@@ -2204,7 +2441,7 @@ $result = [];
             $targetData = json_decode($documentDataEntity->getData(), true);
             
             if ($targetData === null) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => 'Invalid target data format'
                 ], 500);
@@ -2212,7 +2449,7 @@ $result = [];
 
             // Check if field exists in target data
             if (!array_key_exists($fieldName, $targetData)) {
-                return new JsonResponse([
+                return $__debugReturn = new JsonResponse([
                     'success' => false,
                     'error' => "Field '$fieldName' not found in target data"
                 ], 404);
@@ -2241,7 +2478,7 @@ $result = [];
 
             error_log("Field updated successfully: $fieldName changed from '$oldValue' to '$fieldValue'");
 
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'message' => 'Field updated successfully',
                 'data' => [
@@ -2255,10 +2492,13 @@ $result = [];
             error_log("Error updating field: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => false,
                 'error' => 'Internal server error: ' . $e->getMessage()
             ], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -2267,6 +2507,9 @@ $result = [];
      * @Route("/api/flux/document-workflow-logs/{id}", name="api_flux_document_workflow_logs", methods={"GET"})
      */
     public function getDocumentWorkflowLogs($id): JsonResponse {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         try {
             error_log("getDocumentWorkflowLogs called with document ID: " . $id);
             
@@ -2301,7 +2544,7 @@ $result = [];
                 ];
             }
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'data' => $workflowLogsData
             ]);
@@ -2310,10 +2553,13 @@ $result = [];
             error_log("Error in getDocumentWorkflowLogs: " . $e->getMessage());
             error_log("Stack trace: " . $e->getTraceAsString());
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => false,
                 'error' => 'Error retrieving workflow logs'
             ], 500);
+        }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 }

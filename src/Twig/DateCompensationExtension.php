@@ -14,11 +14,25 @@ use Twig\TwigFilter;
  */
 class DateCompensationExtension extends AbstractExtension
 {
+    /** @var array<string, \DateTimeZone> Cache for DateTimeZone objects */
+    private static array $timezoneCache = [];
+
     public function getFilters(): array
     {
         return [
             new TwigFilter('date_compensated', [$this, 'formatDateWithCompensation']),
         ];
+    }
+
+    /**
+     * Get a cached DateTimeZone object to avoid creating thousands of identical objects
+     */
+    private static function getTimezone(string $timezone): \DateTimeZone
+    {
+        if (!isset(self::$timezoneCache[$timezone])) {
+            self::$timezoneCache[$timezone] = new \DateTimeZone($timezone);
+        }
+        return self::$timezoneCache[$timezone];
     }
 
     /**
@@ -52,14 +66,13 @@ class DateCompensationExtension extends AbstractExtension
         // COMPENSATION FIX: Get the raw date/time values (ignoring the incorrect server timezone)
         $dateString = $dateObj->format('Y-m-d H:i:s');
 
-        // Create a new DateTime object, explicitly setting it to UTC
-        $dateInUtc = new \DateTime($dateString, new \DateTimeZone('UTC'));
+        // Create a new DateTime object, explicitly setting it to UTC (using cached timezone)
+        $dateInUtc = new \DateTime($dateString, self::getTimezone('UTC'));
 
-        // Convert from UTC to the target timezone
-        $dateInTargetTz = clone $dateInUtc;
-        $dateInTargetTz->setTimezone(new \DateTimeZone($timezone));
+        // Convert from UTC to the target timezone (using cached timezone)
+        $dateInUtc->setTimezone(self::getTimezone($timezone));
 
         // Return formatted string
-        return $dateInTargetTz->format($format);
+        return $dateInUtc->format($format);
     }
 }

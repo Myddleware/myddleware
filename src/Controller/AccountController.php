@@ -49,13 +49,14 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use App\Entity\Config;
+use App\Entity\User;
 
 
-/**
- * @Route("/rule")
- */
+use App\Service\DebugLogger;
+#[Route('/account')]
 class AccountController extends AbstractController
 {
+    private DebugLogger $debugLogger;
     /**
      * @var ToolsManager
      */
@@ -114,9 +115,11 @@ class AccountController extends AbstractController
         ToolsManager $toolsManager,
         AlertBootstrapInterface $alert,
         TwoFactorAuthService $twoFactorAuthService,
+        DebugLogger $debugLogger,
         SerializerInterface $serializer = null,
         ValidatorInterface $validator = null
     ) {
+        $this->debugLogger = $debugLogger;
         $this->kernel = $kernel;
         $this->env = $kernel->getEnvironment();
         $this->logger = $logger;
@@ -130,23 +133,26 @@ class AccountController extends AbstractController
         $this->validator = $validator;
     }
 
-    /**
-     * @Route("/account/locale/{locale}", name="account_locale", options={"expose"=true})
-     */
+    #[Route('/locale/{locale}', name: 'account_locale', options: ['expose' => true])]
     public function changeLocale(string $locale, Request $request): RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['locale' => $locale, 'request' => $request]);
+        $__debugReturn = null;
+        try {
         $request->getSession()->set('_locale', $locale);
 
-        return $this->redirect($request->headers->get('referer'));
+        return $__debugReturn = $this->redirect($request->headers->get('referer'));
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @return RedirectResponse|Response|null
-     *
-     * @Route("/account/old", name="my_account_old")
-     */
+    #[Route('/old', name: 'my_account_old')]
     public function account(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'hasher' => $hasher, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
         $em = $this->entityManager;
         $form = $this->createForm(ProfileFormType::class, $user);
@@ -184,7 +190,7 @@ class AccountController extends AbstractController
             $request->getSession()->set('_timezone', $timezone);
             $this->entityManager->flush();
             $this->addFlash('account.profile.success', $translator->trans('account.profile.updated_successfully'));
-            return $this->redirectToRoute('my_account_old');
+            return $__debugReturn = $this->redirectToRoute('my_account_old');
         }
         
         if ($twoFactorAuthForm->isSubmitted() && $twoFactorAuthForm->isValid()) {
@@ -197,26 +203,33 @@ class AccountController extends AbstractController
             }
             
             $this->entityManager->flush();
-            return $this->redirectToRoute('my_account_old');
+            return $__debugReturn = $this->redirectToRoute('my_account_old');
         }
 
-        return $this->render('Account/index.html.twig', [
+        return $__debugReturn = $this->render('Account/index.html.twig', [
             'locale' => $request->getLocale(),
             'form' => $form->createView(), // change profile form
             'twoFactorAuthForm' => $twoFactorAuthForm->createView(),
             'smtpConfigured' => $smtpConfigured,
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @return RedirectResponse|Response|null
-     *
-     * @Route("/account/reset-password", name="my_account_reset_password")
-     */
+    #[Route('/reset-password', name: 'my_account_reset_password')]
     public function resetPasswordAction(Request $request, UserPasswordHasherInterface $hasher, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'hasher' => $hasher, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         $em = $this->entityManager;
         $user = $this->getUser();
+
+        if (!$user instanceof User) {
+            throw $this->createAccessDeniedException('You must be logged in to reset your password.');
+        }
+
         $form = $this->createForm(UpdatePasswordType::class, $user);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -235,22 +248,26 @@ class AccountController extends AbstractController
                 $em->flush();
                 $this->addFlash('account.password.success', $translator->trans('password_reset.success'));
 
-                return $this->redirectToRoute('account_modern');
+                return $__debugReturn = $this->redirectToRoute('account_modern');
             } else {
                  $this->addFlash('account.password.danger', $translator->trans('password_reset.incorrect_password'));
             }
         }
 
-        return $this->render('Account/resetPassword.html.twig', [
+        return $__debugReturn = $this->render('Account/resetPassword.html.twig', [
             'form' => $form->createView(),
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/download", name="download_log")
-     **/
+    #[Route('/download', name: 'download_log')]
     public function downloadFileAction()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         if ($this->env === "dev") {
             $logType = 'dev.log';
         } else {
@@ -273,14 +290,18 @@ class AccountController extends AbstractController
 
         $response = new BinaryFileResponse($absolutePathFile);
         $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $logType);
-        return $response;
+        return $__debugReturn = $response;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/emptylog", name="empty_log")
-     **/
+    #[Route('/emptylog', name: 'empty_log')]
     public function emptyLogAction(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         if ($this->env === "dev") {
             $logType = 'dev.log';
         } else {
@@ -312,28 +333,34 @@ class AccountController extends AbstractController
             fclose($handle);
         }
 
-        return $this->redirect($request->headers->get('referer'));
+        return $__debugReturn = $this->redirect($request->headers->get('referer'));
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * Modern JavaScript-based account page
-     * 
-     * @Route("/account", name="account_modern")
-     */
+    #[Route('/', name: 'account_modern')]
     public function accountModern(): Response
     {
-        return $this->render('Account/account-js.html.twig');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        return $__debugReturn = $this->render('Account/account-js.html.twig');
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/info", name="api_account_info", methods={"GET"})
-     */
+    #[Route('/api/account/info', name: 'api_account_info', methods: ['GET'])]
     public function getAccountInfo(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
         
         if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+            return $__debugReturn = new JsonResponse(['error' => 'User not authenticated'], 401);
         }
         
         // Get current locale
@@ -429,7 +456,7 @@ class AccountController extends AbstractController
         $exportSeparator = $user->getCsvSeparator() ?? ',';
         $encoding = $request->getSession()->get('_encoding', 'UTF-8');
         
-        return new JsonResponse([
+        return $__debugReturn = new JsonResponse([
             'id' => $user->getId(),
             'username' => $user->getUsername(),
             'email' => $user->getEmail(),
@@ -444,23 +471,27 @@ class AccountController extends AbstractController
             'encoding' => $encoding,
             'translations' => $translations
         ]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/profile/update", name="api_account_profile_update", methods={"POST"})
-     */
+    #[Route('/api/account/profile/update', name: 'api_account_profile_update', methods: ['POST'])]
     public function updateProfile(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
         
         if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+            return $__debugReturn = new JsonResponse(['error' => 'User not authenticated'], 401);
         }
         
         $data = json_decode($request->getContent(), true);
         
         if (!$data) {
-            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Invalid JSON data'], 400);
         }
         
         // Basic validation
@@ -471,7 +502,7 @@ class AccountController extends AbstractController
         }
         
         if (!empty($errors)) {
-            return new JsonResponse(['errors' => $errors], 400);
+            return $__debugReturn = new JsonResponse(['errors' => $errors], 400);
         }
         
         // Update user data
@@ -489,7 +520,7 @@ class AccountController extends AbstractController
                 $user->setTimezone($data['timezone']);
                 $request->getSession()->set('_timezone', $data['timezone']);
             } catch (\Exception $e) {
-                return new JsonResponse(['errors' => ['Invalid timezone']], 400);
+                return $__debugReturn = new JsonResponse(['errors' => ['Invalid timezone']], 400);
             }
         }
         
@@ -521,38 +552,42 @@ class AccountController extends AbstractController
         
         $this->entityManager->flush();
         
-        return new JsonResponse(['success' => true, 'message' => 'Profile updated successfully']);
+        return $__debugReturn = new JsonResponse(['success' => true, 'message' => 'Profile updated successfully']);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/password/update", name="api_account_password_update", methods={"POST"})
-     */
+    #[Route('/api/account/password/update', name: 'api_account_password_update', methods: ['POST'])]
     public function updatePassword(Request $request, UserPasswordHasherInterface $hasher): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'hasher' => $hasher]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
         
-        if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+        if (!$user instanceof User) {
+        return $__debugReturn = new JsonResponse(['error' => 'User not authenticated or invalid user type'], 401);
         }
         
         $data = json_decode($request->getContent(), true);
         
         if (!$data) {
-            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Invalid JSON data'], 400);
         }
         
         // Validate input
         if (!isset($data['oldPassword']) || empty($data['oldPassword'])) {
-            return new JsonResponse(['error' => 'Current password is required'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Current password is required'], 400);
         }
         
         if (!isset($data['plainPassword']) || empty($data['plainPassword'])) {
-            return new JsonResponse(['error' => 'New password is required'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'New password is required'], 400);
         }
         
         // Check if old password is valid
         if (!$hasher->isPasswordValid($user, $data['oldPassword'])) {
-            return new JsonResponse(['error' => 'Current password is incorrect'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Current password is incorrect'], 400);
         }
         
         // Update password
@@ -561,40 +596,48 @@ class AccountController extends AbstractController
         
         $this->entityManager->flush();
         
-        return new JsonResponse(['success' => true, 'message' => 'Password updated successfully']);
+        return $__debugReturn = new JsonResponse(['success' => true, 'message' => 'Password updated successfully']);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // get config from the table config
 
-    /**
-     * @Route("/api/account/config", name="api_account_config", methods={"GET"})
-     */
+    #[Route('/api/account/config', name: 'api_account_config', methods: ['GET'])]
     public function getConfig(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         // get the pager from the config repository
         $config = [];
         $config['pager'] = $this->entityManager->getRepository(Config::class)->findPager()['value'] ?? '20';
         // get the search limit from the config repository
         $config['search_limit'] = $this->entityManager->getRepository(Config::class)->getSearchLimit()['value'] ?? '1000';
 
-        return new JsonResponse(['success' => true, 'config' => $config]);
+        return $__debugReturn = new JsonResponse(['success' => true, 'config' => $config]);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/twofactor/update", name="api_account_twofactor_update", methods={"POST"})
-     */
+    #[Route('/api/account/twofactor/update', name: 'api_account_twofactor_update', methods: ['POST'])]
     public function updateTwoFactor(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
         
         if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+            return $__debugReturn = new JsonResponse(['error' => 'User not authenticated'], 401);
         }
         
         $data = json_decode($request->getContent(), true);
         
         if (!$data) {
-            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Invalid JSON data'], 400);
         }
         
         // Check if SMTP is configured
@@ -624,7 +667,7 @@ class AccountController extends AbstractController
         
         // If SMTP is not configured, disable 2FA
         if (!$smtpConfigured && isset($data['enabled']) && $data['enabled']) {
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'error' => 'Two-factor authentication requires email configuration. Please configure either SMTP settings or Brevo API key first.'
             ], 400);
         }
@@ -636,18 +679,22 @@ class AccountController extends AbstractController
         
         $this->entityManager->flush();
         
-        return new JsonResponse(['success' => true, 'message' => 'Two-factor authentication settings updated successfully']);
+        return $__debugReturn = new JsonResponse(['success' => true, 'message' => 'Two-factor authentication settings updated successfully']);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/locale", name="api_account_locale", methods={"POST"})
-     */
+    #[Route('/api/account/locale', name: 'api_account_locale', methods: ['POST'])]
     public function apiChangeLocale(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $data = json_decode($request->getContent(), true);
         
         if (!$data || !isset($data['locale'])) {
-            return new JsonResponse(['error' => 'Locale is required'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Locale is required'], 400);
         }
         
         $locale = $data['locale'];
@@ -668,7 +715,7 @@ class AccountController extends AbstractController
         }
         
         if (!in_array($locale, $validLocales)) {
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'error' => sprintf('Invalid locale. Valid locales are: %s', implode(', ', $validLocales))
             ], 400);
         }
@@ -677,23 +724,27 @@ class AccountController extends AbstractController
             // Set the locale in session
             $request->getSession()->set('_locale', $locale);
             
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'message' => sprintf('Locale changed to %s', $locale)
             ]);
             
         } catch (\Exception $e) {
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'error' => 'Failed to change locale: ' . $e->getMessage()
             ], 500);
         }
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/logs/download", name="api_account_logs_download", methods={"GET"})
-     */
+    #[Route('/api/account/logs/download', name: 'api_account_logs_download', methods: ['GET'])]
     public function apiDownloadLog(): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         if ($this->env === "dev") {
             $logType = 'dev.log';
         } else {
@@ -713,20 +764,52 @@ class AccountController extends AbstractController
             $file = $cwdWithoutPublic . $varPath;
             $absolutePathFile = realpath($file);
         }
+        if (!$absolutePathFile || !file_exists($absolutePathFile)) {
+            return new Response('Log file not found', 404);
+        }
+        $content = file_get_contents($absolutePathFile);
+        $lines = explode("\n", $content);
+        $filtered = array_filter($lines, function ($line) {
+            return stripos($line, 'Deprecated') === false
+                && stripos($line, 'TwoFactorAuthListener') === false
+                && stripos($line, 'Stored the security token') === false
+                && stripos($line, 'Matched route') === false
+                && stripos($line, 'User authenticated') === false
+                && stripos($line, 'User was reloaded') === false
+                && stripos($line, 'Authenticator') === false;
+        });
+        $maxLineLength = 1000;
+        $wrapped = [];
+        foreach ($filtered as $line) {
+            if (strlen($line) > $maxLineLength) {
+                $wrapped = array_merge($wrapped, str_split($line, $maxLineLength));
+            } else {
+                $wrapped[] = $line;
+            }
+        }
+        $filteredContent = implode("\n", $wrapped);
 
-        $response = new BinaryFileResponse($absolutePathFile);
-        $response->setContentDisposition(ResponseHeaderBag::DISPOSITION_ATTACHMENT, $logType);
-        return $response;
+        $response = new Response($filteredContent);
+        $response->headers->set('Content-Type', 'text/plain');
+        $response->headers->set('Content-Disposition', $response->headers->makeDisposition(
+            ResponseHeaderBag::DISPOSITION_ATTACHMENT,
+            $logType
+        ));
+        return $__debugReturn = $response;
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/logs/empty", name="api_account_logs_empty", methods={"POST"})
-     */
+    #[Route('/api/account/logs/empty', name: 'api_account_logs_empty', methods: ['POST'])]
     public function apiEmptyLog(): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         // Check user permissions
         if (!$this->isGranted('ROLE_SUPER_ADMIN')) {
-            return new JsonResponse(['error' => 'Permission denied'], 403);
+            return $__debugReturn = new JsonResponse(['error' => 'Permission denied'], 403);
         }
 
         if ($this->env === "dev") {
@@ -760,27 +843,31 @@ class AccountController extends AbstractController
             // Close the file
             fclose($handle);
 
-            return new JsonResponse(['success' => true, 'message' => 'Log file emptied successfully']);
+            return $__debugReturn = new JsonResponse(['success' => true, 'message' => 'Log file emptied successfully']);
         }
 
-        return new JsonResponse(['error' => 'Failed to empty log file'], 500);
+        return $__debugReturn = new JsonResponse(['error' => 'Failed to empty log file'], 500);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    /**
-     * @Route("/api/account/config/update", name="api_account_config_update", methods={"POST"})
-     */
+    #[Route('/api/account/config/update', name: 'api_account_config_update', methods: ['POST'])]
     public function updateConfig(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $user = $this->getUser();
 
         if (!$user) {
-            return new JsonResponse(['error' => 'User not authenticated'], 401);
+            return $__debugReturn = new JsonResponse(['error' => 'User not authenticated'], 401);
         }
 
         $data = json_decode($request->getContent(), true);
 
         if (!$data) {
-            return new JsonResponse(['error' => 'Invalid JSON data'], 400);
+            return $__debugReturn = new JsonResponse(['error' => 'Invalid JSON data'], 400);
         }
 
         $configRepository = $this->entityManager->getRepository(Config::class);
@@ -789,7 +876,7 @@ class AccountController extends AbstractController
         if (isset($data['rowsPerPage'])) {
             $rowsPerPage = intval($data['rowsPerPage']);
             if ($rowsPerPage < 1) {
-                return new JsonResponse(['error' => 'Rows per page must be at least 1'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Rows per page must be at least 1'], 400);
             }
             $configRepository->setPager($rowsPerPage);
         }
@@ -798,11 +885,14 @@ class AccountController extends AbstractController
         if (isset($data['maximumResults'])) {
             $maximumResults = intval($data['maximumResults']);
             if ($maximumResults < 1) {
-                return new JsonResponse(['error' => 'Maximum results must be at least 1'], 400);
+                return $__debugReturn = new JsonResponse(['error' => 'Maximum results must be at least 1'], 400);
             }
             $configRepository->setSearchLimit($maximumResults);
         }
 
-        return new JsonResponse(['success' => true, 'message' => 'Configuration updated successfully']);
+        return $__debugReturn = new JsonResponse(['success' => true, 'message' => 'Configuration updated successfully']);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

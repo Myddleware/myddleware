@@ -27,6 +27,7 @@ namespace App\Manager;
 
 use Exception;
 use App\Entity\Config;
+use App\Entity\RuleRelationShip;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Process\Process;
@@ -39,9 +40,11 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
+use App\Service\DebugLogger;
 
 class UpgradeManager
 {
+    private DebugLogger $debugLogger;
     protected string $env;
     protected $em;
     protected $phpExecutable = 'php';
@@ -56,8 +59,10 @@ class UpgradeManager
     public function __construct(
         LoggerInterface $logger,
         KernelInterface $kernel,
-        EntityManagerInterface $entityManager
+        EntityManagerInterface $entityManager,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->logger = $logger;
         $this->kernel = $kernel;
         $this->entityManager = $entityManager;
@@ -72,6 +77,9 @@ class UpgradeManager
 
     public function processUpgrade($output): string
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['output' => $output]);
+        $__debugReturn = null;
+        try {
         try {
 
             $envFilePath = dirname(__DIR__, 2) . DIRECTORY_SEPARATOR . '.env';
@@ -138,7 +146,10 @@ class UpgradeManager
             $output->writeln('<error>'.$error.'</error>');
         }
 
-        return $this->message;
+        return $__debugReturn = $this->message;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -146,6 +157,8 @@ class UpgradeManager
      */
     protected function updateFiles()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         // Update Main if git_branch is empty otherwise we update the specific branch
         $command = (!empty($this->configParams['git_branch'])) ? ['git', 'pull', 'origin', $this->configParams['git_branch']] : ['git', 'pull'];
         $process = new Process($command);
@@ -178,11 +191,16 @@ class UpgradeManager
         ) {
             throw new Exception('Failed to update Myddleware. Files are not up-to-date.');
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Update vendors via composer
     protected function updateVendors()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         // Change the command composer if php isn't the default php version
         $process = new Process(['composer', 'install', '--ignore-platform-reqs']);
         $process->run();
@@ -190,11 +208,16 @@ class UpgradeManager
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Execute yarn action
     protected function yarnAction()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $process = new Process(['yarn',  'install']);
         $process->run();
         // executes after the command finishes
@@ -208,16 +231,24 @@ class UpgradeManager
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Clear boostrap cache
     protected function clearBoostrapCache()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $process = new Process(array($this->phpExecutable.' vendor/sensio/distribution-bundle/Sensio/Bundle/DistributionBundle/Resources/bin/build_bootstrap.php'));
         $process->run();
         // executes after the command finishes
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
@@ -226,6 +257,8 @@ class UpgradeManager
      */
     protected function updateDatabase()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         // Update schema
         $application = new Application($this->kernel);
         $application->setAutoExit(false);
@@ -265,15 +298,20 @@ class UpgradeManager
             $this->logger->info($content);
             $this->message .= $content.chr(10);
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
-    
-    
+
+
     /**
      * @throws Exception
      */
     protected function clearSymfonyCache()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $fs = new Filesystem();
         // Add current environment to the default list
         $this->defaultEnvironment[$this->env] = $this->env;
@@ -314,12 +352,17 @@ class UpgradeManager
                 $this->message .= "Cache cleared for environment: ".$env.chr(10);
             }
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
-    
+
 
     // Get the content of the table config
     protected function setConfigParam()
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
         $configRepository = $this->entityManager->getRepository(Config::class);
         $configs = $configRepository->findAll();
         if (!empty($configs)) {
@@ -327,15 +370,47 @@ class UpgradeManager
                 $this->configParams[$config->getName()] = $config->getvalue();
             }
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Function to customize the update process
     protected function beforeUpdate($output)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['output' => $output]);
+        try {
+        // Check for active relationships before upgrade
+        $activeRelationships = $this->entityManager
+            ->getRepository(RuleRelationShip::class)
+            ->createQueryBuilder('rr')
+            ->select('COUNT(rr.id)')
+            ->where('rr.deleted = :deleted')
+            ->setParameter('deleted', false)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        if ($activeRelationships > 0) {
+            throw new \Exception(sprintf(
+                'Impossible de procéder à l\'upgrade : %d relation(s) active(s) détectée(s) dans la table rulerelationship. ' .
+                'Veuillez supprimer ou désactiver toutes les relations avant de lancer l\'upgrade.',
+                $activeRelationships
+            ));
+        }
+
+        $output->writeln('<info>Vérification des relations : OK (aucune relation active)</info>');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     // Function to customize the update process
     protected function afterUpdate($output)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['output' => $output]);
+        try {
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 }

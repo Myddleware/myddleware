@@ -25,10 +25,12 @@
 
 namespace App\Repository;
 
-use App\Entity\Connector;
-use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query;
+use App\Entity\Solution;
+use App\Entity\Connector;
+use App\Service\DebugLogger;
 use Doctrine\Persistence\ManagerRegistry;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 
 /**
  * @method Connector|null find($id, $lockMode = null, $lockVersion = null)
@@ -38,59 +40,94 @@ use Doctrine\Persistence\ManagerRegistry;
  */
 class ConnectorRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, Connector::class);
+        $this->debugLogger = $debugLogger;
     }
 
-    // Liste des connecteurs pour un user et si les solutions sont actives
     public function findAllConnectorByUser($id, $type)
     {
-        $qb = $this->createQueryBuilder('c');
-        $qb->select('c.id as id_connector, c.name')
-         ->leftJoin('c.solution', 's')
-         ->where('c.createdBy = :user_id')
-         ->andWhere('s.'.$type.' = 1')
-         ->andWhere('s.active = 1')
-         ->setParameter('user_id', $id);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'type' => $type]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('c');
+            $qb->select('c.id as id_connector, c.name')
+             ->leftJoin('c.solution', 's')
+             ->where('c.createdBy = :user_id')
+             ->andWhere('s.'.$type.' = 1')
+             ->andWhere('s.active = 1')
+             ->setParameter('user_id', $id);
 
-        return $qb->getQuery()
-                  ->getResult();
+            return $__debugReturn = $qb->getQuery()
+                      ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
-    // Affiche la liste des connecteurs d'un user ou tout en fonction si c'est le support
     public function findListConnectorByUser($is_support, $id): Query
     {
-        $qb = $this->createQueryBuilder('c');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['is_support' => $is_support, 'id' => $id]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('c');
 
-        $qb->innerJoin('c.solution', 'sol')
-            ->addSelect('sol.name solution');
+            $qb->innerJoin('c.solution', 'sol')
+                ->addSelect('sol.name solution');
 
-        // Get all connector not deleted depending on the user is support or not
-        if (false === $is_support) {
-            $qb->where('c.createdBy = :user_id AND c.deleted = 0')
-               ->setParameter('user_id', $id);
-        } else {
-            $qb->where('c.deleted = 0');
+            if (false === $is_support) {
+                $qb->where('c.createdBy = :user_id AND c.deleted = 0')
+                   ->setParameter('user_id', $id);
+            } else {
+                $qb->where('c.deleted = 0');
+            }
+
+            $qb->orderBy('c.id', 'DESC');
+
+            return $__debugReturn = $qb->getQuery();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        $qb->orderBy('c.id', 'DESC');
-
-        return $qb->getQuery();
     }
-    
+
     public function existsActiveName(string $name, ?int $excludeId = null): bool
     {
-        $qb = $this->createQueryBuilder('c')
-            ->select('1')
-            ->where('LOWER(c.name) = LOWER(:name)')
-            ->andWhere('c.deleted = 0')
-            ->setMaxResults(1)
-            ->setParameter('name', trim($name));
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['name' => $name, 'excludeId' => $excludeId]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('c')
+                ->select('1')
+                ->where('LOWER(c.name) = LOWER(:name)')
+                ->andWhere('c.deleted = 0')
+                ->setMaxResults(1)
+                ->setParameter('name', trim($name));
 
-        if ($excludeId) {
-            $qb->andWhere('c.id != :id')->setParameter('id', $excludeId);
+            if ($excludeId) {
+                $qb->andWhere('c.id != :id')->setParameter('id', $excludeId);
+            }
+            return $__debugReturn = (bool) $qb->getQuery()->getOneOrNullResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-        return (bool) $qb->getQuery()->getOneOrNullResult();
+    }
+
+    public function findActiveBySolution(Solution $solution): array
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['solution' => $solution]);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this->createQueryBuilder('c')
+                ->andWhere('c.solution = :solution')
+                ->andWhere('c.deleted = 0')
+                ->setParameter('solution', $solution)
+                ->orderBy('c.name', 'ASC')
+                ->getQuery()
+                ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

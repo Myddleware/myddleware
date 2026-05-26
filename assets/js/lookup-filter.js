@@ -5,7 +5,7 @@ function fetchRuleNamesMapping() {
   // if rule_lookup_names is not defined, return a resolved Promise
   if (typeof rule_lookup_names === 'undefined') {
     // console.warn('rule_lookup_names is not defined');
-    return $.Deferred().resolve().promise(); // ✅ Prevents `.then()` crash
+    return $.Deferred().resolve().promise();
   }
 
   return $.ajax({

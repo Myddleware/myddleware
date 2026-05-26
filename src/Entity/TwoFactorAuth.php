@@ -42,7 +42,7 @@ class TwoFactorAuth
     private $id;
 
     /**
-     * @ORM\OneToOne(targetEntity=User::class)
+     * @ORM\OneToOne(targetEntity=User::class, inversedBy="twoFactorAuth")
      * @ORM\JoinColumn(nullable=false, onDelete="CASCADE")
      */
     private $user;

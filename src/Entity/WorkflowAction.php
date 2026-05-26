@@ -97,17 +97,17 @@ class WorkflowAction
 	/**
      * @ORM\Column(name="active", type="boolean", options={"default":1})
      */
-    private int $active;
+    private bool $active;
 
 	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private int $deleted;
+    private bool $deleted;
 
     /**
      * @ORM\Column(name="multipleRuns", type="boolean", options={"default":0})
      */
-    private int $multipleRuns;
+    private bool $multipleRuns;
 
     public function getId(): string
     {
@@ -248,7 +248,7 @@ class WorkflowAction
         return $this;
     }
 
-    public function getActive(): int
+    public function getActive(): bool
     {
         return $this->active;
     }
@@ -259,7 +259,7 @@ class WorkflowAction
         return $this;
     }
 
-    public function getDeleted(): int
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }
@@ -270,7 +270,7 @@ class WorkflowAction
         return $this;
     }
 
-    public function getMultipleRuns(): int
+    public function getMultipleRuns(): bool
     {
         return $this->multipleRuns;
     }

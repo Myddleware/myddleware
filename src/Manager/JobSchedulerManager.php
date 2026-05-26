@@ -25,6 +25,7 @@
 namespace App\Manager;
 
 use App\Repository\RuleRepository;
+use App\Service\DebugLogger;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Psr\Log\LoggerInterface;
@@ -36,22 +37,24 @@ class JobSchedulerManager
     protected array $jobList = ['cleardata', 'notification', 'rerunerror', 'synchro'];
     private LoggerInterface $logger;
     private RuleRepository $ruleRepository;
+    private DebugLogger $debugLogger;
 
     public function __construct(
         EntityManagerInterface $entityManager,
         RuleRepository $ruleRepository,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        DebugLogger $debugLogger
     ) {
         $this->entityManager = $entityManager;
         $this->ruleRepository = $ruleRepository;
         $this->logger = $logger;
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @throws Exception
-     */
     public function getJobsParams(): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
         try {
             $list = [];
             if (!empty($this->jobList)) {
@@ -90,22 +93,30 @@ class JobSchedulerManager
                 }
             }
 
-            return $list;
+            return $__debugReturn = $list;
         } catch (Exception $e) {
             throw new Exception('Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     private function getAllActiveRules(): array
     {
-        $rules['ALL'] = 'All active rules';
-        $activeRules = $this->ruleRepository->findActiveRules();
-        if (!empty($activeRules)) {
-            foreach ($activeRules as $activeRule) {
-                $rules[$activeRule['id']] = $activeRule['name'];
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $rules['ALL'] = 'All active rules';
+            $activeRules = $this->ruleRepository->findActiveRules();
+            if (!empty($activeRules)) {
+                foreach ($activeRules as $activeRule) {
+                    $rules[$activeRule['id']] = $activeRule['name'];
+                }
             }
-        }
 
-        return $rules;
+            return $__debugReturn = $rules;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

@@ -84,7 +84,9 @@ class zuora extends solution
             }
 
             $this->instance->setLocation($domain.'apps/services/a/'.$this->version);
+            $this->logDebug('zuora login request', ['domain' => $domain]);
             $this->instance->login($this->paramConnexion['login'], $this->paramConnexion['password']);
+            $this->logDebug('zuora login response');
 
             $this->connexion_valide = true;
         } catch (\Exception $e) {
@@ -209,9 +211,13 @@ class zuora extends solution
                 ) {
                     // Manage calls create and update
                     if ('create' == $action) {
+                        $this->logDebug('zuora create request', ['module' => $param['module']]);
                         $resultCall = $this->instance->create($zObjects);
+                        $this->logDebug('zuora create response');
                     } else {
+                        $this->logDebug('zuora update request', ['module' => $param['module']]);
                         $resultCall = $this->instance->update($zObjects);
+                        $this->logDebug('zuora update response');
                     }
                     // General error
                     if (empty($resultCall)) {
@@ -286,7 +292,9 @@ class zuora extends solution
                     $amendment->$key = $value;
                 }
                 // Amend the souscription
+                $this->logDebug('zuora amend request', ['module' => $param['module']]);
                 $resultCall = $this->instance->amend($amendment, null, null);
+                $this->logDebug('zuora amend response');
                 // Manage results
                 if (!empty($resultCall->results->Errors)) {
                     $result[$idDoc] = [
@@ -401,7 +409,9 @@ class zuora extends solution
                 $zSContact = new \Zuora_Contact();
                 $zPaymentMethod = new \Zuora_PaymentMethod();
                 try {
+                    $this->logDebug('zuora subscribe request');
                     $resultCall = $this->instance->subscribe($zAccount, $zSubscriptionData, $zSContact, $zPaymentMethod, $zSubscribeOptions);
+                    $this->logDebug('zuora subscribe response');
                 } catch (\Exception $e) {
                     $result[$idDoc] = [
                         'id' => '-1',
@@ -518,7 +528,9 @@ class zuora extends solution
         $totalStart = time();
 
         $start = time();
+        $this->logDebug('zuora query request', ['query' => $query]);
         $result = $this->instance->query($query);
+        $this->logDebug('zuora query response', ['size' => $result->result->size]);
 
         $end = time();
         $elapsed = $end - $start;
@@ -536,7 +548,9 @@ class zuora extends solution
             $recordsArray = array_merge($recordsArray, $newRecords);
             while (!$done && $locator && 0 == $moreCount) {
                 $start = time();
+                $this->logDebug('zuora queryMore request', ['locator' => $locator]);
                 $result = $this->instance->queryMore($locator);
+                $this->logDebug('zuora queryMore response');
                 $end = time();
                 $elapsed = $end - $start;
 

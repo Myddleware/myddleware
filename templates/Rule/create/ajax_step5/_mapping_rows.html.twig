@@ -1,0 +1,36 @@
+{# templates/Rule/create/ajax_step5/_mapping_rows.html.twig #}
+{% for fieldName, props in requiredFields %}
+    {% set rowId = 'row-auto-' ~ random() %}
+    
+    <tr data-row-id="{{ rowId }}">
+        <td>
+            <select class="rule-mapping-target js-select-search-locked">
+                <option value="{{ fieldName }}" selected>{{ fieldName }} *</option>
+            </select>
+        </td>
+        <td>
+            <div class="mapping-src-wrapper">
+                <select class="rule-mapping-source-picker js-select-search-source">
+                    <option value="">{{ 'Select source...'|trans }}</option>
+                    {% for srcKey, srcLabel in sourceFields %}
+                        <option value="{{ srcKey }}">{{ srcKey }}</option>
+                    {% endfor %}
+                </select>
+                <div class="mapping-src-badges pt-1"></div>
+            </div>
+        </td>
+        <td class="d-flex align-items-center">
+            <div class="formula-slot is-empty">...</div>
+            <button type="button" class="btn btn-sm ms-2 rule-mapping-formula" 
+                    data-bs-toggle="modal" data-bs-target="#mapping-formula">
+                <i class="fa fa-code"></i>
+            </button>
+            <input type="hidden" class="rule-mapping-formula-input" name="mapping_formula[]" id="formula-input-{{ rowId }}">
+        </td>
+        <td class="text-start">
+            <button type="button" class="btn btn-sm text-danger mt-2 rule-mapping-delete">
+                <i class="fa-solid fa-trash"></i>
+            </button>
+        </td>
+    </tr>
+{% endfor %}

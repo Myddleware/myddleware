@@ -21,36 +21,31 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/ #} 
+<div class="modern-connector-layout view-create-page">
+    <div class="connector-card"> 
+        <div class="connector-left" id="source"> 
+            <select id="soluce_source" class="liste_solution">
+                {{ solutions | raw }}
+            </select>
+            <div class="logo-wrapper">
+                <div class="picture"></div> 
+            </div>
+            <div id="source_status" style="display:none;"><img src=""></div>
+            <div id="source_msg" style="display:none;"><span></span></div>
+            <div class="help"></div> 
+            <div class="champs"></div>
+        </div>
 
-<!-- create -->
-<div class="container mt-4">
-	<div class="row justify-content-center">
-		<div>
-			<div id="source" class="row justify-content-center">
-				<select id="soluce_source" class="liste_solution form-select col ">
-					{{solutions | raw }}
-				</select>
-				<div class="picture col"></div>	
-				<div class="help col"></div>
-				<div class="champs"></div>
-			</div>
-		</div>
-	</div>
+        <div class="connector-right">
+            <div></div> 
+            <div id="msg_status" class="alert alert-danger" style="display:none; margin-top:15px;">
+                <i class="fa fa-exclamation-circle"></i> <span class="error"></span>
+            </div>
+        </div>
+    </div>
 </div>
-
-<div class="clr"></div>
-<div id="step_modules">
-		<div id="msg_status" class="alert alert-danger" role="alert">
-			<i class="fa fa-exclamation" aria-hidden="true"></i>
-			{{'error.connexion'|trans}} : <span class="error"></span>
-		</div>
-
-</div>
-
 {% block base_js %}
-	{# ------------- PARAMETRES JQUERY ------------- #}
-	<script type="text/javascript">
-		var path_link_fr = "{{'view_connector.help.link'|trans}}";
-	</script>
-	{# ------------- PARAMETRES JQUERY ------------- #}
+    <script type="text/javascript">
+        var path_link_fr = "{{'view_connector.help.link'|trans}}";
+    </script>
 {% endblock base_js %}

@@ -26,42 +26,49 @@ along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 namespace App\Repository;
 
 use App\Entity\JobScheduler;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 class JobSchedulerRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, JobScheduler::class);
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @return JobScheduler[]
-     */
     public function findJobsToRun(): array
     {
-        $qb = $this->createQueryBuilder('j');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('j');
 
-        $qb
-            ->select('j')
-            ->addSelect('(CASE 
-                 WHEN rule_order.order IS NOT NULL
-                 THEN rule_order.order
-                 ELSE j.jobOrder
-            END) AS HIDDEN jobOrder')
-            ->where($qb->expr()->orX(
-                'j.lastRun IS NULL',
-                $qb->expr()->andX(
-                    'j.lastRun IS NOT NULL',
-                    'TIMESTAMPDIFF(MINUTE,j.lastRun,UTC_TIMESTAMP()) >= j.period'
-                )
-            ))
-            ->andWhere('j.active = 1')
-            ->leftJoin('App\Entity\RuleOrder', 'rule_order', Join::WITH, 'j.paramValue1 = rule_order.rule AND j.command = :command')
-            ->setParameter('command', 'synchro');
+            $qb
+                ->select('j')
+                ->addSelect('(CASE
+                     WHEN rule_order.order IS NOT NULL
+                     THEN rule_order.order
+                     ELSE j.jobOrder
+                END) AS HIDDEN jobOrder')
+                ->where($qb->expr()->orX(
+                    'j.lastRun IS NULL',
+                    $qb->expr()->andX(
+                        'j.lastRun IS NOT NULL',
+                        'TIMESTAMPDIFF(MINUTE,j.lastRun,UTC_TIMESTAMP()) >= j.period'
+                    )
+                ))
+                ->andWhere('j.active = 1')
+                ->leftJoin('App\Entity\RuleOrder', 'rule_order', Join::WITH, 'j.paramValue1 = rule_order.rule AND j.command = :command')
+                ->setParameter('command', 'synchro');
 
-        return $qb->getQuery()->getResult();
+            return $__debugReturn = $qb->getQuery()->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

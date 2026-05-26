@@ -120,26 +120,14 @@
 												</td>
 											</tr>
 										{% endfor %}
-										<tr class="invisibele-row-bottom">
-											<th class="rounded-table-down-left">{{'list_connector.th.name'|trans}}</th>
-											<th>{{'list_connector.th.date_created'|trans}}</th>
-											<th class="rounded-table-down-right">{{'list_connector.th.option'|trans}}</th>
-										</tr>
 									</tbody>
 								{% endif %}
 							</table>
 						</div>
 					</div>
 				</div>
-				<div class="d-flex justify-content-center">
-					{% if pager.haveToPaginate %}
-						{{ pagerfanta(pager, 'twitter_bootstrap4', {
-							'routeName': 'regle_connector_page',
-							'proximity': 2,
-							'prev_message': 'pagination.previous'|trans,
-							'next_message': 'pagination.next'|trans
-						})|raw }}
-					{% endif %}
+				<div class="d-flex justify-content-center mt-4">
+					{% include '_pagination.html.twig' with {pager: pager, route: 'regle_connector_page'} %}
 				</div>
 			{% else %}
 				<div class="d-grid justify-content-center pt-4">

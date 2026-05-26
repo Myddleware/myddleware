@@ -84,6 +84,7 @@ class solution
     protected RuleRelationShipRepository $ruleRelationshipsRepository;
     protected FormulaManager $formulaManager;
 	protected ?ToolsManager $tools;
+    protected ?bool $debugMode = null;
     protected array $ignoreQuotesOnQuery = ['bigint', 'numeric', 'bit', 'smallint', 'decimal', 'smallmoney', 'int', 'tinyint', 'money', 'float', 'real'];
 
     public function __construct(
@@ -147,6 +148,27 @@ class solution
     protected function getConn(): Connection
     {
         return $this->connection;
+    }
+
+    protected function isDebugMode(): bool
+    {
+        if ($this->debugMode === null) {
+            try {
+                $stmt = $this->connection->prepare("SELECT value FROM config WHERE name = 'debug_mode'");
+                $result = $stmt->executeQuery()->fetchAssociative();
+                $this->debugMode = $result ? ($result['value'] === '1') : false;
+            } catch (\Exception $e) {
+                $this->debugMode = false;
+            }
+        }
+        return $this->debugMode;
+    }
+
+    protected function logDebug(string $message, array $context = []): void
+    {
+        if ($this->isDebugMode()) {
+            $this->logger->debug($message, $context);
+        }
     }
 	
 	protected function setDocumentManager()

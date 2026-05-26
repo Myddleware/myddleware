@@ -85,7 +85,7 @@ class RuleGroup
 	/**
      * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
-    private int $deleted;
+    private bool $deleted;
 
     /**
      * @var Collection<int, Rule>
@@ -212,7 +212,7 @@ class RuleGroup
         return $this;
     }
 
-    public function getDeleted(): int
+    public function getDeleted(): bool
     {
         return $this->deleted;
     }

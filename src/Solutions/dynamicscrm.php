@@ -88,6 +88,7 @@ class dynamicscrm extends solution
             $tokenUrl = "https://login.microsoftonline.com/{$tenantId}/oauth2/v2.0/token";
 
             $client = $this->getApiClient();
+            $this->logDebug('dynamicscrm login request', ['url' => $tokenUrl, 'method' => 'POST']);
             $response = $client->post($tokenUrl, [
                 'form_params' => [
                     'grant_type' => 'client_credentials',
@@ -98,6 +99,7 @@ class dynamicscrm extends solution
             ]);
 
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm login response', ['status' => $response->getStatusCode()]);
 
             if (isset($data['access_token'])) {
                 $this->token = $data['access_token'];
@@ -194,8 +196,10 @@ class dynamicscrm extends solution
 
             $client = $this->getApiClient();
             $headers = $this->getApiHeaders();
+            $this->logDebug('dynamicscrm get_module_fields request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm get_module_fields response', ['status' => $response->getStatusCode(), 'field_count' => isset($data['value']) ? count($data['value']) : 0]);
 
             $fields = [];
 
@@ -292,8 +296,10 @@ class dynamicscrm extends solution
             $url = $this->getBaseApiUrl() . "EntityDefinitions(LogicalName='{$logicalName}')?". '$select=EntitySetName';
             $client = $this->getApiClient();
             $headers = $this->getApiHeaders();
+            $this->logDebug('dynamicscrm getEntitySetName request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm getEntitySetName response', ['status' => $response->getStatusCode(), 'entitySetName' => $data['EntitySetName'] ?? null]);
 
             return $data['EntitySetName'] ?? $logicalName . 's';
         } catch (\Exception $e) {
@@ -314,8 +320,10 @@ class dynamicscrm extends solution
             $url = $this->getBaseApiUrl() . "EntityDefinitions(LogicalName='{$logicalName}')?". '$select=PrimaryIdAttribute';
             $client = $this->getApiClient();
             $headers = $this->getApiHeaders();
+            $this->logDebug('dynamicscrm getPrimaryIdAttribute request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm getPrimaryIdAttribute response', ['status' => $response->getStatusCode(), 'primaryIdAttribute' => $data['PrimaryIdAttribute'] ?? null]);
 
             return $data['PrimaryIdAttribute'] ?? $logicalName . 'id';
         } catch (\Exception $e) {
@@ -371,8 +379,10 @@ class dynamicscrm extends solution
         $url .= (strpos($url, '?') !== false ? '&' : '?') . '$orderby=modifiedon%20asc';
 
         try {
+            $this->logDebug('dynamicscrm read request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm read response', ['status' => $response->getStatusCode(), 'record_count' => isset($data['value']) ? count($data['value']) : 0]);
 
             if (!isset($data['value']) || !is_array($data['value'])) {
                 $this->logger->error("Invalid response format: missing or invalid 'value' array");
@@ -465,12 +475,14 @@ class dynamicscrm extends solution
 
             $url = $this->getBaseApiUrl() . $entitySetName;
 
+            $this->logDebug('dynamicscrm create request', ['url' => $url, 'method' => 'POST']);
             $response = $client->post($url, [
                 'headers' => $headers,
                 'json' => $record
             ]);
 
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm create response', ['status' => $response->getStatusCode(), 'id' => $data[$primaryIdAttribute] ?? null]);
 
             if (!isset($data[$primaryIdAttribute])) {
                 throw new \Exception('No ID returned from API response');
@@ -522,20 +534,23 @@ class dynamicscrm extends solution
 
             $url = $this->getBaseApiUrl() . "{$entitySetName}({$targetId})";
 
-            // Get current record for ETag (optimistic concurrency)
+            $this->logDebug('dynamicscrm update GET request', ['url' => $url, 'method' => 'GET']);
             $getResponse = $client->get($url, ['headers' => $this->getApiHeaders()]);
             $etag = $getResponse->getHeader('ETag')[0] ?? null;
+            $this->logDebug('dynamicscrm update GET response', ['status' => $getResponse->getStatusCode(), 'etag' => $etag]);
 
             if ($etag) {
                 $headers['If-Match'] = $etag;
             }
 
+            $this->logDebug('dynamicscrm update PATCH request', ['url' => $url, 'method' => 'PATCH']);
             $response = $client->patch($url, [
                 'headers' => $headers,
                 'json' => $data
             ]);
 
             $responseData = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm update PATCH response', ['status' => $response->getStatusCode()]);
 
             if (!isset($responseData[$primaryIdAttribute])) {
                 return $targetId;
@@ -579,9 +594,11 @@ class dynamicscrm extends solution
 
             $url = $this->getBaseApiUrl() . "{$entitySetName}({$targetId})";
 
+            $this->logDebug('dynamicscrm delete request', ['url' => $url, 'method' => 'DELETE']);
             $response = $client->delete($url, [
                 'headers' => $headers
             ]);
+            $this->logDebug('dynamicscrm delete response', ['status' => $response->getStatusCode()]);
 
             if ($response->getStatusCode() === 204) {
                 return $targetId;
@@ -624,8 +641,10 @@ class dynamicscrm extends solution
             // Get entity definitions with select for efficiency
             $url = $this->getBaseApiUrl() . 'EntityDefinitions?$select=LogicalName,DisplayName,IsValidForAdvancedFind';
 
+            $this->logDebug('dynamicscrm get_modules request', ['url' => $url, 'method' => 'GET']);
             $response = $client->get($url, ['headers' => $headers]);
             $data = json_decode($response->getBody(), true);
+            $this->logDebug('dynamicscrm get_modules response', ['status' => $response->getStatusCode(), 'entity_count' => isset($data['value']) ? count($data['value']) : 0]);
 
             $entities = [];
 

@@ -61,15 +61,13 @@ class AccountManager {
     
     // API endpoints with dynamic base URL
     this.apiEndpoints = {
-      getUserInfo: `${this.baseUrl}/rule/api/account/info`,
-      updateProfile: `${this.baseUrl}/rule/api/account/profile/update`,
-      updatePassword: `${this.baseUrl}/rule/api/account/password/update`,
-      updateTwoFactor: `${this.baseUrl}/rule/api/account/twofactor/update`,
-      changeLocale: `${this.baseUrl}/rule/api/account/locale`,
-      downloadLogs: `${this.baseUrl}/rule/api/account/logs/download`,
-      emptyLogs: `${this.baseUrl}/rule/api/account/logs/empty`,
-      getConfig: `${this.baseUrl}/rule/api/account/config`,
-      updateConfig: `${this.baseUrl}/rule/api/account/config/update`
+      getUserInfo: `${this.baseUrl}/account/api/account/info`,
+      updateProfile: `${this.baseUrl}/account/api/account/profile/update`,
+      updatePassword: `${this.baseUrl}/account/api/account/password/update`,
+      updateTwoFactor: `${this.baseUrl}/account/api/account/twofactor/update`,
+      changeLocale: `${this.baseUrl}/account/api/account/locale`,
+      getConfig: `${this.baseUrl}/account/api/account/config`,
+      updateConfig: `${this.baseUrl}/account/api/account/config/update`
     };
     
     // Log all endpoints for debugging
@@ -190,27 +188,6 @@ class AccountManager {
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
           </form>
             
-          <!-- Log Management -->
-          <h3>${t.sections.logs}</h3>
-          <div class="row-logs">
-            <div class="form-group">
-              <label>${t.buttons.download_logs}</label>
-              <div>
-                <button id="download-logs" class="btn-log btn-download">
-                  <i class="fas fa-download me-2"></i>${t.buttons.download_logs}
-                </button>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>${t.buttons.empty_logs}</label>
-              <div>
-                <button id="empty-logs" class="btn-log btn-delete">
-                  <i class="fas fa-trash-alt me-2"></i>${t.buttons.empty_logs}
-                </button>
-              </div>
-            </div>
-          </div>
           
         </div>
         
@@ -299,21 +276,6 @@ class AccountManager {
             <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
           </form>
 
-          <!-- Table Settings -->
-          <h3>${t.sections.table_settings || 'Table settings'}</h3>
-          <form id="table-settings-form" class="account-form">
-            <div class="form-group">
-              <label for="rows-per-page">${t.fields.rows_per_page || 'Rows per page'}</label>
-              <input type="number" id="rows-per-page" name="rows-per-page" class="form-control" min="1" />
-            </div>
-
-            <div class="form-group">
-              <label for="maximum-results">${t.fields.maximum_results || 'Maximum results'}</label>
-              <input type="number" id="maximum-results" name="maximum-results" class="form-control" min="1" />
-            </div>
-
-            <button type="submit" class="btn btn-primary mt-2">${t.buttons.save}</button>
-          </form>
         </div>
       </div>
     `;
@@ -394,13 +356,6 @@ class AccountManager {
         if (twofaToggle) twofaToggle.disabled = true;
       }
       
-      const emptyLogsBtn = document.getElementById('empty-logs');
-      // console.log('emptyLogsBtn 1 in account.js in assets/js', emptyLogsBtn);
-      if (emptyLogsBtn) {
-        // console.log('emptyLogsBtn 2 in account.js in assets/js', emptyLogsBtn);
-        emptyLogsBtn.style.display = this.user.roles?.includes('ROLE_SUPER_ADMIN') ? 'block' : 'none';
-        // console.log('emptyLogsBtn 3 in account.js in assets/js', emptyLogsBtn);
-      }
       
     } catch (error) {
       console.error("Failed to load user data:", {
@@ -651,32 +606,6 @@ class AccountManager {
       this.updateTableSettings();
     });
     
-    // Download logs button
-    const downloadLogsBtn = document.getElementById('download-logs');
-    if (downloadLogsBtn) {
-      // console.log('Adding click event listener to download logs button');
-      downloadLogsBtn.addEventListener('click', () => {
-        // console.log('Download logs button clicked, redirecting to:', this.apiEndpoints.downloadLogs);
-        window.location.href = this.apiEndpoints.downloadLogs;
-      });
-    }
-    
-    document.getElementById('empty-logs')?.addEventListener('click', () => {
-      // Use ThreeModal library instead of browser confirm dialog
-      ThreeModal.showConfirmation({
-        message: this.user.translations.account.messages.confirm_empty_logs,
-        confirmText: this.user.translations.account.buttons.empty_logs,
-        cancelText: 'Cancel',
-        confirmIcon: 'fa-trash-alt',
-        cancelIcon: 'fa-times',
-        confirmColor: '#dc3545',
-        themeColor: 0xdc3545,
-        onConfirm: () => {
-          // Empty the logs when user confirms
-          this.emptyLogs();
-        }
-      });
-    });
     
     // 2FA toggle
     const twofaToggle = document.getElementById('twofa-enabled');
@@ -896,21 +825,6 @@ class AccountManager {
     }
   }
   
-  /**
-   * Empty logs
-   */
-  async emptyLogs() {
-    try {
-      console.log('emptying logs in account.js in assets/js');
-      const response = await axios.post(this.apiEndpoints.emptyLogs);
-      this.showSuccessMessage('Logs emptied successfully');
-      console.log('response in account.js in assets/js', response); 
-    } catch (error) {
-      console.log('error in account.js in assets/js', error);
-      this.showErrorMessage('Failed to empty logs');
-      console.error('Failed to empty logs:', error);
-    }
-  }
   
   /**
    * Show success message

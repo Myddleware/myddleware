@@ -27,15 +27,14 @@ namespace App\Controller;
 
 use Exception;
 use Doctrine\DBAL\Connection;
+use App\Service\DebugLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-/**
- * @Route("/premium")
- */
+#[Route('/premium')]
 class PremiumController extends AbstractController
 {
 
@@ -43,12 +42,21 @@ class PremiumController extends AbstractController
     protected Connection $connection;
     // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
+    private DebugLogger $debugLogger;
 
     public function __construct(
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
     }
 
-    protected function getInstanceBdd() {}
+    protected function getInstanceBdd() {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
+    }
 
 
 
@@ -60,20 +68,22 @@ class PremiumController extends AbstractController
     #[Route('/list', name: 'premium_list', defaults: ['page' => 1])]
     public function PremiumListAction(Request $request, int $page = 1)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page]);
+        $__debugReturn = null;
         try {
             // Si ce n'est pas une requête AJAX, rendre la page complète
-            return $this->render(
-                'Premium/list.html.twig',
-                [
-                    'isPremium' => true,
-                ]
-            );
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
+            try {
+                return $__debugReturn = $this->render(
+                    'Premium/list.html.twig',
+                    [
+                        'isPremium' => true,
+                    ]
+                );
+            } catch (Exception $e) {
+                throw $this->createNotFoundException('Erreur : ' . $e->getMessage());
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
-
-
-
-
 }
