@@ -92,13 +92,7 @@ class RulePersistenceService
             $bidirectionalId, $duplicateField, $description
         ) {
             // A. Gestion de la table 'rule'
-            $existingDateReference = false;
             if ($isEdit) {
-                $existingDateReference = $conn->fetchOne(
-                    'SELECT value FROM ruleparam WHERE rule_id = ? AND name = ?',
-                    [$ruleId, 'datereference']
-                );
-
                 $conn->update('rule', [
                     'conn_id_source'  => $srcConnectorId,
                     'conn_id_target'  => $tgtConnectorId,
@@ -175,8 +169,7 @@ class RulePersistenceService
 
             // D. Insertion des paramètres par défaut
             $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit',         'value' => '100']);
-            $dateReferenceValue = ($isEdit && $existingDateReference !== false) ? $existingDateReference : $midnight;
-            $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference', 'value' => $dateReferenceValue]);
+            $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference', 'value' => $midnight]);
             $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'mode',          'value' => (string)$syncMode]);
 
             // Insertion du champ duplicate_fields si défini
@@ -223,7 +216,7 @@ class RulePersistenceService
             $auditPayload = [
                 'ruleName'      => $nameSlug,
                 'limit'         => '100',
-                'datereference' => $dateReferenceValue,
+                'datereference' => $midnight,
                 'content'       => [
                     'fields' => ['name' => $contentFields['name']],
                     'params' => ['mode' => (int)$syncMode],
