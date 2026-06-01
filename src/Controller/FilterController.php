@@ -398,7 +398,9 @@ public function removeFilter(Request $request): JsonResponse
 
         // get the id of every document that will be return in the search results, and put them in a string where they are separated by a comma
         $csvdocumentids = '';
-        $nbDocuments = count($documents);
+        // Use the pager's total result count (full search result set) rather than
+        // count($documents), which only reflects the documents on the current page.
+        $nbDocuments = $compact['nb'];
         foreach ($documents as $document) {
             $csvdocumentids .= $document['id'].',';
         }
