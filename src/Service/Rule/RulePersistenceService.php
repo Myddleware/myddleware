@@ -100,14 +100,27 @@ class RulePersistenceService
             }
         }
 
+        $submittedKeys = array_keys($data);
+
         $this->connection->transactional(function (Connection $conn) use (
             $ruleId, $nowStr, $midnight, $userId, $name, $nameSlug,
             $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule,
             $rawFields, $rawFormulas, $filters, $syncMode, $isEdit,
-            $bidirectionalId, $duplicateField, $description, $dynamicParams
+            $bidirectionalId, $duplicateField, $description, $dynamicParams, $submittedKeys
         ) {
             // A. Gestion de la table 'rule'
+            $existingParams = [];
+            $existingDateReference = false;
             if ($isEdit) {
+                $rows = $conn->fetchAllAssociative(
+                    'SELECT name, value FROM ruleparam WHERE rule_id = ?',
+                    [$ruleId]
+                );
+                foreach ($rows as $row) {
+                    $existingParams[$row['name']] = $row['value'];
+                }
+                $existingDateReference = $existingParams['datereference'] ?? false;
+
                 $conn->update('rule', [
                     'conn_id_source'  => $srcConnectorId,
                     'conn_id_target'  => $tgtConnectorId,
@@ -211,7 +224,7 @@ class RulePersistenceService
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit', 'value' => '100']);
             }
             if (!$hasDateRef) {
-                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference', 'value' => $midnight]);
+                $dateReferenceValue = ($isEdit && $existingDateReference !== false) ? $existingDateReference : $midnight;
             }
 
             $conn->delete('ruleparam', ['name' => 'bidirectional', 'value' => $ruleId]);
