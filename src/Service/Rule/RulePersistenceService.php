@@ -221,10 +221,29 @@ class RulePersistenceService
             }
 
             if (!$hasLimit) {
-                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit', 'value' => '100']);
+                $limitValue = ($isEdit && isset($existingParams['limit'])) ? $existingParams['limit'] : '100';
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit', 'value' => $limitValue]);
             }
             if (!$hasDateRef) {
                 $dateReferenceValue = ($isEdit && $existingDateReference !== false) ? $existingDateReference : $midnight;
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference', 'value' => $dateReferenceValue]);
+            }
+
+            if ($isEdit) {
+                $managedNames = array_merge(
+                    ['mode', 'duplicate_fields', 'description', 'limit', 'datereference', 'bidirectional'],
+                    array_keys($dynamicParams),
+                    $submittedKeys
+                );
+                foreach ($existingParams as $paramName => $paramValue) {
+                    if (!in_array($paramName, $managedNames, true)) {
+                        $conn->insert('ruleparam', [
+                            'rule_id' => $ruleId,
+                            'name'    => $paramName,
+                            'value'   => $paramValue,
+                        ]);
+                    }
+                }
             }
 
             $conn->delete('ruleparam', ['name' => 'bidirectional', 'value' => $ruleId]);
