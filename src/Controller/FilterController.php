@@ -1148,6 +1148,10 @@ public function removeFilter(Request $request): JsonResponse
 
         $totalCount = $countStmt->executeQuery()->fetchAssociative()['total'];
 
+        if (!empty($limit) && (int) $totalCount > (int) $limit) {
+            $totalCount = (int) $limit;
+        }
+
         // Return results with metadata
         return $__debugReturn = [
             'results' => $results,
