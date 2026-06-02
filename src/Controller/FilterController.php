@@ -326,6 +326,7 @@ public function removeFilter(Request $request): JsonResponse
 
                 $filterMap = self::FILTER_MAP;
 
+                $this->sessionService->removeAllFluxFilters();
                 foreach ($filterMap as $dataKey => $filterName) {
                     if (!empty($data[$dataKey])) {
                         $this->sessionService->{'set'.$filterName}($data[$dataKey]);
