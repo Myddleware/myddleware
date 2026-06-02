@@ -329,10 +329,8 @@ public function removeFilter(Request $request): JsonResponse
                 foreach ($filterMap as $dataKey => $filterName) {
                     if (!empty($data[$dataKey])) {
                         $this->sessionService->{'set'.$filterName}($data[$dataKey]);
-                    } elseif ($dataKey !== 'customWhere') {
-                        $this->sessionService->{'remove'.$filterName}();
                     }
-                } 
+                }
                 $page = 1;
             } else { // if form is not valid
                     $data = $this->getFluxFilterData();
@@ -351,10 +349,18 @@ public function removeFilter(Request $request): JsonResponse
                     $data['source_id'] = $request->query->get('source_id');
                 }
                 $searchParameters = $this->prepareSearch($data, $page, $limit);
-                $documents = $searchParameters['documents'];
                 $totalCount = $searchParameters['total'];
-                $page = $searchParameters['page'];
                 $limit = $searchParameters['limit'];
+
+                $perPage = (int) ($this->params['pager'] ?? 25);
+                $lastPage = max(1, (int) ceil($totalCount / $perPage));
+                if ($page > $lastPage) {
+                    $page = $lastPage;
+                    $searchParameters = $this->prepareSearch($data, $page, $limit);
+                }
+
+                $documents = $searchParameters['documents'];
+                $page = $searchParameters['page'];
 
                 // Pre-generate URLs before pagination (avoids 2000+ path() calls in Twig)
                 $documents = $this->addDocumentUrls($documents);
@@ -1072,28 +1078,15 @@ public function removeFilter(Request $request): JsonResponse
         // Run the query and get the results
         $results = $stmt->executeQuery()->fetchAllAssociative();
 
-        // Get total count for pagination (without LIMIT/OFFSET)
-        // Optimize count query: avoid joins when not needed
-        $needsRuleJoin = !empty($data['rule'])
-                      || !empty($data['customWhere']['rule'])
-                      || !empty($data['module_source'])
-                      || !empty($data['customWhere']['module_source'])
-                      || !empty($data['module_target'])
-                      || !empty($data['customWhere']['module_target']);
-
-        // For simple queries with no filters, use a faster count without joins
-        if (empty($where) && empty($join)) {
-            $countQuery = "SELECT COUNT(*) as total FROM document WHERE deleted = 0";
-        } else {
-            $countQuery = "
-                SELECT COUNT(" . ($join ? "DISTINCT document.id" : "*") . ") as total
-                FROM document "
-                    . ($needsRuleJoin ? "INNER JOIN rule ON document.rule_id = rule.id" : "")
-                    . $join .
-                " WHERE
-                        document.deleted = 0 "
-                        .$where;
-        }
+        $countQuery = "
+            SELECT COUNT(" . ($join ? "DISTINCT document.id" : "*") . ") as total
+            FROM document
+                INNER JOIN rule
+                    ON document.rule_id = rule.id "
+                . $join .
+            " WHERE
+                    document.deleted = 0 "
+                    .$where;
 
         $countStmt = $this->entityManager->getConnection()->prepare($countQuery);
 
@@ -1277,6 +1270,7 @@ public function removeFilter(Request $request): JsonResponse
             }
         }
 
+        $compact['pager']->setNormalizeOutOfRangePages(true);
         $compact['pager']->setMaxPerPage(intval($params['maxPerPage']));
 
         try {

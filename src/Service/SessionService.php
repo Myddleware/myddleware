@@ -992,6 +992,14 @@ class SessionService
         return $customWhere;
     }
 
+    public function removeFluxFilterWhere()
+    {
+        $myddlewareSession = $this->getMyddlewareSession();
+        unset($myddlewareSession['flux_filter']['customWhere']);
+
+        $this->getSession()->set(self::MYDDLEWARE_SESSION_INDEX, $myddlewareSession);
+    }
+
     public function setFluxFilterRuleName($ruleName)
     {
         $myddlewareSession = $this->getMyddlewareSession();
