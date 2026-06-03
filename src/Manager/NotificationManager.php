@@ -115,7 +115,6 @@ class NotificationManager
             try {
 
                 $this->sendAlertTaskTooLong();
-                // $this->sendAlertLimitReached();
 
                 return $__debugReturn = true;
 

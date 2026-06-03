@@ -21,12 +21,10 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 use App\Service\DebugLogger;
-/**
- * @Route("/api", name="api_")
- */
+#[Route('/api', name: 'api_')]
 class ApiController extends AbstractController
 {
     private DebugLogger $debugLogger;
@@ -72,9 +70,7 @@ class ApiController extends AbstractController
         $this->entityManager = $entityManager;
     }
 
-    /**
-     * @Route("/synchro", name="synchro", methods={"POST"})
-     */
+    #[Route('/synchro', name: 'synchro', methods: ['POST'])]
     public function synchroAction(Request $request): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -139,9 +135,7 @@ class ApiController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/read_record", name="read_record", methods={"POST"})
-     */
+    #[Route('/read_record', name: 'read_record', methods: ['POST'])]
     public function readRecordAction(Request $request): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -216,9 +210,7 @@ class ApiController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/delete_record", name="delete_record", methods={"POST"})
-     */
+    #[Route('/delete_record', name: 'delete_record', methods: ['POST'])]
     public function deleteRecordAction(Request $request): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -292,9 +284,7 @@ class ApiController extends AbstractController
             if (!empty($document->error)) {
                 throw new Exception('Error during data transfer creation (rule '.$data['rule'].')  : '.$document->error.'. ');
             }
-            // $connection->commit(); // -- COMMIT TRANSACTION
         } catch (Exception $e) {
-            // $connection->rollBack(); // -- ROLLBACK TRANSACTION
             $this->logger->error($e->getMessage());
             $return['error'] .= $e->getMessage();
             // Stop the process if document hasn't been created
@@ -319,7 +309,6 @@ class ApiController extends AbstractController
 
         // Close job if it has been created
         try {
-            // $connection->beginTransaction(); // -- BEGIN TRANSACTION
             if (true === $this->jobManager->createdJob) {
                 $this->jobManager->closeJob();
             }
@@ -344,9 +333,7 @@ class ApiController extends AbstractController
     }
 
 
-    /**
-     * @Route("/mass_action", name="mass_action", methods={"POST"})
-     */
+    #[Route('/mass_action', name: 'mass_action', methods: ['POST'])]
     public function massActionAction(Request $request): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -421,9 +408,7 @@ class ApiController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/rerun_error", name="rerun_error", methods={"POST"})
-     */
+    #[Route('/rerun_error', name: 'rerun_error', methods: ['POST'])]
     public function rerunErrorAction(Request $request): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -488,24 +473,4 @@ class ApiController extends AbstractController
         }
     }
 
-    // /**
-    //  * @Route("/statistics", name="statistics", methods={"POST"})
-    //  */
-    // public function statisticsAction(Request $request): JsonResponse
-    // {
-    //     try {
-    //         $return = [];
-    //         $home = $this->container->get('myddleware.home');
-
-    //         $return['errorByRule'] = $this->ruleRepository->errorByRule();
-    //         $return['countTypeDoc'] = $this->documentRepository->countTypeDoc();
-    //         $return['listJobDetail'] = $this->jobRepository->listJobDetail();
-    //         $return['countTransferHisto'] = $home->countTransferHisto();
-    //     } catch (Exception $e) {
-    //         $this->logger->error($e->getMessage());
-    //         $return['error'] = $e->getMessage();
-    //     }
-    //     // Send the response
-    //     return $this->json($return);
-    // }
 }

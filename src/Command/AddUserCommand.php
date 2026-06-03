@@ -8,6 +8,7 @@ use App\Repository\ConfigRepository;
 use App\Repository\UserRepository;
 use App\Utils\Validator;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\RuntimeException;
 use Symfony\Component\Console\Input\InputArgument;
@@ -36,11 +37,11 @@ use function Symfony\Component\String\u;
  * We use the default services.yaml configuration, so command classes are registered as services.
  * See https://symfony.com/doc/current/console/commands_as_services.html
  */
+#[AsCommand(name: 'myddleware:add-user', description: 'Creates a Myddleware user')]
 class AddUserCommand extends Command
 {
     // to make your command lazily loaded, configure the $defaultName static property,
     // so it will be instantiated only when the command is actually called.
-    protected static $defaultName = 'myddleware:add-user';
 
     /**
      * @var SymfonyStyle

@@ -524,10 +524,8 @@ class suitecrm extends solution
                 $param['offset'] += $this->limitCall;
             } else {
                 if (!empty($get_entry_list_result->number)) {
-                    // $result['error'] = $get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description;
                     throw new \Exception($get_entry_list_result->number.' : '.$get_entry_list_result->name.'. '.$get_entry_list_result->description);
                 } else {
-                    // $result['error'] = 'Failed to read data from SuiteCRM. No error return by SuiteCRM';
                     throw new \Exception('Failed to read data from SuiteCRM. No error return by SuiteCRM');
                 }
                 break; // Stop the loop if an error happened
@@ -918,23 +916,6 @@ class suitecrm extends solution
 
         return $query;
     }
-
-    // Permet de renvoyer le mode de la règle en fonction du module target
-    // Valeur par défaut "0"
-    // Si la règle n'est qu'en création, pas en modicication alors le mode est C
-    // public function getRuleMode($module, $type): array
-    // {
-        // if (
-                // 'target' == $type
-            // && array_key_exists($module, $this->module_relationship_many_to_many)
-        // ) {
-            // return [
-                // 'C' => 'create_only',
-            // ];
-        // }
-
-        // return parent::getRuleMode($module, $type);
-    // }
 
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
 

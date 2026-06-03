@@ -34,7 +34,8 @@ class sugarcrm extends solution
     protected bool $readDeletion = true;
     protected bool $sendDeletion = true;
 
-    protected $sugarAPI;
+    protected ?string $accessToken = null;
+    protected string $baseUrl = '';
     protected string $sugarAPIVersion = 'v11';
     protected string $sugarPlatform = 'base';
     protected int $defaultLimit = 100;
@@ -80,25 +81,25 @@ class sugarcrm extends solution
     {
         parent::login($paramConnexion);
         try {
-            $server = $this->paramConnexion['url'].'/rest/'.$this->sugarAPIVersion.'/';
-            $credentials = [
+            $this->baseUrl = rtrim($this->paramConnexion['url'], '/').'/rest/'.$this->sugarAPIVersion;
+            $response = $this->apiRequest('/oauth2/token', [
+                'grant_type' => 'password',
+                'client_id' => 'sugar',
+                'client_secret' => '',
                 'username' => $this->paramConnexion['login'],
                 'password' => $this->paramConnexion['password'],
                 'platform' => $this->sugarPlatform,
-            ];
+            ], 'POST');
 
-            // Log into Sugar
-            $this->sugarAPI = new \SugarAPI\SDK\SugarAPI($server, $credentials);
-            $this->sugarAPI->login();
-
-            // Check the token
-            $token = $this->sugarAPI->getToken();
-            if (!empty($token->access_token)) {
+            if ('200' == $response['status'] && !empty($response['body']->access_token)) {
+                $this->accessToken = $response['body']->access_token;
                 $this->connexion_valide = true;
             } else {
-                return ['error' => 'Failed to connect to Sugar, no error returned.'];
+                $error = $response['body']->error_message ?? 'Failed to connect to Sugar, no error returned.';
+
+                return ['error' => $error];
             }
-        } catch (\SugarAPI\SDK\Exception\SDKException $e) {
+        } catch (\Exception $e) {
             $error = $e->getMessage();
             $this->logger->error($error);
 
@@ -274,7 +275,6 @@ class sugarcrm extends solution
         }
     }
 
-    // public function readRelationship($param)
     /**
      * @throws \Exception
      */
@@ -296,17 +296,16 @@ class sugarcrm extends solution
 		$refereceId = current($param['query']);
 
 		// Get the record using the input parameters
-		$getRecords = $this->sugarAPI->filterRelated(key($param['query']), $refereceId, $rel->rhs_table)->execute($filterArgs);
-		$response = $getRecords->getResponse();
+		$parentModule = key($param['query']);
+		$response = $this->apiRequest('/'.$parentModule.'/'.$refereceId.'/link/'.$rel->rhs_table.'/filter', $filterArgs, 'POST');
         // Format response if http return = 200
-        if ('200' == $response->getStatus()) {
-            $body = $getRecords->getResponse()->getBody(false);
-            if (!empty($body->records)) {
-                $records = $body->records;
+        if ('200' == $response['status']) {
+            if (!empty($response['body']->records)) {
+                $records = $response['body']->records;
             }
         } else {
-            $bodyError = $response->getBody();
-            throw new \Exception('Status '.$response->getStatus().' : '.$bodyError['error'].', '.$bodyError['error_message']);
+            $body = $response['body'];
+            throw new \Exception('Status '.$response['status'].' : '.($body->error ?? '').',  '.($body->error_message ?? ''));
         }
 		// Format records to result format
         if (!empty($records)) {
@@ -369,17 +368,15 @@ class sugarcrm extends solution
         // Add function to odify filter id needed
         $filterArgs = $this->changeReadFilterArgs($param, $filterArgs);
         // Get the records
-        $getRecords = $this->sugarAPI->filterRecords($param['module'])->execute($filterArgs);
-        $response = $getRecords->getResponse();
+        $response = $this->apiRequest('/'.$param['module'].'/filter', $filterArgs, 'POST');
         // Format response if http return = 200
-        if ('200' == $response->getStatus()) {
-            $body = $getRecords->getResponse()->getBody(false);
-            if (!empty($body->records)) {
-                $records = $body->records;
+        if ('200' == $response['status']) {
+            if (!empty($response['body']->records)) {
+                $records = $response['body']->records;
             }
         } else {
-            $bodyError = $response->getBody();
-            throw new \Exception('Status '.$response->getStatus().' : '.$bodyError['error'].', '.$bodyError['error_message']);
+            $body = $response['body'];
+            throw new \Exception('Status '.$response['status'].' : '.($body->error ?? '').',  '.($body->error_message ?? ''));
         }
 
         // Format records to result format
@@ -570,11 +567,10 @@ class sugarcrm extends solution
                 }
             }
             // Send all data in 1 call
-            $recordResult = $this->sugarAPI->bulk()->execute($bulkData);
-            $response = $recordResult->getResponse();
+            $response = $this->apiRequest('/bulk', $bulkData, 'POST');
             // Manage response
-            if ('200' == $response->getStatus()) {
-                $records = $response->getBody(false);
+            if ('200' == $response['status']) {
+                $records = $response['body'];
                 $i = 0;
                 // Manage result returned from SugarCRM
                 foreach ($param['data'] as $idDoc => $data) {
@@ -620,7 +616,7 @@ class sugarcrm extends solution
                     ++$i;
                 }
             } else {
-                throw new \Exception('Error '.$response->getStatus().' : '.$response->getError());
+                throw new \Exception('Error '.$response['status'].' : '.($response['body']->error ?? '').', '.($response['body']->error_message ?? ''));
             }
             // Modification du statut du flux
         } catch (\Exception $e) {
@@ -672,6 +668,42 @@ class sugarcrm extends solution
         return rtrim($url, '/').'/#'.$module.'/'.$recordId;
     }
 
+    protected function apiRequest(string $endpoint, $data = null, ?string $method = null): array
+    {
+        $url = $this->baseUrl.$endpoint;
+        $ch = curl_init($url);
+        if (!empty($method)) {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+        }
+        curl_setopt($ch, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 0);
+
+        $headers = ['Content-Type: application/json'];
+        if (!empty($this->accessToken)) {
+            $headers[] = "oauth-token: {$this->accessToken}";
+        }
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+
+        if ($data !== null) {
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+
+        $this->logDebug('sugarcrm api request', ['url' => $url, 'method' => $method]);
+        $response = curl_exec($ch);
+        $httpCode = (string) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $this->logDebug('sugarcrm api response', ['response' => $response, 'status' => $httpCode]);
+
+        return [
+            'status' => $httpCode,
+            'body' => json_decode($response),
+        ];
+    }
+
     /**
      * @throws \Exception
      */
@@ -688,10 +720,9 @@ class sugarcrm extends solution
             curl_setopt($request, CURLOPT_RETURNTRANSFER, 1);
             curl_setopt($request, CURLOPT_FOLLOWLOCATION, 0);
 
-            $token = $this->sugarAPI->getToken();
             curl_setopt($request, CURLOPT_HTTPHEADER, [
                 'Content-Type: application/json',
-                "oauth-token: {$token->access_token}",
+                "oauth-token: {$this->accessToken}",
             ]);
             //convert arguments to json
             if (!empty($parameters)) {

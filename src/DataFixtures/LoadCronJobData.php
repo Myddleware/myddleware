@@ -43,7 +43,7 @@ class LoadCronJobData implements FixtureInterface
         ['period' => '0 0 * * *', 'command' => 'myddleware:checkjob', 'enable' => 1, 'description' => 'Check if a job is not closed after 15 minutes of inactivity.', 'maxInstances' => 3],
     ];
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $this->manager = $manager;
         $this->generateEntities();

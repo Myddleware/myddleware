@@ -27,28 +27,20 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="functions")
- * @ORM\Entity(repositoryClass="App\Repository\FunctionsRepository")
- */
+#[ORM\Table(name: 'functions')]
+#[ORM\Entity(repositoryClass: 'App\Repository\FunctionsRepository')]
 class Functions
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="FuncCat")
-     * @ORM\JoinColumn(name="fcat_id", referencedColumnName="id")
-     */
+    #[ORM\ManyToOne(targetEntity: 'FuncCat')]
+    #[ORM\JoinColumn(name: 'fcat_id', referencedColumnName: 'id')]
     private FuncCat $categoryId;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=255)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 255)]
     private string $name;
 
     public function getId(): int

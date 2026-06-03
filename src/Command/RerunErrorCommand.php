@@ -44,7 +44,7 @@ class RerunErrorCommand extends Command
     public function __construct(
         LoggerInterface $logger,
         JobManager $jobManager,
-        string $name = null
+        ?string $name = null
     ) {
         parent::__construct($name);
         $this->logger = $logger;

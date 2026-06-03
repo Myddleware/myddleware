@@ -100,10 +100,10 @@ class MassActionCommand extends Command
         $action = $input->getArgument('action');
         $dataType = $input->getArgument('dataType');
         $ids = $input->getArgument('ids');
-        $forceAll = $input->getArgument('forceAll');
-        $fromStatus = $input->getArgument('fromStatus');
-        $toStatus = $input->getArgument('toStatus');
-        $api = $input->getArgument('api');
+        $forceAll = $input->getArgument('forceAll') ?? '';
+        $fromStatus = $input->getArgument('fromStatus') ?? '';
+        $toStatus = $input->getArgument('toStatus') ?? '';
+        $api = $input->getArgument('api') ?? '';
         // to avoid unwanted apostrophes in SQL queries
         $action = str_replace('\'', '', $action);
         $dataType = str_replace('\'', '', $dataType);

@@ -28,35 +28,33 @@ use App\Entity\User;
 use App\Form\Type\VerificationCodeFormType;
 use App\Service\DebugLogger;
 use App\Service\TwoFactorAuthService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class TwoFactorAuthController extends AbstractController
 {
     private TwoFactorAuthService $twoFactorAuthService;
     private TokenStorageInterface $tokenStorage;
-    private RequestStack $requestStack;
     private DebugLogger $debugLogger;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(
         TwoFactorAuthService $twoFactorAuthService,
         TokenStorageInterface $tokenStorage,
-        RequestStack $requestStack,
-        DebugLogger $debugLogger
+        DebugLogger $debugLogger,
+        EntityManagerInterface $entityManager
     ) {
         $this->twoFactorAuthService = $twoFactorAuthService;
         $this->tokenStorage = $tokenStorage;
-        $this->requestStack = $requestStack;
         $this->debugLogger = $debugLogger;
+        $this->entityManager = $entityManager;
     }
 
-    /**
-     * @Route("/verify", name="two_factor_auth_verify")
-     */
+    #[Route('/verify', name: 'two_factor_auth_verify')]
     public function verify(Request $request): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -134,9 +132,7 @@ class TwoFactorAuthController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/verify/resend", name="two_factor_auth_resend")
-     */
+    #[Route('/verify/resend', name: 'two_factor_auth_resend')]
     public function resend(Request $request): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -175,9 +171,7 @@ class TwoFactorAuthController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/verify/switch-method/{method}", name="two_factor_auth_switch_method")
-     */
+    #[Route('/verify/switch-method/{method}', name: 'two_factor_auth_switch_method')]
     public function switchMethod(string $method, Request $request): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['method' => $method, 'request' => $request]);
@@ -210,7 +204,7 @@ class TwoFactorAuthController extends AbstractController
             }
 
             $twoFactorAuth->setPreferredMethod($method);
-            $this->getDoctrine()->getManager()->flush();
+            $this->entityManager->flush();
 
             if ($this->twoFactorAuthService->sendVerificationCode($twoFactorAuth)) {
                 $this->addFlash('twofa.switchMethod.success', 'Verification method switched to ' . strtoupper($method) . '. A new code has been sent.');

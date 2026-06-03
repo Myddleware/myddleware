@@ -52,15 +52,51 @@
                     <div>{{ variable.name }}</div>
                 </div>
                 <div class="col-md-6">
-                    <strong>{{ 'variable.table_headers.value'|trans|upper }}</strong>
-                    <div>{{ variable.value }}</div>
+                    <strong>{{ 'variable.table_headers.type'|trans|upper }}</strong>
+                    <div>{{ ('variable.type.' ~ variable.type)|trans }}</div>
                 </div>
             </div>
-             <div class="row mb-2">
+            <div class="row mb-2">
                 <div class="col-md-6">
                     <strong>{{ 'variable.table_headers.description'|trans|upper }}</strong>
                     <div>{{ variable.description }}</div>
                 </div>
+                <div class="col-md-6">
+                    <strong>{{ 'variable.table_headers.value'|trans|upper }}</strong>
+                    {% if variable.type == 'table' %}
+                        {% set tableRows = variable.tableRows %}
+                        {% if tableRows|length > 0 %}
+                            <table class="table table-sm table-bordered mt-1">
+                                <thead>
+                                    <tr>
+                                        <th>{{ 'variable.table_editor.source'|trans }}</th>
+                                        <th>{{ 'variable.table_editor.target'|trans }}</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for row in tableRows %}
+                                        <tr>
+                                            <td>{{ row.source }}</td>
+                                            <td>{{ row.target }}</td>
+                                        </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        {% else %}
+                            <div>{{ variable.value }}</div>
+                        {% endif %}
+                    {% else %}
+                        <div>{{ variable.value }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row mb-2">
+                {% if variable.type == 'table' %}
+                    <div class="col-md-6">
+                        <strong>{{ 'variable.table_editor.formatted_value'|trans|upper }}</strong>
+                        <div><code>{{ variable.formattedValue }}</code></div>
+                    </div>
+                {% endif %}
             </div>
         </div>
     </div>

@@ -28,59 +28,40 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\LogRepository")
- * @ORM\Table(name="log", indexes={
- *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
- *  @ORM\Index(name="index_job_id", columns={"job_id"}),
- *  @ORM\Index(name="index_rule_id",columns={"rule_id"})
- *})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\LogRepository')]
+#[ORM\Table(name: 'log')]
+#[ORM\Index(name: 'index_doc_id', columns: ['doc_id'])]
+#[ORM\Index(name: 'index_job_id', columns: ['job_id'])]
+#[ORM\Index(name: 'index_rule_id', columns: ['rule_id'])]
 class Log
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'created', type: 'datetime', nullable: false)]
     private DateTime $created;
 
-    /**
-     * @ORM\Column(name="type", type="string", length=5, nullable=false)
-     */
+    #[ORM\Column(name: 'type', type: 'string', length: 5, nullable: false)]
     private string $type;
 
-    /**
-     * @ORM\Column(name="msg", type="text", nullable=false)
-     */
+    #[ORM\Column(name: 'msg', type: 'text', nullable: false)]
     private string $message;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="orders")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'orders')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: true)]
     private ?Rule $rule;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="logs")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Document', inversedBy: 'logs')]
+    #[ORM\JoinColumn(name: 'doc_id', referencedColumnName: 'id', nullable: true)]
     private ?Document $document;
 
-    /**
-     * @ORM\Column(name="ref_doc_id", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'ref_doc_id', type: 'string', length: 255, nullable: true)]
     private ?string $ref;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Job", inversedBy="logs")
-     * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Job', inversedBy: 'logs')]
+    #[ORM\JoinColumn(name: 'job_id', referencedColumnName: 'id', nullable: false)]
     private Job $job;
 
     public function getId(): int

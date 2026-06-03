@@ -29,72 +29,49 @@ use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 
-/**
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="App\Repository\WorkflowLogRepository")
- * @ORM\Table(name="workflowlog", indexes={@ORM\Index(name="index_workflow_id", columns={"workflow_id"})})
- * @ORM\Table(name="workflowlog", indexes={@ORM\Index(name="index_job_id", columns={"job_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\WorkflowLogRepository')]
+#[ORM\Table(name: 'workflowlog')]
+#[ORM\Index(name: 'index_workflow_id', columns: ['workflow_id'])]
+#[ORM\Index(name: 'index_job_id', columns: ['job_id'])]
 class WorkflowLog
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Workflow", inversedBy="workflowLogs")
-     * @ORM\JoinColumn(name="workflow_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Workflow', inversedBy: 'workflowLogs')]
+    #[ORM\JoinColumn(name: 'workflow_id', referencedColumnName: 'id', nullable: false)]
     private Workflow $workflow;
-	
-	/**
-     * @ORM\ManyToOne(targetEntity="Job", inversedBy="workflowLogs")
-     * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
-     */
+
+    #[ORM\ManyToOne(targetEntity: 'Job', inversedBy: 'workflowLogs')]
+    #[ORM\JoinColumn(name: 'job_id', referencedColumnName: 'id', nullable: false)]
     private Job $job;
-	
-	/**
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="triggerDocuments")
-     * @ORM\JoinColumn(name="trigger_document_id", referencedColumnName="id", nullable=false)
-     */
+
+    #[ORM\ManyToOne(targetEntity: 'Document', inversedBy: 'triggerDocuments')]
+    #[ORM\JoinColumn(name: 'trigger_document_id', referencedColumnName: 'id', nullable: false)]
     private Document $triggerDocument;
 
-	/**
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="generateDocuments")
-     * @ORM\JoinColumn(name="generate_document_id", referencedColumnName="id", nullable=true)
-     */
-    private ?Document $generateDocument= null;
+    #[ORM\ManyToOne(targetEntity: 'Document', inversedBy: 'generateDocuments')]
+    #[ORM\JoinColumn(name: 'generate_document_id', referencedColumnName: 'id', nullable: true)]
+    private ?Document $generateDocument = null;
 
-	/**
-     * @ORM\ManyToOne(targetEntity="WorkflowAction")
-     * @ORM\JoinColumn(name="action_id", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: 'WorkflowAction')]
+    #[ORM\JoinColumn(name: 'action_id', referencedColumnName: 'id', nullable: true)]
     private WorkflowAction $action;
-	
-	/**
-     * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
-     */
-    private ?string $status;
-	
-	/**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
-    private DateTime $dateCreated;
-	
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=true)
-     */
-    private ?User $createdBy = null;
-	
-    /**
-     * @ORM\Column(name="message", type="text", nullable=true)
-     */
-    private ?string $message = null;
 
+    #[ORM\Column(name: 'status', type: 'string', length: 255, nullable: true, options: ['default' => null])]
+    private ?string $status;
+
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
+    private DateTime $dateCreated;
+
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: true)]
+    private ?User $createdBy = null;
+
+    #[ORM\Column(name: 'message', type: 'text', nullable: true)]
+    private ?string $message = null;
 
     public function getId(): int
     {
@@ -111,8 +88,8 @@ class WorkflowLog
         $this->workflow = $workflow;
         return $this;
     }
-	
-	public function getJob(): ?Job
+
+    public function getJob(): ?Job
     {
         return $this->job;
     }
@@ -122,8 +99,8 @@ class WorkflowLog
         $this->job = $job;
         return $this;
     }
-	
-	public function getTriggerDocument(): ?Document
+
+    public function getTriggerDocument(): ?Document
     {
         return $this->triggerDocument;
     }
@@ -133,8 +110,8 @@ class WorkflowLog
         $this->triggerDocument = $document;
         return $this;
     }
-	
-	public function getGenerateDocument(): ?Document
+
+    public function getGenerateDocument(): ?Document
     {
         return $this->generateDocument;
     }
@@ -144,8 +121,8 @@ class WorkflowLog
         $this->generateDocument = $document;
         return $this;
     }
-	
-	public function setStatus($status): self
+
+    public function setStatus($status): self
     {
         $this->status = $status;
         return $this;
@@ -155,8 +132,8 @@ class WorkflowLog
     {
         return $this->status;
     }
-	
-	public function setDateCreated($dateCreated): self
+
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
@@ -168,8 +145,7 @@ class WorkflowLog
         return $this->dateCreated;
     }
 
-    
-	public function getCreatedBy(): ?User
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
@@ -179,8 +155,8 @@ class WorkflowLog
         $this->createdBy = $createdBy;
         return $this;
     }
-	
-	public function getAction(): WorkflowAction
+
+    public function getAction(): WorkflowAction
     {
         return $this->action;
     }
@@ -190,8 +166,8 @@ class WorkflowLog
         $this->action = $action;
         return $this;
     }
-	
-	public function setMessage($message): self
+
+    public function setMessage($message): self
     {
         $this->message = $message;
         return $this;

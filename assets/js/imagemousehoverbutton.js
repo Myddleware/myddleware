@@ -1,6 +1,3 @@
-// console.log('imagemousehoverbutton');
-
-
 document.addEventListener('DOMContentLoaded', function() {
     const button = document.querySelector('.hover-button');
     const image = document.getElementById('hoverImage');
@@ -17,7 +14,5 @@ document.addEventListener('DOMContentLoaded', function() {
             clearTimeout(hoverTimeout);
             image.style.display = 'none';
         });
-    } else {
-        // console.warn('hover-button or hoverImage not found in DOM');
     }
 });

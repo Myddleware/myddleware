@@ -32,16 +32,17 @@ use Pagerfanta\Adapter\ArrayAdapter;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use App\Service\DebugLogger;
-use Exception;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 class VariableController extends AbstractController
 {
     protected ToolsManager $tools;
@@ -85,9 +86,7 @@ class VariableController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/variables/new", name="variable_create")
-     */
+    #[Route('/variables/new', name: 'variable_create')]
     public function create(EntityManagerInterface $em, Request $request, TranslatorInterface $translator): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'request' => $request, 'translator' => $translator]);
@@ -110,6 +109,18 @@ class VariableController extends AbstractController
                         'spellcheck' => 'false',
                         'autocapitalize' => 'none',
                         'autocomplete' => 'off',
+                    ],
+                ])
+                ->add('type', ChoiceType::class, [
+                    'label' => $translator->trans('variable.table_headers.type'),
+                    'choices' => [
+                        $translator->trans('variable.type.simple') => 'simple',
+                        $translator->trans('variable.type.list') => 'list',
+                        $translator->trans('variable.type.table') => 'table',
+                    ],
+                    'expanded' => true,
+                    'attr' => [
+                        'class' => 'variable-type-selector',
                     ],
                 ])
                 ->add('description', TextareaType::class, [
@@ -170,9 +181,7 @@ class VariableController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/variables/{id}/edit", name="variable_edit")
-     */
+    #[Route('/variables/{id}/edit', name: 'variable_edit')]
     public function edit(EntityManagerInterface $em, Request $request, Variable $variable, TranslatorInterface $translator): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'request' => $request, 'variable' => $variable, 'translator' => $translator]);
@@ -195,6 +204,18 @@ class VariableController extends AbstractController
                         'spellcheck' => 'false',
                         'autocapitalize' => 'none',
                         'autocomplete' => 'off',
+                    ],
+                ])
+                ->add('type', ChoiceType::class, [
+                    'label' => $translator->trans('variable.table_headers.type'),
+                    'choices' => [
+                        $translator->trans('variable.type.simple') => 'simple',
+                        $translator->trans('variable.type.list') => 'list',
+                        $translator->trans('variable.type.table') => 'table',
+                    ],
+                    'expanded' => true,
+                    'attr' => [
+                        'class' => 'variable-type-selector',
                     ],
                 ])
                 ->add('description', TextareaType::class, [
@@ -255,9 +276,6 @@ class VariableController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/variables/verify-name", name="variable_verify_name")
-     */
     public function verifyIfVariableNameExists(EntityManagerInterface $em, string $name, ?int $excludeId = null): bool
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'name' => $name, 'excludeId' => $excludeId]);
@@ -280,10 +298,8 @@ class VariableController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/variables/{id}/delete", name="variable_delete", methods={"POST","DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/variables/{id}/delete', name: 'variable_delete', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(EntityManagerInterface $em, Variable $variable, TranslatorInterface $translator): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['em' => $em, 'variable' => $variable, 'translator' => $translator]);
@@ -311,9 +327,7 @@ class VariableController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/variables/{id}", name="variable_show")
-     */
+    #[Route('/variables/{id}', name: 'variable_show')]
     public function show(Variable $variable): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['variable' => $variable]);

@@ -27,44 +27,30 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="App\Repository\RuleFieldRepository")
- * @ORM\Table(name="rulefield", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleFieldRepository')]
+#[ORM\Table(name: 'rulefield')]
+#[ORM\Index(name: 'Krule_id', columns: ['rule_id'])]
 class RuleField
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="fields")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'fields')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="target_field_name", type="text", nullable=false)
-     */
+    #[ORM\Column(name: 'target_field_name', type: 'text', nullable: false)]
     private string $target;
 
-    /**
-     * @ORM\Column(name="source_field_name", type="text", nullable=false)
-     */
+    #[ORM\Column(name: 'source_field_name', type: 'text', nullable: false)]
     private string $source;
 
-    /**
-     * @ORM\Column(name="formula", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'formula', type: 'text', nullable: true)]
     private ?string $formula;
 
-    /**
-     * @ORM\Column(name="comment", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'comment', type: 'text', nullable: true)]
     private ?string $comment = null;
 
 

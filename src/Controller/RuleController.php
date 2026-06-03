@@ -29,24 +29,16 @@ use App\Entity\Rule;
 use App\Entity\RuleField;
 use App\Entity\Solution;
 use App\Entity\Functions;
-use App\Entity\User;
-use App\Entity\Workflow;
 use App\Manager\RuleManager;
 use App\Manager\ToolsManager;
 use App\Manager\TemplateManager;
-use App\Manager\SolutionManager;
 use App\Manager\FormulaManager;
 use App\Service\SessionService;
-use App\Service\TwoFactorAuthService;
 // Nos nouveaux services
 use App\Service\Rule\RulePersistenceService;
 use App\Service\Rule\RuleQueryService;
 use App\Service\Rule\RuleStepService;
 use App\Service\RuleSimulationService;
-use App\Repository\RuleRepository;
-use App\Repository\DocumentRepository;
-use App\Repository\SolutionRepository;
-use App\Repository\VariableRepository;
 use App\Form\DuplicateRuleFormType;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Query;
@@ -59,7 +51,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use App\Service\DebugLogger;
@@ -76,10 +68,6 @@ class RuleController extends AbstractController
         private RuleManager $ruleManager,
         private TemplateManager $templateManager,
         private FormulaManager $formuleManager,
-        private SolutionManager $solutionManager, // Gardé pour les helpers legacy
-        private TwoFactorAuthService $twoFactorAuthService,
-        private RuleRepository $ruleRepository,
-        private DocumentRepository $documentRepository,
         // Nouveaux Services Refactorisés
         private RulePersistenceService $rulePersistenceService,
         private RuleQueryService $ruleQueryService,
@@ -892,36 +880,6 @@ class RuleController extends AbstractController
         $__debugReturn = null;
         try {
         return $__debugReturn = new Response($rule->getName());
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
-        }
-    }
-
-    #[Route('/get-first-part-of-lookup-formula/{formula}', name: 'get_first_part_of_lookup_formula')]
-    public function getFirstPartOfLookupFormula($formula): Response
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['formula' => $formula]);
-        $__debugReturn = null;
-        try {
-        if (preg_match('/lookup\(\{[^}]+\},\s*/', $formula, $matches)) {
-            return $__debugReturn = new Response($matches[0]);
-        }
-        return $__debugReturn = new Response('');
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
-        }
-    }
-
-    #[Route('/get-second-part-of-lookup-formula/{formula}', name: 'get_second_part_of_lookup_formula')]
-    public function getSecondPartOfLookupFormula($formula): Response
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['formula' => $formula]);
-        $__debugReturn = null;
-        try {
-        if (preg_match('/",\s*(.+)\)/', $formula, $matches)) {
-            return $__debugReturn = new Response(', ' . $matches[1] . ')');
-        }
-        return $__debugReturn = new Response('');
         } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }

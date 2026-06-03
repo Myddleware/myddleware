@@ -1,0 +1,103 @@
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var typeRadios = document.querySelectorAll('.variable-type-radio');
+    var simpleContainer = document.getElementById('value-simple-container');
+    var tableContainer = document.getElementById('value-table-container');
+    var tableBody = document.getElementById('variable-table-body');
+    var addRowBtn = document.getElementById('variable-table-add-row');
+    var valueField = document.querySelector('[id$="_value"]');
+    var form = valueField.closest('form');
+
+    function getSelectedType() {
+        var checked = document.querySelector('.variable-type-radio:checked');
+        return checked ? checked.value : 'simple';
+    }
+
+    function addTableRow(source, target) {
+        source = source || '';
+        target = target || '';
+        var row = document.createElement('tr');
+        row.innerHTML =
+            '<td><input type="text" class="form-control table-source-input" value="' + escapeHtml(source) + '"></td>' +
+            '<td><input type="text" class="form-control table-target-input" value="' + escapeHtml(target) + '"></td>' +
+            '<td><button type="button" class="btn btn-sm btn-outline-danger table-remove-row"><i class="fa fa-trash"></i></button></td>';
+        tableBody.appendChild(row);
+    }
+
+    function escapeHtml(str) {
+        var div = document.createElement('div');
+        div.appendChild(document.createTextNode(str));
+        return div.innerHTML;
+    }
+
+    function toggleTypeDisplay() {
+        var type = getSelectedType();
+        if (type === 'table') {
+            simpleContainer.style.display = 'none';
+            tableContainer.style.display = 'block';
+            loadTableFromValue();
+        } else {
+            simpleContainer.style.display = 'block';
+            tableContainer.style.display = 'none';
+        }
+    }
+
+    function loadTableFromValue() {
+        tableBody.innerHTML = '';
+        var val = valueField.value.trim();
+        if (val) {
+            try {
+                var rows = JSON.parse(val);
+                if (Array.isArray(rows)) {
+                    for (var i = 0; i < rows.length; i++) {
+                        addTableRow(rows[i].source || '', rows[i].target || '');
+                    }
+                    return;
+                }
+            } catch (e) {
+                // Not JSON, ignore
+            }
+        }
+        addTableRow('', '');
+    }
+
+    function serializeTableToValue() {
+        var rows = [];
+        var trList = tableBody.querySelectorAll('tr');
+        for (var i = 0; i < trList.length; i++) {
+            var source = trList[i].querySelector('.table-source-input').value.trim();
+            var target = trList[i].querySelector('.table-target-input').value.trim();
+            if (source !== '' || target !== '') {
+                rows.push({source: source, target: target});
+            }
+        }
+        return JSON.stringify(rows);
+    }
+
+    for (var i = 0; i < typeRadios.length; i++) {
+        typeRadios[i].addEventListener('change', toggleTypeDisplay);
+    }
+
+    addRowBtn.addEventListener('click', function () {
+        addTableRow('', '');
+    });
+
+    tableBody.addEventListener('click', function (e) {
+        var removeBtn = e.target.closest('.table-remove-row');
+        if (removeBtn) {
+            var row = removeBtn.closest('tr');
+            if (tableBody.querySelectorAll('tr').length > 1) {
+                row.remove();
+            }
+        }
+    });
+
+    form.addEventListener('submit', function () {
+        if (getSelectedType() === 'table') {
+            valueField.value = serializeTableToValue();
+        }
+    });
+
+    toggleTypeDisplay();
+});
+</script>

@@ -46,7 +46,7 @@ class LoadConfigData implements FixtureInterface
         ['name' => 'alert_date_ref', 'value' => '1999-01-01 00:00:00', 'update' => true],
     ];
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $this->manager = $manager;
         $this->generateEntities();

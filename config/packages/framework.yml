@@ -5,7 +5,7 @@ framework:
     secret:          "%secret%"
     form:            ~
     csrf_protection: ~
-    validation: { enable_annotations: true, enabled: true }
+    validation: { enable_attributes: true, enabled: true }
     default_locale:  "%locale%"
     session:         ~
     fragments:       ~

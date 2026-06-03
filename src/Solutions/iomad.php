@@ -109,8 +109,7 @@ class iomad extends moodle
 		return $records;
 	}
 	
-	// public function createData($param): array 
-	public function createData($param): array 
+	public function createData($param): array
 	{
 		// Call Moodle function
 		$result = parent::createData($param);

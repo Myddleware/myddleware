@@ -35,7 +35,7 @@ class GenerateTemplateCommand extends Command
 {
     private JobManager $jobManager;
 
-    public function __construct(JobManager $jobManager, string $name = null)
+    public function __construct(JobManager $jobManager, ?string $name = null)
     {
         parent::__construct($name);
         $this->jobManager = $jobManager;

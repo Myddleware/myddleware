@@ -433,6 +433,7 @@ create_connector:
     params_error: An error occurred while saving the settings
     form_error : Cannot get connector data (solution, fields & parent) 
     duplicate_name: A connector already has that name.
+    invalid_form: The connector form contains errors. Please check your input.
 
 list_connector:
     empty: You do not have any connectors yet !
@@ -1186,12 +1187,7 @@ settings:
         description: Configure how tables display data across the application.
         rows_per_page: Rows per page
         maximum_results: Maximum results
-    search_settings:
-        title: Search Settings
-        description: Configure search behavior and Elasticsearch integration.
-        elasticsearch_label: Elasticsearch Status
-        enable_elasticsearch: Enable Elastic Search
-        elasticsearch_hint: Elasticsearch enables greater performance when searching for strings among very large amounts of document (+100k)
+
     logs:
         title: Logs
         enable_debug: Enable Debug Logs
@@ -1204,8 +1200,7 @@ settings:
     messages:
         save_success: Settings saved successfully
         save_error: Failed to save settings
-        elasticsearch_enabled: Elasticsearch has been enabled
-        elasticsearch_disabled: Elasticsearch has been disabled
+
         debug_enabled: Debug logging has been enabled
         debug_disabled: Debug logging has been disabled
         log_level_updated: Log level updated to %level%
@@ -1356,12 +1351,22 @@ variable:
   detail_title: Variable
   confirm_delete: Are you sure you want to delete this variable?
   no_variables: No variables found.
+  type:
+    simple: Simple
+    list: List
+    table: Table (picklist)
   table_headers:
     name: Name
-    value: Value   
+    type: Type
+    value: Value
     created_by: Created By
     actions: Actions
     description: Description
+  table_editor:
+    source: Source
+    target: Target
+    add_row: Add row
+    formatted_value: Formatted value for changeValue
 premium:
     upgrade:
         title_main: "Upgrade to Premium"
