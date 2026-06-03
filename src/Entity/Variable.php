@@ -27,47 +27,35 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\VariableRepository")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\VariableRepository')]
 class Variable
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=100, nullable=false)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 100, nullable: false)]
     private string $name = '';
 
-    /**
-     * @ORM\Column(name="value", type="text", nullable=false)
-     */
-    private string $value  = '';
+    #[ORM\Column(name: 'type', type: 'string', length: 20, nullable: false, options: ['default' => 'simple'])]
+    private string $type = 'simple';
 
-        /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'value', type: 'text', nullable: false)]
+    private string $value = '';
+
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $description;
 
-	/**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private User $modifiedBy;
-	
 
-	public function getCreatedBy(): ?User
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
@@ -88,8 +76,6 @@ class Variable
         $this->modifiedBy = $modifiedBy;
         return $this;
     }
-	    
-
 
     public function getDescription(): ?string
     {
@@ -102,7 +88,7 @@ class Variable
 
         return $this;
     }
-	
+
     public function getId(): int
     {
         return $this->id;
@@ -115,14 +101,25 @@ class Variable
         } else {
             $this->name = $name;
         }
-    
+
         return $this;
     }
-    
 
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function getType(): string
+    {
+        return $this->type;
+    }
+
+    public function setType(string $type): self
+    {
+        $this->type = $type;
+
+        return $this;
     }
 
     public function setValue($value): self
@@ -137,4 +134,39 @@ class Variable
         return $this->value;
     }
 
+    public function getTableRows(): array
+    {
+        if ($this->type !== 'table') {
+            return [];
+        }
+        $rows = json_decode($this->value, true);
+
+        return is_array($rows) ? $rows : [];
+    }
+
+    public function getFormattedValue(): string
+    {
+        if ($this->type === 'table') {
+            return self::convertTableJsonToChangeValueFormat($this->value);
+        }
+
+        return $this->value;
+    }
+
+    public static function convertTableJsonToChangeValueFormat(string $jsonValue): string
+    {
+        $rows = json_decode($jsonValue, true);
+        if (!is_array($rows) || empty($rows)) {
+            return '';
+        }
+
+        $pairs = [];
+        foreach ($rows as $row) {
+            if (isset($row['source'], $row['target'])) {
+                $pairs[] = "'" . $row['source'] . "':'" . $row['target'] . "'";
+            }
+        }
+
+        return '(' . implode(',', $pairs) . ')';
+    }
 }

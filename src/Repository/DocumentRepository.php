@@ -170,7 +170,7 @@ class DocumentRepository extends ServiceEntityRepository
         }
     }
 
-    public function countTypeDoc(User $user = null)
+    public function countTypeDoc(?User $user = null)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user]);
         $__debugReturn = null;
@@ -192,7 +192,7 @@ class DocumentRepository extends ServiceEntityRepository
         }
     }
 
-    public function countTransferHisto(User $user = null)
+    public function countTransferHisto(?User $user = null)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user]);
         $__debugReturn = null;

@@ -31,32 +31,26 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM; // slug
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Table(name="connector")
- * @ORM\Entity(repositoryClass="App\Repository\ConnectorRepository")
- */
+#[ORM\Table(name: 'connector')]
+#[ORM\Entity(repositoryClass: 'App\Repository\ConnectorRepository')]
 class Connector
 {
     /**
      * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
      */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @ORM\OneToMany(targetEntity="ConnectorParam", mappedBy="connector")
-     */
+    #[ORM\OneToMany(targetEntity: 'ConnectorParam', mappedBy: 'connector')]
     private $connectorParams;
 
     /**
      * @var Solution
-     *
-     * @ORM\ManyToOne(targetEntity="Solution", inversedBy="connector")
-     * @ORM\JoinColumn(name="sol_id", referencedColumnName="id")
      */
+    #[ORM\ManyToOne(targetEntity: 'Solution', inversedBy: 'connector')]
+    #[ORM\JoinColumn(name: 'sol_id', referencedColumnName: 'id')]
     private $solution;
 
     /**
@@ -66,50 +60,42 @@ class Connector
 
     /**
      * @var string
-     *
-     * @ORM\Column(name="name", type="string", length=50, nullable=false)
      */
+    #[ORM\Column(name: 'name', type: 'string', length: 50, nullable: false)]
     private $name;
 
-    /**
-     * @Gedmo\Slug(fields={"name"}, separator="_", unique=true)
-     * @ORM\Column(length=50, nullable=false, name="name_slug")
-     */
+    #[Gedmo\Slug(fields: ['name'], separator: '_', unique: true)]
+    #[ORM\Column(length: 50, nullable: false, name: 'name_slug')]
     private $nameSlug;
 
     /**
      * @var DateTime
-     *
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private $dateCreated;
 
     /**
      * @var DateTime
-     *
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
      */
+    #[ORM\Column(name: 'date_modified', type: 'datetime', nullable: false)]
     private $dateModified;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="created_by", nullable=false)
      */
+    #[ORM\Column(name: 'created_by', nullable: false)]
     private $createdBy;
 
     /**
      * @var int
-     *
-     * @ORM\Column(name="modified_by", nullable=false)
      */
+    #[ORM\Column(name: 'modified_by', nullable: false)]
     private $modifiedBy;
 
     /**
      * @var bool
-     *
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
      */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private $deleted;
 
     /**

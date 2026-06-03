@@ -31,87 +31,57 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Shapecode\Bundle\CronBundle\Entity\CronJob;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
- * @ORM\Table(name="job", indexes={
- *  @ORM\Index(name="index_status_begin", columns={"status","begin"})
- *})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\JobRepository')]
+#[ORM\Table(name: 'job')]
+#[ORM\Index(name: 'index_status_begin', columns: ['status', 'begin'])]
 class Job
 {
-    /**
-     * @ORM\Column(name="id", type="string", length=255, nullable=false)
-     * @ORM\Id
-     */
+    #[ORM\Column(name: 'id', type: 'string', length: 255, nullable: false)]
+    #[ORM\Id]
     private string $id;
 
-    /**
-     * @ORM\Column(name="status", type="string", length=50, nullable=false)
-     */
+    #[ORM\Column(name: 'status', type: 'string', length: 50, nullable: false)]
     private string $status;
 
-    /**
-     * @ORM\Column(name="param", type="text", nullable=false)
-     */
+    #[ORM\Column(name: 'param', type: 'text', nullable: false)]
     private string $param;
 
-    /**
-     * @ORM\Column(name="begin", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'begin', type: 'datetime', nullable: false)]
     private DateTime $begin;
 
-    /**
-     * @ORM\Column(name="end", type="datetime",  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'end', type: 'datetime', nullable: true, options: ['default' => null])]
     private ?DateTime $end;
 
-    /**
-     * @ORM\Column(name="message", type="text",  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'message', type: 'text', nullable: true, options: ['default' => null])]
     private ?string $message;
 
-    /**
-     * @ORM\Column(name="open", type="integer", length=6,  nullable=true, options={"default":0})
-     */
+    #[ORM\Column(name: 'open', type: 'integer', length: 6, nullable: true, options: ['default' => 0])]
     private ?int $open;
 
-    /**
-     * @ORM\Column(name="close", type="integer", length=6,  nullable=true, options={"default":0})
-     */
+    #[ORM\Column(name: 'close', type: 'integer', length: 6, nullable: true, options: ['default' => 0])]
     private ?int $close;
 
-    /**
-     * @ORM\Column(name="cancel", type="integer", length=6,  nullable=true, options={"default":0})
-     */
+    #[ORM\Column(name: 'cancel', type: 'integer', length: 6, nullable: true, options: ['default' => 0])]
     private ?int $cancel;
 
-    /**
-     * @ORM\Column(name="`manual`", type="boolean",  nullable=true, options={"default":0})
-     */
+    #[ORM\Column(name: '`manual`', type: 'boolean', nullable: true, options: ['default' => 0])]
     private ?bool $manual;
 
-    /**
-     * @ORM\Column(name="api", type="boolean",  nullable=true, options={"default":0})
-     */
+    #[ORM\Column(name: 'api', type: 'boolean', nullable: true, options: ['default' => 0])]
     private ?bool $api;
 
-    /**
-     * @ORM\Column(name="error", type="integer", length=6,  nullable=true, options={"default":0})
-     */
+    #[ORM\Column(name: 'error', type: 'integer', length: 6, nullable: true, options: ['default' => 0])]
     private ?int $error;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Log", mappedBy="job")
-     */
+    #[ORM\OneToMany(targetEntity: 'Log', mappedBy: 'job')]
     private $logs;
-	
-	/**
+
+    /**
      * @var WorkflowLog[]
-     *
-     * @ORM\OneToMany(targetEntity="WorkflowLog", mappedBy="job")
      */
+    #[ORM\OneToMany(targetEntity: 'WorkflowLog', mappedBy: 'job')]
     private $workflowLogs;
-	
+
 
     public function __construct()
     {
@@ -294,8 +264,8 @@ class Job
 
         return $this;
     }
-	
-	/**
+
+    /**
      * @return Collection|WorkflowLog[]
      */
     public function getWorkflowLogs(): Collection

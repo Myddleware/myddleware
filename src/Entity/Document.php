@@ -31,138 +31,91 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\DocumentRepository")
- * @ORM\Table(name="document", indexes={
- *      @ORM\Index(name="index_rule_gbstatus_status", columns={"rule_id","global_status","status","deleted"}),
- *      @ORM\Index(name="index_gbstatus", columns={"global_status","deleted"}),
- *      @ORM\Index(name="index_parent_id", columns={"parent_id","deleted"}),
- *      @ORM\Index(name="index_rule_source", columns={"rule_id","source_id","deleted"}),
- *      @ORM\Index(name="index_rule_target", columns={"rule_id","target_id","deleted"}),
- *      @ORM\Index(name="index_rule_date_modified", columns={"rule_id","date_modified","deleted"}),
- *      @ORM\Index(name="index_rule_status_modified", columns={"rule_id","status","source_date_modified","deleted"}),
- *      @ORM\Index(name="index_source_id", columns={"source_id","deleted"}),
- *      @ORM\Index(name="index_target_id", columns={"target_id","deleted"}),
- *      @ORM\Index(name="index_date_modified", columns={"date_modified","deleted"}),
- *      @ORM\Index(name="index_job_lock", columns={"job_lock"})
- * })
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\DocumentRepository')]
+#[ORM\Table(name: 'document')]
+#[ORM\Index(name: 'index_rule_gbstatus_status', columns: ['rule_id', 'global_status', 'status', 'deleted'])]
+#[ORM\Index(name: 'index_gbstatus', columns: ['global_status', 'deleted'])]
+#[ORM\Index(name: 'index_parent_id', columns: ['parent_id', 'deleted'])]
+#[ORM\Index(name: 'index_rule_source', columns: ['rule_id', 'source_id', 'deleted'])]
+#[ORM\Index(name: 'index_rule_target', columns: ['rule_id', 'target_id', 'deleted'])]
+#[ORM\Index(name: 'index_rule_date_modified', columns: ['rule_id', 'date_modified', 'deleted'])]
+#[ORM\Index(name: 'index_rule_status_modified', columns: ['rule_id', 'status', 'source_date_modified', 'deleted'])]
+#[ORM\Index(name: 'index_source_id', columns: ['source_id', 'deleted'])]
+#[ORM\Index(name: 'index_target_id', columns: ['target_id', 'deleted'])]
+#[ORM\Index(name: 'index_date_modified', columns: ['date_modified', 'deleted'])]
+#[ORM\Index(name: 'index_job_lock', columns: ['job_lock'])]
 class Document
 {
-    /**
-     * @ORM\Column(name="id", type="string", nullable=false)
-     * @ORM\Id
-     */
+    #[ORM\Column(name: 'id', type: 'string', length: 255, nullable: false)]
+    #[ORM\Id]
     private string $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="documents")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'documents')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private DateTime $dateCreated;
 
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_modified', type: 'datetime', nullable: false)]
     private DateTime $dateModified;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private ?User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private ?User $modifiedBy;
 
-    /**
-     * @ORM\Column(name="status", type="string",  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'status', type: 'string', length: 255, nullable: true, options: ['default' => null])]
     private ?string $status;
 
-    /**
-     * @ORM\Column(name="source_id", type="string", nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'source_id', type: 'string', length: 255, nullable: true, options: ['default' => null])]
     private ?string $source;
 
-    /**
-     * @ORM\Column(name="target_id", type="string",  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'target_id', type: 'string', length: 255, nullable: true, options: ['default' => null])]
     private ?string $target;
 
-    /**
-     * @ORM\Column(name="source_date_modified", type="datetime",  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'source_date_modified', type: 'datetime', nullable: true, options: ['default' => null])]
     private ?DateTime $sourceDateModified;
 
-    /**
-     * @ORM\Column(name="mode", type="string", length=1,  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'mode', type: 'string', length: 1, nullable: true, options: ['default' => null])]
     private ?string $mode;
 
-    /**
-     * @ORM\Column(name="type", type="string", length=1,  nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'type', type: 'string', length: 1, nullable: true, options: ['default' => null])]
     private ?string $type;
 
-    /**
-     * @ORM\Column(name="attempt", type="integer", length=5,  nullable=false, options={"default":0})
-     */
+    #[ORM\Column(name: 'attempt', type: 'integer', length: 5, nullable: false, options: ['default' => 0])]
     private int $attempt;
 
-    /**
-     * @ORM\Column(name="global_status", type="string",  nullable=false, options={"default":0})
-     */
+    #[ORM\Column(name: 'global_status', type: 'string', length: 255, nullable: false, options: ['default' => 0])]
     private string $globalStatus;
 
-    /**
-     * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
-     */
+    #[ORM\Column(name: 'parent_id', type: 'string', length: 255, nullable: true, options: ['default' => null])]
     private ?string $parentId;
 
-    /**
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private bool $deleted;
 
-    /**
-     * @ORM\OneToMany(targetEntity="DocumentData", mappedBy="doc_id")
-     */
+    #[ORM\OneToMany(targetEntity: 'DocumentData', mappedBy: 'doc_id')]
     private $datas;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Log", mappedBy="document")
-     */
+    #[ORM\OneToMany(targetEntity: 'Log', mappedBy: 'document')]
     private $logs;
-	
-	/**
-     * @ORM\OneToMany(targetEntity="App\Entity\WorkflowLog", mappedBy="triggerDocument")
-     */
+
+    #[ORM\OneToMany(targetEntity: 'App\Entity\WorkflowLog', mappedBy: 'triggerDocument')]
     private $triggerDocuments;
 
-	/**
-     * @ORM\OneToMany(targetEntity="App\Entity\WorkflowLog", mappedBy="generateDocument")
-     */
+    #[ORM\OneToMany(targetEntity: 'App\Entity\WorkflowLog', mappedBy: 'generateDocument')]
     private $generateDocuments;
 
-	/**
-     * @ORM\Column(name="job_lock", type="string", length=23, nullable=false)
-     */
+    #[ORM\Column(name: 'job_lock', type: 'string', length: 23, nullable: false)]
     private string $jobLock;
-	
-	/**
-     * @ORM\Column(name="workflow_error", type="boolean", options={"default":0})
-     */
+
+    #[ORM\Column(name: 'workflow_error', type: 'boolean', options: ['default' => 0])]
     private $workflowError;
-	
+
     public function __construct()
     {
         $this->datas = new ArrayCollection();
@@ -334,9 +287,6 @@ class Document
         return $this->parentId;
     }
 
-    /**
-     * @param bool $deleted
-     */
     public function setDeleted($deleted): self
     {
         $this->deleted = (bool)$deleted;
@@ -370,7 +320,6 @@ class Document
     public function removeData(DocumentData $data): self
     {
         if ($this->datas->removeElement($data)) {
-            // set the owning side to null (unless already changed)
             if ($data->getDocId() === $this) {
                 $data->setDocId(null);
             }
@@ -390,10 +339,8 @@ class Document
         }
     }
 
-    // Function to manually edit the data inside a Myddleware Document
     public function updateDocumentData(string $docId, array $newValues, string $dataType)
     {
-            // check if data of that type with this docid and this data fields
             if (empty($docId)) {
                 throw new Exception("No document id provided");
             }
@@ -414,7 +361,6 @@ class Document
                 throw new Exception("This is not  the correct data type. Source, Target, or History is required");
             }
 
-            // Build the new data array from the old one and the function arguments
             $oldData = $this->getDataByType($dataType);
             if(!empty($oldData)){
                 foreach ($newValues as $oneKey => $oneValue)
@@ -429,7 +375,6 @@ class Document
                         }
                 }
 
-                // Updat the data of the right type
                 $dataDestination = $this->getDatas();
                 foreach ($dataDestination as $oneDataset) {
                     if (
@@ -462,7 +407,6 @@ class Document
     public function removeLog(Log $log): self
     {
         if ($this->logs->removeElement($log)) {
-            // set the owning side to null (unless already changed)
             if ($log->getDocument() === $this) {
                 $log->setDocument(null);
             }
@@ -491,7 +435,6 @@ class Document
     public function removeTriggerDocument(Workflowlog $triggerDocument): self
     {
         if ($this->triggerDocuments->removeElement($triggerDocument)) {
-            // set the owning side to null (unless already changed)
             if ($triggerDocument->getDocument() === $this) {
                 $triggerDocument->setDocument(null);
             }
@@ -522,8 +465,8 @@ class Document
 
         return $this;
     }
-	
-	public function setJobLock($jobLock): self
+
+    public function setJobLock($jobLock): self
     {
         $this->jobLock = $jobLock;
         return $this;
@@ -533,8 +476,8 @@ class Document
     {
         return $this->jobLock;
     }
-    
-	public function setWorkflowError($workflowError): self
+
+    public function setWorkflowError($workflowError): self
     {
         $this->workflowError = $workflowError;
         return $this;

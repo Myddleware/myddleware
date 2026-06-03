@@ -11,7 +11,7 @@ use Exception;
 use PDOException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Requirements\SymfonyRequirements;
 use App\Service\DebugLogger;
@@ -30,9 +30,7 @@ class InstallRequirementsController extends AbstractController
         $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @Route("/install/requirements", name="install_requirements")
-     */
+    #[Route('/install/requirements', name: 'install_requirements')]
     public function index(TranslatorInterface $translator): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['translator' => $translator]);

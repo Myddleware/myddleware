@@ -28,85 +28,55 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="App\Repository\WorkflowActionRepository")
- * @ORM\Table(name="workflowaction", indexes={@ORM\Index(name="index_workflow_id", columns={"workflow_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\WorkflowActionRepository')]
+#[ORM\Table(name: 'workflowaction')]
+#[ORM\Index(name: 'index_workflow_id', columns: ['workflow_id'])]
 class WorkflowAction
 {
-    /**
-     * @ORM\Column(name="id", type="string")
-     * @ORM\Id
-     */
+    #[ORM\Column(name: 'id', type: 'string', length: 255)]
+    #[ORM\Id]
     private string $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Workflow", inversedBy="workflowActions")
-     * @ORM\JoinColumn(name="workflow_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Workflow', inversedBy: 'workflowActions')]
+    #[ORM\JoinColumn(name: 'workflow_id', referencedColumnName: 'id', nullable: false)]
     private Workflow $workflow;
 
-	/**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private DateTime $dateCreated;
 
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_modified', type: 'datetime', nullable: false)]
     private DateTime $dateModified;
-	
-	/**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private User $modifiedBy;
-	
-    /**
-     * @ORM\Column(name="name", type="text", nullable=false)
-     */
+
+    #[ORM\Column(name: 'name', type: 'text', nullable: false)]
     private string $name;
-	
-	/**
-     * @ORM\Column(name="action", type="text", nullable=false)
-     */
+
+    #[ORM\Column(name: 'action', type: 'text', nullable: false)]
     private string $action;
 
-    /**
-     * @ORM\Column(name="arguments", type="array", nullable=false)
-     */
+    #[ORM\Column(name: 'arguments', type: 'json', nullable: false)]
     private $arguments;
 
-    /**
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'description', type: 'text', nullable: true)]
     private string $description;
 
-    /**
-     * @ORM\Column(name="`order`", type="integer", length=3, nullable=false, options={"default": 1})
-     */
+    #[ORM\Column(name: '`order`', type: 'integer', length: 3, nullable: false, options: ['default' => 1])]
     private int $order;
-	
-	/**
-     * @ORM\Column(name="active", type="boolean", options={"default":1})
-     */
+
+    #[ORM\Column(name: 'active', type: 'boolean', options: ['default' => 1])]
     private bool $active;
 
-	/**
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private bool $deleted;
 
-    /**
-     * @ORM\Column(name="multipleRuns", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'multipleRuns', type: 'boolean', options: ['default' => 0])]
     private bool $multipleRuns;
 
     public function getId(): string
@@ -131,8 +101,8 @@ class WorkflowAction
         $this->workflow = $workflow;
         return $this;
     }
-	
-	public function setDateCreated($dateCreated): self
+
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
 
@@ -155,8 +125,8 @@ class WorkflowAction
     {
         return $this->dateModified;
     }
-	
-	public function getCreatedBy(): ?User
+
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
@@ -177,8 +147,8 @@ class WorkflowAction
         $this->modifiedBy = $modifiedBy;
         return $this;
     }
-	    
-	public function setName($name): self
+
+    public function setName($name): self
     {
         $this->name = $name;
         return $this;
@@ -188,8 +158,8 @@ class WorkflowAction
     {
         return $this->name;
     }
-	
-	public function getAction(): string
+
+    public function getAction(): string
     {
         return $this->action;
     }
@@ -199,7 +169,7 @@ class WorkflowAction
         $this->action = $action;
         return $this;
     }
-	
+
     public function getArguments(): array
     {
         if (is_array($this->arguments)) {
@@ -218,8 +188,8 @@ class WorkflowAction
         $this->arguments = $arguments;
         return $this;
     }
-	
-	public function setDescription($description): self
+
+    public function setDescription($description): self
     {
         $this->description = $description;
         return $this;
@@ -229,8 +199,8 @@ class WorkflowAction
     {
         return isset($this->description) ? $this->description : '';
     }
-	
-	public function setOrder($order): self
+
+    public function setOrder($order): self
     {
         $this->order = $order;
 
@@ -242,7 +212,7 @@ class WorkflowAction
         return $this->order;
     }
 
-	public function setActive($active): self
+    public function setActive($active): self
     {
         $this->active = $active;
         return $this;

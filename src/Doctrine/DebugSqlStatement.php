@@ -23,26 +23,25 @@ class DebugSqlStatement extends AbstractStatementMiddleware
         $this->sql = $sql;
     }
 
-    public function bindValue($param, $value, $type = ParameterType::STRING)
+    public function bindValue(string|int $param, mixed $value, ParameterType $type = ParameterType::STRING): void
     {
         $this->params[$param] = $value;
         $this->types[$param] = $type;
 
-        return parent::bindValue($param, $value, $type);
+        parent::bindValue($param, $value, $type);
     }
 
-    public function execute($params = null): Result
+    public function execute(): Result
     {
         if (DynamicLogLevelListener::isDebugModeEnabled()) {
-            $allParams = $params ?? $this->params;
             $this->logger->critical(sprintf(
                 '[DEBUG SQL] %s | Params: %s',
                 $this->sql,
-                json_encode($this->sanitizeParams($allParams), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
+                json_encode($this->sanitizeParams($this->params), JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
             ));
         }
 
-        return parent::execute($params);
+        return parent::execute();
     }
 
     private function sanitizeParams(array $params): array

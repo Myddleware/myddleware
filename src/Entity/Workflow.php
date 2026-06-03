@@ -31,94 +31,62 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Exception;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Order;
 
-/**
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="App\Repository\WorkflowRepository")
- * @ORM\Table(name="workflow", indexes={@ORM\Index(name="index_rule_id", columns={"rule_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\WorkflowRepository')]
+#[ORM\Table(name: 'workflow')]
+#[ORM\Index(name: 'index_rule_id', columns: ['rule_id'])]
 class Workflow
 {
-
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255)]
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="workflows")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'workflows')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private $dateCreated;
 
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_modified', type: 'datetime', nullable: false)]
     private DateTime $dateModified;
-	
-	/**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private User $modifiedBy;
-	
-    /**
-     * @ORM\Column(name="name", type="text", nullable=false)
-     */
+
+    #[ORM\Column(name: 'name', type: 'text', nullable: false)]
     private string $name;
 
-    /**
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'description', type: 'text', nullable: true)]
     private string $description;
-	
-	/**
-     * @ORM\Column(name="`condition`", type="text", nullable=false)
-     */
+
+    #[ORM\Column(name: '`condition`', type: 'text', nullable: false)]
     private string $condition;
 
-	/**
-     * @ORM\Column(name="active", type="boolean", options={"default":1})
-     */
+    #[ORM\Column(name: 'active', type: 'boolean', options: ['default' => 1])]
     private bool $active;
 
-    /**
-     * @ORM\Column(name="`order`", type="integer", length=3, nullable=false, options={"default": 1})
-     */
+    #[ORM\Column(name: '`order`', type: 'integer', length: 3, nullable: false, options: ['default' => 1])]
     private int $order;
 
-	/**
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private bool $deleted;
-	
-/**
- * @var Collection|WorkflowAction[]
- *
- * @ORM\OneToMany(targetEntity="WorkflowAction", mappedBy="workflow")
- */
-private $workflowActions;
-	
-	/**
-     * @var WorkflowLog[]
-     *
-     * @ORM\OneToMany(targetEntity="WorkflowLog", mappedBy="workflow")
-     */
+
+    /** @var Collection|WorkflowAction[] */
+    #[ORM\OneToMany(targetEntity: 'WorkflowAction', mappedBy: 'workflow')]
+    private $workflowActions;
+
+    /** @var WorkflowLog[] */
+    #[ORM\OneToMany(targetEntity: 'WorkflowLog', mappedBy: 'workflow')]
     private $workflowLogs;
-	
-	public function __construct()
+
+    public function __construct()
     {
         $this->workflowActions = new ArrayCollection();
         $this->workflowLogs = new ArrayCollection();
@@ -128,7 +96,7 @@ private $workflowActions;
         $this->deleted = false;
         $this->order = 1;
     }
-	
+
     public function getId(): string
     {
         return $this->id;
@@ -151,8 +119,8 @@ private $workflowActions;
         $this->rule = $rule;
         return $this;
     }
-	
-	public function setDateCreated($dateCreated): self
+
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
         return $this;
@@ -173,8 +141,8 @@ private $workflowActions;
     {
         return $this->dateModified;
     }
-	
-	public function getCreatedBy(): ?User
+
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
@@ -195,8 +163,8 @@ private $workflowActions;
         $this->modifiedBy = $modifiedBy;
         return $this;
     }
-	    
-	public function setName($name): self
+
+    public function setName($name): self
     {
         $this->name = $name;
         return $this;
@@ -206,8 +174,8 @@ private $workflowActions;
     {
         return $this->name;
     }
-	
-	public function setDescription($description): self
+
+    public function setDescription($description): self
     {
         $this->description = $description;
         return $this;
@@ -217,8 +185,8 @@ private $workflowActions;
     {
         return $this->description;
     }
-	
-	public function getCondition(): string
+
+    public function getCondition(): string
     {
         return $this->condition;
     }
@@ -229,7 +197,7 @@ private $workflowActions;
         return $this;
     }
 
-	public function setOrder($order): self
+    public function setOrder($order): self
     {
         $this->order = $order;
 
@@ -240,7 +208,7 @@ private $workflowActions;
     {
         return $this->order;
     }
-	
+
     public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
@@ -252,7 +220,7 @@ private $workflowActions;
         return $this->deleted;
     }
 
-	public function setActive($active): self
+    public function setActive($active): self
     {
         $this->active = $active;
         return $this;
@@ -263,18 +231,17 @@ private $workflowActions;
         return $this->active;
     }
 
+    /**
+     * @return Collection|WorkflowAction[]
+     */
+    public function getWorkflowActions(): Collection
+    {
+        $criteria = Criteria::create(true)
+            ->where(Criteria::expr()->neq('deleted', 1))
+            ->orderBy(['order' => Order::Ascending]);
 
-/**
- * @return Collection|WorkflowAction[]
- */
-public function getWorkflowActions(): Collection
-{
-    $criteria = Criteria::create()
-        ->where(Criteria::expr()->neq('deleted', 1)) // Assuming 'deleted' is the field name and it's directly accessible.
-        ->orderBy(['order' => Criteria::ASC]); // Adjust 'order' to your actual field name if different.
-
-    return $this->workflowActions->matching($criteria);
-}
+        return $this->workflowActions->matching($criteria);
+    }
 
     public function addWorkflowActions(WorkflowAction $workflowAction): self
     {
@@ -288,15 +255,14 @@ public function getWorkflowActions(): Collection
     public function removeWorkflowAction(WorkflowAction $workflowAction): self
     {
         if ($this->workflowActions->removeElement($workflowAction)) {
-            // set the owning side to null (unless already changed)
             if ($workflowAction->getWorkflow() === $this) {
                 $workflowAction->setWorkflow(null);
             }
         }
         return $this;
     }
-	
-	/**
+
+    /**
      * @return Collection|WorkflowLog[]
      */
     public function getWorkflowLogs(): Collection
@@ -316,7 +282,6 @@ public function getWorkflowActions(): Collection
     public function removeWorkflowLog(WorkflowLog $workflowLog): self
     {
         if ($this->workflowLogs->removeElement($workflowLog)) {
-            // set the owning side to null (unless already changed)
             if ($workflowLog->getWorkflow() === $this) {
                 $workflowLog->setWorkflow(null);
             }

@@ -98,11 +98,11 @@ class WorkflowActionType extends AbstractType
             ->add('order', IntegerType::class, [
                 'label' => 'Order',
                 'constraints' => [
-                    new Range([
-                        'min' => 0,
-                        'max' => 50,
-                        'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
-                    ]),
+                    new Range(
+                        min: 0,
+                        max: 50,
+                        notInRangeMessage: 'You must enter a number between {{ min }} and {{ max }}.',
+                    ),
                 ],
                 'attr' => [
                     'class' => 'form-control',

@@ -40,8 +40,6 @@ use Exception;
 use App\Service\DebugLogger;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-// use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-// use App\Event\DocumentEvent;
 
 class DocumentManager
 {
@@ -93,7 +91,6 @@ class DocumentManager
     protected FormulaManager $formulaManager;
     protected ?ParameterBagInterface $parameterBagInterface;
     protected ?SolutionManager $solutionManager;
-    // protected ?EventDispatcherInterface $eventDispatcher;
     protected array $globalStatus = [
         'New' => 'Open',
         'Predecessor_OK' => 'Open',
@@ -122,11 +119,10 @@ class DocumentManager
         Connection $dbalConnection,
         EntityManagerInterface $entityManager,
         FormulaManager $formulaManager,
-        SolutionManager $solutionManager = null,
-        ParameterBagInterface $parameterBagInterface = null,
-        ToolsManager $tools = null,
-        EventDispatcherInterface $eventDispatcher = null,
-        DebugLogger $debugLogger = null
+        ?SolutionManager $solutionManager = null,
+        ?ParameterBagInterface $parameterBagInterface = null,
+        ?ToolsManager $tools = null,
+        ?DebugLogger $debugLogger = null
     ) {
         $this->connection = $dbalConnection;
         $this->logger = $logger;
@@ -135,7 +131,6 @@ class DocumentManager
         $this->tools = $tools;
         $this->formulaManager = $formulaManager;
         $this->solutionManager = $solutionManager;
-        $this->eventDispatcher = $eventDispatcher;
 		$this->env = $_SERVER['APP_ENV'];
         $this->debugLogger = $debugLogger;
     }
@@ -437,15 +432,13 @@ class DocumentManager
             // Création de la requête d'entête
             $date_modified = $this->data['date_modified'];
             // Source_id could contain accent
-            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
+            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".$this->ensureUtf8($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
             // Insert source data
             $insertDataTable = $this->insertDataTable($this->data, 'S');
             $this->updateStatus('New');
 
-            // // Dispatch event for Elasticsearch sync
-            // $this->dispatchDocumentEvent(DocumentEvent::CREATED);
 
 			return $insertDataTable;
         } catch (\Exception $e) {
@@ -649,14 +642,13 @@ class DocumentManager
                 return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
             }
         } catch (\Exception $e) {
-            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}
     } finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
-	
+
 	// Set the document lock
     public function unsetLock($force = false) {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['force' => $force]);
@@ -1317,7 +1309,6 @@ class DocumentManager
                 if (!empty($this->sourceData[$childRuleId['field_name_source']])) {
                     $idQuery = $this->sourceData[$childRuleId['field_name_source']];
                 } else {
-                    //throw new \Exception( 'Failed to get the data in the document for the field '.$childRuleId['field_name_source'].'. The query to search to generate child data can\'t be created');
                     continue;
                 }
                 // Generate documents for the child rule (could be several documents) => We search the value of the field_name_source in the field_name_target of the target rule
@@ -2491,11 +2482,6 @@ class DocumentManager
             // Update current global status tracker
             $this->currentGlobalStatus = $globalStatus;
 
-            // // Dispatch event for Elasticsearch sync ONLY when global_status changes
-            // // This optimization reduces ES operations by ~70% (avoids syncing intermediate statuses)
-            // if ($previousGlobalStatus !== $globalStatus) {
-            //     $this->dispatchDocumentEvent(DocumentEvent::UPDATED);
-            // }
 
 			return true;
         } catch (\Exception $e) {
@@ -2542,9 +2528,7 @@ class DocumentManager
             $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
             $this->createDocLog();
 
-            // // Dispatch event for Elasticsearch sync
-            // // Use DELETED when soft-deleting, UPDATED when restoring
-            // $this->dispatchDocumentEvent(!empty($deleted) ? DocumentEvent::DELETED : DocumentEvent::UPDATED);
+
         } catch (\Exception $e) {
             $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->typeError = 'E';
@@ -2661,7 +2645,7 @@ class DocumentManager
             $stmt = $this->connection->prepare($query);
             $stmt->bindValue(':now', $now);
             // Target id could contain accent
-            $stmt->bindValue(':target_id', utf8_encode($target_id));
+            $stmt->bindValue(':target_id', $this->ensureUtf8($target_id));
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
             $this->message .= 'Target id : '.$target_id;
@@ -3045,7 +3029,7 @@ class DocumentManager
             $stmt = $this->connection->prepare($query_header);
             $stmt->bindValue(':created', $now);
             $stmt->bindValue(':typeError', $this->typeError);
-            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
+            $stmt->bindValue(':message', str_replace("'", '', $this->message));
             $stmt->bindValue(':rule_id', $this->ruleId);
             $stmt->bindValue(':doc_id', $this->id);
             $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
@@ -3078,27 +3062,11 @@ class DocumentManager
         }
     }
 
-    // /**
-    //  * Dispatch document event for Elasticsearch sync
-    //  *
-    //  * @param string $eventType One of DocumentEvent::CREATED, UPDATED, DELETED
-    //  */
-    // protected function dispatchDocumentEvent(string $eventType): void
-    // {
-    //     if ($this->eventDispatcher === null) {
-    //         return;
-    //     }
-
-    //     try {
-    //         $event = new DocumentEvent($this->id);
-    //         $this->eventDispatcher->dispatch($event, $eventType);
-    //     } catch (\Exception $e) {
-    //         // Log error but don't fail the main operation
-    //         $this->logger->warning('Failed to dispatch document event: ' . $e->getMessage(), [
-    //             'document_id' => $this->id,
-    //             'event_type' => $eventType
-    //         ]);
-    //     }
-    // }
-
+    protected function ensureUtf8(string $value): string
+    {
+        if (mb_check_encoding($value, 'UTF-8')) {
+            return $value;
+        }
+        return mb_convert_encoding($value, 'UTF-8', 'ISO-8859-1');
+    }
 }

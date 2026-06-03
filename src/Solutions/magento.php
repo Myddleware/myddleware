@@ -766,19 +766,6 @@ class magento extends solution
         return $result;
     }
 
-    // For module address, we only update data
-    // public function getRuleMode($module,$type) {
-    // if (
-    // $type == 'source'
-    // AND $module == 'customer_address'
-    // ) {
-    // return array(
-    // 'U' => 'update_only',
-    // );
-    // }
-    // return parent::getRuleMode($module,$type);
-    // }
-
     // Renvoie le nom du champ de la date de référence en fonction du module et du mode de la règle
     /**
      * @throws \Exception

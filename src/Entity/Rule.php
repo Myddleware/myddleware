@@ -31,154 +31,96 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RuleRepository")
- * @ORM\HasLifecycleCallbacks()
- *
- * @ORM\Table(name="rule", indexes={
- *	 @ORM\Index(name="Krule_name", columns={"name"}),
- *	 @ORM\Index(name="index_read_job_lock", columns={"read_job_lock"})
- * })
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleRepository')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'rule')]
+#[ORM\Index(name: 'Krule_name', columns: ['name'])]
+#[ORM\Index(name: 'index_read_job_lock', columns: ['read_job_lock'])]
 class Rule
 {
-    /**
-     * @ORM\Column(name="id", type="string")
-     * @ORM\Id
-     */
+    #[ORM\Column(name: 'id', type: 'string', length: 255)]
+    #[ORM\Id]
     private string $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Connector")
-     * @ORM\JoinColumn(name="conn_id_source", referencedColumnName="id")
-     */
+    #[ORM\ManyToOne(targetEntity: 'Connector')]
+    #[ORM\JoinColumn(name: 'conn_id_source', referencedColumnName: 'id')]
     private Connector $connectorSource;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Connector")
-     * @ORM\JoinColumn(name="conn_id_target", referencedColumnName="id")
-     */
+    #[ORM\ManyToOne(targetEntity: 'Connector')]
+    #[ORM\JoinColumn(name: 'conn_id_target', referencedColumnName: 'id')]
     private Connector $connectorTarget;
 
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private DateTime $dateCreated;
 
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_modified', type: 'datetime', nullable: false)]
     private DateTime $dateModified;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private User $modifiedBy;
 
-    /**
-     * @ORM\Column(name="module_source", type="string", nullable=false)
-     */
+    #[ORM\Column(name: 'module_source', type: 'string', length: 255, nullable: false)]
     private string $moduleSource;
 
-    /**
-     * @ORM\Column(name="module_target", type="string", nullable=false)
-     */
+    #[ORM\Column(name: 'module_target', type: 'string', length: 255, nullable: false)]
     private string $moduleTarget;
 
-    /**
-     * @ORM\Column(name="active", type="boolean", nullable=false)
-     */
+    #[ORM\Column(name: 'active', type: 'boolean', nullable: false)]
     private bool $active;
 
-    /**
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private bool $deleted;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=50, nullable=false)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 50, nullable: false)]
     private string $name;
 
-    /**
-     * @Gedmo\Slug(fields={"name"}, separator="_")
-     * @ORM\Column(length=50, nullable=false, name="name_slug")
-     */
+    #[Gedmo\Slug(fields: ['name'], separator: '_')]
+    #[ORM\Column(length: 50, nullable: false, name: 'name_slug')]
     private string $nameSlug;
 
-    /**
-     * @var RuleParam[]
-     *
-     * @ORM\OneToMany(targetEntity="RuleParam", mappedBy="rule")
-     */
+    /** @var RuleParam[] */
+    #[ORM\OneToMany(targetEntity: 'RuleParam', mappedBy: 'rule')]
     private $params;
 
-    /**
-     * @var RuleRelationShip[]
-     *
-     * @ORM\OneToMany(targetEntity="RuleRelationShip", mappedBy="rule")
-     */
+    /** @var RuleRelationShip[] */
+    #[ORM\OneToMany(targetEntity: 'RuleRelationShip', mappedBy: 'rule')]
     private $relationsShip;
 
-    /**
-     * @var RuleOrder[]
-     *
-     * @ORM\OneToMany(targetEntity="RuleOrder", mappedBy="rule")
-     */
+    /** @var RuleOrder[] */
+    #[ORM\OneToMany(targetEntity: 'RuleOrder', mappedBy: 'rule')]
     private $orders;
 
-    /**
-     * @var RuleFilter[]
-     *
-     * @ORM\OneToMany(targetEntity="RuleFilter", mappedBy="rule")
-     */
+    /** @var RuleFilter[] */
+    #[ORM\OneToMany(targetEntity: 'RuleFilter', mappedBy: 'rule')]
     private $filters;
 
-    /**
-     * @var RuleField[]
-     *
-     * @ORM\OneToMany(targetEntity="RuleField", mappedBy="rule")
-     */
+    /** @var RuleField[] */
+    #[ORM\OneToMany(targetEntity: 'RuleField', mappedBy: 'rule')]
     private $fields;
 
-    /**
-     * @var RuleAudit[]
-     *
-     * @ORM\OneToMany(targetEntity="RuleAudit", mappedBy="rule")
-     */
+    /** @var RuleAudit[] */
+    #[ORM\OneToMany(targetEntity: 'RuleAudit', mappedBy: 'rule')]
     private $audits;
 
-     /**
-     * @var Workflow[]
-     *
-     * @ORM\OneToMany(targetEntity="Workflow", mappedBy="rule")
-     */
+    /** @var Workflow[] */
+    #[ORM\OneToMany(targetEntity: 'Workflow', mappedBy: 'rule')]
     private $workflows;
 
-    /**
-     * @var Document[]
-     *
-     * @ORM\OneToMany(targetEntity="Document", mappedBy="rule")
-     * @ORM\OrderBy({"sourceDateModified" : "ASC"})
-     */
+    /** @var Document[] */
+    #[ORM\OneToMany(targetEntity: 'Document', mappedBy: 'rule')]
+    #[ORM\OrderBy(['sourceDateModified' => 'ASC'])]
     private $documents;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="RuleGroup", inversedBy="rules")
-     * @ORM\JoinColumn(name="group_id", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: 'RuleGroup', inversedBy: 'rules')]
+    #[ORM\JoinColumn(name: 'group_id', referencedColumnName: 'id', nullable: true)]
     private ?RuleGroup $group = null;
-	
-	/**
-     * @ORM\Column(name="read_job_lock", type="string", length=23, nullable=true, options={"default":NULL})
-     */
+
+    #[ORM\Column(name: 'read_job_lock', type: 'string', length: 23, nullable: true, options: ['default' => null])]
     private string $readJobLock;
 
     public function __construct()
@@ -193,9 +135,7 @@ class Rule
         $this->workflows = new ArrayCollection();
     }
 
-    /**
-     * @ORM\PrePersist()
-     */
+    #[ORM\PrePersist]
     public function preSave()
     {
         $this->id = uniqid();
@@ -308,8 +248,8 @@ class Rule
     {
         return $this->nameSlug;
     }
-	
-	public function setReadJobLock($readJobLock): self
+
+    public function setReadJobLock($readJobLock): self
     {
         $this->readJobLock = $readJobLock;
         return $this;
@@ -399,7 +339,6 @@ class Rule
     public function removeParam(RuleParam $param): self
     {
         if ($this->params->removeElement($param)) {
-            // set the owning side to null (unless already changed)
             if ($param->getRule() === $this) {
                 $param->setRule(null);
             }
@@ -440,7 +379,6 @@ class Rule
     public function removeRelationsShip(RuleRelationShip $relationsShip): self
     {
         if ($this->relationsShip->removeElement($relationsShip)) {
-            // set the owning side to null (unless already changed)
             if ($relationsShip->getRule() === $this) {
                 $relationsShip->setRule(null);
             }
@@ -470,7 +408,6 @@ class Rule
     public function removeOrder(RuleOrder $order): self
     {
         if ($this->orders->removeElement($order)) {
-            // set the owning side to null (unless already changed)
             if ($order->getRule() === $this) {
                 $order->setRule(null);
             }
@@ -500,7 +437,6 @@ class Rule
     public function removeFilter(RuleFilter $filter): self
     {
         if ($this->filters->removeElement($filter)) {
-            // set the owning side to null (unless already changed)
             if ($filter->getRule() === $this) {
                 $filter->setRule(null);
             }
@@ -530,7 +466,6 @@ class Rule
     public function removeAudit(RuleAudit $audit): self
     {
         if ($this->audits->removeElement($audit)) {
-            // set the owning side to null (unless already changed)
             if ($audit->getRule() === $this) {
                 $audit->setRule(null);
             }
@@ -560,7 +495,6 @@ class Rule
     public function removeField(RuleField $field): self
     {
         if ($this->fields->removeElement($field)) {
-            // set the owning side to null (unless already changed)
             if ($field->getRule() === $this) {
                 $field->setRule(null);
             }
@@ -569,7 +503,7 @@ class Rule
         return $this;
     }
 
-	/**
+    /**
      * @return Collection|Workflow[]
      */
     public function getWorkflows(): Collection
@@ -589,7 +523,6 @@ class Rule
     public function removeWorkflow(Workflow $workflow): self
     {
         if ($this->workflows->removeElement($workflow)) {
-            // set the owning side to null (unless already changed)
             if ($workflow->getRule() === $this) {
                 $workflow->setRule(null);
             }
@@ -625,7 +558,6 @@ class Rule
     public function removeDocument(Document $document): self
     {
         if ($this->documents->removeElement($document)) {
-            // set the owning side to null (unless already changed)
             if ($document->getRule() === $this) {
                 $document->setRule(null);
             }
@@ -653,14 +585,12 @@ class Rule
     {
         $items = [];
         foreach ($this->getFields() as $ruleField) {
-            // Plusieurs champs source peuvent être utilisé pour un seul champ cible
             $fields = explode(';', $ruleField->getSource());
             foreach ($fields as $field) {
                 $items[] = ltrim($field);
             }
         }
 
-        // Lecture des relations de la règle
         if ($this->getRelationsShip()->count()) {
             foreach ($this->getRelationsShip() as $ruleRelationship) {
                 $items[] = ltrim($ruleRelationship->getFieldNameSource());
@@ -677,7 +607,6 @@ class Rule
             $items[] = ltrim($ruleField->getSource());
         }
 
-        // Lecture des relations de la règle
         if ($this->getRelationsShip()->count()) {
             foreach ($this->getRelationsShip() as $ruleRelationship) {
                 $items[] = ltrim($ruleRelationship->getFieldNameTarget());
@@ -731,13 +660,11 @@ class Rule
 
     public static function getNameTest(): array
     {
-
         return ['ruleName', 'rule'];
     }
 
     public function isNameSet(): bool
     {
-        // test with isset if the name property is set
         return isset($this->name);
     }
 
@@ -750,8 +677,8 @@ class Rule
     {
         return isset($this->moduleTarget);
     }
-	
-	public function setGroup(?RuleGroup $group): self
+
+    public function setGroup(?RuleGroup $group): self
     {
         $this->group = $group;
 
@@ -762,5 +689,4 @@ class Rule
     {
         return $this->group;
     }
-
 }

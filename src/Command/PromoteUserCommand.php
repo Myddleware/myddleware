@@ -4,6 +4,7 @@ namespace App\Command;
 
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -11,10 +12,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'myddleware:promote-user', description: 'Promotes an existing Myddleware user to ROLE_ADMIN or ROLE_SUPER_ADMIN')]
 class PromoteUserCommand extends Command
 {
-    protected static $defaultName = 'myddleware:promote-user';
-    protected static $defaultDescription = 'Promotes an existing Myddleware user to ROLE_ADMIN or ROLE_SUPER_ADMIN';
     private EntityManagerInterface $em;
     private UserRepository $userRepository;
     private SymfonyStyle $io;

@@ -227,13 +227,12 @@ class ToolsManager
         $stmt = $this->connection->prepare($select);
         $result = $stmt->executeQuery();
         $config = $result->fetchAssociative();
-        if (!empty($config['conf_value'])) {
-            $php = $config['conf_value'];
+        if (!empty($config['value'])) {
+            $php = $config['value'];
         } else {
-            // If no php version found, we use the one returned by the php library
+            // PhpExecutableFinder locates the CLI php binary (PHP_BINARY may point to httpd.exe under mod_php)
             $phpBinaryFinder = new PhpExecutableFinder();
-            $phpBinaryPath = $phpBinaryFinder->find();
-            $php = $phpBinaryPath;
+            $php = $phpBinaryFinder->find();
         }
 
         // If no executable found we return 'php'

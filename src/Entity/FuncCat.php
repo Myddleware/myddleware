@@ -28,22 +28,16 @@ namespace App\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="funccat")
- * @ORM\Entity(repositoryClass="App\Repository\FuncCatRepository")
- */
+#[ORM\Table(name: 'funccat')]
+#[ORM\Entity(repositoryClass: 'App\Repository\FuncCatRepository')]
 class FuncCat
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=100)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 100)]
     private string $name;
 
     /**

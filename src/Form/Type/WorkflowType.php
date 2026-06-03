@@ -75,11 +75,11 @@ class WorkflowType extends AbstractType
             $builder->add('order', IntegerType::class, [
                 'label' => 'view_edit_workflow.Order',
                 'constraints' => [
-                    new Range([
-                        'min' => 0,
-                        'max' => 50,
-                        'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
-                    ]),
+                    new Range(
+                        min: 0,
+                        max: 50,
+                        notInRangeMessage: 'You must enter a number between {{ min }} and {{ max }}.',
+                    ),
                 ],
                 'attr' => [
                     'class' => 'form-control',
@@ -89,8 +89,7 @@ class WorkflowType extends AbstractType
                     'label' => 'view_edit_workflow.Condition',
                     'data' => $existingCondition ?: '{status} == "', // Use existing condition if available, otherwise use default
                     'constraints' => [
-                        new Callback([
-                            'callback' => function($payload, ExecutionContextInterface $context) {
+                        new Callback(callback: function($payload, ExecutionContextInterface $context) {
                                 // Check for both possible patterns
                                 if (strpos($payload, '{status} == "') === false && strpos($payload, '{status}=="') === false) {
                                     $context->buildViolation('The condition must contain either "{status} == " or "{status}==""')
@@ -108,8 +107,7 @@ class WorkflowType extends AbstractType
                                         ->atPath('condition')
                                         ->addViolation();
                                 }
-                            },
-                        ]),
+                            }),
                     ],
                     'attr' => [
                         'class' => 'form-control',

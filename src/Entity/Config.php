@@ -6,27 +6,19 @@ use App\Repository\ConfigRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Entity(repositoryClass=ConfigRepository::class)
- */
+#[ORM\Entity(repositoryClass: ConfigRepository::class)]
 class Config
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     * @Assert\Unique
-     */
+    #[ORM\Column(type: 'string', length: 255)]
+    #[Assert\Unique]
     private ?string $name;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
+    #[ORM\Column(type: 'string', length: 255)]
     private ?string $value;
 
     public function getId(): ?int

@@ -28,66 +28,36 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\VariableAuditRepository")
- * @ORM\Table(name="variableaudit", indexes={
- *  @ORM\Index(name="index_variable_id", columns={"variable_id"})
- *})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\VariableAuditRepository')]
+#[ORM\Table(name: 'variableaudit')]
+#[ORM\Index(name: 'index_variable_id', columns: ['variable_id'])]
 class VariableAudit
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @ORM\PrePersist()
-     */
+    #[ORM\PrePersist]
     public function preSave()
     {
         $this->id = uniqid();
     }
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="variable_id", type="integer")
-     */
+    #[ORM\Column(name: 'variable_id', type: 'integer')]
     private $variableId;
 
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'modified', type: 'datetime', nullable: false)]
     private $dateModified;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="before_value", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'before_value', type: 'string', length: 255, nullable: true)]
     private $before;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="after_value", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'after_value', type: 'string', length: 255, nullable: true)]
     private $after;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="user", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'user', type: 'string', length: 255, nullable: true)]
     private $byUser;
-
 
     /**
      * Get id.
@@ -218,5 +188,4 @@ class VariableAudit
     {
         return $this->byUser;
     }
-	
 }

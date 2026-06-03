@@ -53,14 +53,11 @@
 }
 
 .carousel li {
-    /*padding: 0 10px 0 10px;*/
     margin: 3px 0 0;
-    /*opacity: 0.4; */
 }
 
 .carousel li:hover {
     cursor: pointer;
-    /*opacity: 1;*/
     padding-top: 1px;
 }
 

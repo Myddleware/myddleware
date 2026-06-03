@@ -24,46 +24,29 @@
 
 namespace App\Controller;
 
-use Doctrine\DBAL\Connection;
 use App\Manager\TemplateManager;
 use App\Service\DebugLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
-    /**
-     * @Route("/rule")
-     */
+    #[Route('/rule')]
     class RuleTemplateController extends AbstractController
     {
         private TranslatorInterface $translator;
-        protected Connection $connection;
-        protected $simulationQueryField;
         private DebugLogger $debugLogger;
 
         public function __construct(
-            Connection $connection,
             TranslatorInterface $translator,
             DebugLogger $debugLogger,
         ) {
-            $this->connection = $connection;
             $this->translator = $translator;
             $this->debugLogger = $debugLogger;
         }
 
-        protected function getInstanceBdd()
-        {
-            $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-            try {
-            } finally {
-                $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-            }
-        }
-
-   
     // /**
     //  * LISTE DES TEMPLATES.
     //  */

@@ -27,8 +27,6 @@ namespace App\Solutions;
 
 use App\Solutions\lib\PrestaShopWebservice;
 use App\Solutions\lib\PrestaShopWebserviceException;
-//use Psr\LoggerInterface;
-
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -485,7 +483,6 @@ class prestashop extends solution
 
                         $opt['sort'] = '[date_add_ASC]';
                     } else {
-                        // $opt['filter[date_upd]'] = '[' . $param['date_ref'] .',9999-12-31 00:00:00]';
                         $opt['filter[date_upd]'] = '['.$param['date_ref'].',9999-12-31 00:00:00]';
 
                         $opt['sort'] = '[date_upd_ASC]';

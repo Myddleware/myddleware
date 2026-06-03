@@ -12,7 +12,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Doctrine\ORM\EntityManagerInterface;
@@ -32,9 +32,7 @@ class RegistrationController extends AbstractController
         $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @Route("/register", name="app_register")
-     */
+    #[Route('/register', name: 'app_register')]
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher, UserAuthenticatorInterface $userAuthenticator, SecurityAuthenticator $authenticator): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'passwordHasher' => $passwordHasher, 'userAuthenticator' => $userAuthenticator, 'authenticator' => $authenticator]);

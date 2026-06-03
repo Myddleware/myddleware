@@ -69,8 +69,6 @@ class DynamicsBusinessDeleteTest extends KernelTestCase
     public function testDeleteCustomer()
     {
 
-        // $CustomerIdTestFromEnv = $_ENV['CUSTOMER_ID_TEST'];
-
         $CustomerIdTestFromEnv = json_decode(file_get_contents(dirname(__DIR__, 2).'/tests/Solutions/ids-to-delete.json'), true);
 
         if (empty($CustomerIdTestFromEnv)) {

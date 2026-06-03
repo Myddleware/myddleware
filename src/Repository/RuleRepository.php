@@ -178,7 +178,7 @@ class RuleRepository extends ServiceEntityRepository
     /**
      * @return Rule[]
      */
-    public function errorByRule(User $user = null): array
+    public function errorByRule(?User $user = null): array
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user ? $user->getId() : null]);
         $__debugReturn = null;
