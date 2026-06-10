@@ -424,7 +424,7 @@ class SettingsManager {
             }
 
             const data = this.getSmtpFormData();
-            const response = await axios.post(`${this.baseUrl}/rule/api/smtp/save`, data);
+            const response = await axios.post(`${this.baseUrl}/managementsmtp/api/smtp/save`, data);
 
             if (response.data.success) {
                 this.showNotification('success', response.data.message || 'SMTP configuration saved successfully');
@@ -456,7 +456,7 @@ class SettingsManager {
             }
 
             const data = this.getSmtpFormData();
-            const response = await axios.post(`${this.baseUrl}/rule/api/smtp/test`, data);
+            const response = await axios.post(`${this.baseUrl}/managementsmtp/api/smtp/test`, data);
 
             if (response.data.success) {
                 this.showNotification('success', response.data.message || 'Test email sent successfully');
