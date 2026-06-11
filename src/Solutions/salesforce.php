@@ -414,9 +414,11 @@ class salesforce extends solution {
 				} else {
 					$query = $baseQuery.$querySelect.$queryFrom.$queryWhere.$queryOrder.$queryLimit.$queryOffset;
 				}
+				$this->logDebug('salesforce call query ', ['query' => $query]);
 				$query_request_data = $this->call($query, false);
+				$this->logDebug('salesforce call response', ['response' => $query_request_data]);
 				$query_request_data = $this->formatResponse($param,$query_request_data);
-
+				
 				if (!empty($query_request_data['records'])){
 					$i = 0;
 					// Traitement des informations reçues
@@ -598,7 +600,9 @@ class salesforce extends solution {
 				) {			
 					$parameters = json_encode($parameters);
 					// Call to Salesforce
-					$query_request_data = $this->call($query_url, $parameters);					
+					$this->logDebug('salesforce call parameters ', $parameters);
+					$query_request_data = $this->call($query_url, $parameters);	
+					$this->logDebug('salesforce call response ', $query_request_data);					
 					if (!empty($query_request_data['results'])) {
 						foreach ($query_request_data['results'] as $result_record) {	
 							// Check that we have the document id
@@ -705,9 +709,10 @@ class salesforce extends solution {
 					throw new \Exception ('The target id is requiered for an update.');
 				}
 				$parameters = json_encode($parameters);
-				// Appel de la requête				
+				// Appel de la requête
+				$this->logDebug('salesforce call parameters ', $parameters);				
                 $query_request_data = $this->call($query_url, $parameters, 'PATCH');             				
-				
+				$this->logDebug('salesforce call response ', $query_request_data);
 				if ($query_request_data === true) {
 					$result[$idDoc] = array(
 											'id' => $target_id,
