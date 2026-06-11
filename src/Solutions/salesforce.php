@@ -631,21 +631,18 @@ class salesforce extends solution {
 				}
 			}			
 		} catch (\Exception $e) {
-			// Global error
-			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Detail of the error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-			$result['error'] = $error;
-			// Erro on each data transfer
-			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Please open the task to get more detail.';
+			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Detail of the error : '.$e>                        $result['error'] = $error;
+			// Error on each data transfer
 			// Set status for all data transfer when an error happens in a mass action
 			foreach($param['data'] as $idDoc => $data) {
 				$result[$idDoc] = array(
-						'id' => '-1',
-						'error' => $error
-				);
+									'id' => '-1',
+									'error' => $error
+									);
 				// Change status for all records
-				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);	
+				$this->updateDocumentStatus($idDoc,$result[$idDoc],$param);
 			}
-		}					
+		}
 		return $result;
 	}
 
@@ -970,6 +967,10 @@ class salesforce extends solution {
 	
 	// Function de conversion de datetime format solution à un datetime format Myddleware
 	protected function dateTimeToMyddleware($dateTime) {
+		// No need to remove millisecond if there is no milliseconds
+		if (!str_contains($dateTime,'.')) {
+			return $dateTime;
+		}
 		$tab = explode('T', $dateTime);
 		$dateTime = $tab[0] . ' ' . $tab[1];
 		$tab = explode('.', $dateTime);
