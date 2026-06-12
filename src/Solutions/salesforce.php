@@ -598,9 +598,9 @@ class salesforce extends solution {
 						$nb_record == $i
 					 || $i % $this->limitCall  == 0
 				) {			
+					$this->logDebug('salesforce call parameters ', $parameters);
 					$parameters = json_encode($parameters);
 					// Call to Salesforce
-					$this->logDebug('salesforce call parameters ', $parameters);
 					$query_request_data = $this->call($query_url, $parameters);	
 					$this->logDebug('salesforce call response ', $query_request_data);					
 					if (!empty($query_request_data['results'])) {
@@ -635,7 +635,7 @@ class salesforce extends solution {
 				}
 			}			
 		} catch (\Exception $e) {
-			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Detail of the error : '.$e>                        $result['error'] = $error;
+			$error = 'An error happens in mass creation process. One of the record in the task '.$param['jobId'].' has failed. ALl records of this task have been rejected. Detail of the error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' ). Please open the task to get more detail.';
 			// Error on each data transfer
 			// Set status for all data transfer when an error happens in a mass action
 			foreach($param['data'] as $idDoc => $data) {
@@ -708,9 +708,9 @@ class salesforce extends solution {
 				if (empty($target_id)) {
 					throw new \Exception ('The target id is requiered for an update.');
 				}
+				$this->logDebug('salesforce call parameters ', $parameters);				
 				$parameters = json_encode($parameters);
 				// Appel de la requête
-				$this->logDebug('salesforce call parameters ', $parameters);				
                 $query_request_data = $this->call($query_url, $parameters, 'PATCH');             				
 				$this->logDebug('salesforce call response ', $query_request_data);
 				if ($query_request_data === true) {

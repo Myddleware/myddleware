@@ -971,14 +971,7 @@ class DocumentManager
                 and !$this->isChild()
             ) {
                 if (empty($this->targetId)) {
-                    // If no predecessor at all (even in error or open) and type D => it means that Myddleware has never sent the record so we can't delete it
-                    if ('D' == $this->documentType) {
-                        $this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
-                        $this->updateStatus('Cancel');
-
-                        return false;
-                    }
-                    throw new \Exception('No target id found for a document with the type Update. ');
+                    throw new \Exception('No target id found for a document with the type Update or delete. ');
                 }
                 if (!$this->updateTargetId($this->targetId)) {
                     throw new \Exception('Failed to update the target id. Failed to unblock this update document. ');
