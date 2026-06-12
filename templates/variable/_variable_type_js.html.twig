@@ -35,10 +35,12 @@ document.addEventListener('DOMContentLoaded', function () {
         if (type === 'table') {
             simpleContainer.style.display = 'none';
             tableContainer.style.display = 'block';
+            valueField.removeAttribute('required');
             loadTableFromValue();
         } else {
             simpleContainer.style.display = 'block';
             tableContainer.style.display = 'none';
+            valueField.setAttribute('required', 'required');
         }
     }
 
