@@ -115,7 +115,6 @@ class VariableController extends AbstractController
                     'label' => $translator->trans('variable.table_headers.type'),
                     'choices' => [
                         $translator->trans('variable.type.simple') => 'simple',
-                        $translator->trans('variable.type.list') => 'list',
                         $translator->trans('variable.type.table') => 'table',
                     ],
                     'expanded' => true,
@@ -210,7 +209,6 @@ class VariableController extends AbstractController
                     'label' => $translator->trans('variable.table_headers.type'),
                     'choices' => [
                         $translator->trans('variable.type.simple') => 'simple',
-                        $translator->trans('variable.type.list') => 'list',
                         $translator->trans('variable.type.table') => 'table',
                     ],
                     'expanded' => true,
