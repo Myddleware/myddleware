@@ -520,5 +520,12 @@ color: #0a58ca;
 }
 
 .rule-list-button{
-	margin: 3rem 1rem 2rem 5.2rem !important;
+	max-width: 88vw;
+	margin: 3rem auto 2rem auto !important;
+}
+
+.rule-table-row{
+	max-width: 88vw;
+	margin-left: auto !important;
+	margin-right: auto !important;
 }
