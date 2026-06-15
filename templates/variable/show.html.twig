@@ -56,40 +56,54 @@
                     <div>{{ ('variable.type.' ~ variable.type)|trans }}</div>
                 </div>
             </div>
-            <div class="row mb-2">
-                <div class="col-md-6">
-                    <strong>{{ 'variable.table_headers.description'|trans|upper }}</strong>
-                    <div>{{ variable.description }}</div>
+            {% if variable.type == 'table' %}
+                {# Table (picklist): stack description and the table full-width to avoid horizontal overflow #}
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <strong>{{ 'variable.table_headers.description'|trans|upper }}</strong>
+                        <div class="text-break">{{ variable.description }}</div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <strong>{{ 'variable.table_headers.value'|trans|upper }}</strong>
-                    {% if variable.type == 'table' %}
+                <div class="row mb-2">
+                    <div class="col-12">
+                        <strong>{{ 'variable.table_headers.value'|trans|upper }}</strong>
                         {% set tableRows = variable.tableRows %}
                         {% if tableRows|length > 0 %}
-                            <table class="table table-sm table-bordered mt-1">
-                                <thead>
-                                    <tr>
-                                        <th>{{ 'variable.table_editor.source'|trans }}</th>
-                                        <th>{{ 'variable.table_editor.target'|trans }}</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {% for row in tableRows %}
+                            <div class="table-responsive">
+                                <table class="table table-sm table-bordered mt-1">
+                                    <thead>
                                         <tr>
-                                            <td>{{ row.source }}</td>
-                                            <td>{{ row.target }}</td>
+                                            <th>{{ 'variable.table_editor.source'|trans }}</th>
+                                            <th>{{ 'variable.table_editor.target'|trans }}</th>
                                         </tr>
-                                    {% endfor %}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in tableRows %}
+                                            <tr>
+                                                <td>{{ row.source }}</td>
+                                                <td>{{ row.target }}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
                         {% else %}
                             <div>{{ variable.value }}</div>
                         {% endif %}
-                    {% else %}
-                        <div>{{ variable.value }}</div>
-                    {% endif %}
+                    </div>
                 </div>
-            </div>
+            {% else %}
+                <div class="row mb-2">
+                    <div class="col-md-6">
+                        <strong>{{ 'variable.table_headers.description'|trans|upper }}</strong>
+                        <div class="text-break">{{ variable.description }}</div>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>{{ 'variable.table_headers.value'|trans|upper }}</strong>
+                        <div class="text-break">{{ variable.value }}</div>
+                    </div>
+                </div>
+            {% endif %}
             <div class="row mb-2">
                 {% if variable.type == 'table' %}
                     <div class="col-md-6">
