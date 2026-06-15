@@ -1359,6 +1359,26 @@ table.table-rule-view tr:first-child th, table.table-rule-view-workflows tr:firs
 	padding-left: 8px !important;
 }
 
+.selectize-control.multi .selectize-input {
+    flex-wrap: wrap !important;
+    gap: 4px 0 !important;
+}
+
+.selectize-control.multi .selectize-input > div.item .remove {
+    margin-left: 6px;
+    padding-left: 6px;
+    color: #000;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    border-left: 1px dashed #03c4eb;
+}
+
+.selectize-control.multi .selectize-input > div.item .remove:hover {
+    color: #dc3545;
+    background: transparent;
+}
+
 .template-card {
   position: relative;
   border-radius: .75rem;

@@ -35,14 +35,11 @@
             <label class="form-label" for="duplicate-field">
                 {{ 'create_rule.step5.params.duplicate'|trans }}
             </label>
-            <select id="duplicate-field" class="js-select-search" style="width: 100%;">
-                <option value="" selected disabled></option>
+            <select id="duplicate-field" class="js-select-search" multiple style="width: 100%;">
                 {% for key, label in duplicate_target %}
                     <option value="{{ label }}">{{ label }}</option>
                 {% endfor %}
             </select>
-            <div id="duplicate-badges-container" class="mapping-src-badges pt-1">
-            </div>
         </div>
     </div>
 {% endif %}
