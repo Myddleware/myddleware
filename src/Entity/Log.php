@@ -68,7 +68,7 @@ class Log
 
     /**
      * @ORM\ManyToOne(targetEntity="Document", inversedBy="logs")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=true)
+     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=true, columnDefinition="VARCHAR(36)")
      */
     private ?Document $document;
 

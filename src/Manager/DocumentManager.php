@@ -42,6 +42,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 // use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
 // use App\Event\DocumentEvent;
+use Symfony\Component\Uid\Uuid;
 
 class DocumentManager
 {
@@ -329,7 +330,7 @@ class DocumentManager
 				// Instanciate attribut sourceData
 				$this->setDocument($param['id_doc_myddleware']);
 			} else {
-				$this->id = uniqid('', true);
+				$this->id = Uuid::v7()->__toString();
 				$this->dateCreated = gmdate('Y-m-d H:i:s');
 				$this->ruleName = $param['rule']['name_slug'];
 				$this->ruleMode = $param['rule']['mode'];
