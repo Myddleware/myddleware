@@ -601,7 +601,7 @@ class JobManager
             // Filter on rule or docuement depending on the data type
             $where = ' WHERE ';
             if (in_array($dataType, array('rule','group'))) {
-                $where .= " rule.id IN $queryIn ";
+                $where .= " rule.id IN $queryIn AND (document.job_lock = '' OR document.job_lock IS NULL) ";
             } elseif ('document' == $dataType) {
                 $where .= " document.id IN $queryIn ";
             }

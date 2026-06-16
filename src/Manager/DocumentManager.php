@@ -974,10 +974,29 @@ class DocumentManager
                 if (empty($this->targetId)) {
                     // If no predecessor at all (even in error or open) and type D => it means that Myddleware has never sent the record so we can't delete it
                     if ('D' == $this->documentType) {
-                        $this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
-                        $this->updateStatus('Cancel');
+						// Search for any document Open or in Error on this rule with the same source_id
+						$sqlParams = "	SELECT document.id								
+										FROM document								
+										WHERE 
+												document.rule_id = :rule_id 
+											AND document.source_id = :source_id 
+											AND document.deleted = 0
+											AND document.type <> 'D'
+											AND document.global_status IN ('Error','Open')
+										LIMIT 1	
+							";
+						$stmt = $this->connection->prepare($sqlParams);
+						$stmt->bindValue(':rule_id', $this->document_data['rule_id']);
+						$stmt->bindValue(':source_id', $this->document_data['source_id']);
+						$result = $stmt->executeQuery();
+						$result = $result->fetchAssociative();
 
-                        return false;
+						// If no document found then Cancel the current one
+						if (empty($result['id'])) {
+							$this->message .= 'No predecessor. Myddleware has never sent this record so it cannot delete it. This data transfer is cancelled. ';
+							$this->updateStatus('Cancel');
+							return false;
+						}
                     }
                     throw new \Exception('No target id found for a document with the type Update. ');
                 }
