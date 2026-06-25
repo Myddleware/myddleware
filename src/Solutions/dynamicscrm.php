@@ -201,8 +201,6 @@ class dynamicscrm extends solution
             $data = json_decode($response->getBody(), true);
             $this->logDebug('dynamicscrm get_module_fields response', ['status' => $response->getStatusCode(), 'field_count' => isset($data['value']) ? count($data['value']) : 0]);
 
-            $fields = [];
-
             if (isset($data['value']) && is_array($data['value'])) {
                 foreach ($data['value'] as $attribute) {
                     $name = $attribute['LogicalName'] ?? null;
@@ -218,7 +216,7 @@ class dynamicscrm extends solution
                     $displayName = $attribute['DisplayName']['UserLocalizedLabel']['Label'] ?? $name;
                     $requiredLevel = $attribute['RequiredLevel']['Value'] ?? 'None';
 
-                    $fields[$name] = [
+                    $this->moduleFields[$name] = [
                         'label' => $displayName,
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
@@ -226,9 +224,7 @@ class dynamicscrm extends solution
                     ];
                 }
             }
-
-            return $fields;
-
+            return $this->moduleFields;
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             $errorMessage = $e->getMessage();
             if ($e->hasResponse()) {
