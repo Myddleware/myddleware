@@ -220,7 +220,9 @@ class dynamicscrm extends solution
                         'label' => $displayName,
                         'type' => 'varchar(255)',
                         'type_bdd' => 'varchar(255)',
-                        'required' => ($requiredLevel === 'ApplicationRequired' || $requiredLevel === 'SystemRequired') ? 1 : 0
+                        'required' => ($requiredLevel === 'ApplicationRequired' || $requiredLevel === 'SystemRequired') ? 1 : 0,
+						'relate' => ($attribute['AttributeType'] == 'Lookup') ? 1 : 0,
+						'targetModule' => (!empty($attribute['Targets'][0])) ? $attribute['Targets'][0] : ''
                     ];
                 }
             }
@@ -457,7 +459,7 @@ class dynamicscrm extends solution
      * @return string|array Created record ID or error array
      * @throws \Exception If creation fails
      */
-    public function create($param, $record, $idDoc = null)
+    public function create($param, $data, $idDoc = null)
     {
         try {
             $client = $this->getApiClient();
@@ -470,22 +472,21 @@ class dynamicscrm extends solution
             $primaryIdAttribute = $this->getPrimaryIdAttribute($module);
 
             $url = $this->getBaseApiUrl() . $entitySetName;
-
+			$data = $this->prepareData($param, $data);
             $this->logDebug('dynamicscrm create request', ['url' => $url, 'method' => 'POST']);
+            $this->logDebug('dynamicscrm create headers', $headers);
+            $this->logDebug('dynamicscrm create payload', $data);
             $response = $client->post($url, [
                 'headers' => $headers,
-                'json' => $record
+                'json' => $data
             ]);
-
             $data = json_decode($response->getBody(), true);
             $this->logDebug('dynamicscrm create response', ['status' => $response->getStatusCode(), 'id' => $data[$primaryIdAttribute] ?? null]);
 
             if (!isset($data[$primaryIdAttribute])) {
                 throw new \Exception('No ID returned from API response');
             }
-
             return $data[$primaryIdAttribute];
-
         } catch (\GuzzleHttp\Exception\RequestException $e) {
             $errorMessage = $e->getMessage();
             if ($e->hasResponse()) {
@@ -494,11 +495,11 @@ class dynamicscrm extends solution
             }
             $error = $errorMessage.' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-            return ['error' => $error];
+            throw new \Exception($error);
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-            return ['error' => $error];
+            throw new \Exception($error);
         }
     }
 
@@ -531,6 +532,8 @@ class dynamicscrm extends solution
             $url = $this->getBaseApiUrl() . "{$entitySetName}({$targetId})";
 
             $this->logDebug('dynamicscrm update GET request', ['url' => $url, 'method' => 'GET']);
+			$this->logDebug('dynamicscrm update headers', $headers);
+            $this->logDebug('dynamicscrm update payload', $data);
             $getResponse = $client->get($url, ['headers' => $this->getApiHeaders()]);
             $etag = $getResponse->getHeader('ETag')[0] ?? null;
             $this->logDebug('dynamicscrm update GET response', ['status' => $getResponse->getStatusCode(), 'etag' => $etag]);
@@ -562,11 +565,11 @@ class dynamicscrm extends solution
             }
             $error = $errorMessage.' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-            return ['error' => $error];
+            throw new \Exception($error);
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-            return ['error' => $error];
+            throw new \Exception($error);
         }
     }
 
@@ -591,6 +594,8 @@ class dynamicscrm extends solution
             $url = $this->getBaseApiUrl() . "{$entitySetName}({$targetId})";
 
             $this->logDebug('dynamicscrm delete request', ['url' => $url, 'method' => 'DELETE']);
+			$this->logDebug('dynamicscrm delete headers', $headers);
+            $this->logDebug('dynamicscrm delete payload', $data);
             $response = $client->delete($url, [
                 'headers' => $headers
             ]);
@@ -610,14 +615,31 @@ class dynamicscrm extends solution
             }
             $error = $errorMessage.' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-            return ['error' => $error];
+            throw new \Exception($error);
         } catch (\Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
-            return ['error' => $error];
+            throw new \Exception($error);
         }
     }
 
+	// Prepare data to be sent
+	protected function prepareData($param, $data) {
+		if (!empty($data)) {
+			$fields = $this->get_module_fields($param['module']);
+			// Change lookup field format
+			if (!empty($fields)) {
+				foreach($data as $key => $value) {
+					if ($fields[$key]['relate']) {
+						$data[$key.'@odata.bind'] = '/'.$fields[$key]['targetModule'].'('.$value.')';
+						unset($data[$key]);
+					}
+				}
+			}
+		}
+		return $data;
+	}
+	
     /**
      * Retrieves list of available entities from API metadata
      *
