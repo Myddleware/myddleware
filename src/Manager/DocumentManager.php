@@ -406,7 +406,6 @@ class DocumentManager
 			'id' => $this->id,
 			'rule_id' => $this->ruleId,
 			'date_created' => $this->dateCreated,
-			'date_modified' => $this->dateCreated,
 			'created_by' => $this->userId,
 			'modified_by' => $this->userId,
 			'source_id' => utf8_encode($this->sourceId),
@@ -448,11 +447,10 @@ class DocumentManager
 
 		// Prepare insert query for document table
 		foreach ($this->documentBatch as $doc) {
-			$values[] = "(?,?,?,?,?,?,?,?,?,?,?,?)";
+			$values[] = "(?,?,?,?,?,?,?,?,?,?,?)";
 			$params[] = $doc['id'];
 			$params[] = $doc['rule_id'];
 			$params[] = $doc['date_created'];
-			$params[] = $doc['date_modified'];
 			$params[] = $doc['created_by'];
 			$params[] = $doc['modified_by'];
 			$params[] = $doc['source_id'];
@@ -464,7 +462,7 @@ class DocumentManager
 		}
 		$sql = "
 			INSERT INTO document 
-			(id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock)
+			(id, rule_id, date_created, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock)
 			VALUES ".implode(',', $values);
 		// Execute query for document table
 		$this->connection->executeStatement($sql, $params);
@@ -608,7 +606,6 @@ class DocumentManager
                 $now = gmdate('Y-m-d H:i:s');
                 $query = '	UPDATE document 
                                 SET 
-                                    date_modified = :now,
                                     job_lock = :job_id
                                 WHERE
                                     id = :id
@@ -650,7 +647,6 @@ class DocumentManager
                 $now = gmdate('Y-m-d H:i:s');
                 $query = "	UPDATE document 
                                 SET 
-                                    date_modified = :now,
                                     job_lock = ''
                                 WHERE
                                     id = :id
@@ -2123,7 +2119,7 @@ class DocumentManager
 								AND	document.source_id = :id
 								AND document.id != :id_doc
 								AND document.deleted = 0 
-							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
+							ORDER BY targetOrder DESC, global_status DESC, date_created DESC
 							LIMIT 1";
 
             // On prépare la requête pour rechercher dans la partie target
@@ -2146,7 +2142,7 @@ class DocumentManager
 								AND	document.target_id = :id
 								AND document.id != :id_doc
 								AND document.deleted = 0 
-							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
+							ORDER BY targetOrder DESC, global_status DESC, date_created DESC
 							LIMIT 1";
 
             // Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
@@ -2351,7 +2347,6 @@ class DocumentManager
             }
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									global_status = :globalStatus,
 									attempt = :attempt,
 									status = :new_status
@@ -2442,7 +2437,6 @@ class DocumentManager
 			// Save update for the batch
 			$this->statusBatch[] = [
 				'id' => $this->id,
-				'date_modified' => $now,
 				'global_status' => $globalStatus,
 				'attempt' => $this->attempt,
 				'status' => $new_status
@@ -2498,14 +2492,12 @@ class DocumentManager
 			$casesStatus .= "WHEN id = '$id' THEN '{$row['status']}' ";
 			$casesGlobal .= "WHEN id = '$id' THEN '{$row['global_status']}' ";
 			$casesAttempt .= "WHEN id = '$id' THEN {$row['attempt']} ";
-			$casesDate .= "WHEN id = '$id' THEN '{$row['date_modified']}' ";
 		}
 		$sql = "
 			UPDATE document SET
 				status = CASE $casesStatus END,
 				global_status = CASE $casesGlobal END,
 				attempt = CASE $casesAttempt END,
-				date_modified = CASE $casesDate END
 			WHERE id IN (".implode(',', $ids).")
 		";
 		// Execute query
@@ -2550,7 +2542,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									deleted = :deleted
 								WHERE
 									id = :id
@@ -2622,7 +2613,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									type = :new_type
 								WHERE
 									id = :id
@@ -2654,7 +2644,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									target_id = :target_id
 								WHERE
 									id = :id
@@ -2694,7 +2683,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									workflow_error = :workflowError
 								WHERE
 									id = :id
