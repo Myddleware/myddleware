@@ -516,6 +516,10 @@ class RuleManager
                                 $readSource['error'] .= $this->documentManager->getMessage();
                             }
                         }
+						// Flush the last packet of documents whith their status and logs
+						$this->documentManager->flushBatchCreateDocuments();
+						$this->documentManager->flushStatusBatch();
+						$this->documentManager->flushLogBatch();
                     }
                     // Mise à jour de la date de référence si des documents ont été créés
                     $this->updateReferenceDate();
