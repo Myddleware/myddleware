@@ -284,7 +284,9 @@ class mailchimp extends solution
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
             }
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            $this->logDebug('mailchimp request', ['url' => $url, 'method' => $method]);
             $result = curl_exec($ch);
+            $this->logDebug('mailchimp response', ['response' => $result]);
             curl_close($ch);
 
             return $result ? json_decode($result, true) : false;

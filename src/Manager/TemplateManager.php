@@ -43,9 +43,11 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use App\Service\DebugLogger;
 
 class TemplateManager
 {
+    private DebugLogger $debugLogger;
     protected string $lang;
     protected $solutionSourceName;
     protected $solutionTarget;
@@ -74,8 +76,10 @@ class TemplateManager
         RuleManager $ruleManager,
         RequestStack $requestStack,
         TranslatorInterface $translator,
-        DriverConnection $dbalConnection
+        DriverConnection $dbalConnection,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->logger = $logger;
         $this->entityManager = $entityManager;
         $this->connection = $dbalConnection;
@@ -96,6 +100,9 @@ class TemplateManager
      */
     public function setRules($rules): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rules' => $rules]);
+        $__debugReturn = null;
+        try {
         $this->rules = $rules;
         $rulesString = trim(implode(',', $rules));
         $query = 'SELECT rule_id FROM ruleorder WHERE FIND_IN_SET(`rule_id`,:rules) ORDER BY ruleorder.order ASC';
@@ -103,12 +110,18 @@ class TemplateManager
         $stmt->bindValue('rules', $rulesString);
         $result = $stmt->executeQuery();
 
-        return $result->fetchAllAssociative();
+        return $__debugReturn = $result->fetchAllAssociative();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Permet de lister les templates pour les connecteurs selectionnés
     public function getTemplates(string $solutionSourceName, string $solutionTarget): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['solutionSourceName' => $solutionSourceName, 'solutionTarget' => $solutionTarget]);
+        $__debugReturn = null;
+        try {
         $templates = [];
         // Read in the directory template, we read files  corresponding to the selected solutions
         foreach (glob($this->templateDir.$solutionSourceName.'_'.$solutionTarget.'*.yml') as $filename) {
@@ -116,7 +129,10 @@ class TemplateManager
             $templates[] = $template;
         }
 
-        return $templates;
+        return $__debugReturn = $templates;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -126,6 +142,9 @@ class TemplateManager
      */
     public function extractRule($ruleId): array
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId]);
+        $__debugReturn = null;
+        try {
         $rule = $this->entityManager
                             ->getRepository(Rule::class)
                             ->find($ruleId);
@@ -197,7 +216,10 @@ class TemplateManager
             }
         }
 
-        return $data;
+        return $__debugReturn = $data;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     protected function initSolutions(
@@ -206,6 +228,8 @@ class TemplateManager
         Connector $connectorSource,
         Connector $connectorTarget
     ) {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['connectorSource' => $connectorSource, 'connectorTarget' => $connectorTarget]);
+        try {
         /** @var ConnectorParamRepository $connectorParamRepository */
         $connectorParamRepository = $this->entityManager->getRepository(ConnectorParam::class);
         // Init source solution
@@ -223,6 +247,9 @@ class TemplateManager
         }
         // Throw exception in the login in case the connection doesn't work
         $targetSolution->login($params);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
     }
 
     /**
@@ -237,6 +264,9 @@ class TemplateManager
         int $connectorTargetId,
         User $user
     ): array {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleName' => $ruleName, 'templateName' => $templateName, 'connectorSourceId' => $connectorSourceId, 'connectorTargetId' => $connectorTargetId, 'user' => $user]);
+        $__debugReturn = null;
+        try {
         /** @var ConnectorRepository $connectorRepository */
         $connectorRepository = $this->entityManager->getRepository(Connector::class);
         $connectorSource = $connectorRepository->find($connectorSourceId);
@@ -459,9 +489,12 @@ class TemplateManager
             $error = 'Failed to generate rules : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($error);
 
-            return ['success' => false, 'message' => $error];
+            return $__debugReturn = ['success' => false, 'message' => $error];
         }
 
-        return ['success' => true];
+        return $__debugReturn = ['success' => true];
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

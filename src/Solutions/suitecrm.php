@@ -985,9 +985,6 @@ class suitecrm extends solution
     //function to make cURL request
     protected function call($method, $parameters)
     {
-        if ($method == 'login') {
-            $this->logger->critical("using the regular login");
-        }
 
         try {
             ob_start();
@@ -1009,7 +1006,9 @@ class suitecrm extends solution
             ];
 
             curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
+            $this->logDebug('suitecrm call request', ['url' => $this->paramConnexion['url'], 'method' => $method]);
             $result = curl_exec($curl_request);
+            $this->logDebug('suitecrm call response', ['response' => $result]);
             curl_close($curl_request);
             if (empty($result)) {
                 return false;

@@ -700,8 +700,11 @@ class sugarcrm extends solution
             }
 
             //execute request
+            $this->logDebug('sugarcrm call request', ['url' => $url, 'method' => $method]);
             $response = curl_exec($request);
             //decode response
+            $this->logDebug('sugarcrm call response', ['response' => $response]);
+
             $response_obj = json_decode($response);
         } catch (Exception $e) {
             $error = $e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';

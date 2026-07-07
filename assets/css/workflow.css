@@ -65,7 +65,8 @@
 
 #workflowTableContainer, #rulegroups, .table-wrapper-variable{
     display: flex;
-    justify-content: center;
+    flex-direction: column;
+    align-items: center;
 }
 
 .log-message {

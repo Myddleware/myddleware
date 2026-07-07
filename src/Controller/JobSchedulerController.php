@@ -31,6 +31,7 @@ use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use App\Service\DebugLogger;
 
 /**
  * @Route("/rule/jobscheduler")
@@ -41,13 +42,15 @@ class JobSchedulerController extends AbstractController
     private EntityManagerInterface $entityManager;
     private ToolsManager $tools;
     private SynchroCommand $synchroCommand;
+    private DebugLogger $debugLogger;
 
-    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools, SynchroCommand $synchroCommand)
+    public function __construct(EntityManagerInterface $entityManager, JobSchedulerManager $jobSchedulerManager,ToolsManager $tools, SynchroCommand $synchroCommand, DebugLogger $debugLogger)
     {
         $this->entityManager = $entityManager;
         $this->jobSchedulerManager = $jobSchedulerManager;
         $this->tools = $tools;
         $this->synchroCommand = $synchroCommand;
+        $this->debugLogger = $debugLogger;
     }
 
     /**
@@ -55,16 +58,22 @@ class JobSchedulerController extends AbstractController
      */
     public function index(): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
 
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entities = $this->entityManager->getRepository(JobScheduler::class)->findBy([], ['jobOrder' => 'ASC']);
 
-        return $this->render('JobScheduler/index.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/index.html.twig', [
             'entities' => $entities,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -72,8 +81,11 @@ class JobSchedulerController extends AbstractController
      */
     public function create(Request $request)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = new JobScheduler();
@@ -108,19 +120,25 @@ class JobSchedulerController extends AbstractController
             $this->entityManager->persist($entity);
             $this->entityManager->flush();
 
-            return $this->redirect($this->generateUrl('jobscheduler', ['id' => $entity->getId()]));
+            return $__debugReturn = $this->redirect($this->generateUrl('jobscheduler', ['id' => $entity->getId()]));
         }
 
-        return $this->render('JobScheduler/new.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/new.html.twig', [
             'entity' => $entity,
             'form' => $form->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     private function createCreateForm(JobScheduler $entity): FormInterface
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entity' => $entity]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $form = $this->createForm(JobSchedulerType::class, $entity, [
@@ -130,7 +148,10 @@ class JobSchedulerController extends AbstractController
 
         $form->add('submit', SubmitType::class, ['label' => 'jobscheduler.new']);
 
-        return $form;
+        return $__debugReturn = $form;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -138,17 +159,23 @@ class JobSchedulerController extends AbstractController
      */
     public function new(): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = new JobScheduler();
         $form = $this->createCreateForm($entity);
 
-        return $this->render('JobScheduler/new.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/new.html.twig', [
             'entity' => $entity,
             'form' => $form->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -156,8 +183,11 @@ class JobSchedulerController extends AbstractController
      */
     public function show($id): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -165,16 +195,18 @@ class JobSchedulerController extends AbstractController
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
         }
 
-        /** @var UserRepository $userRepository */
         $userRepository = $this->entityManager->getRepository(User::class);
         $user_created = $userRepository->find($entity->getcreatedBy());
         $user_modified = $userRepository->find($entity->getmodifiedBy());
 
-        return $this->render('JobScheduler/show.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/show.html.twig', [
             'entity' => $entity,
             'user_created' => $user_created,
             'user_modified' => $user_modified,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -182,8 +214,11 @@ class JobSchedulerController extends AbstractController
      */
     public function edit($id): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -194,11 +229,14 @@ class JobSchedulerController extends AbstractController
         $editForm = $this->createEditForm($entity);
         $deleteForm = $this->createDeleteForm($id);
 
-        return $this->render('JobScheduler/edit.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/edit.html.twig', [
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteForm->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -206,8 +244,11 @@ class JobSchedulerController extends AbstractController
      */
     private function createEditForm(JobScheduler $entity): FormInterface
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entity' => $entity]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $form = $this->createForm(JobSchedulerType::class, $entity, [
@@ -217,7 +258,10 @@ class JobSchedulerController extends AbstractController
 
         $form->add('submit', SubmitType::class, ['label' => 'jobscheduler.update']);
 
-        return $form;
+        return $__debugReturn = $form;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -227,8 +271,11 @@ class JobSchedulerController extends AbstractController
      */
     public function update(Request $request, $id)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
@@ -242,13 +289,16 @@ class JobSchedulerController extends AbstractController
         if ($editForm->isValid()) {
             $this->entityManager->flush();
 
-            return $this->redirect($this->generateUrl('jobscheduler'));
+            return $__debugReturn = $this->redirect($this->generateUrl('jobscheduler'));
         }
 
-        return $this->render('JobScheduler/edit.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/edit.html.twig', [
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -257,8 +307,11 @@ class JobSchedulerController extends AbstractController
      */
     public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $id = $request->get('id');
@@ -270,7 +323,10 @@ class JobSchedulerController extends AbstractController
         $this->entityManager->remove($entity);
         $this->entityManager->flush();
 
-        return $this->redirect($this->generateUrl('jobscheduler'));
+        return $__debugReturn = $this->redirect($this->generateUrl('jobscheduler'));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -278,15 +334,21 @@ class JobSchedulerController extends AbstractController
      */
     private function createDeleteForm($id): FormInterface
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
-        return $this->createFormBuilder()
+        return $__debugReturn = $this->createFormBuilder()
             ->setAction($this->generateUrl('jobscheduler_delete', ['id' => $id]))
             ->setMethod('DELETE')
             ->add('submit', SubmitType::class, ['label' => 'Delete'])
             ->getForm();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -294,12 +356,18 @@ class JobSchedulerController extends AbstractController
      */
     public function getFieldsSelect(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         $select = [];
         if ($request->isXmlHttpRequest() && 'GET' == $request->getMethod()) {
             $select = $this->getData($request->query->get('type'));
         }
 
-        return $this->json($select);
+        return $__debugReturn = $this->json($select);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -307,8 +375,11 @@ class JobSchedulerController extends AbstractController
      */
     private function getData($selectName)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['selectName' => $selectName]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $paramsCommand = null;
@@ -318,7 +389,10 @@ class JobSchedulerController extends AbstractController
             $paramsCommand = null;
         }
 
-        return $paramsCommand;
+        return $__debugReturn = $paramsCommand;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
      /**
@@ -328,8 +402,11 @@ class JobSchedulerController extends AbstractController
      */
     public function createActionWithCron(Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
          $command = '';
@@ -353,7 +430,7 @@ class JobSchedulerController extends AbstractController
 
             if ($command === '' || $period === '') {
                 $this->addFlash('jobscheduler.create.danger', $translator->trans('crontab.incorrect'));
-                return $this->render('JobScheduler/crontab.html.twig', [
+                return $__debugReturn = $this->render('JobScheduler/crontab.html.twig', [
                     'entity' => $entity,
                     'form' => $form->createView(),
                 ]);
@@ -374,15 +451,18 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->flush();
 
                 $this->addFlash('jobscheduler.create.success', $translator->trans('crontab.success'));
-                return $this->redirectToRoute('jobscheduler_cron_list');
+                return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
             } catch (\Throwable $e) {
                 $this->addFlash('jobscheduler.create.danger', $translator->trans('crontab.incorrect'));
             }
         }
-        return $this->render('JobScheduler/crontab.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/crontab.html.twig', [
             'entity' => $entity,
             'form' => $form->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -391,9 +471,12 @@ class JobSchedulerController extends AbstractController
      */
     public function crontabList(int $page): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['page' => $page]);
+        $__debugReturn = null;
+        try {
 
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         //Check if crontab is enabled 
@@ -410,11 +493,14 @@ class JobSchedulerController extends AbstractController
             throw $this->createNotFoundException('Missing config "search_limit"');
         }
 
-        return $this->render('JobScheduler/crontab_list.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/crontab_list.html.twig', [
             'entity' => $entity,
             'timezone' => $timezone,
             'entitiesCron' => $entitiesCron,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -425,8 +511,11 @@ class JobSchedulerController extends AbstractController
      */
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $id = $request->get('id');
@@ -439,7 +528,10 @@ class JobSchedulerController extends AbstractController
         $this->entityManager->remove($entity);
         $this->entityManager->flush();
 
-        return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
+        return $__debugReturn = $this->redirect($this->generateUrl('jobscheduler_cron_list'));
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -447,15 +539,21 @@ class JobSchedulerController extends AbstractController
      */
     private function createDeleteFormCrontab($id): FormInterface
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
-        return $this->createFormBuilder()
+        return $__debugReturn = $this->createFormBuilder()
             ->setAction($this->generateUrl('crontab_delete', ['id' => $id]))
             ->setMethod('DELETE')
             ->add('submit', SubmitType::class, ['label' => 'Delete'])
             ->getForm();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -463,8 +561,11 @@ class JobSchedulerController extends AbstractController
      */
     public function editCrontab($id): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
@@ -476,26 +577,34 @@ class JobSchedulerController extends AbstractController
         $editForm = $this->createEditFormCrontab($entity);
         $deleteFormCrontab = $this->createDeleteFormCrontab($id);
 
-        return $this->render('JobScheduler/edit_crontab.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/edit_crontab.html.twig', [
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
             'delete_form' => $deleteFormCrontab->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     private function createEditFormCrontab(CronJob $entity): FormInterface
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entity' => $entity]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
-        // Field command can't be changed
-        return $this->createForm(JobSchedulerCronType::class, $entity, [
+        return $__debugReturn = $this->createForm(JobSchedulerCronType::class, $entity, [
                 'action' => $this->generateUrl('crontab_update', ['id' => $entity->getId()]),
                 'method' => 'POST',
             ])
             ->add('command', TextType::class, ['disabled' => true]
         );
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -505,8 +614,11 @@ class JobSchedulerController extends AbstractController
      */
     public function updateCrontab(Request $request, $id)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
@@ -532,7 +644,7 @@ class JobSchedulerController extends AbstractController
             if ($newRunningInstances > $newMaxInstances) {
                 $this->addFlash('jobscheduler.edit.danger', 'Running instances cannot be greater than max instances.');
 
-                return $this->render('JobScheduler/edit_crontab.html.twig', [
+                return $__debugReturn = $this->render('JobScheduler/edit_crontab.html.twig', [
                     'entity' => $entity,
                     'edit_form' => $editForm->createView(),
                 ]);
@@ -546,13 +658,16 @@ class JobSchedulerController extends AbstractController
 
             $this->entityManager->flush();
 
-            return $this->redirect($this->generateUrl('jobscheduler_cron_list'));
+            return $__debugReturn = $this->redirect($this->generateUrl('jobscheduler_cron_list'));
         }
 
-        return $this->render('JobScheduler/edit_crontab.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/edit_crontab.html.twig', [
             'entity' => $entity,
             'edit_form' => $editForm->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -561,13 +676,16 @@ class JobSchedulerController extends AbstractController
     public function enableDisableCrontab(Request $request, $id, $enable): Response
     {
         // Check if it's a valid request
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id, 'enable' => $enable]);
+        $__debugReturn = null;
+        try {
         if (!$request->isXmlHttpRequest()) {
             throw $this->createAccessDeniedException('Only AJAX requests are allowed');
         }
 
         // Validate enable parameter
         if (!in_array($enable, ['0', '1'])) {
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => false,
                 'message' => 'Invalid enable value'
             ], 400);
@@ -575,7 +693,7 @@ class JobSchedulerController extends AbstractController
 
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
         if (!$entity) {
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => false,
                 'message' => 'Crontab not found'
             ], 404);
@@ -585,15 +703,18 @@ class JobSchedulerController extends AbstractController
             $entity->setEnable((bool)$enable);
             $this->entityManager->flush();
 
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => true,
                 'message' => 'Crontab status updated successfully'
             ]);
         } catch (\Exception $e) {
-            return new JsonResponse([
+            return $__debugReturn = new JsonResponse([
                 'success' => false,
                 'message' => 'Failed to update crontab status: ' . $e->getMessage()
             ], 500);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -603,8 +724,11 @@ class JobSchedulerController extends AbstractController
      */
     public function showCrontab($id, int $page): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'page' => $page]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
 
@@ -635,10 +759,13 @@ class JobSchedulerController extends AbstractController
         $pager->setMaxPerPage(3);
         $pager->setCurrentPage($page);
 
-        return $this->render('JobScheduler/show_crontab.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/show_crontab.html.twig', [
             'entity' => $entity,
             'pager'  => $pager,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
         
     /**
@@ -648,6 +775,9 @@ class JobSchedulerController extends AbstractController
      */
     public function disableAllTask(Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
             $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 1]);
             if (!($entities)) {
@@ -658,12 +788,15 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($entity);
             }
             $this->entityManager->flush();
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('jobscheduler.disableAll.danger', $failure);
 
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -674,6 +807,9 @@ class JobSchedulerController extends AbstractController
      */
     public function enableAllTask(Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
             $entities = $this->entityManager->getRepository(CronJob::class)->findBy(["enable" => 0]);
             if (!($entities)) {
@@ -684,12 +820,15 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($entity);
             }
             $this->entityManager->flush();
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('jobscheduler.enableAll.danger', $failure);
 
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
        /**
@@ -699,9 +838,12 @@ class JobSchedulerController extends AbstractController
      */
     public function disableAllCrons(Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
 
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         try {
@@ -715,11 +857,14 @@ class JobSchedulerController extends AbstractController
             }
             $this->entityManager->flush();
             $this->addFlash('jobscheduler.disableAllCrons.success', $translator->trans('crontab.disableAllCrons'));
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('jobscheduler.disableAllCrons.danger', $failure);
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -730,6 +875,9 @@ class JobSchedulerController extends AbstractController
      */
     public function enableAllCrons(Request $request, TranslatorInterface $translator)
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
             $entities = $this->entityManager->getRepository(Config::class)->findBy(['name' => 'cron_enabled']);
             if (!($entities)) {
@@ -740,13 +888,15 @@ class JobSchedulerController extends AbstractController
                 $this->entityManager->persist($entityCron);
             }
             $this->entityManager->flush();
-            // Message success
             $this->addFlash('jobscheduler.enableAllCrons.success', $translator->trans('crontab.enableAllCrons'));
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
         } catch (Exception $e) {
             $failure = $translator->trans('crontab.incorrect');
             $this->addFlash('jobscheduler.enableAllCrons.danger', $failure);
-            return $this->redirectToRoute('jobscheduler_cron_list');
+            return $__debugReturn = $this->redirectToRoute('jobscheduler_cron_list');
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -755,8 +905,11 @@ class JobSchedulerController extends AbstractController
      */
     public function executeTerminalCommand(Request $request, SynchroCommand $synchroCommand): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'synchroCommand' => $synchroCommand]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $command = $request->request->get('command');
@@ -766,9 +919,9 @@ class JobSchedulerController extends AbstractController
             // Extract the rule ID from the command
             $parts = explode(' ', $command);
             $ruleId = $parts[1] ?? null;
-            
+
             if (!$ruleId) {
-                return new JsonResponse(['error' => 'Rule ID is required']);
+                return $__debugReturn = new JsonResponse(['error' => 'Rule ID is required']);
             }
 
             ob_start();
@@ -780,7 +933,10 @@ class JobSchedulerController extends AbstractController
             $synchroCommand->run($input, $output);
             $result = ob_get_clean();
 
-            return new JsonResponse(['result' => $output->fetch()]);
+            return $__debugReturn = new JsonResponse(['result' => $output->fetch()]);
+        }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
         
         // ... handle other commands as before ...
@@ -791,8 +947,11 @@ class JobSchedulerController extends AbstractController
      */
     public function loadResults(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+            return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
         $searchLimitConfig = $this->entityManager->getRepository(Config::class)->findOneBy(['name' => 'search_limit']);
@@ -813,8 +972,11 @@ class JobSchedulerController extends AbstractController
         $pager->setMaxPerPage(10);
         $pager->setCurrentPage($request->query->getInt('page', 1));
 
-        return $this->render('JobScheduler/_crontab_results_table.html.twig', [
+        return $__debugReturn = $this->render('JobScheduler/_crontab_results_table.html.twig', [
             'pager' => $pager,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

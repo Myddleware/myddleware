@@ -27,14 +27,18 @@ namespace App\Service;
 
 use App\Entity\Connector;
 use App\Entity\ConnectorParam;
+use App\Manager\SolutionManager;
 use Doctrine\ORM\EntityManagerInterface;
+use Illuminate\Encryption\Encrypter;
 
 class ConnectorService
 {
     private $em;
+    private $solutionManager;
 
-    public function __construct(EntityManagerInterface $em) {
+    public function __construct(EntityManagerInterface $em, SolutionManager $solutionManager) {
         $this->em = $em;
+        $this->solutionManager = $solutionManager;
     }
 
     /**
@@ -86,5 +90,50 @@ class ConnectorService
         }
 
         return !empty($params) ? $params : null;
+    }
+
+    /**
+     * Teste une connexion
+     */
+    public function testConnection(string $solutionName, array $params): array
+    {
+        $solution = $this->solutionManager->get(strtolower($solutionName));
+        $result = $solution->login($params);
+
+        if (!empty($solution->connexion_valide)) {
+            return ['success' => true];
+        }
+
+        return ['success' => false, 'message' => $result['error'] ?? 'Connection failed'];
+    }
+
+    /**
+     * Déchiffre un tableau ou une chaîne de paramètres de connecteur
+     */
+    public function decryptParams(array|string $params, string $secret): array|string
+    {
+        $encrypter = new Encrypter(substr($secret, -16));
+        
+        if (is_array($params)) {
+            $return_params = [];
+            foreach ($params as $key => $value) {
+                if (is_string($value) && !in_array($key, ['solution', 'module'])) {
+                    try {
+                        $return_params[$key] = $encrypter->decrypt($value);
+                    } catch (\Exception $e) {
+                        $return_params[$key] = $value;
+                    }
+                } else {
+                    $return_params[$key] = $value;
+                }
+            }
+            return $return_params;
+        }
+        
+        try {
+            return $encrypter->decrypt($params);
+        } catch (\Exception $e) {
+            return $params;
+        }
     }
 }

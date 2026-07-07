@@ -6,6 +6,7 @@ use App\Entity\User;
 use App\Form\RegistrationFormType;
 use App\Repository\ConfigRepository;
 use App\Security\SecurityAuthenticator;
+use App\Service\DebugLogger;
 use Exception;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,12 +22,14 @@ class RegistrationController extends AbstractController
     private ConfigRepository $configRepository;
     private LoggerInterface $logger;
     private EntityManagerInterface $entityManager;
+    private DebugLogger $debugLogger;
 
-    public function __construct(ConfigRepository $configRepository, LoggerInterface $logger, EntityManagerInterface $entityManager)
+    public function __construct(ConfigRepository $configRepository, LoggerInterface $logger, EntityManagerInterface $entityManager, DebugLogger $debugLogger)
     {
         $this->logger = $logger;
         $this->configRepository = $configRepository;
         $this->entityManager = $entityManager;
+        $this->debugLogger = $debugLogger;
     }
 
     /**
@@ -34,6 +37,9 @@ class RegistrationController extends AbstractController
      */
     public function register(Request $request, UserPasswordHasherInterface $passwordHasher, UserAuthenticatorInterface $userAuthenticator, SecurityAuthenticator $authenticator): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'passwordHasher' => $passwordHasher, 'userAuthenticator' => $userAuthenticator, 'authenticator' => $authenticator]);
+        $__debugReturn = null;
+        try {
         try {
             //to help voter decide whether we allow access to install process again or not
             $configs = $this->configRepository->findAll();
@@ -82,7 +88,7 @@ class RegistrationController extends AbstractController
                 $this->entityManager->flush();
 
                 // do anything else you need here, like send an email
-                return $userAuthenticator->authenticateUser(
+                return $__debugReturn = $userAuthenticator->authenticateUser(
                 $user,
                 $authenticator,
                 $request
@@ -91,11 +97,14 @@ class RegistrationController extends AbstractController
         } catch (Exception $e) {
             $this->logger->error($e->getMessage());
 
-            return $this->redirectToRoute('login');
+            return $__debugReturn = $this->redirectToRoute('login');
         }
 
-        return $this->render('registration/register.html.twig', [
+        return $__debugReturn = $this->render('registration/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

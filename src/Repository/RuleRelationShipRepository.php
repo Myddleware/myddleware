@@ -27,33 +27,40 @@ namespace App\Repository;
 
 use App\Entity\Rule;
 use App\Entity\RuleRelationShip;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\Persistence\ManagerRegistry;
 
 class RuleRelationShipRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, RuleRelationShip::class);
+        $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @return RuleRelationShip[]
-     */
     public function findDocumentChildRules(Rule $rule): array
     {
-        $qb = $this->createQueryBuilder('rule_relationship');
-        $qb
-            ->select('rule_relationship')
-            ->innerJoin('App\Entity\Rule', 'rule', Join::WITH, 'rule_relationship.fieldId = rule.id AND rule_relationship.parent = 1')
-            ->leftJoin('rule.documents', 'document')
-            ->andWhere('rule.deleted = 0')
-            ->andWhere('document.deleted = 0')
-            ->andWhere('document.rule = :rule')
-            ->setParameter('rule', $rule)
-            ->addOrderBy('document.sourceDateModified', 'ASC');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['rule' => $rule->getId()]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('rule_relationship');
+            $qb
+                ->select('rule_relationship')
+                ->innerJoin('App\Entity\Rule', 'rule', Join::WITH, 'rule_relationship.fieldId = rule.id AND rule_relationship.parent = 1')
+                ->leftJoin('rule.documents', 'document')
+                ->andWhere('rule.deleted = 0')
+                ->andWhere('document.deleted = 0')
+                ->andWhere('document.rule = :rule')
+                ->setParameter('rule', $rule)
+                ->addOrderBy('document.sourceDateModified', 'ASC');
 
-        return $qb->getQuery()->getResult();
+            return $__debugReturn = $qb->getQuery()->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

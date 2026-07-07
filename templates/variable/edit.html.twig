@@ -7,10 +7,10 @@
 {% block body %}
     <div class="container mt-5">
         <div class="text-center m-5">
-            <a href="{{ path('variable_list') }}" class="btn btn-outline-primary m-2"> {{ 'variable.back_to_list'|trans }}</a>
+            <a href="{{ path('variable_list') }}" class="btn btn-outline-warning m-2"> {{ 'view_workflow.cancel_edit'|trans }}</a>
         </div>
 
-{% include '_notifications.html.twig' with { filter_prefix: 'variable.edit' } %}
+        {% include '_notifications.html.twig' with { filter_prefix: 'variable.edit' } %}
         
         {{ form_start(form) }}
         <div class="mb-3">

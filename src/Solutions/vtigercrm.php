@@ -106,7 +106,9 @@ class vtigercrm extends solution
 
         try {
             $client = new VtigerClient($this->paramConnexion['url']);
+            $this->logDebug('vtigercrm login request', ['url' => $this->paramConnexion['url']]);
             $result = $client->login(trim($this->paramConnexion['username']), trim($this->paramConnexion['accesskey']));
+            $this->logDebug('vtigercrm login response', ['response' => $result]);
 
             if (!$result['success']) {
                 throw new \Exception($result['error']['message']);
@@ -176,7 +178,9 @@ class vtigercrm extends solution
                 return false;
             }
 
+            $this->logDebug('vtigercrm get_modules request', []);
             $result = $this->vtigerClient->listTypes();
+            $this->logDebug('vtigercrm get_modules response', ['response' => $result]);
 
             if (!$result['success'] || ($result['success'] && 0 == count($result['result']))) {
                 return false;
@@ -374,7 +378,9 @@ class vtigercrm extends solution
                         $this->setModulePrefix();
                     }
 
+                    $this->logDebug('vtigercrm readData query request', ['query' => "SELECT parent_id FROM $param[module];"]);
                     $query = $this->vtigerClient->query("SELECT parent_id FROM $param[module];");
+                    $this->logDebug('vtigercrm readData query response', ['response' => $query]);
 
                     $parentModules = [];
                     foreach ($query['result'] as $parent) {
@@ -386,13 +392,17 @@ class vtigercrm extends solution
 
                     $entitys = [];
                     foreach ($parentModules as $prefix => $moduleName) {
+                        $this->logDebug('vtigercrm readData query request', ['query' => "SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderby LIMIT $param[offset], $nDataCall;"]);
                         $query = $this->vtigerClient->query("SELECT id, modifiedtime, createdtime FROM $moduleName $where $orderby LIMIT $param[offset], $nDataCall;");
+                        $this->logDebug('vtigercrm readData query response', ['response' => $query]);
                         if (empty($query) || !$query['success']) {
                             continue;
                         }
 
                         foreach ($query['result'] as $parentElement) {
+                            $this->logDebug('vtigercrm readData retrieve request', ['id' => $parentElement['id']]);
                             $retrive = $this->vtigerClient->retrieve($parentElement['id']);
+                            $this->logDebug('vtigercrm readData retrieve response', ['response' => $retrive]);
                             foreach ($retrive['result']['LineItems'] as $index => $lineitem) {
                                 if (0 == $index) {
                                     continue;
@@ -407,7 +417,9 @@ class vtigercrm extends solution
 
                     $query = ['success' => true, 'result' => $entitys];
                 } else {
+                    $this->logDebug('vtigercrm readData query request', ['query' => "SELECT $queryParam FROM $param[module] $where $orderby LIMIT $param[offset], $nDataCall;"]);
                     $query = $this->vtigerClient->query("SELECT $queryParam FROM $param[module] $where $orderby LIMIT $param[offset], $nDataCall;");
+                    $this->logDebug('vtigercrm readData query response', ['response' => $query]);
                 }
                 if (empty($query) || (!empty($query) && !$query['success'])) {
                     return [
@@ -503,7 +515,9 @@ class vtigercrm extends solution
                         }
                     }
 
+                    $this->logDebug('vtigercrm createData request', ['module' => $param['module'], 'data' => $data]);
                     $resultCreate = $this->vtigerClient->create($param['module'], $data);
+                    $this->logDebug('vtigercrm createData response', ['response' => $resultCreate]);
 
                     if (!empty($resultCreate) && $resultCreate['success'] && !empty($resultCreate['result'])) {
                         if ('LineItem' == $param['module']) {
@@ -608,7 +622,9 @@ class vtigercrm extends solution
                         }
                     }
 
+                    $this->logDebug('vtigercrm updateData request', ['module' => $param['module'], 'data' => $data]);
                     $resultUpdate = $this->vtigerClient->update($param['module'], $data);
+                    $this->logDebug('vtigercrm updateData response', ['response' => $resultUpdate]);
 
                     if (!empty($resultUpdate) && $resultUpdate['success'] && !empty($resultUpdate['result'])) {
                         if ('LineItem' == $param['module']) {
@@ -668,7 +684,9 @@ class vtigercrm extends solution
                         throw new \Exception('No target id found. Failed to delete the record.');
                     }
                     // Delete the record
+                    $this->logDebug('vtigercrm deleteData request', ['target_id' => $data['target_id']]);
                     $resultDelete = $this->vtigerClient->delete($data['target_id']);
+                    $this->logDebug('vtigercrm deleteData response', ['response' => $resultDelete]);
                     if (empty($resultDelete['success'])) {
                         throw new \Exception($resultDelete['error']['message'] ?? 'Error');
                     }

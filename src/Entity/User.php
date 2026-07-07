@@ -37,7 +37,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
  * @UniqueEntity(fields={"username"}, message="There is already an account with this username")
  */
-class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serializable
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     const ROLE_DEFAULT = 'ROLE_USER';
     const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
@@ -129,6 +129,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
     protected string $date_format = 'd/m/Y';
 
     /**
+     * @ORM\Column(name="deleted", type="boolean", options={"default": 0})
+     */
+    protected bool $deleted = false;
+
+    /**
      * @ORM\OneToOne(targetEntity=TwoFactorAuth::class, mappedBy="user", cascade={"remove"})
      */
     private ?TwoFactorAuth $twoFactorAuth = null;
@@ -163,12 +168,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function serialize(): ?string
+    public function __serialize(): array
     {
-        return serialize([
+        return [
             $this->password,
             $this->salt,
             $this->usernameCanonical,
@@ -178,26 +180,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
             $this->email,
             $this->emailCanonical,
             $this->timezone,
-        ]);
+        ];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function unserialize($serialized)
+    public function __unserialize(array $data): void
     {
-        $data = unserialize($serialized);
-
-        if (13 === count($data)) {
-            // Unserializing a User object from 1.3.x
-            unset($data[4], $data[5], $data[6], $data[9], $data[10]);
-            $data = array_values($data);
-        } elseif (11 === count($data)) {
-            // Unserializing a User from a dev version somewhere between 2.0-alpha3 and 2.0-beta1
-            unset($data[4], $data[7], $data[8]);
-            $data = array_values($data);
-        }
-
         [
             $this->password,
             $this->salt,
@@ -207,8 +194,8 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
             $this->id,
             $this->email,
             $this->emailCanonical,
-            $this->timezone
-            ] = $data;
+            $this->timezone,
+        ] = $data;
     }
 
     /**
@@ -565,6 +552,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface, \Serial
     public function setDateFormat(string $date_format): self
     {
         $this->date_format = $date_format;
+
+        return $this;
+    }
+
+    public function getDeleted(): bool
+    {
+        return $this->deleted;
+    }
+
+    public function setDeleted(bool $deleted): self
+    {
+        $this->deleted = $deleted;
 
         return $this;
     }

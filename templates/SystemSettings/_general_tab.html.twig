@@ -33,6 +33,68 @@
     </form>
 </div>
 
+<div class="settings-section mt-4">
+    <h4>{{ 'settings.logs.title'|trans }}</h4>
+
+    {% if is_granted('ROLE_SUPER_ADMIN') %}
+    <div class="mt-2 mb-3">
+        <div class="form-group toggle-switch-container" style="justify-content: flex-start; gap: 0.75rem;">
+            <label>{{ 'settings.logs.enable_debug'|trans }}</label>
+            <div class="toggle-switch small debug-toggle">
+                <input type="checkbox" id="debug-mode-toggle">
+                <label class="toggle-slider debug-slider" for="debug-mode-toggle"></label>
+            </div>
+            <span id="debug-mode-spinner" style="display:none;" class="ms-2">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
+        </div>
+        <small class="text-muted">{{ 'settings.logs.debug_hint'|trans }}</small>
+    </div>
+
+    <div class="mt-4 mb-3">
+        <div class="d-flex align-items-center gap-3">
+            <label for="log-level-select" class="form-label mb-0" style="white-space: nowrap;">{{ 'settings.logs.choose_level'|trans }}</label>
+            <select id="log-level-select" class="form-select" style="max-width: 200px;">
+                <option value="debug">Debug</option>
+                <option value="info">Info</option>
+                <option value="notice">Notice</option>
+                <option value="warning">Warning</option>
+                <option value="error">Error</option>
+                <option value="critical">Critical</option>
+                <option value="alert">Alert</option>
+                <option value="emergency">Emergency</option>
+            </select>
+            <span id="log-level-spinner" style="display:none;" class="ms-2">
+                <i class="fas fa-spinner fa-spin"></i>
+            </span>
+        </div>
+        <small class="text-muted">{{ 'settings.logs.level_hint'|trans }}</small>
+    </div>
+    {% endif %}
+
+    <div class="d-flex gap-3 mt-3 flex-wrap">
+        <div>
+            <label class="form-label">{{ 'settings.logs.download_logs'|trans }}</label>
+            <div>
+                <button type="button" id="download-logs" class="btn-log btn-download">
+                    <i class="fas fa-download me-2"></i>{{ 'settings.logs.download_logs'|trans }}
+                </button>
+            </div>
+        </div>
+
+        {% if is_granted('ROLE_SUPER_ADMIN') %}
+        <div>
+            <label class="form-label">{{ 'settings.logs.empty_logs'|trans }}</label>
+            <div>
+                <button type="button" id="empty-logs" class="btn-log btn-delete">
+                    <i class="fas fa-trash-alt me-2"></i>{{ 'settings.logs.empty_logs'|trans }}
+                </button>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
 <hr class="my-4">
 
 {# <!-- Search Settings Section -->

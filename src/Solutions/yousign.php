@@ -560,7 +560,9 @@ class yousign extends solution
                     'Content-Type: application/json',
                 ],
             ]);
+            $this->logDebug('yousign request', ['url' => $url.'/'.$endpoint, 'method' => 'GET']);
             $response = curl_exec($curl);
+            $this->logDebug('yousign response', ['response' => $response]);
             $err = curl_error($curl);
             curl_close($curl);
             if ($err) {

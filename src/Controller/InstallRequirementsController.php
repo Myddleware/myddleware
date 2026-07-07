@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Requirements\SymfonyRequirements;
+use App\Service\DebugLogger;
 
 class InstallRequirementsController extends AbstractController
 {
@@ -21,10 +22,12 @@ class InstallRequirementsController extends AbstractController
     private $phpVersion;
     private $systemStatus;
     private $configRepository;
+    private DebugLogger $debugLogger;
 
-    public function __construct(ConfigRepository $configRepository)
+    public function __construct(ConfigRepository $configRepository, DebugLogger $debugLogger)
     {
         $this->configRepository = $configRepository;
+        $this->debugLogger = $debugLogger;
     }
 
     /**
@@ -32,6 +35,9 @@ class InstallRequirementsController extends AbstractController
      */
     public function index(TranslatorInterface $translator): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['translator' => $translator]);
+        $__debugReturn = null;
+        try {
         try {
             //to help voter decide whether we allow access to install process again or not
             $configs = $this->configRepository->findAll();
@@ -89,7 +95,7 @@ class InstallRequirementsController extends AbstractController
                     $this->systemStatus = $translator->trans('install.system_status_ready');
                 }
 
-                return $this->render('install_requirements/index.html.twig', [
+                return $__debugReturn = $this->render('install_requirements/index.html.twig', [
                     'php_version' => $this->phpVersion,
                     'error_messages' => $requirementsErrorMessages,
                     'recommendation_messages' => $recommendationMessages,
@@ -102,11 +108,11 @@ class InstallRequirementsController extends AbstractController
                 // if we already have a database section in the .env.local file, deny access and add a flash message
                 if (!empty($_ENV['DATABASE_HOST']) && !empty($_ENV['DATABASE_NAME'])) {
                     $this->addFlash('error_install', $translator->trans('install.database_already_exists'));
-                    return $this->redirectToRoute('login');
+                    return $__debugReturn = $this->redirectToRoute('login');
                 }
 
                 // if other error, deny access
-                return $this->redirectToRoute('login');
+                return $__debugReturn = $this->redirectToRoute('login');
             }
         }
         $this->symfonyRequirements = new SymfonyRequirements();
@@ -138,7 +144,7 @@ class InstallRequirementsController extends AbstractController
         }
 
         //allow access if no errors
-        return $this->render('install_requirements/index.html.twig', [
+        return $__debugReturn = $this->render('install_requirements/index.html.twig', [
             'php_version' => $this->phpVersion,
             'error_messages' => $requirementsErrorMessages,
             'recommendation_messages' => $recommendationMessages,
@@ -146,5 +152,8 @@ class InstallRequirementsController extends AbstractController
             'env_local_file_rights' => $envLocalFileRights,
             'env_local_file_writable' => $envLocalFileWritable,
         ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 }

@@ -2,11 +2,7 @@
 {% block title %}{{ parent() }} | {{ 'rulegroup.create'| trans}}{% endblock %}
 {% block titlesm %}{{ 'rulegroup.create'| trans}}{% endblock titlesm %}
 {% block body %}
-    <div class="container mt-5">
-        <div class="text-center m-5">
-            <a href="{{ path('rulegroup_list') }}" class="btn btn-outline-primary m-2"> {{ 'rulegroup.back'| trans }}</a>
-        </div>
-        
+    <div class="container mt-5">        
         {{ form_start(form) }}
         <div class="mb-3">
                 <div class="row mb-4">

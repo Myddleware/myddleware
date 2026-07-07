@@ -51,9 +51,15 @@
   <button id="rule-save" type="button" class="btn btn-success mt-4" data-path-save="{{ path('rule_create_save') }}">
     {{ 'create_rule.step5.formula.save'|trans }}
   </button>
-  <a href="{{ path('regle_list_page') }}" id="rule-create-back" class="btn btn-outline-danger mt-4">
-    {{ 'create_rule.step5.back'|trans }}
-  </a>
+  {% if rule is not null %}
+    <a href="{{ path('regle_open', {'id': rule.id}) }}" id="rule-create-back" class="btn btn-outline-danger mt-4">
+      {{ 'create_rule.step5.back_to_rule'|trans }}
+    </a>
+  {% else %}
+    <a href="{{ path('regle_list_page') }}" id="rule-create-back" class="btn btn-outline-danger mt-4">
+      {{ 'create_rule.step5.back'|trans }}
+    </a>
+  {% endif %}
 </section>
 
 {# --- POP UP : FORMULA --- #}

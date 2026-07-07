@@ -269,11 +269,9 @@ td > a {
 /* Page View Rule : Validation Tab */
 #ruleparams,
 #simuleRuleFluxContainer {
-	background: rgb(233, 233, 233);
     color: black;
     margin-bottom: 20px;
     padding: 30px;
-	max-width: 30vw;
 	border-radius: 8px;
 	padding: 20px;
 	box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
@@ -304,7 +302,6 @@ td > a {
 
 #ruleparams .form-control,
 #validRuleParams .form-control {
-	max-width: 250px;
 	margin-bottom: 5px;
 }
 
@@ -481,4 +478,49 @@ label[for^="connector_connectorParams_"][for$="_value"] {
 
 .formula-full .all-link:hover {
 color: #0a58ca;
+}
+
+
+#rulenamesearchbar {
+    border: 1px solid #cccccc;
+    border-radius: 8px;
+    background-color: transparent;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+#rulenamesearchbar::before {
+    content: "Search";
+    position: absolute;
+    top: -9px;
+    left: 15px;
+    background-color: #ffffff;
+    padding: 0 8px;
+    color: #495057;
+    font-size: 13px;
+    font-weight: 500;
+    z-index: 5;
+    text-transform: uppercase;
+}
+
+#rule_name_searchbar {
+    border: none !important;
+    background-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    width: 100%;
+    padding: 9px 15px;
+}
+
+#rule_name_searchbar::placeholder {
+    color: transparent; 
+}
+
+#clear_rule_search {
+    right: 15px !important;
+}
+
+.rule-list-button{
+	margin: 3rem 1rem 2rem 5.2rem !important;
 }

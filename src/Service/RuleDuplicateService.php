@@ -86,7 +86,7 @@ class RuleDuplicateService
             $newAction->setModifiedBy($this->security->getUser());
             $newAction->setDateCreated(new \DateTime());
             $newAction->setDateModified(new \DateTime());
-            $newAction->setName($action->getName());
+            $newAction->setName($action->getName() . ' (copy)');
             $newAction->setAction($action->getAction());
             $newAction->setDescription($action->getDescription());
             $newAction->setOrder($action->getOrder());

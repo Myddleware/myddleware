@@ -21,39 +21,221 @@
  You should have received a copy of the GNU General Public License
  along with Myddleware.  If not, see <http://www.gnu.org/licenses/>.
 *********************************************************************************/
-
-#connector #tab_connector td.title {
-	width: 35%;
-	color:#0F66A9;
-	padding-right: 10px;
+/* =========================================
+   CONNECTOR CARD LAYOUT
+   ========================================= */
+   
+   .modern-connector-layout {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 50px 0;
 }
 
-#connector #tab_connector td.value input {
-	width:100%;
-	padding:8px;
+.connector-card { 
+    position: relative;
+    background: #fff; 
+    border-radius: 15px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.05); 
+    width: 950px; 
+    min-height: 550px;
+    height: auto;
 }
 
-/* Style for status icon to keep it inline with buttons */
-.status {
-	display: inline-block;
-	vertical-align: middle;
-	white-space: nowrap;
+.champs .row {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 0 35px 0 !important;
+    position: relative;
 }
 
-/* Prevent button row from wrapping */
-#connector .col[style*="margin-right: 10rem;"] {
-	display: flex;
-	flex-wrap: nowrap;
-	gap: 0.5rem;
-	align-items: center;
+.champs label {
+    display: block !important;
+    position: absolute;
+    top: -10px;
+    left: 12px;
+    background: #fff;
+    padding: 0 8px;
+    font-size: 11px;
+    color: #067dd7;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    z-index: 11;
 }
 
-/* Updates after SF4 upgrade */
-
-/* Title 'Creating a connector' */
-.tabs ul.ui-tabs-nav {
-	display: flex;
-	justify-content: center;
-
+.champs input.params, 
+.champs .params-wrapper input {
+    width: 100% !important;
+    border: 1.5px solid #dce4ec !important;
+    border-radius: 12px !important;
+    padding: 14px 15px !important;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    background-color: transparent;
+    color: #555;
 }
 
+.champs input.params:focus {
+    border-color: #067dd7 !important;
+    box-shadow: 0 0 10px rgba(6, 125, 215, 0.1);
+    outline: none;
+}
+
+.brand-title {
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+.champs .row.justify-content-center.mt-5 {
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 15px;
+    margin-top: 30px !important;
+}
+
+.status-online { 
+    color: #19ca42 !important; font-size: 24px; 
+}
+.status-offline { 
+    color: #8e8b8b !important; font-size: 24px; 
+}
+.status-loader { 
+    color: #067dd7; font-size: 20px; 
+}
+
+.view-detail-page .connector-card {
+    display: flex;
+}
+
+.view-detail-page .connector-left { 
+    width: 30%; 
+    padding: 40px; 
+    border-right: 1px solid #eee;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.view-detail-page .connector-right { 
+    width: 70%; 
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+.view-detail-page .logo-wrapper {
+    margin-top: 20px;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.view-detail-page .picture img {
+    max-width: 100px;
+    height: auto;
+}
+
+.view-detail-page .champs {
+    width: 100% !important;
+    margin-top: 20px;
+}
+
+.connector-actions-footer {
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    align-items: center !important;
+    gap: 15px !important;
+    margin-top: 30px !important;
+}
+
+.connector-actions-footer .btn,
+.connector-actions-footer form button {
+    flex-grow: 0 !important;
+    width: auto !important;
+    padding: 10px 25px !important;
+    font-weight: bold !important;
+}
+
+.connector-actions-footer .btn-success {
+    background-color: #19ca42 !important;
+    border: none !important;
+    color: #fff !important;
+}
+
+.view-create-page .connector-card {
+    display: grid;
+    grid-template-columns: 30% 70%;
+    grid-template-rows: auto auto auto 1fr;
+    align-items: start;
+}
+
+.view-create-page .connector-left {
+    display: contents; 
+}
+
+.view-create-page .connector-right {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 40px 40px 0 40px;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.view-create-page .liste_solution,
+.view-create-page .selectize-control {
+    grid-column: 1;
+    grid-row: 1;
+    margin: 40px auto 10px auto;
+    width: 80%;
+}
+
+.view-create-page .logo-wrapper {
+    grid-column: 1;
+    grid-row: 2;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.view-create-page .picture img {
+    max-width: 100px;
+    height: auto;
+}
+
+.view-create-page #source_status,
+.view-create-page #source_msg,
+.view-create-page .help {
+    grid-column: 1;
+    grid-row: 3;
+    text-align: center;
+    margin-top: 15px;
+}
+
+.view-create-page .champs {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    border-left: 1px solid #eee;
+    padding: 100px 40px 40px 40px !important;
+    width: 100% !important;
+    margin: 0 !important;
+    position: relative !important;
+    z-index: 10;
+    pointer-events: auto;
+}
+
+#connexion_detail, #connexion{
+    color: #929da2;
+    background-color: transparent;
+    border: 1px solid #929da2;
+}
+
+#connexion_detail:hover, #connexion:hover{
+    color: #ffffff;
+    background-color: #929da2;
+}
