@@ -441,12 +441,14 @@ class DocumentManager
 			'id' => $this->id,
 			'rule_id' => $this->ruleId,
 			'date_created' => $this->dateCreated,
+			'status' => 'New',
 			'created_by' => $this->userId,
 			'modified_by' => $this->userId,
 			'source_id' => utf8_encode($this->sourceId),
 			'source_date_modified' => $this->data['date_modified'],
 			'mode' => $this->ruleMode,
 			'type' => $this->documentType,
+			'global_status' => 'Open',
 			'parent_id' => $this->parentId,
 			'job_lock' => ''
 		];		
@@ -464,7 +466,6 @@ class DocumentManager
 			$this->flushStatusBatch();
 			$this->flushLogBatch();
 		}
-		$this->updateStatusBatch('New');
 		return true;
     }
 	
@@ -482,22 +483,24 @@ class DocumentManager
 
 		// Prepare insert query for document table
 		foreach ($this->documentBatch as $doc) {
-			$values[] = "(?,?,?,?,?,?,?,?,?,?,?)";
+			$values[] = "(?,?,?,?,?,?,?,?,?,?,?,?,?)";
 			$params[] = $doc['id'];
 			$params[] = $doc['rule_id'];
 			$params[] = $doc['date_created'];
+			$params[] = $doc['status'];
 			$params[] = $doc['created_by'];
 			$params[] = $doc['modified_by'];
 			$params[] = $doc['source_id'];
 			$params[] = $doc['source_date_modified'];
 			$params[] = $doc['mode'];
 			$params[] = $doc['type'];
+			$params[] = $doc['global_status'];
 			$params[] = $doc['parent_id'];
 			$params[] = $doc['job_lock'];
 		}
 		$sql = "
 			INSERT INTO document 
-			(id, rule_id, date_created, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock)
+			(id, rule_id, date_created, status, created_by, modified_by, source_id, source_date_modified, mode, type, global_status, parent_id, job_lock)
 			VALUES ".implode(',', $values);
 		// Execute query for document table
 		$this->connection->executeStatement($sql, $params);
@@ -2621,7 +2624,6 @@ class DocumentManager
                 echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
             }
             $stmt = $this->connection->prepare($query);
-            $stmt->bindValue(':now', $now);
             $stmt->bindValue(':globalStatus', $globalStatus);
             $stmt->bindValue(':attempt', $this->attempt);
             $stmt->bindValue(':new_status', $new_status);
@@ -2659,13 +2661,6 @@ class DocumentManager
 
             // Update current global status tracker
             $this->currentGlobalStatus = $globalStatus;
-
-            // // Dispatch event for Elasticsearch sync ONLY when global_status changes
-            // // This optimization reduces ES operations by ~70% (avoids syncing intermediate statuses)
-            // if ($previousGlobalStatus !== $globalStatus) {
-            //     $this->dispatchDocumentEvent(DocumentEvent::UPDATED);
-            // }
-
 			return true;
         } catch (\Exception $e) {
 			$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
