@@ -118,11 +118,11 @@ class DocumentManager
 
     private array $notSentFields = [];
     protected ?DebugLogger $debugLogger = null;
-	private array $documentBatch = [];
-	private array $documentDataBatch = [];
-	private array $statusBatch = [];
-	private array $logBatch = [];
-	private int $batchSize = 1000;
+	  private array $documentBatch = [];
+	  private array $documentDataBatch = [];
+	  private array $statusBatch = [];
+	  private array $logBatch = [];
+	  private int $batchSize = 1000;
 
     public function __construct(
         LoggerInterface $logger,
