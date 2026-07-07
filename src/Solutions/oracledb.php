@@ -122,6 +122,7 @@ class oracledb extends database
             $requestSQL = $this->queryValidation($param, 'read', $requestSQL);
 
             // Appel de la requête
+            $this->logDebug('oracledb readData query', ['query' => $requestSQL]);
             $q = $this->pdo->prepare($requestSQL);
             $exec = $q->execute();
 
@@ -130,6 +131,7 @@ class oracledb extends database
                 throw new \Exception('Read: '.$errorInfo[2].' . Query : '.$requestSQL);
             }
             $fetchAll = $q->fetchAll(\PDO::FETCH_ASSOC);
+            $this->logDebug('oracledb readData result', ['count' => count($fetchAll)]);
 
             $row = [];
             if (!empty($fetchAll)) {

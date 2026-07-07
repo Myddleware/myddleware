@@ -50,7 +50,7 @@ class DocumentAudit
     }
 
     /**
-     * @ORM\Column(name="doc_id", type="string", nullable=false)
+     * @ORM\Column(name="doc_id", type="string", length=36, nullable=false)
      */
     private string $doc;
 

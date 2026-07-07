@@ -91,6 +91,7 @@ use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
+use App\Service\DebugLogger;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 
 
@@ -121,6 +122,7 @@ class WorkflowActionController extends AbstractController
     // To allow sending a specific record ID to rule simulation
     protected $simulationQueryField;
     private ConfigRepository $configRepository;
+    private DebugLogger $debugLogger;
 
     public function __construct(
         LoggerInterface $logger,
@@ -142,7 +144,8 @@ class WorkflowActionController extends AbstractController
         TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
         ParameterBagInterface $paramsprivate,
-        ConfigRepository $configRepository
+        ConfigRepository $configRepository,
+        DebugLogger $debugLogger
     ) {
         $this->logger = $logger;
         $this->ruleManager = $ruleManager;
@@ -163,9 +166,16 @@ class WorkflowActionController extends AbstractController
         $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
         $this->configRepository = $configRepository;
+        $this->debugLogger = $debugLogger;
     }
 
-    protected function getInstanceBdd() {}
+    protected function getInstanceBdd() {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        try {
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
+    }
 
 
     // public function to delet the workflow by id (set deleted to 1)
@@ -175,28 +185,34 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
+        $__debugReturn = null;
         try {
-            $em = $this->entityManager;
-            $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-            $workflowAction = $workflowActionResult[0];
-
-            if ($workflowAction) {
-                $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
-                $workflowAction->setDeleted(1);
-                $em->persist($workflowAction);
-                $em->flush();
-                $this->addFlash('success', 'Action deleted successfully');
-            } else {
-                $this->addFlash('error', 'Action not found');
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
-            return $this->redirectToRoute('workflow_list');
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            try {
+                $em = $this->entityManager;
+                $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+                $workflowAction = $workflowActionResult[0];
+
+                if ($workflowAction) {
+                    $this->saveWorkflowAudit($workflowAction->getWorkflow()->getId());
+                    $workflowAction->setDeleted(1);
+                    $em->persist($workflowAction);
+                    $em->flush();
+                    $this->addFlash('success', 'Action deleted successfully');
+                } else {
+                    $this->addFlash('error', 'Action not found');
+                }
+
+                return $__debugReturn = $this->redirectToRoute('workflow_list');
+            } catch (Exception $e) {
+                throw $this->createNotFoundException('Error : ' . $e);
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -206,37 +222,43 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionActiveAction(string $id, Request $request)
     {
-        if (!$this->tools->isPremium()) {
-            return new JsonResponse(['error' => 'Premium required'], 403);
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
+        $__debugReturn = null;
         try {
-            $em = $this->entityManager;
-            $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-            
-            if (!empty($workflowResult)) {
-                $workflow = $workflowResult[0];
-                $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
-                $em->persist($workflow);
-                $em->flush();
-                
-                return new JsonResponse([
-                    'success' => true,
-                    'message' => 'Workflow Action updated successfully',
-                    'active' => $workflow->getActive()
-                ]);
-            } 
-            
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Workflow Action not found'
-            ], 404);
-            
-        } catch (Exception $e) {
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Error: ' . $e->getMessage()
-            ], 500);
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = new JsonResponse(['error' => 'Premium required'], 403);
+            }
+
+            try {
+                $em = $this->entityManager;
+                $workflowResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+
+                if (!empty($workflowResult)) {
+                    $workflow = $workflowResult[0];
+                    $workflow->setActive($workflow->getActive() == 1 ? 0 : 1);
+                    $em->persist($workflow);
+                    $em->flush();
+
+                    return $__debugReturn = new JsonResponse([
+                        'success' => true,
+                        'message' => 'Workflow Action updated successfully',
+                        'active' => $workflow->getActive()
+                    ]);
+                }
+
+                return $__debugReturn = new JsonResponse([
+                    'success' => false,
+                    'message' => 'Workflow Action not found'
+                ], 404);
+
+            } catch (Exception $e) {
+                return $__debugReturn = new JsonResponse([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ], 500);
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -246,28 +268,33 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionActiveShowAction(string $id, Request $request)
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
+        $__debugReturn = null;
         try {
-            $em = $this->entityManager;
-            $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-            $workflowAction = $workflowActionResult[0];
-
-            if ($workflowAction) {
-                $workflowAction->setActive($workflowAction->getActive() == 1 ? 0 : 1);
-                $em->persist($workflowAction);
-                $em->flush();
-                $this->addFlash('workflowaction.success', $translator->trans('view_workflow_action.updated_successfully'));
-            } else {
-                $this->addFlash('error', 'Workflow Action not found');
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
+            try {
+                $em = $this->entityManager;
+                $workflowActionResult = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+                $workflowAction = $workflowActionResult[0];
 
-            return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+                if ($workflowAction) {
+                    $workflowAction->setActive($workflowAction->getActive() == 1 ? 0 : 1);
+                    $em->persist($workflowAction);
+                    $em->flush();
+                    $this->addFlash('workflowaction.success', $translator->trans('view_workflow_action.updated_successfully'));
+                } else {
+                    $this->addFlash('error', 'Workflow Action not found');
+                }
+
+                return $__debugReturn = $this->redirectToRoute('workflow_action_show', ['id' => $id]);
+            } catch (Exception $e) {
+                throw $this->createNotFoundException('Error : ' . $e);
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -277,11 +304,14 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowCreateActionWithWorkflow(string $workflowId, Request $request)
         {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['workflowId' => $workflowId, 'request' => $request]);
+        $__debugReturn = null;
         try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
+
+            try {
             $em = $this->entityManager;
             $workflow = $em->getRepository(Workflow::class)->find($workflowId);
 
@@ -802,12 +832,12 @@ class WorkflowActionController extends AbstractController
 
                     $this->addFlash('workflowaction.create.success', $this->translator->trans('view_workflow_action.created_successfully'));
 
-                    return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
+                    return $__debugReturn = $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
                 $workflows = $em->getRepository(Workflow::class)->findBy(['deleted' => 0]);
 
-                return $this->render(
+                return $__debugReturn = $this->render(
                     'WorkflowAction/new.html.twig',
                     [
                         'form' => $form->createView(),
@@ -817,10 +847,13 @@ class WorkflowActionController extends AbstractController
             } else {
                 $this->addFlash('error', 'Action not found');
 
-                return $this->redirectToRoute('workflow_list');
+                return $__debugReturn = $this->redirectToRoute('workflow_list');
             }
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            } catch (Exception $e) {
+                throw $this->createNotFoundException('Error : ' . $e);
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -829,23 +862,28 @@ class WorkflowActionController extends AbstractController
      */
     public function getTargetFields(string $ruleId, EntityManagerInterface $em): JsonResponse
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId, 'em' => $em]);
+        $__debugReturn = null;
+        try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
+
+            $ruleFields = $em->getRepository(RuleField::class)->findBy(['rule' => $ruleId]);
+
+            if (!$ruleFields) {
+                return $__debugReturn = new JsonResponse(['fields' => []], 404);
+            }
+
+            $fields = [];
+            foreach ($ruleFields as $ruleField) {
+                $fields[] = $ruleField->getTarget();
+            }
+
+            return $__debugReturn = new JsonResponse(['fields' => $fields]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        $ruleFields = $em->getRepository(RuleField::class)->findBy(['rule' => $ruleId]);
-
-        if (!$ruleFields) {
-            return new JsonResponse(['fields' => []], 404);
-        }
-
-        // get the target fields
-        $fields = [];
-        foreach ($ruleFields as $ruleField) {
-            $fields[] = $ruleField->getTarget();
-        }
-
-        return new JsonResponse(['fields' => $fields]);
     }
 
     // public function to show the detail view of a single workflow
@@ -855,46 +893,52 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionShowAction(string $id, Request $request, int $page): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'page' => $page]);
+        $__debugReturn = null;
         try {
-            $em = $this->entityManager;
-            $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
-            if (!$workflow) {
-                $this->addFlash('error', 'Workflow Action not found');
-                return $this->redirectToRoute('workflow_list');
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
             }
 
-            $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
-                ['action' => $workflow],
-                ['dateCreated' => 'DESC']
-            );
+            try {
+                $em = $this->entityManager;
+                $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
+                $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(['action' => $id]);
+                if (!$workflow) {
+                    $this->addFlash('error', 'Workflow Action not found');
+                    return $__debugReturn = $this->redirectToRoute('workflow_list');
+                }
 
-            $adapter = new ArrayAdapter($workflowLogs);
-            $pager = new Pagerfanta($adapter);
-            $pager->setMaxPerPage(10);
-            $pager->setCurrentPage($page);
-
-            if ($workflow) {
-                $nb_workflow = count($workflowLogs);
-                return $this->render(
-                    'WorkflowAction/show.html.twig',
-                    [
-                        'workflow' => $workflow,
-                        'workflowLogs' => $workflowLogs,
-                        'nb_workflow' => $nb_workflow,
-                        'pager' => $pager,
-                    ]
+                $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
+                    ['action' => $workflow],
+                    ['dateCreated' => 'DESC']
                 );
-            } else {
-                $this->addFlash('error', 'Workflow not found');
-                return $this->redirectToRoute('workflow_list');
+
+                $adapter = new ArrayAdapter($workflowLogs);
+                $pager = new Pagerfanta($adapter);
+                $pager->setMaxPerPage(10);
+                $pager->setCurrentPage($page);
+
+                if ($workflow) {
+                    $nb_workflow = count($workflowLogs);
+                    return $__debugReturn = $this->render(
+                        'WorkflowAction/show.html.twig',
+                        [
+                            'workflow' => $workflow,
+                            'workflowLogs' => $workflowLogs,
+                            'nb_workflow' => $nb_workflow,
+                            'pager' => $pager,
+                        ]
+                    );
+                } else {
+                    $this->addFlash('error', 'Workflow not found');
+                    return $__debugReturn = $this->redirectToRoute('workflow_list');
+                }
+            } catch (Exception $e) {
+                throw $this->createNotFoundException('Error : ' . $e);
             }
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
@@ -904,22 +948,25 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionShowLogs(string $id, Request $request, int $page): Response
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'page' => $page]);
+        $__debugReturn = null;
+        try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
 
-       try {
+           try {
             $em = $this->entityManager;
             $workflowAction = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
 
             if (!$workflowAction) {
                 if ($request->isXmlHttpRequest()) {
-                    return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                    return $__debugReturn = $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
                         'error' => 'Workflow Action not found'
                     ]);
                 }
                 $this->addFlash('error', 'Workflow Action not found');
-                return $this->redirectToRoute('workflow_list');
+                return $__debugReturn = $this->redirectToRoute('workflow_list');
             }
 
             $conf = $this->configRepository->findOneBy(['name' => 'search_limit']);
@@ -930,7 +977,7 @@ class WorkflowActionController extends AbstractController
                 $query->setMaxResults($limit);
             }
             $logs = $query->getResult();
-            
+
             $pager = new Pagerfanta(new ArrayAdapter($logs));
             $pager->setMaxPerPage(20);
             $pager->setCurrentPage($page);
@@ -939,18 +986,18 @@ class WorkflowActionController extends AbstractController
             $nb_workflow = count($logs);
 
             if ($request->isXmlHttpRequest()) {
-                return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                return $__debugReturn = $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
                     'workflowLogs' => $workflowLogs,
                     'nb_workflow' => $nb_workflow,
                     'pager' => $pager,
                     'workflowAction' => $workflowAction,
                 ]);
             }
-            return $this->redirectToRoute('workflow_action_show', ['id' => $id]);
+            return $__debugReturn = $this->redirectToRoute('workflow_action_show', ['id' => $id]);
         } catch (Exception $e) {
             error_log('WorkflowActionShowLogs Error: ' . $e->getMessage() . ' in ' . $e->getFile() . ' on line ' . $e->getLine());
             if ($request->isXmlHttpRequest()) {
-                return $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
+                return $__debugReturn = $this->render('WorkflowAction/_workflowaction_logs_table.html.twig', [
                     'workflowLogs' => [],
                     'nb_workflow' => 0,
                     'pager' => null,
@@ -960,6 +1007,9 @@ class WorkflowActionController extends AbstractController
             }
             throw $this->createNotFoundException('Error: ' . $e->getMessage());
         }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // public function to edit a workflow
@@ -968,11 +1018,14 @@ class WorkflowActionController extends AbstractController
      */
     public function WorkflowActionEditAction(string $id, Request $request)
     {
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
+        $__debugReturn = null;
         try {
+            if (!$this->tools->isPremium()) {
+                return $__debugReturn = $this->redirectToRoute('premium_list');
+            }
+
+            try {
             $em = $this->entityManager;
             $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
             $workflowAction = $workflowActionArray[0];
@@ -1500,12 +1553,11 @@ class WorkflowActionController extends AbstractController
 
                     $this->addFlash('success', 'Action updated successfully');
 
-                    return $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
+                    return $__debugReturn = $this->redirectToRoute('workflow_action_show', ['id' => $workflowAction->getId()]);
                 }
 
                 $targetFieldsData = [];
                 if (!empty($arguments) && count($arguments) > 0) {
-                    // Handle fields property specifically
                     if (isset($arguments['fields']) && is_array($arguments['fields'])) {
                         foreach ($arguments['fields'] as $field => $value) {
                             $targetFieldsData[] = [
@@ -1515,60 +1567,66 @@ class WorkflowActionController extends AbstractController
                         }
                     }
                 }
-                return $this->render(
+                return $__debugReturn = $this->render(
                     'WorkflowAction/edit.html.twig',
                     [
                         'form' => $form->createView(),
                         'targetFieldsData' => $targetFieldsData,
-                        'workflowAction' => $workflowAction, 
+                        'workflowAction' => $workflowAction,
                         'workflows' => $em->getRepository(Workflow::class)->findBy(['deleted' => 0]),
                     ]
                 );
             } else {
                 $this->addFlash('error', 'Action not found');
 
-                return $this->redirectToRoute('workflow_list');
+                return $__debugReturn = $this->redirectToRoute('workflow_list');
             }
-        } catch (Exception $e) {
-            throw $this->createNotFoundException('Error : ' . $e);
+            } catch (Exception $e) {
+                throw $this->createNotFoundException('Error : ' . $e);
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
-    // public function to empty the arguments based on the action
     public function emptyArgumentsBasedOnAction($id)
     {
-
-        if (!$this->tools->isPremium()) {
-            return $this->redirectToRoute('premium_list');
-        }
-
-        $em = $this->entityManager;
-        $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
-        $workflowAction = $workflowActionArray[0];
-
-        if ($workflowAction) {
-            $arguments = $workflowAction->getArguments();
-            $action = $workflowAction->getAction();
-
-            if ($action == 'updateStatus') {
-                unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
-            } elseif ($action == 'generateDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['type']);
-            } elseif ($action == 'sendNotification') {
-                unset($arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
-            } elseif ($action == 'transformDocument') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
-            } elseif ($action == 'rerun') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
-            } elseif ($action == 'changeData') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type'], $arguments['rerun']);
-            } elseif ($action == 'updateType') {
-                unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['ruleId'], $arguments['rerun']);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
+        try {
+            if (!$this->tools->isPremium()) {
+                return $this->redirectToRoute('premium_list');
             }
 
-            $workflowAction->setArguments($arguments);
-            $em->persist($workflowAction);
-            $em->flush();
+            $em = $this->entityManager;
+            $workflowActionArray = $em->getRepository(WorkflowAction::class)->findBy(['id' => $id, 'deleted' => 0]);
+            $workflowAction = $workflowActionArray[0];
+
+            if ($workflowAction) {
+                $arguments = $workflowAction->getArguments();
+                $action = $workflowAction->getAction();
+
+                if ($action == 'updateStatus') {
+                    unset($arguments['to'], $arguments['subject'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+                } elseif ($action == 'generateDocument') {
+                    unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['type']);
+                } elseif ($action == 'sendNotification') {
+                    unset($arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+                } elseif ($action == 'transformDocument') {
+                    unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+                } elseif ($action == 'rerun') {
+                    unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type']);
+                } elseif ($action == 'changeData') {
+                    unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['type'], $arguments['rerun']);
+                } elseif ($action == 'updateType') {
+                    unset($arguments['to'], $arguments['subject'], $arguments['message'], $arguments['status'], $arguments['searchField'], $arguments['searchValue'], $arguments['ruleId'], $arguments['rerun']);
+                }
+
+                $workflowAction->setArguments($arguments);
+                $em->persist($workflowAction);
+                $em->flush();
+            }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 

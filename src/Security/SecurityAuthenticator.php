@@ -70,6 +70,10 @@ class SecurityAuthenticator extends AbstractLoginFormAuthenticator
             throw new CustomUserMessageAuthenticationException($this->translator->trans('login.invalid_credentials'));
         }
 
+        if ($user->getDeleted()) {
+            throw new CustomUserMessageAuthenticationException($this->translator->trans('login.disabled_account'));
+        }
+
         if (!$user->isEnabled()) {
             throw new CustomUserMessageAuthenticationException($this->translator->trans('login.disabled_account'));
         }

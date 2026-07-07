@@ -1,0 +1,120 @@
+.fe-wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.fe-highlight,
+.fe-textarea {
+  font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace !important;
+  font-size: .875rem !important;
+  line-height: 1.5 !important;
+  padding: .375rem .75rem !important;
+  border: 1px solid #dee2e6;
+  border-radius: .375rem;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+  tab-size: 4;
+  margin: 0;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.fe-highlight {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 1;
+  background: #fff;
+  color: #374151;
+  border-color: transparent;
+}
+
+.fe-textarea {
+  position: relative;
+  z-index: 2;
+  background: transparent !important;
+  color: transparent !important;
+  caret-color: #1f2937 !important;
+  resize: vertical;
+  min-height: 120px;
+}
+
+.fe-textarea::selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: transparent;
+}
+.fe-textarea::-moz-selection {
+  background: rgba(59, 130, 246, 0.3);
+  color: transparent;
+}
+
+.fe-bracket,
+.fe-quote {
+  font-weight: 700;
+}
+
+.fe-bracket-highlight {
+  background: rgba(255, 215, 0, 0.40) !important;
+  border-radius: 2px;
+  outline: 2px solid rgba(255, 180, 0, 0.65);
+  outline-offset: -1px;
+  animation: fe-pulse 0.5s ease-out;
+}
+
+@keyframes fe-pulse {
+  0%   { background: rgba(255, 215, 0, 0.70) !important; }
+  100% { background: rgba(255, 215, 0, 0.40) !important; }
+}
+
+.fe-bracket-unmatched {
+  color: #dc2626 !important;
+  font-weight: 800;
+  text-decoration: wavy underline #dc2626;
+  text-underline-offset: 3px;
+  background: rgba(220, 38, 38, 0.10);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.fe-toolbar {
+  display: flex;
+  gap: .5rem;
+  margin-bottom: .4rem;
+}
+
+.fe-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  padding: .2rem .6rem;
+  font-size: .72rem;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  border-radius: .375rem;
+  background: #f9fafb;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all .15s ease;
+  user-select: none;
+  line-height: 1.4;
+}
+
+.fe-toggle:hover {
+  background: #f3f4f6;
+  border-color: #9ca3af;
+}
+
+.fe-toggle.active {
+  background: #eff6ff;
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}
+
+.fe-toggle i {
+  font-size: .65rem;
+}

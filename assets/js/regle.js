@@ -169,26 +169,17 @@ $(function () {
           mod: 3,
         },
         beforeSend: function () {
-          $("#" + parent + "_status img").removeAttr("src");
-          $("#" + parent + "_status img").attr("src", path_img + "loader.gif");
+          $("#" + parent + "_status").html('<i class="fa fa-spinner fa-spin status-loader"></i>');
         },
         success: function (msg) {
           var r = msg.split(";");
 
           if (r[1] == 0) {
-            $("#" + parent + "_status img").removeAttr("src");
-            $("#" + parent + "_status img").attr(
-              "src",
-              path_img + "status_offline.png"
-            );
+            $("#" + parent + "_status").html('<i class="fa fa-lightbulb status-offline"></i>');
             $("#" + parent + "_msg span").html(r[0]);
             $("#" + parent + "_msg").show();
           } else {
-            $("#" + parent + "_status img").removeAttr("src");
-            $("#" + parent + "_status img").attr(
-              "src",
-              path_img + "status_online.png"
-            );
+            $("#" + parent + "_status").html('<i class="fa fa-lightbulb status-online"></i>');
             $("#" + parent + "_msg").hide();
             $("#" + parent + "_msg span").html("");
           }
@@ -570,9 +561,9 @@ function notification() {
 
 function next_step(error) {
   $(".status")
-    .find("img")
+    .find("i")
     .each(function () {
-      if ($(this).attr("src") != path_img + "status_online.png") {
+      if (!$(this).hasClass("status-online")) {
         error++;
       }
     });
@@ -597,7 +588,7 @@ function verif(div_clock) {
   $(".testing", div_clock).on("click", function () {
     var parent = $("#source").attr("id");
     var datas = "";
-    var status = $(div_clock).parent().find(".status img");
+    var status = $(div_clock).parent().find(".status");
     var solution = $(div_clock).parent().find(".liste_solution").val();
     $("input").each(function () {
       if ($(this).attr("data-param") != undefined) {
@@ -630,21 +621,11 @@ function verif(div_clock) {
         mod: 2,
       },
       beforeSend: function () {
-        $(status).removeAttr("src");
-        if (window.location.pathname.includes("createout")) {
-          $(status).attr("src", path_img_modal + "loader.gif");
-        } else {
-          $(status).attr("src", path_img + "loader.gif");
-        }
+          $(status).html('<i class="fa fa-spinner fa-spin status-loader"></i>');
       },
       success: function (json) {
         if (!json.success) {
-          $(status).removeAttr("src");
-          if (window.location.pathname.includes("createout")) {
-            $(status).attr("src", path_img_modal + "status_offline.png");
-          } else {
-            $(status).attr("src", path_img + "status_offline.png");
-          }
+          $(status).html('<i class="fa fa-lightbulb status-offline"></i>');
           $("#msg_status span.error").html(json.message);
           $("#msg_status").show();
           return false;
@@ -695,8 +676,7 @@ function verif(div_clock) {
 
                     var response = dataCode.split(";");
 
-                    $(status).removeAttr("src");
-                    $(status).attr("src", path_img + "status_offline.png");
+                    $(status).html('<i class="fa fa-lightbulb status-offline"></i>');
 
                     if (
                       typeof data_error_without_popup[0] !== "undefined" &&
@@ -708,8 +688,7 @@ function verif(div_clock) {
                     $("#msg_status span.error").html(response[0]);
                     $("#msg_status").show();
                   } else {
-                    $(status).removeAttr("src");
-                    $(status).attr("src", path_img + "status_online.png");
+                    $(status).html('<i class="fa fa-lightbulb status-online"></i>');
                     $("#msg_status").hide();
                     $("#msg_status span.error").html("");
                     $("#step_modules_confirme").removeAttr("disabled");
@@ -719,21 +698,11 @@ function verif(div_clock) {
             } else {
               // Sans popup
               if (!json.success) {
-                $(status).removeAttr("src");
-                if (window.location.pathname.includes("createout")) {
-                  $(status).attr("src", path_img_modal + "status_offline.png");
-                } else {
-                  $(status).attr("src", path_img + "status_offline.png");
-                }
+                $(status).html('<i class="fa fa-lightbulb status-offline"></i>');
                 $("#msg_status span.error").html(json.message);
                 $("#msg_status").show();
               } else {
-                $(status).removeAttr("src");
-                if (window.location.pathname.includes("createout")) {
-                  $(status).attr("src", path_img_modal + "status_online.png");
-                } else {
-                  $(status).attr("src", path_img + "status_online.png");
-                }
+                $(status).html('<i class="fa fa-lightbulb status-online"></i>');
                 $("#msg_status").hide();
                 $("#msg_status span.error").html("");
                 $("#step_modules_confirme").removeAttr("disabled");

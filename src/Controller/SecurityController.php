@@ -7,6 +7,7 @@ use App\Form\Type\ResetPasswordType;
 use App\Form\Type\UserForgotPasswordType;
 use App\Manager\NotificationManager;
 use App\Repository\UserRepository;
+use App\Service\DebugLogger;
 use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -28,6 +29,7 @@ class SecurityController extends AbstractController
     private EntityManagerInterface $entityManager;
     private NotificationManager $notificationManager;
     private SecurityService $securityService;
+    private DebugLogger $debugLogger;
 
     public function __construct(
         AuthorizationCheckerInterface $authorizationChecker,
@@ -35,7 +37,8 @@ class SecurityController extends AbstractController
         UserRepository $userRepository,
         EntityManagerInterface $entityManager,
         NotificationManager $notificationManager,
-        SecurityService $securityService
+        SecurityService $securityService,
+        DebugLogger $debugLogger
     ) {
         $this->authorizationChecker = $authorizationChecker;
         $this->passwordHasherFactory = $passwordHasherFactory;
@@ -43,175 +46,199 @@ class SecurityController extends AbstractController
         $this->entityManager = $entityManager;
         $this->notificationManager = $notificationManager;
         $this->securityService = $securityService;
+        $this->debugLogger = $debugLogger;
     }
 
     #[Route('/', name: 'login')]
     #[Route('/login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
-        if ($this->getUser() instanceof User) {
-            return $this->redirectToRoute('regle_panel');
-        }
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['authenticationUtils' => $authenticationUtils]);
+        $__debugReturn = null;
+        try {
+            if ($this->getUser() instanceof User) {
+                return $__debugReturn = $this->redirectToRoute('regle_panel');
+            }
 
-        // get the login error if there is one
-        $error = $authenticationUtils->getLastAuthenticationError();
-        if (!empty($error)) {
-            $error = $error->getMessage();
-        }
+            // get the login error if there is one
+            $error = $authenticationUtils->getLastAuthenticationError();
+            if (!empty($error)) {
+                $error = $error->getMessage();
+            }
 
-        // last username entered by the user
-        $lastUsername = $authenticationUtils->getLastUsername();
-        $this->calculBan($lastUsername);
+            // last username entered by the user
+            $lastUsername = $authenticationUtils->getLastUsername();
+            $this->calculBan($lastUsername);
 
-        $attempt = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] : 0);
-        $remaining = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['remaining'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['remaining'] : 0);
+            $attempt = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] : 0);
+            $remaining = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['remaining'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['remaining'] : 0);
 
-        // If we are on platform.sh, we check that the password has been changed because the first user is always admin/admin
-        $passwordMessage = false;
-        $platformSh = false;
-        if (isset($_ENV['PLATFORM_RELATIONSHIPS'])) {
-            $platformSh = true;
-            // Get the admin user
-            $userAdmin = $this->userRepository->loadUserByUsername('admin');
-            if (!empty($userAdmin)) {
-                $passwordHasher = $this->passwordHasherFactory->getPasswordHasher($userAdmin);
-                // Compare password with admin encoded
-                if ($passwordHasher->verify($userAdmin->getPassword(), 'admin')) {
-                    $passwordMessage = true;
+            // If we are on platform.sh, we check that the password has been changed because the first user is always admin/admin
+            $passwordMessage = false;
+            $platformSh = false;
+            if (isset($_ENV['PLATFORM_RELATIONSHIPS'])) {
+                $platformSh = true;
+                // Get the admin user
+                $userAdmin = $this->userRepository->loadUserByUsername('admin');
+                if (!empty($userAdmin)) {
+                    $passwordHasher = $this->passwordHasherFactory->getPasswordHasher($userAdmin);
+                    // Compare password with admin encoded
+                    if ($passwordHasher->verify($userAdmin->getPassword(), 'admin')) {
+                        $passwordMessage = true;
+                    }
                 }
             }
-        }
 
-        return $this->render('Login/index.html.twig', [
-            'last_username' => $lastUsername,
-            'error' => $error,
-            'attempt' => $attempt,
-            'remaining' => $remaining,
-            'password_message' => $passwordMessage,
-            'platform_sh' => $platformSh,
-        ]);
+            return $__debugReturn = $this->render('Login/index.html.twig', [
+                'last_username' => $lastUsername,
+                'error' => $error,
+                'attempt' => $attempt,
+                'remaining' => $remaining,
+                'password_message' => $passwordMessage,
+                'platform_sh' => $platformSh,
+            ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     private function calculBan($lastUsername)
     {
-        if (isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
-            if (time() > $_SESSION['myddleware']['secure'][$lastUsername]['time']) {
-                $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
-            } else {
-                // RESTE X MINUTES AVANT LA FUTUR CONNEXION
-                $date1 = time();
-                $date2 = $_SESSION['myddleware']['secure'][$lastUsername]['time'];
-                $diff = abs($date1 - $date2);
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['lastUsername' => $lastUsername]);
+        try {
+            if (isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
+                if (time() > $_SESSION['myddleware']['secure'][$lastUsername]['time']) {
+                    $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
+                } else {
+                    // RESTE X MINUTES AVANT LA FUTUR CONNEXION
+                    $date1 = time();
+                    $date2 = $_SESSION['myddleware']['secure'][$lastUsername]['time'];
+                    $diff = abs($date1 - $date2);
 
-                $diff = abs($date1 - $date2); // abs pour avoir la valeur absolute, ainsi éviter d'avoir une différence négative
-                $remaining = [];
+                    $diff = abs($date1 - $date2); // abs pour avoir la valeur absolute, ainsi éviter d'avoir une différence négative
+                    $remaining = [];
 
-                $tmp = $diff;
-                $remaining['second'] = $tmp % 60;
+                    $tmp = $diff;
+                    $remaining['second'] = $tmp % 60;
 
-                $tmp = floor(($tmp - $remaining['second']) / 60);
-                $remaining['minute'] = $tmp % 60;
+                    $tmp = floor(($tmp - $remaining['second']) / 60);
+                    $remaining['minute'] = $tmp % 60;
 
-                $tmp = floor(($tmp - $remaining['minute']) / 60);
-                $remaining['hour'] = $tmp % 24;
+                    $tmp = floor(($tmp - $remaining['minute']) / 60);
+                    $remaining['hour'] = $tmp % 24;
 
-                $tmp = floor(($tmp - $remaining['hour']) / 24);
-                $remaining['day'] = $tmp;
+                    $tmp = floor(($tmp - $remaining['hour']) / 24);
+                    $remaining['day'] = $tmp;
 
-                $_SESSION['myddleware']['secure'][$lastUsername]['remaining'] = $remaining;
+                    $_SESSION['myddleware']['secure'][$lastUsername]['remaining'] = $remaining;
+                }
             }
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
 
     #[Route('/verifAccount', name: 'verif_account', methods: ['POST'])]
     public function verifAccount(Request $request): Response
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
         try {
-            if ($request->isMethod('POST')) {
-                $lastUsername = trim($request->request->get('login'));
+            try {
+                if ($request->isMethod('POST')) {
+                    $lastUsername = trim($request->request->get('login'));
 
-                // contrôle des tentatives
-                // si le nombre de tentative n'existe pas on affecte 0
-                if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) {
-                    $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
-                } else { // si existe on ajoute +1
-                    $_SESSION['myddleware']['secure'][$lastUsername]['attempt'];
-                }
-
-                // si le nombre de tentative est supérieur à 5 alors on ajoute une date de contrôle
-                if ($_SESSION['myddleware']['secure'][$lastUsername]['attempt'] > 4) {
-                    if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
-                        $_SESSION['myddleware']['secure'][$lastUsername]['time'] = strtotime('+15 minutes', time());
-                    } else {
-                        $this->calculBan($lastUsername);
+                    // contrôle des tentatives
+                    // si le nombre de tentative n'existe pas on affecte 0
+                    if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) {
+                        $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
+                    } else { // si existe on ajoute +1
+                        $_SESSION['myddleware']['secure'][$lastUsername]['attempt'];
                     }
+
+                    // si le nombre de tentative est supérieur à 5 alors on ajoute une date de contrôle
+                    if ($_SESSION['myddleware']['secure'][$lastUsername]['attempt'] > 4) {
+                        if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
+                            $_SESSION['myddleware']['secure'][$lastUsername]['time'] = strtotime('+15 minutes', time());
+                        } else {
+                            $this->calculBan($lastUsername);
+                        }
+                    }
+
+                    return $__debugReturn = new Response(1);
                 }
 
-                return new Response(1);
+                return $__debugReturn = new Response(0);
+            } catch (Exception $e) {
+                return $__debugReturn = new Response(0);
             }
-
-            return new Response(0);
-        } catch (Exception $e) {
-            return new Response(0);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
     #[Route('/resetting/{token}', name: 'resetting_request', defaults: ['token' => null])]
     public function reset(Request $request, $token, UserPasswordHasherInterface $passwordHasher)
     {
-        if (!$token) {
-            $form = $this->createForm(UserForgotPasswordType::class);
-            $form->handleRequest($request);
-            if ($form->isSubmitted() && $form->isValid()) {
-                $email = $form->get('email')->getData();
-                /** @var User|null $user */
-                $user = $this->userRepository->findOneBy(['email' => $email]);
-                if (!$user) {
-                    $this->addFlash('security.reset.danger', 'No user with this email was found.');
-                    return $this->redirectToRoute('resetting_request');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'token' => $token, 'passwordHasher' => $passwordHasher]);
+        $__debugReturn = null;
+        try {
+            if (!$token) {
+                $form = $this->createForm(UserForgotPasswordType::class);
+                $form->handleRequest($request);
+                if ($form->isSubmitted() && $form->isValid()) {
+                    $email = $form->get('email')->getData();
+                    /** @var User|null $user */
+                    $user = $this->userRepository->findOneBy(['email' => $email]);
+                    if (!$user) {
+                        $this->addFlash('security.reset.danger', 'No user with this email was found.');
+                        return $__debugReturn = $this->redirectToRoute('resetting_request');
+                    }
+
+                    $user->setConfirmationToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
+                    $this->entityManager->flush();
+
+                    try {
+                        $this->notificationManager->resetPassword($user);
+                        $this->addFlash('security.reset.success', 'An email has been sent to ' . $user->getEmail() . ' with a password reset link.');
+                        return $__debugReturn = $this->redirectToRoute('resetting_request');
+                    } catch (Exception $e) {
+                        $this->addFlash('security.reset.danger', 'Unable to send email. ' . $e->getMessage());
+                        return $__debugReturn = $this->redirectToRoute('resetting_request');
+                    }
                 }
 
-                $user->setConfirmationToken(rtrim(strtr(base64_encode(random_bytes(32)), '+/', '-_'), '='));
-                $this->entityManager->flush();
-
-                try {
-                    $this->notificationManager->resetPassword($user);
-                    $this->addFlash('security.reset.success', 'An email has been sent to ' . $user->getEmail() . ' with a password reset link.');
-                    return $this->redirectToRoute('resetting_request');
-                } catch (Exception $e) {
-                    $this->addFlash('security.reset.danger', 'Unable to send email. ' . $e->getMessage());
-                    return $this->redirectToRoute('resetting_request');
-                }
+                return $__debugReturn = $this->render('Login/reset_request.html.twig', [
+                    'form' => $form->createView(),
+                ]);
             }
 
-            return $this->render('Login/reset_request.html.twig', [
+            /** @var User|null $user */
+            $user = $this->userRepository->findOneBy(['confirmationToken' => $token]);
+            if (null === $user) {
+                return $__debugReturn = $this->redirectToRoute('regle_panel');
+            }
+
+            $form = $this->createForm(ResetPasswordType::class, $user);
+            $form->handleRequest($request);
+
+            if ($form->isSubmitted() && $form->isValid()) {
+                $newHashedPassword = $passwordHasher->hashPassword($user, $user->getPlainPassword());
+                $user->setPassword($newHashedPassword);
+                $user->setConfirmationToken(null); // Clear the token after successful reset
+                $this->entityManager->persist($user);
+                $this->entityManager->flush();
+
+                $this->addFlash('security.reset.success', 'Password has been successfully reset.');
+                return $__debugReturn = $this->redirectToRoute('login');
+            }
+
+            return $__debugReturn = $this->render('Login/reset.html.twig', [
+                'token' => $token,
                 'form' => $form->createView(),
             ]);
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        /** @var User|null $user */
-        $user = $this->userRepository->findOneBy(['confirmationToken' => $token]);
-        if (null === $user) {
-            return $this->redirectToRoute('regle_panel');
-        }
-
-        $form = $this->createForm(ResetPasswordType::class, $user);
-        $form->handleRequest($request);
-
-        if ($form->isSubmitted() && $form->isValid()) {
-            $newHashedPassword = $passwordHasher->hashPassword($user, $user->getPlainPassword());
-            $user->setPassword($newHashedPassword);
-            $user->setConfirmationToken(null); // Clear the token after successful reset
-            $this->entityManager->persist($user);
-            $this->entityManager->flush();
-
-            $this->addFlash('security.reset.success', 'Password has been successfully reset.');
-            return $this->redirectToRoute('login');
-        }
-
-        return $this->render('Login/reset.html.twig', [
-            'token' => $token,
-            'form' => $form->createView(),
-        ]);
     }
 }

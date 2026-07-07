@@ -27,7 +27,11 @@ export function getBaseUrl() {
         return window.location.origin + basePath;
     }
 
-    // Fallback for root installations
+    const indexPhpIndex = pathname.indexOf('/index.php/');
+    if (indexPhpIndex !== -1) {
+        return window.location.origin + pathname.substring(0, indexPhpIndex + '/index.php'.length);
+    }
+
     return window.location.origin;
 }
 

@@ -1,13 +1,13 @@
 <div class="row g-4 align-items-start">
     {% for param in rule_params %}
         <div class="col-12 col-md-6">
-            <div class="form-group">
+            <div class="form-group mdw-floating-field">
                 <label class="form-label" for="{{ param.id }}">
                     {{ param.label }} {% if param.required %}*{% endif %}
                 </label>
                 
                 {% if param.type == 'option' %}
-                    <select id="{{ param.id }}" name="{{ param.name }}" class="form-select">
+                    <select id="{{ param.id }}" name="{{ param.name }}" class="js-select-search {{ param.class|default('') }}">
                         <option value="" disabled {% if param.value|default(null) is empty %}selected{% endif %}>
                         </option>
 
@@ -31,7 +31,7 @@
 
 {% if duplicate_target is defined and duplicate_target is not empty %}
     <div class="col-12 col-md-6">
-        <div class="form-group">
+        <div class="form-group mdw-floating-field">
             <label class="form-label" for="duplicate-field">
                 {{ 'create_rule.step5.params.duplicate'|trans }}
             </label>

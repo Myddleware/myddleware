@@ -65,6 +65,7 @@ class postgresql extends database
         try {
             $modules = [];
             // Send the query to the database
+            $this->logDebug('postgresql get_modules query', ['query' => $this->get_query_show_tables($type)]);
             $q = $this->pdo->prepare($this->get_query_show_tables($type));
             $exec = $q->execute();
             // Error management
@@ -94,6 +95,7 @@ class postgresql extends database
     {
         try {
             // Get all fields of the table in input
+            $this->logDebug('postgresql get_module_fields query', ['query' => $this->get_query_describe_table($module)]);
             $q = $this->pdo->prepare($this->get_query_describe_table($module));
             $exec = $q->execute();
 

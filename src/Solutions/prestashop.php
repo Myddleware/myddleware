@@ -514,7 +514,9 @@ class prestashop extends solution
             $opt = $this->updateOptions('read', $opt, $param);
 
             // Call
+            $this->logDebug('prestashop read request', ['resource' => $opt['resource'] ?? '', 'module' => $param['module']]);
             $xml = $this->webService->get($opt);
+            $this->logDebug('prestashop read response', ['module' => $param['module']]);
 
             $xml = $xml->asXML();
             $simplexml = simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA);
@@ -820,7 +822,9 @@ class prestashop extends solution
 
                     // Function to modify opt (used for custom needs)
                     $opt = $this->updateOptions('create2', $opt, $param);
+                    $this->logDebug('prestashop create request', ['resource' => $opt['resource'] ?? '', 'module' => $param['module']]);
                     $new = $this->webService->add($opt);
+                    $this->logDebug('prestashop create response', ['module' => $param['module']]);
                     $result[$idDoc] = [
                         'id' => (string) $new->children()->children()->id,
                         'error' => false,
@@ -939,7 +943,9 @@ class prestashop extends solution
                         'id' => $targetId,
                     ];
 
+                    $this->logDebug('prestashop update request', ['resource' => $opt['resource'] ?? '', 'id' => $opt['id'] ?? '']);
                     $new = $this->webService->edit($opt);
+                    $this->logDebug('prestashop update response', ['id' => $opt['id'] ?? '']);
                     $result[$idDoc] = [
                         'id' => $targetIdResult,
                         'error' => false,

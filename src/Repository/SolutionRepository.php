@@ -26,84 +26,110 @@
 namespace App\Repository;
 
 use App\Entity\Solution;
+use App\Service\DebugLogger;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 class SolutionRepository extends ServiceEntityRepository
 {
-    public function __construct(ManagerRegistry $registry)
+    private DebugLogger $debugLogger;
+
+    public function __construct(ManagerRegistry $registry, DebugLogger $debugLogger)
     {
         parent::__construct($registry, Solution::class);
+        $this->debugLogger = $debugLogger;
     }
 
     // Liste des solutions actives
     public function solutionActive()
     {
-        return $this
-          ->createQueryBuilder('s')
-          ->select('s')
-          ->where('s.active = :active')
-          ->setParameter('active', 1)
-          ->getQuery()
-          ->getResult();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__);
+        $__debugReturn = null;
+        try {
+            return $__debugReturn = $this
+              ->createQueryBuilder('s')
+              ->select('s')
+              ->where('s.active = :active')
+              ->setParameter('active', 1)
+              ->getQuery()
+              ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // Liste des solutions en fonction des connecteurs
     public function solutionConnector($type, $is_support, $id)
     {
-        $qb = $this->createQueryBuilder('s');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['type' => $type, 'is_support' => $is_support, 'id' => $id]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('s');
 
-        $field = (('target' == $type) ? 'target' : 'source');
+            $field = (('target' == $type) ? 'target' : 'source');
 
-        $qb->select('s', 'c')
-         ->innerJoin('s.connector', 'c');
+            $qb->select('s', 'c')
+             ->innerJoin('s.connector', 'c');
 
-        // si ce n'est pas le support alors on affecte l'id client sinon on affiche tout
-        // On affiche uniquement les connecteurs du user
-        if (false === $is_support) {
-            $qb->where('s.active = :active AND s.'.$field.' = :type AND c.createdBy = :user_id')
-               ->setParameter('active', 1)
-               ->setParameter('type', 1)
-               ->setParameter('user_id', $id);
-        } else {
-            $qb->where('s.active = :active AND s.'.$field.' = :type')
-               ->setParameter('active', 1)
-               ->setParameter('type', 1);
+            if (false === $is_support) {
+                $qb->where('s.active = :active AND s.'.$field.' = :type AND c.createdBy = :user_id')
+                   ->setParameter('active', 1)
+                   ->setParameter('type', 1)
+                   ->setParameter('user_id', $id);
+            } else {
+                $qb->where('s.active = :active AND s.'.$field.' = :type')
+                   ->setParameter('active', 1)
+                   ->setParameter('type', 1);
+            }
+
+            $qb->orderBy('s.name', 'ASC');
+
+            return $__debugReturn = $qb->getQuery()
+                      ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-
-        $qb->orderBy('s.name', 'ASC');
-
-        return $qb->getQuery()
-                  ->getResult();
     }
 
     // Liste des solutions en fonction des types
     public function solutionConnectorType($type)
     {
-        $qb = $this->createQueryBuilder('s');
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['type' => $type]);
+        $__debugReturn = null;
+        try {
+            $qb = $this->createQueryBuilder('s');
 
-        $field = (('target' == $type) ? 'target' : 'source');
+            $field = (('target' == $type) ? 'target' : 'source');
 
-        $qb->select('s.name')
-         ->where('s.active = :active AND s.'.$field.' = :type')
-         ->setParameter('active', 1)
-         ->setParameter('type', 1)
-         ->groupBy('s.name')
-         ->orderBy('s.name', 'ASC');
+            $qb->select('s.name')
+             ->where('s.active = :active AND s.'.$field.' = :type')
+             ->setParameter('active', 1)
+             ->setParameter('type', 1)
+             ->groupBy('s.name')
+             ->orderBy('s.name', 'ASC');
 
-        return $qb->getQuery()
-                  ->getResult();
+            return $__debugReturn = $qb->getQuery()
+                      ->getResult();
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     public function resolveName($val): ?string
     {
-        if (!$val) return null;
-        if (!is_numeric($val)) return (string) $val;
-        $solution = $this->find((int) $val); 
-        if ($solution && method_exists($solution, 'getName')) {
-            return (string) $solution->getName();
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['val' => $val]);
+        $__debugReturn = null;
+        try {
+            if (!$val) return $__debugReturn = null;
+            if (!is_numeric($val)) return $__debugReturn = (string) $val;
+            $solution = $this->find((int) $val);
+            if ($solution && method_exists($solution, 'getName')) {
+                return $__debugReturn = (string) $solution->getName();
+            }
+
+            return $__debugReturn = null;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
-        
-        return null;
     }
 }

@@ -16,15 +16,13 @@
 	{% include '_notifications.html.twig' with { filter_prefix: 'workflowaction.' } %}
 
 	<div id="workflows">
-		<div class="link-help-view text-end mb-4 mx-4">
-			<a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=workflowaction">
-				<i class="fa fa-info-circle" aria-hidden="true"></i>
-				{{ 'rule.help' | trans }}
+		<div class="link-help-view text-end mt-3 me-3">
+			<a href="https://myddleware.github.io/myddleware-docs/#/advanced_usage?id=workflowaction" class="btn btn-sm text-decoration-none">
+				<i class="fa-solid fa-book me-1"></i>{{ 'rule.help'|trans }}
 			</a>
 		</div>
 		<div class="text-center pt-4 pb-4">
-			<a href="{{ path('workflow_show', {'id': workflow.workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.back_to_workflow'|trans }}</a>
-			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-success m-2">{{ 'view_workflow_action.edit'|trans }}</a>
+			<a href="{{ path('workflow_action_edit', {'id': workflow.id}) }}" class="btn btn-outline-primary m-2">{{ 'view_workflow_action.edit'|trans }}</a>
 			<form method="post" action="{{ path('workflow_action_delete', {'id': workflow.id}) }}" style="display: inline;">
 				<button type="submit" 
 						onclick="return confirm('{{ 'view_workflow_action.confirm_delete'|trans }}');" 

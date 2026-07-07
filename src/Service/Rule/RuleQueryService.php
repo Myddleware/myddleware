@@ -140,7 +140,7 @@ public function prepareDataForView(Rule $rule): array
      * @param Rule $rule
      * @return string JSON string
      */
-    public function prepareJsonForEdit(Rule $rule): string
+   public function prepareJsonForEdit(Rule $rule): string
     {
         // 1. Connexions source / target
         $sourceConnector = $rule->getConnectorSource();
@@ -148,19 +148,21 @@ public function prepareDataForView(Rule $rule): array
 
         $connection = [
             'source' => [
-                'solutionId'  => method_exists($sourceConnector, 'getSolution') ? $sourceConnector->getSolution()->getId() : null,
-                'connectorId' => $sourceConnector?->getId(),
-                'module'      => $rule->getModuleSource(),
+                'solutionId'    => method_exists($sourceConnector, 'getSolution') ? $sourceConnector->getSolution()->getId() : null,
+                'connectorId'   => $sourceConnector?->getId(),
+                'connectorName' => $sourceConnector?->getName() ?? '',
+                'module'        => $rule->getModuleSource(),
             ],
             'target' => [
-                'solutionId'  => method_exists($targetConnector, 'getSolution') ? $targetConnector->getSolution()->getId() : null,
-                'connectorId' => $targetConnector?->getId(),
-                'module'      => $rule->getModuleTarget(),
+                'solutionId'    => method_exists($targetConnector, 'getSolution') ? $targetConnector->getSolution()->getId() : null,
+                'connectorId'   => $targetConnector?->getId(),
+                'connectorName' => $targetConnector?->getName() ?? '',
+                'module'        => $rule->getModuleTarget(),
             ],
         ];
 
         // 2. Params
-        $params = $rule->getParamsValues(); // Helper méthode supposée dans l'entité Rule
+        $params = $rule->getParamsValues(); // Helper méthode supposée dans l'entité Rule  
         $syncOptions = [
             'type'           => $params['mode']            ?? null,
             'duplicateField' => $params['duplicate_fields'] ?? null,
@@ -172,6 +174,12 @@ public function prepareDataForView(Rule $rule): array
             'description' => $params['description'] ?? '',
             'bidirectional' => $params['bidirectional'] ?? '',
         ];
+        $knownKeys = ['mode', 'duplicate_fields', 'limit', 'datereference', 'description', 'bidirectional'];
+        foreach ($params as $key => $value) {
+            if (!in_array($key, $knownKeys, true)) {
+                $ruleParams[$key] = $value;
+            }
+        }
 
         // 3. Filtres
         $filters = [];
@@ -208,7 +216,7 @@ public function prepareDataForView(Rule $rule): array
 
         return json_encode($data, JSON_THROW_ON_ERROR);
     }
-
+    
     /**
      * Helper pour extraire les variables Myddleware ({mdwvar_...}) utilisées dans une règle.
      */

@@ -84,15 +84,43 @@ class RulePersistenceService
         
         $userId = (int) ($user?->getId() ?? 1);
 
-        // 3. Exécution Transactionnelle (DBAL)
+        $coreKeys = [
+            'name', 'description', 'src_solution_id', 'tgt_solution_id', 'src_solution_name', 'tgt_solution_name', 
+            'src_connector_id', 'tgt_connector_id', 'src_module', 'tgt_module', 
+            'sync_mode', 'duplicate_fields', 'bidirectional', 'filters', 'champs', 'formules', 'rule_id'
+        ];
+
+        $dynamicParams = [];
+        foreach ($data as $key => $value) {
+            if (!in_array($key, $coreKeys, true) && is_scalar($value)) {
+                $valStr = trim((string)$value);
+                if ($valStr !== '') {
+                    $dynamicParams[$key] = $valStr;
+                }
+            }
+        }
+
+        $submittedKeys = array_keys($data);
+
         $this->connection->transactional(function (Connection $conn) use (
             $ruleId, $nowStr, $midnight, $userId, $name, $nameSlug,
             $srcConnectorId, $tgtConnectorId, $srcModule, $tgtModule,
             $rawFields, $rawFormulas, $filters, $syncMode, $isEdit,
-            $bidirectionalId, $duplicateField, $description
+            $bidirectionalId, $duplicateField, $description, $dynamicParams, $submittedKeys
         ) {
             // A. Gestion de la table 'rule'
+            $existingParams = [];
+            $existingDateReference = false;
             if ($isEdit) {
+                $rows = $conn->fetchAllAssociative(
+                    'SELECT name, value FROM ruleparam WHERE rule_id = ?',
+                    [$ruleId]
+                );
+                foreach ($rows as $row) {
+                    $existingParams[$row['name']] = $row['value'];
+                }
+                $existingDateReference = $existingParams['datereference'] ?? false;
+
                 $conn->update('rule', [
                     'conn_id_source'  => $srcConnectorId,
                     'conn_id_target'  => $tgtConnectorId,
@@ -167,10 +195,7 @@ class RulePersistenceService
                 ]);
             }
 
-            // D. Insertion des paramètres par défaut
-            $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit',         'value' => '100']);
-            $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference', 'value' => $midnight]);
-            $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'mode',          'value' => (string)$syncMode]);
+            $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'mode', 'value' => (string)$syncMode]);
 
             // Insertion du champ duplicate_fields si défini
             if ($duplicateField !== '') {
@@ -181,8 +206,46 @@ class RulePersistenceService
                 $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'description', 'value' => $description]);
             }
 
-            // E. Gestion Bidirectionnelle
-            // Nettoyage préalable (cas d'update)
+            $hasLimit = false;
+            $hasDateRef = false;
+
+            foreach ($dynamicParams as $paramName => $paramValue) {
+                $conn->insert('ruleparam', [
+                    'rule_id' => $ruleId, 
+                    'name' => $paramName, 
+                    'value' => $paramValue
+                ]);
+                
+                if ($paramName === 'limit') $hasLimit = true;
+                if ($paramName === 'datereference') $hasDateRef = true;
+            }
+
+            if (!$hasLimit) {
+                $limitValue = ($isEdit && isset($existingParams['limit'])) ? $existingParams['limit'] : '100';
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'limit', 'value' => $limitValue]);
+            }
+            if (!$hasDateRef) {
+                $dateReferenceValue = ($isEdit && $existingDateReference !== false) ? $existingDateReference : $midnight;
+                $conn->insert('ruleparam', ['rule_id' => $ruleId, 'name' => 'datereference', 'value' => $dateReferenceValue]);
+            }
+
+            if ($isEdit) {
+                $managedNames = array_merge(
+                    ['mode', 'duplicate_fields', 'description', 'limit', 'datereference', 'bidirectional'],
+                    array_keys($dynamicParams),
+                    $submittedKeys
+                );
+                foreach ($existingParams as $paramName => $paramValue) {
+                    if (!in_array($paramName, $managedNames, true)) {
+                        $conn->insert('ruleparam', [
+                            'rule_id' => $ruleId,
+                            'name'    => $paramName,
+                            'value'   => $paramValue,
+                        ]);
+                    }
+                }
+            }
+
             $conn->delete('ruleparam', ['name' => 'bidirectional', 'value' => $ruleId]);
 
             if ($bidirectionalId !== '') {
@@ -194,7 +257,7 @@ class RulePersistenceService
                 ]);
 
                 // Vérifier et créer/mettre à jour le lien sur la règle opposée
-                $opposite = $conn->fetchAssociative(
+                 $opposite = $conn->fetchAssociative(
                     'SELECT id, value FROM ruleparam WHERE rule_id = ? AND name = ?',
                     [$bidirectionalId, 'bidirectional']
                 );
@@ -215,8 +278,8 @@ class RulePersistenceService
             // F. Audit (RuleAudit)
             $auditPayload = [
                 'ruleName'      => $nameSlug,
-                'limit'         => '100',
-                'datereference' => $midnight,
+                'limit'         => $dynamicParams['limit'] ?? '100',
+                'datereference' => $dynamicParams['datereference'] ?? $midnight,
                 'content'       => [
                     'fields' => ['name' => $contentFields['name']],
                     'params' => ['mode' => (int)$syncMode],

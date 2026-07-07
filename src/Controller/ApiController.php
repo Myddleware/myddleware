@@ -23,11 +23,13 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
+use App\Service\DebugLogger;
 /**
  * @Route("/api", name="api_")
  */
 class ApiController extends AbstractController
 {
+    private DebugLogger $debugLogger;
     private RuleRepository $ruleRepository;
     private JobRepository $jobRepository;
     private DocumentRepository $documentRepository;
@@ -52,8 +54,10 @@ class ApiController extends AbstractController
         EntityManagerInterface $entityManager,
         FormulaManager $formulaManager,
         DocumentManager $documentManager,
-        SolutionManager $solutionManager
+        SolutionManager $solutionManager,
+        DebugLogger $debugLogger
     ) {
+        $this->debugLogger = $debugLogger;
         $this->ruleRepository = $ruleRepository;
         $this->jobRepository = $jobRepository;
         $this->documentRepository = $documentRepository;
@@ -73,6 +77,9 @@ class ApiController extends AbstractController
      */
     public function synchroAction(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $return = [];
             $return['error'] = '';
@@ -126,7 +133,10 @@ class ApiController extends AbstractController
             $return['error'] = $e->getMessage();
         }
         // Send the response
-        return $this->json($return);
+        return $__debugReturn = $this->json($return);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -134,6 +144,9 @@ class ApiController extends AbstractController
      */
     public function readRecordAction(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $return = [];
             $return['error'] = '';
@@ -197,7 +210,10 @@ class ApiController extends AbstractController
             $return['error'] = $e->getMessage();
         }
         // Send the response
-        return $this->json($return);
+        return $__debugReturn = $this->json($return);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -205,6 +221,9 @@ class ApiController extends AbstractController
      */
     public function deleteRecordAction(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
 			$connection = $this->entityManager->getConnection();
             $return = [];
@@ -279,7 +298,7 @@ class ApiController extends AbstractController
             $this->logger->error($e->getMessage());
             $return['error'] .= $e->getMessage();
             // Stop the process if document hasn't been created
-            return $this->json($return);
+            return $__debugReturn = $this->json($return);
         }
 
         // Send the document just created if requested
@@ -318,7 +337,10 @@ class ApiController extends AbstractController
             $return['error'] .= 'Failed to get the job statistics. '.$e->getMessage();
         }
         // Send the response
-        return $this->json($return);
+        return $__debugReturn = $this->json($return);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
 
@@ -327,6 +349,9 @@ class ApiController extends AbstractController
      */
     public function massActionAction(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $return = [];
             $return['error'] = '';
@@ -390,7 +415,10 @@ class ApiController extends AbstractController
             $return['error'] = $e->getMessage();
         }
         // Send the response
-        return $this->json($return);
+        return $__debugReturn = $this->json($return);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     /**
@@ -398,6 +426,9 @@ class ApiController extends AbstractController
      */
     public function rerunErrorAction(Request $request): JsonResponse
     {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
+        $__debugReturn = null;
+        try {
         try {
             $return = [];
             $return['error'] = '';
@@ -451,7 +482,10 @@ class ApiController extends AbstractController
             $return['error'] = $e->getMessage();
         }
         // Send the response
-        return $this->json($return);
+        return $__debugReturn = $this->json($return);
+    } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
     }
 
     // /**

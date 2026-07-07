@@ -28,6 +28,7 @@ namespace App\Manager;
 use App\Entity\User;
 use App\Repository\DocumentRepository;
 use App\Repository\JobRepository;
+use App\Service\DebugLogger;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 
@@ -41,17 +42,20 @@ class HomeManager
     protected string $historicDateFormat = 'M-d';
     private JobRepository $jobRepository;
     private DocumentRepository $documentRepository;
+    private DebugLogger $debugLogger;
 
     public function __construct(
         LoggerInterface $logger,
         Connection $connection,
         JobRepository $jobRepository,
-        DocumentRepository $documentRepository
+        DocumentRepository $documentRepository,
+        DebugLogger $debugLogger
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
         $this->jobRepository = $jobRepository;
         $this->documentRepository = $documentRepository;
+        $this->debugLogger = $debugLogger;
     }
 	
 }

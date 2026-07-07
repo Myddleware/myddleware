@@ -2,11 +2,10 @@
 {% block title %}{{ parent() }} | {{ 'rulegroup.edit'| trans}}{% endblock %}
 {% block titlesm %}{{ 'rulegroup.edit'| trans}} <i class="fa-solid fa-arrow-right fa-flip arrow-cut-animation fa-solid fa-arrow-right fa-flip"></i> {{ rulegroup.name }}{% endblock titlesm %}
 {% block body %}
-    <div class="container mt-5">
+    <div class="container mt-5">  
         <div class="text-center m-5">
-            <a href="{{ path('rulegroup_list') }}" class="btn btn-outline-primary m-2"> {{ 'rulegroup.back'| trans }}</a>
-        </div>
-        
+            <a href="{{ path('rulegroup_list') }}" class="btn btn-outline-warning m-2"> {{ 'view_workflow.cancel_edit'|trans }}</a>
+        </div>      
         {{ form_start(form) }}
         <div class="mb-3">
                 <div class="row mb-4">

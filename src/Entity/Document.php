@@ -37,20 +37,17 @@ use Exception;
  *      @ORM\Index(name="index_rule_gbstatus_status", columns={"rule_id","global_status","status","deleted"}),
  *      @ORM\Index(name="index_gbstatus", columns={"global_status","deleted"}),
  *      @ORM\Index(name="index_parent_id", columns={"parent_id","deleted"}),
- *      @ORM\Index(name="index_rule_source", columns={"rule_id","source_id","deleted"}),
+ *      @ORM\Index(name="index_rule_source", columns={"rule_id","source_id","deleted","date_created"}),
  *      @ORM\Index(name="index_rule_target", columns={"rule_id","target_id","deleted"}),
- *      @ORM\Index(name="index_rule_date_modified", columns={"rule_id","date_modified","deleted"}),
- *      @ORM\Index(name="index_rule_status_modified", columns={"rule_id","status","source_date_modified","deleted"}),
  *      @ORM\Index(name="index_source_id", columns={"source_id","deleted"}),
  *      @ORM\Index(name="index_target_id", columns={"target_id","deleted"}),
- *      @ORM\Index(name="index_date_modified", columns={"date_modified","deleted"}),
  *      @ORM\Index(name="index_job_lock", columns={"job_lock"})
  * })
  */
 class Document
 {
     /**
-     * @ORM\Column(name="id", type="string", nullable=false)
+     * @ORM\Column(name="id", type="string",  length=36, nullable=false)
      * @ORM\Id
      */
     private string $id;
@@ -65,11 +62,6 @@ class Document
      * @ORM\Column(name="date_created", type="datetime", nullable=false)
      */
     private DateTime $dateCreated;
-
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
-    private DateTime $dateModified;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
@@ -124,7 +116,7 @@ class Document
     private string $globalStatus;
 
     /**
-     * @ORM\Column(name="parent_id", type="string", nullable=true, options={"default":NULL})
+     * @ORM\Column(name="parent_id", type="string", nullable=true, length=36, options={"default":NULL})
      */
     private ?string $parentId;
 
@@ -205,18 +197,6 @@ class Document
     public function getDateCreated(): DateTime
     {
         return $this->dateCreated;
-    }
-
-    public function setDateModified($dateModified): self
-    {
-        $this->dateModified = $dateModified;
-
-        return $this;
-    }
-
-    public function getDateModified(): DateTime
-    {
-        return $this->dateModified;
     }
 
     public function setStatus($status): self

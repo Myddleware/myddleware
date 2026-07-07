@@ -15,32 +15,6 @@
     padding: 5px;
     color: red;
 }
-
-.button_plus_message {
-  color: white;
-  background-color: #6D6D6E;
-  padding: 0px 7px 3px 7px;
-  border-radius: 50%;
-  font-weight: bold;
-  float: right;
-  margin-right: 10px;
-}
-
-.button_plus_message:hover, .button_minus_message:hover {
-  color: #6D6D6E;
-  background-color: white;
-  border: 1px solid #6D6D6E;
-}
-
-.button_minus_message {
-  color: white;
-  background-color: #6D6D6E;
-  padding: 0px 11px 4px 10px;
-  border-radius: 50%;
-  font-weight: bold;
-  float: right;
-  margin-right: 10px;
-}
   .bg-danger {
     background-color: #f2dedf !important; 
 }
@@ -74,14 +48,40 @@
     opacity: 1;
 }
 
-.enabled-crontab{
-    padding-left: 3.7rem !important;
-}
-
 .th-running{
     min-width: 185px;
 }
 
 .command-crontab{
     min-width: 215px;
+}
+
+#crontabList .table-wrapper {
+    overflow: visible !important;
+}
+
+#crontabList table {
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}
+
+#crontabList thead th {
+    position: -webkit-sticky;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid #ccc !important;
+}
+
+#crontabList thead tr:first-child th:first-child {
+    border-top-left-radius: 15px;
+}
+#crontabList thead tr:first-child th:last-child {
+    border-top-right-radius: 15px;
+}
+
+.button_plus_message, 
+.button_minus_message {
+    display: block;
+    margin: 8px auto 0 auto;
 }

@@ -67,7 +67,9 @@ class moodle extends solution
             $this->paramConnexion['token'] = trim($this->paramConnexion['token']);
             $functionname = 'core_webservice_get_site_info';
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+            $this->logDebug('moodle login request', ['url' => $serverurl]);
             $response = $this->moodleClient->post($serverurl, $params);
+            $this->logDebug('moodle login response', ['response' => $response]);
             $xml = simplexml_load_string($response);
 			// Add a hook de get site information
 			$this->getSiteInfo($xml);
@@ -171,7 +173,9 @@ class moodle extends solution
                     $params = [];
                     $functionname = 'core_course_get_categories';
                     $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                    $this->logDebug('moodle get_module_fields request', ['url' => $serverurl]);
                     $response = $this->moodleClient->post($serverurl, $params);
+                    $this->logDebug('moodle get_module_fields response', ['response' => $response]);
                     $xml = simplexml_load_string($response);
                     if (!empty($xml->MULTIPLE->SINGLE)) {
                         foreach ($xml->MULTIPLE as $category) {
@@ -224,7 +228,9 @@ class moodle extends solution
             $customFieldList = $this->getCustomFields($param);
             // Call to Moodle
             $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+            $this->logDebug('moodle read request', ['url' => $serverurl]);
             $response = $this->moodleClient->post($serverurl, $parameters);
+            $this->logDebug('moodle read response', ['response' => $response]);
             $xml = $this->formatResponse('read', $response, $param);
             if (!empty($xml->ERRORCODE)) {
                 throw new \Exception("Error code $xml->ERRORCODE : $xml->MESSAGE. ".(!empty($xml->DEBUGINFO) ? "Info : $xml->DEBUGINFO" : ""));
@@ -326,7 +332,9 @@ class moodle extends solution
                 }
 
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                $this->logDebug('moodle createData request', ['url' => $serverurl]);
                 $response = $this->moodleClient->post($serverurl, $params);
+                $this->logDebug('moodle createData response', ['response' => $response]);
                 $xml = simplexml_load_string($response);
 
 				// Check if there is a warning
@@ -484,7 +492,9 @@ class moodle extends solution
                 }
 
                 $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
-                $response = $this->moodleClient->post($serverurl, $params);			
+                $this->logDebug('moodle updateData request', ['url' => $serverurl]);
+                $response = $this->moodleClient->post($serverurl, $params);
+                $this->logDebug('moodle updateData response', ['response' => $response]);
                 $xml = simplexml_load_string($response);
 				
 				// Check if there is a warning
