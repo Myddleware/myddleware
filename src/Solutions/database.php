@@ -423,13 +423,15 @@ class database extends solution
             }
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
             $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.',';
-
-            // Check if the field type is in the $ignoreQuotesOnQuery array
-            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
-                $values .= ('null' == $value ? 'null,' : $this->escape($value).',');
-            } else {
-                $values .= ('null' == $value ? 'null,' : "'".$this->escape($value)."',");
-            }
+			
+			// Format values and manage null value
+			if ($value === null || $value === 'null') {
+				$values .= 'null,';
+			} elseif (in_array(gettype($value), $ignoreQuotesOnQuery, true)) {
+				$values .= $this->escape($value).',';
+			} else {
+				$values .= "'".$this->escape($value)."',";
+			}
         }
 
         // Remove the last coma
@@ -488,10 +490,12 @@ class database extends solution
             // Decode field to be compatible with the database fields (has been encoded for Myddleware purpose in method get_module_fields)
 
             // Check if the field type is in the $ignoreQuotesOnQuery array
-            if (in_array(gettype($value), $ignoreQuotesOnQuery)) {
-                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : $this->escape($value).',');
+			if ($value === null || $value === 'null') {
+				 $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'=null,';
+            } elseif (in_array(gettype($value), $ignoreQuotesOnQuery)) {
+                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.$this->escape($value).',';
             } else {
-                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='.('null' == $value ? 'null,' : "'".$this->escape($value)."',");
+                $sql .= $this->stringSeparatorOpen.rawurldecode($key).$this->stringSeparatorClose.'='."'".$this->escape($value)."',";
             }
         }
 
