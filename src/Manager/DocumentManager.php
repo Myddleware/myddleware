@@ -434,20 +434,13 @@ class DocumentManager
                 return false;
             }
             // Création du header de la requête
-            $query_header = 'INSERT INTO document (id, rule_id, date_created, date_modified, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock) VALUES';
-            // Création de la requête d'entête
-            $date_modified = $this->data['date_modified'];
+            $query_header = 'INSERT INTO document (id, rule_id, date_created, created_by, modified_by, source_id, source_date_modified, mode, type, parent_id, job_lock, status, global_status) VALUES';
             // Source_id could contain accent
-            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$date_modified','$this->ruleMode','$this->documentType','$this->parentId', '')";
+            $query_header .= "('$this->id','$this->ruleId','$this->dateCreated','$this->userId','$this->userId','".utf8_encode($this->sourceId)."','$this->ruleMode','$this->documentType','$this->parentId', '', 'New', 'Open')";
             $stmt = $this->connection->prepare($query_header);
             $result = $stmt->executeQuery();
             // Insert source data
             $insertDataTable = $this->insertDataTable($this->data, 'S');
-            $this->updateStatus('New');
-
-            // // Dispatch event for Elasticsearch sync
-            // $this->dispatchDocumentEvent(DocumentEvent::CREATED);
-
 			return $insertDataTable;
         } catch (\Exception $e) {
             $this->message .= 'Failed to create document (id source : '.$this->sourceId.'): '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -634,7 +627,6 @@ class DocumentManager
                 $now = gmdate('Y-m-d H:i:s');
                 $query = '	UPDATE document 
                                 SET 
-                                    date_modified = :now,
                                     job_lock = :job_id
                                 WHERE
                                     id = :id
@@ -682,7 +674,6 @@ class DocumentManager
                 $now = gmdate('Y-m-d H:i:s');
                 $query = "	UPDATE document 
                                 SET 
-                                    date_modified = :now,
                                     job_lock = ''
                                 WHERE
                                     id = :id
@@ -2214,7 +2205,7 @@ class DocumentManager
 								AND	document.source_id = :id
 								AND document.id != :id_doc
 								AND document.deleted = 0 
-							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
+							ORDER BY targetOrder DESC, global_status DESC, date_created DESC
 							LIMIT 1";
 
             // On prépare la requête pour rechercher dans la partie target
@@ -2237,7 +2228,7 @@ class DocumentManager
 								AND	document.target_id = :id
 								AND document.id != :id_doc
 								AND document.deleted = 0 
-							ORDER BY targetOrder DESC, global_status DESC, date_modified DESC
+							ORDER BY targetOrder DESC, global_status DESC, date_created DESC
 							LIMIT 1";
 
             // Si une relation avec le champ Myddleware_element_id est présente alors on passe en update et on change l'id source en prenant l'id de la relation
@@ -2457,7 +2448,6 @@ class DocumentManager
             }
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									global_status = :globalStatus,
 									attempt = :attempt,
 									status = :new_status
@@ -2542,7 +2532,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									deleted = :deleted
 								WHERE
 									id = :id
@@ -2635,7 +2624,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									type = :new_type
 								WHERE
 									id = :id
@@ -2672,7 +2660,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									target_id = :target_id
 								WHERE
 									id = :id
@@ -2717,7 +2704,6 @@ class DocumentManager
             $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
-									date_modified = :now,
 									workflow_error = :workflowError
 								WHERE
 									id = :id
