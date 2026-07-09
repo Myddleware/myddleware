@@ -685,41 +685,39 @@ class DocumentManager
     protected function setLock() {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
         try {
-        try {
-			// Get the job lock on the document
-            $documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
-            $stmt = $this->connection->prepare($documentQuery);
-            $stmt->bindValue(':doc_id', $this->id);
-            $documentResult = $stmt->executeQuery();
-            $documentData = $documentResult->fetchAssociative(); // 1 row
+			try {
+				// Get the job lock on the document
+				$documentQuery = 'SELECT * FROM document WHERE id = :doc_id';
+				$stmt = $this->connection->prepare($documentQuery);
+				$stmt->bindValue(':doc_id', $this->id);
+				$documentResult = $stmt->executeQuery();
+				$documentData = $documentResult->fetchAssociative(); // 1 row
 
-            // If document already lock by the current job, we return true;
-            if ($documentData['job_lock'] == $this->jobId) {
-                return array('success' => true);
-            // If document not locked, we lock it.
-            } elseif (empty($documentData['job_lock'])) {
-                $now = gmdate('Y-m-d H:i:s');
-                $query = '	UPDATE document 
-                                SET 
-                                    job_lock = :job_id
-                                WHERE
-                                    id = :id
-                                ';
-                $stmt = $this->connection->prepare($query);
-                $stmt->bindValue(':now', $now);
-                $stmt->bindValue(':job_id', $this->jobId);
-                $stmt->bindValue(':id', $this->id);
-                $result = $stmt->executeQuery();
-                return array('success' => true);
-            // Error for all other cases
-            } else {
-                return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
-            }
-        } catch (\Exception $e) {
-            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-            return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-		}
-    } finally {
+				// If document already lock by the current job, we return true;
+				if ($documentData['job_lock'] == $this->jobId) {
+					return array('success' => true);
+				// If document not locked, we lock it.
+				} elseif (empty($documentData['job_lock'])) {
+					$query = '	UPDATE document 
+									SET 
+										job_lock = :job_id
+									WHERE
+										id = :id
+									';
+					$stmt = $this->connection->prepare($query);
+					$stmt->bindValue(':job_id', $this->jobId);
+					$stmt->bindValue(':id', $this->id);
+					$result = $stmt->executeQuery();
+					return array('success' => true);
+				// Error for all other cases
+				} else {
+					return array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
+				}
+			} catch (\Exception $e) {
+				// $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
+				return array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
+			}
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
@@ -745,15 +743,8 @@ class DocumentManager
 				$documentData['job_lock'] == $this->jobId
 			 OR $force === true
 			) {
-                $now = gmdate('Y-m-d H:i:s');
-                $query = "	UPDATE document 
-                                SET 
-                                    job_lock = ''
-                                WHERE
-                                    id = :id
-                                ";
+                $query = "	UPDATE document SET job_lock = '' WHERE id = :id ";
                 $stmt = $this->connection->prepare($query);
-                $stmt->bindValue(':now', $now);
                 $stmt->bindValue(':id', $this->id);
                 $result = $stmt->executeQuery();
 				// Create log only when force is true
@@ -766,7 +757,7 @@ class DocumentManager
 							!$this->api
 						AND $this->env == 'background'
 					) {
-						echo 'Unlock document '.$this->id.'  '.$now.chr(10);
+						echo 'Unlock document '.$this->id.'  '.gmdate('Y-m-d H:i:s').chr(10);
 					}
 				}
 				return $__debugReturn = true;
@@ -2599,7 +2590,6 @@ class DocumentManager
 			$this->connection->beginTransaction(); // -- BEGIN TRANSACTION
             // On ajoute un contôle dans le cas on voudrait changer le statut
             $new_status = $this->beforeStatusChange($new_status);
-            $now = gmdate('Y-m-d H:i:s');
             // Récupération du statut global
             $globalStatus = $this->globalStatus[$new_status];
             // Track previous global status for ES sync optimization
@@ -2621,7 +2611,7 @@ class DocumentManager
 					!$this->api
 				AND $this->env == 'background'
 			) {
-                echo 'status '.$new_status.' id = '.$this->id.'  '.$now.chr(10);
+                echo 'status '.$new_status.' id = '.$this->id.'  '.gmdate('Y-m-d H:i:s').chr(10);
             }
             $stmt = $this->connection->prepare($query);
             $stmt->bindValue(':globalStatus', $globalStatus);
@@ -2798,39 +2788,32 @@ class DocumentManager
     {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['deleted' => $deleted]);
         try {
-        try {
-            $now = gmdate('Y-m-d H:i:s');
-            $query = '	UPDATE document 
-								SET 
-									deleted = :deleted
-								WHERE
-									id = :id
-								';
-            // We don't send output for the API and Myddleware UI
-			if (
-					!$this->api
-				AND $this->env == 'background'
-			) {
-                echo(!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.$now.chr(10);
-            }
-            $stmt = $this->connection->prepare($query);
-            $stmt->bindValue(':now', $now);
-            $stmt->bindValue(':deleted', $deleted);
-            $stmt->bindValue(':id', $this->id);
-            $result = $stmt->executeQuery();
-            $this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
-            $this->createDocLog();
+			try {
+				$query = 'UPDATE document SET deleted = :deleted WHERE id = :id';
+				// We don't send output for the API and Myddleware UI
+				if (
+						!$this->api
+					AND $this->env == 'background'
+				) {
+					echo(!empty($deleted) ? 'Remove' : 'Restore').' document id = '.$this->id.'  '.gmdate('Y-m-d H:i:s').chr(10);
+				}
+				$stmt = $this->connection->prepare($query);
+				$stmt->bindValue(':deleted', $deleted);
+				$stmt->bindValue(':id', $this->id);
+				$result = $stmt->executeQuery();
+				$this->message .= (!empty($deleted) ? 'Remove' : 'Restore').' document';
+				$this->createDocLog();
 
-            // // Dispatch event for Elasticsearch sync
-            // // Use DELETED when soft-deleting, UPDATED when restoring
-            // $this->dispatchDocumentEvent(!empty($deleted) ? DocumentEvent::DELETED : DocumentEvent::UPDATED);
-        } catch (\Exception $e) {
-            $this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->logger->error($this->id.' - '.$this->message);
-            $this->createDocLog();
-        }
-    } finally {
+				// // Dispatch event for Elasticsearch sync
+				// // Use DELETED when soft-deleting, UPDATED when restoring
+				// $this->dispatchDocumentEvent(!empty($deleted) ? DocumentEvent::DELETED : DocumentEvent::UPDATED);
+			} catch (\Exception $e) {
+				$this->message .= 'Failed to '.(!empty($deleted) ? 'Remove ' : 'Restore ').' : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->typeError = 'E';
+				$this->logger->error($this->id.' - '.$this->message);
+				$this->createDocLog();
+			}
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
@@ -2891,7 +2874,6 @@ class DocumentManager
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['new_type' => $new_type]);
         try {
         try {
-            $now = gmdate('Y-m-d H:i:s');
             $query = '	UPDATE document 
 								SET 
 									type = :new_type
@@ -2900,7 +2882,6 @@ class DocumentManager
 								';
             // Suppression de la dernière virgule
             $stmt = $this->connection->prepare($query);
-            $stmt->bindValue(':now', $now);
             $stmt->bindValue(':new_type', $new_type);
             $stmt->bindValue(':id', $this->id);
             $result = $stmt->executeQuery();
@@ -2926,35 +2907,33 @@ class DocumentManager
     {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['target_id' => $target_id]);
         try {
-        try {
-            $now = gmdate('Y-m-d H:i:s');
-            $query = '	UPDATE document 
-								SET 
-									target_id = :target_id
-								WHERE
-									id = :id
-								';
-            // Suppression de la dernière virgule
-            $stmt = $this->connection->prepare($query);
-            $stmt->bindValue(':now', $now);
-            // Target id could contain accent
-            $stmt->bindValue(':target_id', utf8_encode($target_id));
-            $stmt->bindValue(':id', $this->id);
-            $result = $stmt->executeQuery();
-            $this->message .= 'Target id : '.$target_id;
-            $this->createDocLog();
-            // Change the target id for the current process
-            $this->targetId = $target_id;
+			try {
+				$query = '	UPDATE document 
+									SET 
+										target_id = :target_id
+									WHERE
+										id = :id
+									';
+				// Suppression de la dernière virgule
+				$stmt = $this->connection->prepare($query);
+				// Target id could contain accent
+				$stmt->bindValue(':target_id', utf8_encode($target_id));
+				$stmt->bindValue(':id', $this->id);
+				$result = $stmt->executeQuery();
+				$this->message .= 'Target id : '.$target_id;
+				$this->createDocLog();
+				// Change the target id for the current process
+				$this->targetId = $target_id;
 
-            return true;
-        } catch (\Exception $e) {
-            $this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->logger->error($this->id.' - '.$this->message);
-            $this->createDocLog();
-            return false;
-        }
-    } finally {
+				return true;
+			} catch (\Exception $e) {
+				$this->message .= 'Error target id  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->typeError = 'E';
+				$this->logger->error($this->id.' - '.$this->message);
+				$this->createDocLog();
+				return false;
+			}
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
@@ -2966,33 +2945,31 @@ class DocumentManager
     {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['workflowError' => $workflowError]);
         try {
-        try {
-			// Update workflowError only if the flag has changed
-			if ($workflowError == $this->workflowError) {
-				return;
+			try {
+				// Update workflowError only if the flag has changed
+				if ($workflowError == $this->workflowError) {
+					return;
+				}
+				$query = '	UPDATE document 
+									SET 
+										workflow_error = :workflowError
+									WHERE
+										id = :id
+									';
+				// Suppression de la dernière virgule
+				$stmt = $this->connection->prepare($query);
+				$stmt->bindValue(':workflowError', $workflowError);
+				$stmt->bindValue(':id', $this->id);
+				$result = $stmt->executeQuery();
+				$this->message .= 'Workflow error set to '.$workflowError;
+				$this->createDocLog();
+			} catch (\Exception $e) {
+				$this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				$this->typeError = 'E';
+				$this->logger->error($this->id.' - '.$this->message);
+				$this->createDocLog();
 			}
-            $now = gmdate('Y-m-d H:i:s');
-            $query = '	UPDATE document 
-								SET 
-									workflow_error = :workflowError
-								WHERE
-									id = :id
-								';
-            // Suppression de la dernière virgule
-            $stmt = $this->connection->prepare($query);
-            $stmt->bindValue(':now', $now);
-            $stmt->bindValue(':workflowError', $workflowError);
-            $stmt->bindValue(':id', $this->id);
-            $result = $stmt->executeQuery();
-            $this->message .= 'Workflow error set to '.$workflowError;
-			$this->createDocLog();
-        } catch (\Exception $e) {
-            $this->message .= 'Error type   : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->logger->error($this->id.' - '.$this->message);
-            $this->createDocLog();
-        }
-    } finally {
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
@@ -3315,26 +3292,26 @@ class DocumentManager
     {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['clearMessage' => $clearMessage]);
         try {
-        try {
-            $now = gmdate('Y-m-d H:i:s');
-            $query_header = 'INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)';
-            $stmt = $this->connection->prepare($query_header);
-            $stmt->bindValue(':created', $now);
-            $stmt->bindValue(':typeError', $this->typeError);
-            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
-            $stmt->bindValue(':rule_id', $this->ruleId);
-            $stmt->bindValue(':doc_id', $this->id);
-            $stmt->bindValue(':ref_doc_id', $this->docIdRefError);
-            $stmt->bindValue(':job_id', $this->jobId);
-            $result = $stmt->executeQuery();
-			if ($clearMessage) {
-				$this->message = '';
-				$this->docIdRefError = '';
+			try {
+				$now = gmdate('Y-m-d H:i:s');
+				$query_header = 'INSERT INTO log (created, type, msg, rule_id, doc_id, ref_doc_id, job_id) VALUES (:created,:typeError,:message,:rule_id,:doc_id,:ref_doc_id,:job_id)';
+				$stmt = $this->connection->prepare($query_header);
+				$stmt->bindValue(':created', $now);
+				$stmt->bindValue(':typeError', $this->typeError);
+				$stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
+				$stmt->bindValue(':rule_id', $this->ruleId);
+				$stmt->bindValue(':doc_id', $this->id);
+				$stmt->bindValue(':ref_doc_id', $this->docIdRefError);
+				$stmt->bindValue(':job_id', $this->jobId);
+				$result = $stmt->executeQuery();
+				if ($clearMessage) {
+					$this->message = '';
+					$this->docIdRefError = '';
+				}
+			} catch (\Exception $e) {
+				$this->logger->error($this->id.' - Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 			}
-        } catch (\Exception $e) {
-            $this->logger->error($this->id.' - Failed to create log : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
-        }
-    } finally {
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }

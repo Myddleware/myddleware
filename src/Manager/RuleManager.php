@@ -2387,15 +2387,8 @@ class RuleManager
 				)
 			) {
                 $now = gmdate('Y-m-d H:i:s');
-                $query = '	UPDATE document 
-                                SET 
-                                    date_modified = :now,
-                                    job_lock = :job_id
-                                WHERE
-                                    id = :id
-                                ';
+                $query = '	UPDATE document SET job_lock = :job_id WHERE id = :id';
                 $stmt = $this->connection->prepare($query);
-                $stmt->bindValue(':now', $now);
                 $stmt->bindValue(':job_id', $this->jobId);
                 $stmt->bindValue(':id', $docId);
                 $result = $stmt->executeQuery();
