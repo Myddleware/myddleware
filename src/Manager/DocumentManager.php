@@ -517,7 +517,7 @@ class DocumentManager
 			$params[] = $data['type'];
 			$params[] = $data['data'];
 		}
-		$sql = "INSERT INTO documentData (doc_id, type, data)
+		$sql = "INSERT INTO documentdata (doc_id, type, data)
 				VALUES ".implode(',', $values);
 		// Execute query for document data table
 		$this->connection->executeStatement($sql, $params);
