@@ -2175,6 +2175,7 @@ class RuleManager
 									WHERE 
 											d.rule = :ruleId
 										AND d.status = :status
+										AND d.globalStatus = 'Open'
 										AND d.deleted = 0
 										AND (
 												d.jobLock = '' 
@@ -2251,6 +2252,7 @@ class RuleManager
         if (!empty($documentId)) {
             $documentFilter = " 	document.id = '$documentId'
 								AND document.deleted = 0 
+                                AND document.global_status IN ('Open', 'Error')
                                 AND document.status IN ('Ready_to_send', 'Error_sending')
                                 AND (
 										document.job_lock = '' 
@@ -2262,6 +2264,7 @@ class RuleManager
             $documentFilter = " 	document.parent_id = '$parentDocId' 
 								AND document.rule_id = '$parentRuleId'
 								AND document.deleted = 0 
+								AND document.global_status IN ('Open', 'Error')
                                 AND document.status IN ('Ready_to_send', 'Error_sending')
                                 AND (
 										document.job_lock = '' 
@@ -2276,6 +2279,7 @@ class RuleManager
         else {
             $documentFilter = "	    document.rule_id = '$this->ruleId'
 								AND document.status = 'Ready_to_send'
+								AND document.global_status = 'Open'
 								AND document.deleted = 0
 								AND document.type = '$type' 
                                 AND (
