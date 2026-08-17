@@ -1898,6 +1898,13 @@ class DocumentManager
                 throw new \Exception('Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField, true));
             }
         } catch (\Exception $e) {
+			// No lookup error if delete Document
+			if (
+					str_contains($e->getMessage(), 'lookup')
+				AND $this->documentType == 'D'
+			){
+				return null;
+			}
             $this->typeError = 'E';
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->id.' - '.$this->message);
