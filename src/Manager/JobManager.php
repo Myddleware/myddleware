@@ -1122,13 +1122,10 @@ class JobManager
             // Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
             $sql = "SELECT
 						rule.id,
-						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id,
 						GROUP_CONCAT(rulefield.formula SEPARATOR ';') formula
 					FROM rule
 						LEFT OUTER JOIN rulefield
 							ON rule.id = rulefield.rule_id
-						LEFT OUTER JOIN rulerelationship
-							ON rule.id = rulerelationship.rule_id
 					WHERE
 						rule.deleted = 0
 					GROUP BY rule.id";
@@ -1140,17 +1137,20 @@ class JobManager
 				// Add the rule in formula to the list of rules in relationship
 				foreach ($rules as $key => $rule) {
 					$matches = array();
-					// Get the second parameters (rule id) of the lookup functions
-					preg_match_all('/lookup\(\{[^}]+\},"([^"]+)"/', $rule['formula'], $matches);
-					// Transform result and add it to the other rules (old relationships)
-					$rules[$key]['field_id'] .= ';'.implode(';', array_unique($matches[1]));
-					$rules[$key]['field_id'] = trim($rules[$key]['field_id'],';');
+                    $rules[$key]['rulesLinked'] = array();
+                    // Only of lookup in the formula 
+                    if (str_contains($rule['formula'], 'lookup')) {
+                        // Get the second parameters (rule id) of the lookup functions
+                        preg_match_all('/\blookup\s*\(\s*[^,]+,\s*(["\'])(.*?)\1\s*(?=,|\))/i', $rule['formula'], $matches);
+                        // Transform result and add it to the other rules (old relationships)
+                        $rules[$key]['rulesLinked'] = array_unique($matches[2]);
+                    }
 				}
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
                 $ruleKeyValue = [];
                 foreach ($rules as $key => $rule) {
-                    // Init order depending on the field_id value
-                    if (empty($rule['field_id'])) {
+                    // Init order depending on the rulesLinked value
+                    if (empty($rule['rulesLinked'])) {
                         $rules[$key]['rule_order'] = 1;
                     } else {
                         $rules[$key]['rule_order'] = 99;
@@ -1165,7 +1165,7 @@ class JobManager
                 while ($i < 20 && in_array('99', $ruleKeyValue)) {
                     ++$i;
                     // Boucles sur les régles
-                    foreach ($rules as $rule) {
+                    foreach ($rules as $key => $rule) {
                         $order = 0;
                         // Si on est une règle sans ordre
                         if (
@@ -1173,8 +1173,7 @@ class JobManager
                             and '99' == $rule['rule_order']
                         ) {
                             // Récupération des règles liées et recherche dans le tableau keyValue
-                            $rulesLink = explode(';', $rule['field_id']);
-                            foreach ($rulesLink as $ruleLink) {
+                            foreach ($rule['rulesLinked'] as $ruleLink) {
                                 if (
                                         !empty($ruleKeyValue[$ruleLink])
                                     && $ruleKeyValue[$ruleLink] > $order
@@ -1185,11 +1184,10 @@ class JobManager
                             // Si toutes les règles trouvées ont une priorité autre que 99 alors on affecte à la règle la piorité +1 dans les tableaux de références
                             if ($order < 99) {
                                 $ruleKeyValue[$rule['id']] = $order + 1;
-                                $rulesRef[$rule['id']]['rule_order'] = $order + 1;
+                                $rules[$key]['rule_order'] = $order + 1;
                             }
                         }
                     }
-                    $rules = $rulesRef;
                 }
                 // On vide la table RuleOrder
                 $sql = 'DELETE FROM ruleorder';
