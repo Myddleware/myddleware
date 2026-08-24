@@ -364,6 +364,10 @@ class RuleManager
                     if (!$createDocument) {
                         throw new \Exception('Failed to create document : '.$this->documentManager->getMessage());
                     }
+					// Commit the generated document in teh database
+					$childDocument->flushBatchCreateDocuments();
+					$childDocument->flushStatusBatch();
+					$childDocument->flushLogBatch();
                     $documents[] = $childDocument;
                 }
             }

@@ -427,7 +427,7 @@ class DocumentManager
 	// Document creation
     public function createDocument(): bool
     {
-    $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+		$this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
 		// Check on current document before any action
 		$this->checkDocumentBeforeAction();
 		
