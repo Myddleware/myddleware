@@ -153,7 +153,7 @@ class SolutionManager
                 throw new Exception('Solution ' . $name . ' not found. Please make sure that you have added this solution into Myddleware. ');
             }
 
-            return $__debugReturn = $this->classes[$name];
+            return $__debugReturn = clone $this->classes[$name];
         } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }

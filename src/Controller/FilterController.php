@@ -763,76 +763,11 @@ public function removeFilter(Request $request): JsonResponse
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data, 'page' => $page, 'limit' => $limit]);
         $__debugReturn = null;
         try {
-        // // Check if Elasticsearch is enabled in database config
-        // $elasticsearchEnabled = ($this->params['elasticsearch_enabled'] ?? '0') === '1';
-
-        // // Try Elasticsearch first if available and enabled
-        // if ($elasticsearchEnabled && $this->elasticsearchService !== null) {
-        //     try {
-        //         if ($this->elasticsearchService->isAvailable()) {
-        //             $this->logger->info('Using Elasticsearch for document search');
-        //             return $this->searchDocumentsWithElasticsearch($data, $page);
-        //         }
-        //     } catch (\Exception $e) {
-        //         $this->logger->warning('Elasticsearch search failed, falling back to SQL: ' . $e->getMessage());
-        //     }
-        // }
-
-        // Fallback to SQL
-        return $__debugReturn = $this->searchDocumentsWithSql($data, $page, $limit);
-    } finally {
+			return $__debugReturn = $this->searchDocumentsWithSql($data, $page, $limit);
+		} finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
-
-    // /**
-    //  * Search documents using Elasticsearch
-    //  */
-    // protected function searchDocumentsWithElasticsearch(array $data, int $page = 1): array
-    // {
-    //     $perPage = $this->params['pager'] ?? 25;
-    //     $from = ($page - 1) * $perPage;
-
-    //     // Prepare filters for Elasticsearch
-    //     $filters = $data;
-
-    //     // Handle rule name to get rule_id if needed
-    //     if (!empty($data['rule'])) {
-    //         // Elasticsearch service expects rule name directly
-    //         $filters['rule'] = $data['rule'];
-    //     }
-
-    //     $searchResult = $this->elasticsearchService->searchDocuments($filters, $from, $perPage);
-
-    //     // Transform Elasticsearch results to match SQL format
-    //     $results = [];
-    //     foreach ($searchResult['hits'] as $hit) {
-    //         $results[] = [
-    //             'id' => $hit['id'],
-    //             'date_created' => $hit['date_created'] ?? null,
-    //             'date_modified' => $hit['date_modified'] ?? null,
-    //             'status' => $hit['status'] ?? null,
-    //             'source_id' => $hit['source_id'] ?? null,
-    //             'target_id' => $hit['target_id'] ?? null,
-    //             'source_date_modified' => $hit['source_date_modified'] ?? null,
-    //             'mode' => $hit['mode'] ?? null,
-    //             'type' => $hit['type'] ?? null,
-    //             'attempt' => $hit['attempt'] ?? 0,
-    //             'global_status' => $hit['global_status'] ?? null,
-    //             'rule_name' => $hit['rule_name'] ?? null,
-    //             'module_source' => $hit['module_source'] ?? null,
-    //             'module_target' => $hit['module_target'] ?? null,
-    //             'rule_id' => $hit['rule_id'] ?? null,
-    //         ];
-    //     }
-
-    //     return [
-    //         'results' => $results,
-    //         'total' => $searchResult['total'],
-    //         'page' => $page,
-    //         'perPage' => $perPage
-    //     ];
-    // }
 
     /**
      * Search documents using SQL (original implementation)
@@ -860,11 +795,11 @@ public function removeFilter(Request $request): JsonResponse
         }
         // Date modified (start) 
         if (!empty($data['date_modif_start'])) {
-            $where .= " AND document.date_modified >= :dateModifiedStart ";
+            $where .= " AND document.date_created >= :dateModifiedStart ";
         }
         // Date modified (end)
         if (!empty($data['date_modif_end'])) {
-            $where .= " AND document.date_modified <= :dateModifiedEnd ";
+            $where .= " AND document.date_created <= :dateModifiedEnd ";
         }
 
         // Reference
@@ -969,7 +904,7 @@ public function removeFilter(Request $request): JsonResponse
         if (!empty($data['sort_field'])) {
             $orderBy = " ORDER BY ".$data['sort_field'];
         } else {
-            $orderBy = " ORDER BY document.date_modified";
+            $orderBy = " ORDER BY document.date_created";
         }
 
         // sort_order
@@ -988,7 +923,6 @@ public function removeFilter(Request $request): JsonResponse
             SELECT
                 document.id,
                 document.date_created,
-                document.date_modified,
                 document.status,
                 document.source_id,
                 document.target_id,
@@ -1201,9 +1135,6 @@ public function removeFilter(Request $request): JsonResponse
             $documents[$key]['date_created_formatted'] = $this->formatDateCompensated(
                 $document['date_created'] ?? null, $dateFormat, $utcTz, $targetTz
             );
-            $documents[$key]['date_modified_formatted'] = $this->formatDateCompensated(
-                $document['date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
-            );
             $documents[$key]['source_date_modified_formatted'] = $this->formatDateCompensated(
                 $document['source_date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
             );
@@ -1328,7 +1259,6 @@ public function removeFilter(Request $request): JsonResponse
                 document.created_by,
                 document.modified_by, 
                 document.date_created,
-                document.date_modified,
                 document.status,
                 document.source_id,
                 document.target_id,
@@ -1370,7 +1300,6 @@ public function removeFilter(Request $request): JsonResponse
             'created_by',
             'modified_by',
             'date_created',
-            'date_modified',
             'status',
             'source_id',
             'target_id',
@@ -1410,7 +1339,6 @@ public function removeFilter(Request $request): JsonResponse
                 $row['created_by'],
                 $row['modified_by'],
                 $row['date_created'],
-                $row['date_modified'],
                 $row['status'],
                 $row['source_id'],
                 $row['target_id'],

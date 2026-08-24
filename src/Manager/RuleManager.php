@@ -364,6 +364,10 @@ class RuleManager
                     if (!$createDocument) {
                         throw new \Exception('Failed to create document : '.$this->documentManager->getMessage());
                     }
+					// Commit the generated document in teh database
+					$childDocument->flushBatchCreateDocuments();
+					$childDocument->flushStatusBatch();
+					$childDocument->flushLogBatch();
                     $documents[] = $childDocument;
                 }
             }
@@ -516,6 +520,10 @@ class RuleManager
                                 $readSource['error'] .= $this->documentManager->getMessage();
                             }
                         }
+						// Flush the last packet of documents whith their status and logs
+						$this->documentManager->flushBatchCreateDocuments();
+						$this->documentManager->flushStatusBatch();
+						$this->documentManager->flushLogBatch();
                     }
                     // Mise à jour de la date de référence si des documents ont été créés
                     $this->updateReferenceDate();
@@ -2171,6 +2179,7 @@ class RuleManager
 									WHERE 
 											d.rule = :ruleId
 										AND d.status = :status
+										AND d.globalStatus = 'Open'
 										AND d.deleted = 0
 										AND (
 												d.jobLock = '' 
@@ -2247,6 +2256,7 @@ class RuleManager
         if (!empty($documentId)) {
             $documentFilter = " 	document.id = '$documentId'
 								AND document.deleted = 0 
+                                AND document.global_status IN ('Open', 'Error')
                                 AND document.status IN ('Ready_to_send', 'Error_sending')
                                 AND (
 										document.job_lock = '' 
@@ -2258,6 +2268,7 @@ class RuleManager
             $documentFilter = " 	document.parent_id = '$parentDocId' 
 								AND document.rule_id = '$parentRuleId'
 								AND document.deleted = 0 
+								AND document.global_status IN ('Open', 'Error')
                                 AND document.status IN ('Ready_to_send', 'Error_sending')
                                 AND (
 										document.job_lock = '' 
@@ -2272,6 +2283,7 @@ class RuleManager
         else {
             $documentFilter = "	    document.rule_id = '$this->ruleId'
 								AND document.status = 'Ready_to_send'
+								AND document.global_status = 'Open'
 								AND document.deleted = 0
 								AND document.type = '$type' 
                                 AND (
@@ -2383,15 +2395,8 @@ class RuleManager
 				)
 			) {
                 $now = gmdate('Y-m-d H:i:s');
-                $query = '	UPDATE document 
-                                SET 
-                                    date_modified = :now,
-                                    job_lock = :job_id
-                                WHERE
-                                    id = :id
-                                ';
+                $query = '	UPDATE document SET job_lock = :job_id WHERE id = :id';
                 $stmt = $this->connection->prepare($query);
-                $stmt->bindValue(':now', $now);
                 $stmt->bindValue(':job_id', $this->jobId);
                 $stmt->bindValue(':id', $docId);
                 $result = $stmt->executeQuery();

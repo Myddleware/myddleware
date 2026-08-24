@@ -644,7 +644,6 @@ class RuleController extends AbstractController
         $initialRuleJson = $this->ruleQueryService->prepareJsonForEdit($rule);
         $lst_functions = $this->entityManager->getRepository(Functions::class)->findAll();
         $solutions = $this->entityManager->getRepository(Solution::class)->findBy(['active' => 1], ['name' => 'ASC']);
-
         return $__debugReturn = $this->render('Rule/create/index.html.twig', [
             'initialRuleJson' => $initialRuleJson,
             'rule'            => $rule,

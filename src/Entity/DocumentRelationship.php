@@ -46,12 +46,12 @@ class DocumentRelationship
     private int $id;
 
     /**
-     * @ORM\Column(name="doc_id", type="string", length=100, nullable=false)
+     * @ORM\Column(name="doc_id", type="string", length=36, nullable=false)
      */
     private string $doc_id;
 
     /**
-     * @ORM\Column(name="doc_rel_id", type="string", length=100, nullable=false)
+     * @ORM\Column(name="doc_rel_id", type="string", length=36, nullable=false)
      */
     private string $doc_rel_id;
 
