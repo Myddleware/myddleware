@@ -452,9 +452,25 @@ class DocumentManager
 			'parent_id' => $this->parentId,
 			'job_lock' => ''
 		];		
-		// Préparer documentData (S uniquement ici)
+		// Prepare documentData (S for source)
 		$dataInsert = $this->prepareDataInsert($this->data, 'S');
-		
+        // Prepare logs
+        $this->logBatch[] = [
+			'created' => gmdate('Y-m-d H:i:s'),
+			'type' => $this->typeError,
+			'msg' => 'Status : New',
+			'rule_id' => $this->ruleId,
+			'doc_id' => $this->id,
+			'ref_doc_id' => $this->docIdRefError,
+			'job_id' => $this->jobId
+		];
+        if (
+                !$this->api
+            AND $this->env == 'background'
+        ) {
+            echo 'status New id = '.$this->id.'  '.gmdate('Y-m-d H:i:s').chr(10);
+        }
+
 		$this->documentDataBatch[] = [
 			'doc_id' => $this->id,
 			'type' => 'S',
