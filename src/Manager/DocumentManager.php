@@ -187,17 +187,21 @@ class DocumentManager
 	public function setId($id) {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         try {
-		$this->id = $id;
-	} finally {
-            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
+			$this->id = $id;
+		} finally {
+			$this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
+    }
+	
+	public function getTargetId() {
+        return $this->targetId;
     }
 	
 	public function setNoLock($noLock) {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['noLock' => $noLock]);
         try {
-		$this->noLock = $noLock;
-	} finally {
+			$this->noLock = $noLock;
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
@@ -205,8 +209,8 @@ class DocumentManager
 	public function setDocumentType($documentType) {
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documentType' => $documentType]);
         try {
-		$this->documentType = $documentType;
-	} finally {
+			$this->documentType = $documentType;
+		} finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
         }
     }
@@ -1859,29 +1863,6 @@ class DocumentManager
                 }
                 // -- -- -- Gestion des formules
             }
-            // S'il s'agit d'un champ relation
-            elseif (!empty($ruleField['field_id'])) {
-                // Si l'id est vide on renvoie vide
-                if (empty(trim($source[$ruleField['field_name_source']]))) {
-                    return null;
-                }
-
-                // If the relationship is a parent type, we don't search the id in the child rule now. Data will be read from the child rule when we will send the parent document. So no target id is required now.
-                if (!empty($ruleField['parent'])) {
-                    return null;
-                }
-
-                // Récupération de l'ID de l'enregistrement lié dans la cible avec l'id correspondant dans la source et la correspondance existante dans la règle liée.
-                $targetId = $this->getTargetId($ruleField, $source[$ruleField['field_name_source']]);
-                if (!empty($targetId['record_id'])) {
-                    return $targetId['record_id'];
-                // No need of relate field in case of deletion
-                } elseif ('D' != $this->documentType) {
-                    throw new \Exception('Target id not found for id source '.$source[$ruleField['field_name_source']].' of the rule '.$ruleField['field_id']);
-                } else {
-                    return null;
-                }
-            }
             // Si le champ est envoyé sans transformation
             elseif (isset($source[$ruleField['source_field_name']])) {
                 return $this->checkField($source[$ruleField['source_field_name']]);
@@ -1898,6 +1879,13 @@ class DocumentManager
                 throw new \Exception('Field '.$ruleField['source_field_name'].' not found in source data.------'.print_r($ruleField, true));
             }
         } catch (\Exception $e) {
+			// No lookup error if delete Document
+			if (
+					str_contains($e->getMessage(), 'lookup')
+				AND $this->documentType == 'D'
+			){
+				return null;
+			}
             $this->typeError = 'E';
             $this->message .= 'Error : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
             $this->logger->error($this->id.' - '.$this->message);
@@ -2820,122 +2808,6 @@ class DocumentManager
             return null;
         } catch (\Exception $e) {
             return null;
-        }
-    } finally {
-            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
-    // Permet de récupérer l'id target pour une règle et un id source ou l'inverse
-    protected function getTargetId($ruleRelationship, $record_id)
-    {
-        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['ruleRelationship' => $ruleRelationship, 'record_id' => $record_id]);
-        try {
-        try {
-            $direction = $this->getRelationshipDirection($ruleRelationship);
-
-            // En fonction du sens de la relation, la recherche du parent id peut-être inversée (recherchée en source ou en cible)
-            // Search all documents with target ID not empty in status close or no_send (document canceled but it is a real document)
-            if ('-1' == $direction) {
-                $sqlParams = "	SELECT 
-									source_id record_id,
-									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
-									GROUP_CONCAT(DISTINCT document.type) types
-								FROM document
-								WHERE  
-										document.rule_id = :ruleRelateId
-									AND document.source_id != ''
-									AND document.deleted = 0
-									AND document.target_id = :record_id
-									AND (
-											document.global_status = 'Close'
-										 OR document.status = 'No_send'
-									)
-								GROUP BY source_id
-								HAVING types NOT LIKE '%D%'
-								LIMIT 1";
-            } elseif ('1' == $direction) {
-                $sqlParams = "	SELECT 
-									target_id record_id,
-									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
-									GROUP_CONCAT(DISTINCT document.type) types
-								FROM document 
-								WHERE  
-										document.rule_id = :ruleRelateId
-									AND document.source_id = :record_id
-									AND document.deleted = 0
-									AND document.target_id != ''
-									AND (
-											document.global_status = 'Close'
-										 OR document.status = 'No_send'
-									)
-								GROUP BY target_id
-								HAVING types NOT LIKE '%D%'
-								LIMIT 1";
-            } else {
-                throw new \Exception('Failed to find the direction of the relationship with the rule_id '.$ruleRelationship['field_id'].'. ');
-            }
-
-            // A mass process exist for migration mode
-            if (!empty($this->ruleDocuments[$ruleRelationship['field_id']])) {
-                // We search the target/source id in the array in memory
-                if ('1' == $direction) {
-                    if (!empty($this->ruleDocuments[$ruleRelationship['field_id']]['sourceId'][$record_id])) {
-                        foreach ($this->ruleDocuments[$ruleRelationship['field_id']]['sourceId'][$record_id] as $document) {
-                            if (
-                                (
-                                        'Close' == $document['global_status']
-                                     or 'No_send' == $document['status']
-                                )
-                                and '' != $document['target_id']
-                            ) {
-                                $result['record_id'] = $document['target_id'];
-                                $result['document_id'] = $document['id'];
-                                break;
-                            }
-                        }
-                    }
-                } else {
-                    if (!empty($this->ruleDocuments[$ruleRelationship['field_id']]['targetId'][$record_id])) {
-                        foreach ($this->ruleDocuments[$ruleRelationship['field_id']]['targetId'][$record_id] as $document) {
-                            if (
-                                (
-                                        'Close' == $document['global_status']
-                                     or 'No_send' == $document['status']
-                                )
-                                and '' != $document['source_id']
-                            ) {
-                                $result['record_id'] = $document['source_id'];
-                                $result['document_id'] = $document['id'];
-                                break;
-                            }
-                        }
-                    }
-                }
-            } else {
-                $stmt = $this->connection->prepare($sqlParams);
-                $stmt->bindValue(':ruleRelateId', $ruleRelationship['field_id']);
-                $stmt->bindValue(':record_id', $record_id);
-                $result = $stmt->executeQuery();
-                $result = $result->fetchAssociative();
-
-				// In cas of several document found we get only the first one (which is the most recent one)
-				if (
-						!empty($result['document_id'])
-					AND strpos($result['document_id'], ',')
-				) {
-					$documentList = explode(',',$result['document_id']);
-					$result['document_id'] = $documentList[0];
-				}
-            }
-			if (!empty($result['record_id'])) {
-                return $result;
-            }
-            return null;
-        } catch (\Exception $e) {
-            $this->message .= 'Error getTargetId  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-            $this->typeError = 'E';
-            $this->logger->error($this->id.' - '.$this->message);
         }
     } finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__);

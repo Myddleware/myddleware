@@ -563,6 +563,9 @@ class airtable extends solution
         $moduleNameAndRecordId = $this->extractModuleAndRecordId($rule, $document, $type);
         $moduleName = $moduleNameAndRecordId['module'];
         $recordId = $moduleNameAndRecordId['record_id'];
+        if (empty($recordId)) {
+            return '';
+        }
 
         // Load metadata to get table mappings
         $metadataMappings = $this->loadAirtableMetadataMappings();
