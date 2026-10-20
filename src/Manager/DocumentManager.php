@@ -475,7 +475,10 @@ class DocumentManager
 		$this->documentDataBatch[] = [
 			'doc_id' => $this->id,
 			'type' => 'S',
-			'data' => serialize(json_encode($dataInsert))
+			'data' => json_encode(
+				json_encode($dataInsert, JSON_THROW_ON_ERROR),
+				JSON_THROW_ON_ERROR
+			)
 		];				
 		// Flush if batch limit reached
 		if (count($this->documentBatch) >= $this->batchSize) {
