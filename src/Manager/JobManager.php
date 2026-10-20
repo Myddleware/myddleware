@@ -1708,6 +1708,7 @@ class JobManager
 					ON job.id = log.job_id
 			WHERE
 					job.status = 'start'
+				AND job.param != 'cleardata'
 			GROUP BY job.id
 			HAVING diff_log > :period OR (diff_job > :period AND log_created IS NULL)
 			";
