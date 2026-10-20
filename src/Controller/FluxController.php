@@ -472,11 +472,11 @@ class FluxController extends AbstractController
         }
         // Date modified (start) 
         if (!empty($data['date_modif_start'])) {
-            $where .= " AND document.date_modified >= :dateModifiedStart ";
+            $where .= " AND document.date_created >= :dateModifiedStart ";
         }
         // Date modified (end)
         if (!empty($data['date_modif_end'])) {
-            $where .= " AND document.date_modified <= :dateModifiedEnd ";
+            $where .= " AND document.date_created <= :dateModifiedEnd ";
         }
         // Rule
         if (
@@ -662,7 +662,7 @@ class FluxController extends AbstractController
             $compact = $this->nav_pagination([
                 'adapter_em_repository' => $em->getRepository(Document::class)->findBy(
                     ['source' => $doc[0]->getSource(), 'rule' => $doc[0]->getRule(), 'deleted' => 0],
-                    ['dateModified' => 'DESC']
+                    ['dateCreated' => 'DESC']
                 ),
                 'maxPerPage' => $this->params['pager'],
                 'page' => $page,
@@ -725,7 +725,7 @@ class FluxController extends AbstractController
 
             // HISTORY DOCUMENT
             // Get the history documents (all document for the same source)
-            $historyDocuments = $em->getRepository(Document::class)->findBy(['source' => $doc[0]->getSource(), 'rule' => $doc[0]->getRule(), 'deleted' => 0], ['dateModified' => 'DESC'], 10);
+            $historyDocuments = $em->getRepository(Document::class)->findBy(['source' => $doc[0]->getSource(), 'rule' => $doc[0]->getRule(), 'deleted' => 0], ['dateCreated' => 'DESC'], 10);
             // If only one record, the history is the current document, so we remove it => no parent
             if (1 == count($historyDocuments)) {
                 $historyDocuments = [];
@@ -777,7 +777,7 @@ class FluxController extends AbstractController
             $docParams = [
                 'adapter_em_repository' => $em->getRepository(Document::class)->findBy(
                     ['source' => $doc[0]->getSource(), 'rule' => $doc[0]->getRule(), 'deleted' => 0],
-                    ['dateModified' => 'DESC']
+                    ['dateCreated' => 'DESC']
                 ),
                 'maxPerPage' => $this->params['pager'],
                 'page' => $documentPage,
@@ -1624,7 +1624,7 @@ $result = [];
 
                 // Dates and reference - convert to user's timezone before formatting (except reference which stays in UTC)
                 'creation_date' => $this->formatDateInUserTimezone($document->getDateCreated()),
-                'modification_date' => $this->formatDateInUserTimezone($document->getDateModified()),
+                'modification_date' => $this->formatDateInUserTimezone($document->getDateCreated()),
                 'reference' => $document->getSourceDateModified() ? $document->getSourceDateModified()->format('Y-m-d H:i:s') : null,
 
                 // Pass user timezone and date format for client-side formatting
@@ -1798,7 +1798,7 @@ $result = [];
             'Close' => 'Close ✓'
         ];
         
-        return $__debugReturn = $statusLabels[$statusValue] ?? $statusValue;
+        return $__debugReturn = $statusLabels[$statusValue] ?? $statusValue ?? '';;
     } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
@@ -1888,7 +1888,7 @@ $result = [];
                     'rule' => $document->getRule(), 
                     'deleted' => 0
                 ], 
-                ['dateModified' => 'DESC']
+                ['dateCreated' => 'DESC']
             );
             
             // If only one record, the history is the current document, so we remove it => no history
@@ -1909,7 +1909,7 @@ $result = [];
                     'ruleId' => $rule->getId(),
                     'sourceId' => $histDoc->getSource(),
                     'targetId' => $histDoc->getTarget(),
-                    'modificationDate' => $this->formatDateInUserTimezone($histDoc->getDateModified()),
+                    'modificationDate' => $this->formatDateInUserTimezone($histDoc->getDateCreated()),
                     'type' => $histDoc->getType(),
                     'status' => $statusInfo['status'],
                     'statusClass' => $statusInfo['status_class']
@@ -1953,7 +1953,7 @@ $result = [];
                    'd.id as docId',
                    'd.source',
                    'd.target', 
-                   'd.dateModified',
+                   'd.dateCreated',
                    'd.type',
                    'COALESCE(r.name, :defaultRuleName) as ruleName',
                    'r.id as ruleId'
@@ -1982,7 +1982,7 @@ $result = [];
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
-                        'modificationDate' => $this->formatDateInUserTimezone($result['dateModified']),
+                        'modificationDate' => $this->formatDateInUserTimezone($result['dateCreated']),
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
@@ -2026,7 +2026,7 @@ $result = [];
                     'd.id as docId',
                     'd.source',
                     'd.target',
-                    'd.dateModified',
+                    'd.dateCreated',
                     'd.type',
                     'COALESCE(r.name, :defaultRuleName) as ruleName',
                     'r.id as ruleId',
@@ -2057,7 +2057,7 @@ $result = [];
                         'ruleId' => $result['ruleId'],
                         'sourceId' => $result['source'],
                         'targetId' => $result['target'],
-                        'modificationDate' => $this->formatDateInUserTimezone($result['dateModified']),
+                        'modificationDate' => $this->formatDateInUserTimezone($result['dateCreated']),
                         'type' => $result['type'],
                         'status' => $statusInfo['status'],
                         'statusClass' => $statusInfo['status_class'],
@@ -2111,7 +2111,7 @@ $result = [];
                     'ruleId' => $rule ? $rule->getId() : null,
                     'sourceId' => $postDoc->getSource(),
                     'targetId' => $postDoc->getTarget(),
-                    'modificationDate' => $this->formatDateInUserTimezone($postDoc->getDateModified()),
+                    'modificationDate' => $this->formatDateInUserTimezone($postDoc->getDateCreated()),
                     'type' => $postDoc->getType(),
                     'status' => $statusInfo['status'],
                     'statusClass' => $statusInfo['status_class']

@@ -156,7 +156,7 @@ class DocumentRepository extends ServiceEntityRepository
         $__debugReturn = null;
         try {
             return $__debugReturn = $this->createQueryBuilder('d')
-                ->select('rule.name, d.id d.dateModified as date_modified')
+                ->select('rule.name, d.id d.dateCreated as date_modified')
                 ->join('d.rule', 'rule')
                 ->andWhere('d.globalStatus = :error')
                 ->andWhere('d.deleted = 0')
@@ -198,11 +198,11 @@ class DocumentRepository extends ServiceEntityRepository
         $__debugReturn = null;
         try {
             $qb = $this->createQueryBuilder('d')
-                    ->select("DATE_FORMAT(d.dateModified, '%Y-%m-%d') AS date")
+                    ->select("DATE_FORMAT(d.dateCreated, '%Y-%m-%d') AS date")
                     ->addSelect('d.globalStatus')
                     ->addSelect('COUNT(d.id) AS nb')
                     ->andWhere('d.deleted = 0')
-                    ->andWhere('d.dateModified >= :days ')
+                    ->andWhere('d.dateCreated >= :days ')
                     ->setParameter('days', new DateTime('-'.HomeManager::nbHistoricJobs.' day'))
                     ->groupBy('date')
                     ->addGroupBy('d.globalStatus');
@@ -323,7 +323,7 @@ class DocumentRepository extends ServiceEntityRepository
         try {
             $qb = $this->createQueryBuilder('document');
             $qb
-                ->select('document.id, document.dateCreated, document.dateModified as date_modified, document.status, document.source as source_id, document.target as target_id, document.sourceDateModified as source_date_modified, document.mode, document.type, document.attempt, document.globalStatus as global_status')
+                ->select('document.id, document.dateCreated, document.status, document.source as source_id, document.target as target_id, document.sourceDateModified as source_date_modified, document.mode, document.type, document.attempt, document.globalStatus as global_status')
                 ->addSelect('user.username, rule.name as rule_name, rule.id as rule_id')
                 ->join('document.rule', 'rule')
                 ->join('document.createdBy', 'user')
@@ -351,13 +351,13 @@ class DocumentRepository extends ServiceEntityRepository
 
             if (!empty($data['date_modif_start']) && is_string($data['date_modif_start'])) {
                 $qb
-                    ->andWhere('document.dateModified >= :dateModified')
+                    ->andWhere('document.dateCreated >= :dateModified')
                     ->setParameter('dateModified', $data['date_modif_start']);
             }
 
             if (!empty($data['date_modif_end']) && is_string($data['date_modif_end'])) {
                 $qb
-                    ->andWhere('document.dateModified <= :dateModifiedEnd')
+                    ->andWhere('document.dateCreated <= :dateModifiedEnd')
                     ->setParameter('dateModifiedEnd', $data['date_modif_end']);
             }
 
@@ -417,7 +417,7 @@ class DocumentRepository extends ServiceEntityRepository
             if (!empty($data['limit'])) {
                 $qb->setMaxResults($data['limit']);
             }
-            $qb->orderBy('document.dateModified', 'DESC');
+            $qb->orderBy('document.dateCreated', 'DESC');
 
             return $__debugReturn = $qb->getQuery()->getResult(AbstractQuery::HYDRATE_ARRAY);
         } finally {

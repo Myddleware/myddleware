@@ -47,14 +47,18 @@ class WorkflowLog
     #[ORM\ManyToOne(targetEntity: 'Job', inversedBy: 'workflowLogs')]
     #[ORM\JoinColumn(name: 'job_id', referencedColumnName: 'id', nullable: false)]
     private Job $job;
-
-    #[ORM\ManyToOne(targetEntity: 'Document', inversedBy: 'triggerDocuments')]
-    #[ORM\JoinColumn(name: 'trigger_document_id', referencedColumnName: 'id', nullable: false)]
+	
+	/**
+     * @ORM\ManyToOne(targetEntity="Document", inversedBy="triggerDocuments")
+     * @ORM\JoinColumn(name="trigger_document_id", referencedColumnName="id", nullable=false, columnDefinition="VARCHAR(36)")
+     */
     private Document $triggerDocument;
 
-    #[ORM\ManyToOne(targetEntity: 'Document', inversedBy: 'generateDocuments')]
-    #[ORM\JoinColumn(name: 'generate_document_id', referencedColumnName: 'id', nullable: true)]
-    private ?Document $generateDocument = null;
+	/**
+     * @ORM\ManyToOne(targetEntity="Document", inversedBy="generateDocuments")
+     * @ORM\JoinColumn(name="generate_document_id", referencedColumnName="id", nullable=true, columnDefinition="VARCHAR(36)")
+     */
+    private ?Document $generateDocument= null;
 
     #[ORM\ManyToOne(targetEntity: 'WorkflowAction')]
     #[ORM\JoinColumn(name: 'action_id', referencedColumnName: 'id', nullable: true)]

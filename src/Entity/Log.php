@@ -53,8 +53,10 @@ class Log
     #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: true)]
     private ?Rule $rule;
 
-    #[ORM\ManyToOne(targetEntity: 'Document', inversedBy: 'logs')]
-    #[ORM\JoinColumn(name: 'doc_id', referencedColumnName: 'id', nullable: true)]
+    /**
+     * @ORM\ManyToOne(targetEntity="Document", inversedBy="logs")
+     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=true, columnDefinition="VARCHAR(36)")
+     */
     private ?Document $document;
 
     #[ORM\Column(name: 'ref_doc_id', type: 'string', length: 255, nullable: true)]

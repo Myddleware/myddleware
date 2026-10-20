@@ -722,11 +722,11 @@ class FilterController extends AbstractController
         }
         // Date modified (start) 
         if (!empty($data['date_modif_start'])) {
-            $where .= " AND document.date_modified >= :dateModifiedStart ";
+            $where .= " AND document.date_created >= :dateModifiedStart ";
         }
         // Date modified (end)
         if (!empty($data['date_modif_end'])) {
-            $where .= " AND document.date_modified <= :dateModifiedEnd ";
+            $where .= " AND document.date_created <= :dateModifiedEnd ";
         }
 
         // Reference
@@ -831,7 +831,7 @@ class FilterController extends AbstractController
         if (!empty($data['sort_field'])) {
             $orderBy = " ORDER BY ".$data['sort_field'];
         } else {
-            $orderBy = " ORDER BY document.date_modified";
+            $orderBy = " ORDER BY document.date_created";
         }
 
         // sort_order
@@ -850,7 +850,6 @@ class FilterController extends AbstractController
             SELECT
                 document.id,
                 document.date_created,
-                document.date_modified,
                 document.status,
                 document.source_id,
                 document.target_id,
@@ -1063,9 +1062,6 @@ class FilterController extends AbstractController
             $documents[$key]['date_created_formatted'] = $this->formatDateCompensated(
                 $document['date_created'] ?? null, $dateFormat, $utcTz, $targetTz
             );
-            $documents[$key]['date_modified_formatted'] = $this->formatDateCompensated(
-                $document['date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
-            );
             $documents[$key]['source_date_modified_formatted'] = $this->formatDateCompensated(
                 $document['source_date_modified'] ?? null, $dateFormat, $utcTz, $targetTz
             );
@@ -1188,7 +1184,6 @@ class FilterController extends AbstractController
                 document.created_by,
                 document.modified_by, 
                 document.date_created,
-                document.date_modified,
                 document.status,
                 document.source_id,
                 document.target_id,
@@ -1230,7 +1225,6 @@ class FilterController extends AbstractController
             'created_by',
             'modified_by',
             'date_created',
-            'date_modified',
             'status',
             'source_id',
             'target_id',
@@ -1270,7 +1264,6 @@ class FilterController extends AbstractController
                 $row['created_by'],
                 $row['modified_by'],
                 $row['date_created'],
-                $row['date_modified'],
                 $row['status'],
                 $row['source_id'],
                 $row['target_id'],
