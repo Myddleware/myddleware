@@ -39,7 +39,6 @@
 			</div>
 			<h2 class="login-title">Sign in</h2>
 			<form id="myd_login-form" method="post" class="form-inline" role="form" action="{{ path('login') }}">
-				{% if attempt < 6 %}
 					<div class="login-inputs">
 						<input type="text" autocomplete='off' class="form-control mb-2" id="username" name="_username" placeholder="{{ 'login.user'|trans }}">
 						<input type="password" autocomplete='off' class="form-control mb-2" id="password" name="_password" placeholder="{{ 'login.pwd'|trans }}">
@@ -47,13 +46,7 @@
 						{% if error %}
 							<div class="alert alert-danger d-flex justify-content-start align-content-start" role="alert">
 								<i class="fas fa-times"></i>
-								<p class="ms-2">{{ error|trans }}
-									<span>
-										(
-										{{ attempt }}
-										)
-									</span>
-								</p>
+								<p class="ms-2">{{ error|trans }}</p>
 							</div>
 						{% else %}
 							<div id="error_message" style="display:none;" class="alert alert-danger" role="alert">
@@ -66,18 +59,6 @@
 							<a class="password-reset-link" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a>
 						</p>
 					</div>
-				{% else %}
-					<div class="alert alert-danger" role="alert">
-						<span>
-							<i class="fas fa-times"></i>
-							Please wait :
-							{{ remaining.minute }}min
-							{{ remaining.second }}s</span>
-					</div>
-					<p>
-						<a class="password-reset-link" href="{{ path('resetting_request') }}">{{ 'login.btn.pwd_forgot'|trans }}</a>
-					</p>
-				{% endif %}
 			</form>
 		</div>
 
@@ -112,9 +93,6 @@
 			</div>
 		</div>
 	</div>
-	<script type="text/javascript">
-		var path_control = "{#{{ path('login_protect') }}#}";
-	</script>
 {% endblock %}
 
 {% block javascripts %}

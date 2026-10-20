@@ -27,60 +27,25 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\Rule;
-use App\Entity\User;
-use App\Entity\FuncCat;
-use App\Entity\Document;
-use App\Entity\Solution;
 use App\Entity\Workflow;
-use App\Entity\Connector;
-use App\Entity\Functions;
-use App\Entity\RuleAudit;
 use App\Entity\RuleField;
-use App\Entity\RuleParam;
-use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
 use App\Entity\WorkflowLog;
-use App\Form\ConnectorType;
-use App\Manager\JobManager;
-use App\Entity\DocumentData;
-use App\Manager\HomeManager;
-use App\Manager\RuleManager;
-use Doctrine\ORM\Mapping\Id;
-use Psr\Log\LoggerInterface;
 use App\Entity\WorkflowAudit;
 use App\Manager\ToolsManager;
-use Doctrine\DBAL\Connection;
-use App\Entity\ConnectorParam;
-use App\Entity\RuleParamAudit;
 use App\Entity\WorkflowAction;
-use App\Form\Type\WorkflowType;
-use App\Manager\FormulaManager;
-use App\Service\SessionService;
-use App\Entity\RuleRelationShip;
 use App\Manager\DocumentManager;
-use App\Manager\SolutionManager;
-use App\Manager\TemplateManager;
-use App\Repository\JobRepository;
-use App\Repository\RuleRepository;
-use App\Form\DuplicateRuleFormType;
 use App\Repository\ConfigRepository;
-use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Form\Type\RelationFilterType;
-use App\Form\Type\WorkflowActionType;
-use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use App\Repository\WorkflowActionRepository;
 use App\Repository\WorkflowLogRepository;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\Constraints\Range;
 use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
@@ -89,100 +54,42 @@ use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use App\Service\DebugLogger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
-/**
- * @Route("/workflowAction")
- */
+#[Route('/workflowAction')]
 class WorkflowActionController extends AbstractController
 {
-    private FormulaManager $formuleManager;
-    private SessionService $sessionService;
-    private ParameterBagInterface $params;
     private EntityManagerInterface $entityManager;
-    private HomeManager $home;
     private ToolsManager $tools;
     private TranslatorInterface $translator;
-    private AuthorizationCheckerInterface $authorizationChecker;
-    private JobManager $jobManager;
-    private LoggerInterface $logger;
-    private TemplateManager $template;
-    private RuleRepository $ruleRepository;
-    private JobRepository $jobRepository;
-    private DocumentRepository $documentRepository;
-    private SolutionManager $solutionManager;
-    private RuleManager $ruleManager;
     private DocumentManager $documentManager;
     private WorkflowLogRepository $workflowLogRepository;
-    protected Connection $connection;
-    // To allow sending a specific record ID to rule simulation
-    protected $simulationQueryField;
     private ConfigRepository $configRepository;
     private DebugLogger $debugLogger;
 
     public function __construct(
-        LoggerInterface $logger,
-        RuleManager $ruleManager,
-        FormulaManager $formuleManager,
-        SolutionManager $solutionManager,
         DocumentManager $documentManager,
-        SessionService $sessionService,
         EntityManagerInterface $entityManager,
-        RuleRepository $ruleRepository,
-        JobRepository $jobRepository,
-        DocumentRepository $documentRepository,
-        Connection $connection,
         TranslatorInterface $translator,
-        AuthorizationCheckerInterface $authorizationChecker,
-        HomeManager $home,
         ToolsManager $tools,
-        JobManager $jobManager,
-        TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
-        ParameterBagInterface $paramsprivate,
         ConfigRepository $configRepository,
         DebugLogger $debugLogger
     ) {
-        $this->logger = $logger;
-        $this->ruleManager = $ruleManager;
-        $this->formuleManager = $formuleManager;
-        $this->solutionManager = $solutionManager;
         $this->documentManager = $documentManager;
-        $this->sessionService = $sessionService;
         $this->entityManager = $entityManager;
-        $this->ruleRepository = $ruleRepository;
-        $this->jobRepository = $jobRepository;
-        $this->documentRepository = $documentRepository;
-        $this->connection = $connection;
         $this->translator = $translator;
-        $this->authorizationChecker = $authorizationChecker;
-        $this->home = $home;
         $this->tools = $tools;
-        $this->jobManager = $jobManager;
-        $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
         $this->configRepository = $configRepository;
         $this->debugLogger = $debugLogger;
     }
 
-    protected function getInstanceBdd() {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-        try {
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
-
     // public function to delet the workflow by id (set deleted to 1)
-    /**
-     * @Route("/deleteAction/{id}", name="workflow_action_delete", methods={"POST", "DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/deleteAction/{id}', name: 'workflow_action_delete', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function WorkflowActionDeleteAction(string $id, Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -217,9 +124,7 @@ class WorkflowActionController extends AbstractController
     }
 
     // public function to set the workflow to active or inactive
-    /**
-     * @Route("/active/{id}", name="workflow_action_active")
-     */
+    #[Route('/active/{id}', name: 'workflow_action_active')]
     public function WorkflowActionActiveAction(string $id, Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -262,10 +167,7 @@ class WorkflowActionController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/action_active_show/{id}", name="workflow_action_active_show")
-     * function activate or deactivate an action in the show view
-     */
+    #[Route('/action_active_show/{id}', name: 'workflow_action_active_show')]
     public function WorkflowActionActiveShowAction(string $id, Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -284,7 +186,7 @@ class WorkflowActionController extends AbstractController
                     $workflowAction->setActive($workflowAction->getActive() == 1 ? 0 : 1);
                     $em->persist($workflowAction);
                     $em->flush();
-                    $this->addFlash('workflowaction.success', $translator->trans('view_workflow_action.updated_successfully'));
+                    $this->addFlash('workflowaction.success', $this->translator->trans('view_workflow_action.updated_successfully'));
                 } else {
                     $this->addFlash('error', 'Workflow Action not found');
                 }
@@ -299,9 +201,7 @@ class WorkflowActionController extends AbstractController
     }
 
 
-    /**
-     * @Route("/new/{workflowId}", name="workflow_action_create_with_workflow")
-     */
+    #[Route('/new/{workflowId}', name: 'workflow_action_create_with_workflow')]
     public function WorkflowCreateActionWithWorkflow(string $workflowId, Request $request)
         {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['workflowId' => $workflowId, 'request' => $request]);
@@ -373,7 +273,6 @@ class WorkflowActionController extends AbstractController
 
                 // fill the array with the source fields of each rule
                 foreach ($rules as $rule) {
-                    // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
                     $ruleSourceFields = $rule->getSourceFields();
                     foreach ($ruleSourceFields as $key => $value) {
                         $ruleSourceFields[$value] = $value;
@@ -673,10 +572,10 @@ class WorkflowActionController extends AbstractController
                         ])
                         ->add('order', IntegerType::class, [
                             'label'      => 'view_edit_workflow_action.order',
-                            'constraints'=> [new Range([
-                                'min' => 0, 'max' => 50,
-                                'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
-                            ])],
+                            'constraints'=> [new Range(
+                                min: 0, max: 50,
+                                notInRangeMessage: 'You must enter a number between {{ min }} and {{ max }}.',
+                            )],
                             'row_attr'   => [
                                 'class' => 'mb-3'
                             ],
@@ -857,9 +756,7 @@ class WorkflowActionController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/get-target-fields/{ruleId}", name="get_target_fields", methods={"GET"})
-     */
+    #[Route('/get-target-fields/{ruleId}', name: 'get_target_fields', methods: ['GET'])]
     public function getTargetFields(string $ruleId, EntityManagerInterface $em): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleId' => $ruleId, 'em' => $em]);
@@ -887,10 +784,8 @@ class WorkflowActionController extends AbstractController
     }
 
     // public function to show the detail view of a single workflow
-    /**
-     * @Route("/showAction/{id}", name="workflow_action_show", defaults={"page"=1})
-     * @Route("/showAction/{id}/page-{page}", name="workflow_action_show_page", requirements={"page"="\d+"})
-     */
+    #[Route('/showAction/{id}', name: 'workflow_action_show', defaults: ['page' => 1])]
+    #[Route('/showAction/{id}/page-{page}', name: 'workflow_action_show_page', requirements: ['page' => '\d+'])]
     public function WorkflowActionShowAction(string $id, Request $request, int $page): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'page' => $page]);
@@ -942,10 +837,8 @@ class WorkflowActionController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/showAction/{id}/logs", name="workflow_action_show_logs", defaults={"page"=1})
-     * @Route("/showAction/{id}/logs/page-{page}", name="workflow_action_show_logs_page", requirements={"page"="\d+"})
-     */
+    #[Route('/showAction/{id}/logs', name: 'workflow_action_show_logs', defaults: ['page' => 1])]
+    #[Route('/showAction/{id}/logs/page-{page}', name: 'workflow_action_show_logs_page', requirements: ['page' => '\d+'])]
     public function WorkflowActionShowLogs(string $id, Request $request, int $page): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'page' => $page]);
@@ -1013,9 +906,7 @@ class WorkflowActionController extends AbstractController
     }
 
     // public function to edit a workflow
-    /**
-     * @Route("/editWorkflowAction/{id}", name="workflow_action_edit")
-     */
+    #[Route('/editWorkflowAction/{id}', name: 'workflow_action_edit')]
     public function WorkflowActionEditAction(string $id, Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -1073,7 +964,6 @@ class WorkflowActionController extends AbstractController
 
                 // fill the array with the source fields of each rule
                 foreach ($rules as $rule) {
-                    // $sourceSearchValue[$rule->getId()] = $rule->getSourceFields();
                     $ruleSourceFields = $rule->getSourceFields();
                     foreach ($ruleSourceFields as $key => $value) {
                         $ruleSourceFields[$value] = $value;
@@ -1390,11 +1280,11 @@ class WorkflowActionController extends AbstractController
                     ->add('order', IntegerType::class, [
                         'label'       => 'view_edit_workflow_action.order',
                         'constraints' => [
-                            new Range([
-                                'min'               => 0,
-                                'max'               => 50,
-                                'notInRangeMessage' => 'You must enter a number between {{ min }} and {{ max }}.',
-                            ]),
+                            new Range(
+                                min: 0,
+                                max: 50,
+                                notInRangeMessage: 'You must enter a number between {{ min }} and {{ max }}.',
+                            ),
                         ],
                         'label_attr'  => [
                             'class' => 'form-label'
@@ -1686,48 +1576,4 @@ class WorkflowActionController extends AbstractController
         $this->entityManager->flush();
     }
 
-    // /**
-    //  * @Route("/update-field-value", name="update_field_value", methods={"POST"})
-    //  */
-    // public function updateFieldValue(Request $request, EntityManagerInterface $em): JsonResponse
-    // {
-    //     $targetField = $request->request->get('targetField');
-    //     $newValue = $request->request->get('newValue');
-    //     $docId = 'oihjkjn';
-
-    //     if ($targetField && $newValue) {
-    //         $documentData = new DocumentData();
-    //         $documentData->setDocId($docId);
-    //         $documentData->setType('S');
-    //         $documentData->setData(json_encode([$targetField => $newValue]));
-
-    //         $em->persist($documentData);
-    //         $em->flush();
-
-    //         return new JsonResponse(['message' => 'Mise à jour réussie']);
-    //     }
-
-    //     return new JsonResponse(['error' => 'Données invalides'], 400);
-    // }
-
-        /**
-     * @Route("/workflow/{id}/actions/partial", name="workflow_actions_partial")
-     */
-    public function actionLogsPartial(EntityManagerInterface $em, string $id): Response
-    {
-        $workflow = $em->getRepository(WorkflowAction::class)->findOneBy(['id' => $id, 'deleted' => 0]);
-
-        if (!$workflow) {
-            throw $this->createNotFoundException('WorkflowAction not found');
-        }
-
-        $logs = $em->getRepository(WorkflowLog::class)->findBy(
-            ['action' => $workflow],
-            ['dateCreated' => 'DESC']
-        );
-
-        return $this->render('workflowAction/_partial_action_logs.html.twig', [
-            'logs' => $logs,
-        ]);
-    }
 }

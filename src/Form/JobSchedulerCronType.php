@@ -27,10 +27,10 @@ class JobSchedulerCronType extends AbstractType
             ->add('maxInstances', IntegerType::class)
              ->add('period', TextType::class, [
                 'constraints' => [
-                    new Assert\Regex([
-                        'pattern' => '/^\s*\S+\s+\S+\s+\S+\s+\S+\s+\S+\s*$/',
-                        'message' => 'Invalid cron expression. Example: */5 * * * *',
-                    ]),
+                    new Assert\Regex(
+                        pattern: '/^\s*\S+\s+\S+\s+\S+\s+\S+\s+\S+\s*$/',
+                        message: 'Invalid cron expression. Example: */5 * * * *',
+                    ),
                 ], 'attr' => [
                     'required' => true,
                     'placeholder' => '*/5 * * * *',

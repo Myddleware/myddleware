@@ -116,6 +116,7 @@ class FormulaFunctionManager
         if (!empty($acceptNull)) {
             return '';
         }
+		throw new \Exception('Value '.$var.' not found in the array '.print_r($arrayKeyToValue,1).'. ');
     }
 	
     public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)

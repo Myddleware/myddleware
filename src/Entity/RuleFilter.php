@@ -27,39 +27,28 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RuleFilterRepository")
- * @ORM\HasLifecycleCallbacks()
- * @ORM\Table(name="rulefilter", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleFilterRepository')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'rulefilter')]
+#[ORM\Index(name: 'Krule_id', columns: ['rule_id'])]
 class RuleFilter
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="filters")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'filters')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="target", type="string", length=255, nullable=false)
-     */
+    #[ORM\Column(name: 'target', type: 'string', length: 255, nullable: false)]
     private string $target;
 
-    /**
-     * @ORM\Column(name="type", type="string", length=255, nullable=false)
-     */
+    #[ORM\Column(name: 'type', type: 'string', length: 255, nullable: false)]
     private string $type;
 
-    /**
-     * @ORM\Column(name="value", type="string", length=255, nullable=false)
-     */
+    #[ORM\Column(name: 'value', type: 'string', length: 255, nullable: false)]
     private string $value;
 
     public function getId(): int

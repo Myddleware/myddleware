@@ -28,72 +28,39 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RuleParamAuditRepository")
- * @ORM\Table(name="ruleparamaudit", indexes={
- *  @ORM\Index(name="index_job_id", columns={"job_id"}),
- *  @ORM\Index(name="index_rule_param_id", columns={"rule_param_id"})
- *})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleParamAuditRepository')]
+#[ORM\Table(name: 'ruleparamaudit')]
+#[ORM\Index(name: 'index_job_id', columns: ['job_id'])]
+#[ORM\Index(name: 'index_rule_param_id', columns: ['rule_param_id'])]
 class RuleParamAudit
 {
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @ORM\PrePersist()
-     */
+    #[ORM\PrePersist]
     public function preSave()
     {
         $this->id = uniqid();
     }
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="rule_param_id", type="integer")
-     */
+    #[ORM\Column(name: 'rule_param_id', type: 'integer')]
     private $ruleParamId;
 
-    /**
-     * @var DateTime
-     *
-     * @ORM\Column(name="modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'modified', type: 'datetime', nullable: false)]
     private $dateModified;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="before_value", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'before_value', type: 'string', length: 255, nullable: true)]
     private $before;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="after_value", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'after_value', type: 'string', length: 255, nullable: true)]
     private $after;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="user", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'user', type: 'string', length: 255, nullable: true)]
     private $byUser;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="job_id", type="string", length=255, nullable=true)
-     */
+    #[ORM\Column(name: 'job_id', type: 'string', length: 255, nullable: true)]
     private $job;
 
     /**

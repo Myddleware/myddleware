@@ -130,7 +130,7 @@ class JobRepository extends ServiceEntityRepository
         }
     }
 
-    public function findJobsForPagination(int $limit = null)
+    public function findJobsForPagination(?int $limit = null)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['limit' => $limit]);
         $__debugReturn = null;
@@ -149,7 +149,7 @@ class JobRepository extends ServiceEntityRepository
         }
     }
 
-    public function findJobsFiltered(array $filters, int $limit = null)
+    public function findJobsFiltered(array $filters, ?int $limit = null)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['filters' => $filters, 'limit' => $limit]);
         $__debugReturn = null;
@@ -209,7 +209,7 @@ class JobRepository extends ServiceEntityRepository
         }
     }
 
-    public function getFilterOptions(int $limit = null): array
+    public function getFilterOptions(?int $limit = null): array
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['limit' => $limit]);
         $__debugReturn = null;

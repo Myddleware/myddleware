@@ -132,7 +132,6 @@ class sendinblue extends solution
             $results = $apiInstance->getAttributes();
             $this->logDebug('sendinblue getAttributes response', ['count' => count($results->getAttributes())]);
             $attributes = $results->getAttributes();
-            // $this->moduleFields = $moduleFields['transactionalEmails'];  //add attributes for transaction
             foreach ($attributes as $attribute) {
                 $this->moduleFields[$attribute->getName()] = [
                     'label' => $attribute->getName(),
