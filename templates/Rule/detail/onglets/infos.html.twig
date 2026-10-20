@@ -90,7 +90,7 @@
 											<i class="fa fa-pen me-1"></i>
 											{{ 'view_rule.action.edit_rule' | trans }}
 										</a>
-										<button type="button" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#simulationModal">
+										<button type="button" id="rule-mapping-simulation" class="btn btn-outline-success btn-sm" data-bs-toggle="modal" data-bs-target="#simulationModal">
 											<i class="fa-solid fa-play me-1"></i>
 											{{ 'view_rule.action.simulation' | trans }}
 										</button>
@@ -100,11 +100,11 @@
 												<i class="fa-solid fa-caret-down ms-1"></i>
 											</button>
 											<div class="more-actions-dropdown">
-												<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" class="dropdown-item text-primary">
+												<a href="{{ path('duplic_rule', {'id': rule.GetId }) }}" class="dropdown-item text-primary" data-action="duplicate">
 													<i class="fa-regular fa-copy"></i>
 													{{ 'view_rule.action.duplic_rule' | trans }}
 												</a>
-												<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" class="dropdown-item text-danger">
+												<a href="{{ path('regle_delete', {'id': rule.GetId }) }}" onclick="return(confirm('{{ 'view_rule.action.confirm_delete_rule' | trans }}'));" class="dropdown-item text-danger" data-action="delete">
 													<i class="fa-solid fa-trash"></i>
 													{{ 'view_rule.action.delete_rule' | trans }}
 												</a>

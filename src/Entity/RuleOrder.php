@@ -27,32 +27,26 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="ruleorder")
- * @ORM\Entity(repositoryClass="App\Repository\RuleOrderRepository")
- */
+#[ORM\Table(name: 'ruleorder')]
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleOrderRepository')]
 class RuleOrder
 {
-    /**
-     * @ORM\Id
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="orders")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id")
-     */
+    #[ORM\Id]
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'orders')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id')]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="order", type="integer", length=3, nullable=false)
-     */
-    private string $order;
+    #[ORM\Column(name: 'order', type: 'integer', nullable: false)]
+    private int $order;
 
-    public function setOrder($order): self
+    public function setOrder(int $order): self
     {
         $this->order = $order;
 
         return $this;
     }
 
-    public function getOrder(): string
+    public function getOrder(): int
     {
         return $this->order;
     }

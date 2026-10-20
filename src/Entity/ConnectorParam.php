@@ -27,33 +27,23 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="connectorparam")
- * @ORM\Entity(repositoryClass="App\Repository\ConnectorParamRepository")
- */
+#[ORM\Table(name: 'connectorparam')]
+#[ORM\Entity(repositoryClass: 'App\Repository\ConnectorParamRepository')]
 class ConnectorParam
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Connector", inversedBy="connectorParams")
-     * @ORM\JoinColumn(name="conn_id", referencedColumnName="id")
-     */
+    #[ORM\ManyToOne(targetEntity: 'Connector', inversedBy: 'connectorParams')]
+    #[ORM\JoinColumn(name: 'conn_id', referencedColumnName: 'id')]
     private Connector $connector;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=684)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 684)]
     private ?string $name;
 
-    /**
-     * @ORM\Column(name="value", type="string", length=684, nullable=true)
-     */
+    #[ORM\Column(name: 'value', type: 'string', length: 684, nullable: true)]
     private $value;
 
     public function getId()

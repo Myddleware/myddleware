@@ -5,53 +5,35 @@ namespace App\Entity;
 use App\Repository\InternalListRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=InternalListRepository::class)
- */
+#[ORM\Entity(repositoryClass: InternalListRepository::class)]
 class InternalList
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private ?int $id;
 
-    /**
-     * @ORM\Column(type="string", length=50)
-     */
+    #[ORM\Column(type: 'string', length: 50)]
     private ?string $name;
 
-    /**
-     * @ORM\Column(type="string", length=50)
-     */
+    #[ORM\Column(type: 'string', length: 50)]
     private ?string $type;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private ?User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private ?User $modifiedBy;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateCreated;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     private ?\DateTimeInterface $dateModified;
 
-    /**
-     * @ORM\Column(type="boolean", options={"default":0})
-     */
+    #[ORM\Column(type: 'boolean', options: ['default' => 0])]
     private ?bool $deleted;
 
     public function getId(): ?int

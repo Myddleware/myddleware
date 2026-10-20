@@ -32,66 +32,40 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table()
- * @ORM\Entity(repositoryClass="App\Repository\RuleGroupRepository")
- * @ORM\Table(name="rulegroup")
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleGroupRepository')]
+#[ORM\Table(name: 'rulegroup')]
 class RuleGroup
 {
-
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="string")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255)]
     private $id;
-	
-    /**
-     * @ORM\Column(name="name", type="text", nullable=false)
-     * @Assert\NotBlank(
-     *     message="rulegroup.name_cannot_be_empty",
-     *     normalizer="trim"
-     * )
-     */
-    private string $name;
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
 
+    #[ORM\Column(name: 'name', type: 'text', nullable: false)]
+    #[Assert\NotBlank(message: 'rulegroup.name_cannot_be_empty', normalizer: 'trim')]
+    private string $name;
+
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private $dateCreated;
 
-    /**
-     * @ORM\Column(name="date_modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_modified', type: 'datetime', nullable: false)]
     private DateTime $dateModified;
-	
-	/**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=false)
-     */
+
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: false)]
     private User $createdBy;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="User")
-     * @ORM\JoinColumn(name="modified_by", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'User')]
+    #[ORM\JoinColumn(name: 'modified_by', referencedColumnName: 'id', nullable: false)]
     private User $modifiedBy;
 
-    /**
-     * @ORM\Column(name="description", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'description', type: 'text', nullable: true)]
     private ?string $description = null;
-	
-	/**
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
-     */
+
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private bool $deleted;
 
-    /**
-     * @var Collection<int, Rule>
-     * 
-     * @ORM\OneToMany(targetEntity="Rule", mappedBy="group")
-     */
+    /** @var Collection<int, Rule> */
+    #[ORM\OneToMany(targetEntity: 'Rule', mappedBy: 'group')]
     private $rules;
 
     public function __construct()
@@ -119,7 +93,6 @@ class RuleGroup
     public function removeRule(Rule $rule): self
     {
         if ($this->rules->removeElement($rule)) {
-            // set the owning side to null (unless already changed)
             if ($rule->getGroup() === $this) {
                 $rule->setGroup(null);
             }
@@ -127,7 +100,6 @@ class RuleGroup
         return $this;
     }
 
-	
     public function getId(): string
     {
         return $this->id;
@@ -140,7 +112,7 @@ class RuleGroup
         return $this;
     }
 
-	public function setDateCreated($dateCreated): self
+    public function setDateCreated($dateCreated): self
     {
         $this->dateCreated = $dateCreated;
         return $this;
@@ -161,8 +133,8 @@ class RuleGroup
     {
         return $this->dateModified;
     }
-	
-	public function getCreatedBy(): ?User
+
+    public function getCreatedBy(): ?User
     {
         return $this->createdBy;
     }
@@ -183,8 +155,8 @@ class RuleGroup
         $this->modifiedBy = $modifiedBy;
         return $this;
     }
-	    
-	public function setName($name): self
+
+    public function setName($name): self
     {
         $this->name = trim((string) $name);
         return $this;
@@ -194,8 +166,8 @@ class RuleGroup
     {
         return $this->name;
     }
-	
-	public function setDescription(?string $description): self
+
+    public function setDescription(?string $description): self
     {
         $this->description = $description;
         return $this;
@@ -205,7 +177,7 @@ class RuleGroup
     {
         return $this->description;
     }
-	
+
     public function setDeleted($deleted): self
     {
         $this->deleted = $deleted;
@@ -216,5 +188,4 @@ class RuleGroup
     {
         return $this->deleted;
     }
-
 }

@@ -42,18 +42,18 @@ class VerificationCodeFormType extends AbstractType
                 'label' => 'Verification Code',
                 'required' => true,
                 'constraints' => [
-                    new NotBlank([
-                        'message' => 'Please enter the verification code',
-                    ]),
-                    new Length([
-                        'min' => 6,
-                        'max' => 6,
-                        'exactMessage' => 'The verification code must be exactly {{ limit }} digits',
-                    ]),
-                    new Regex([
-                        'pattern' => '/^\d{6}$/',
-                        'message' => 'The verification code must contain only digits',
-                    ]),
+                    new NotBlank(
+                        message: 'Please enter the verification code',
+                    ),
+                    new Length(
+                        min: 6,
+                        max: 6,
+                        exactMessage: 'The verification code must be exactly {{ limit }} digits',
+                    ),
+                    new Regex(
+                        pattern: '/^\d{6}$/',
+                        message: 'The verification code must contain only digits',
+                    ),
                 ],
                 'attr' => [
                     'placeholder' => '123456',

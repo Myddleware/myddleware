@@ -25,7 +25,7 @@
 
 namespace App\Solutions;
 
-use Javanile\VtigerClient\VtigerClient;
+use App\Solutions\Client\VtigerClient;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
