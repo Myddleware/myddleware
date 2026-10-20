@@ -26,14 +26,12 @@
 namespace App\Controller;
 
 use Exception;
-use App\Entity\Job;
 use App\Entity\Log;
 use App\Entity\Rule;
 use App\Entity\Config;
 use App\Entity\Document;
 use App\Entity\RuleParam;
 use Pagerfanta\Pagerfanta;
-use App\Entity\DocumentData;
 use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
 use App\Form\Filter\FilterType;
@@ -41,7 +39,6 @@ use App\Service\SessionService;
 use App\Repository\RuleRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
 use App\Pagerfanta\ArrayAdapterWithCount;
-use App\Form\Type\DocumentCommentType;
 use App\Repository\DocumentRepository;
 use App\Form\Filter\CombinedFilterType;
 use App\Service\AlertBootstrapInterface;
@@ -49,7 +46,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Pagerfanta\Exception\NotValidCurrentPageException;
@@ -57,11 +54,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use App\Service\DebugLogger;
-// use App\Service\DocumentElasticsearchService;
 
-/**
- * @Route("/rule")
- */
+#[Route('/rule')]
 class FilterController extends AbstractController
 {
     private DebugLogger $debugLogger;
@@ -121,7 +115,6 @@ class FilterController extends AbstractController
 
     private DocumentRepository $documentRepository;
     private SessionService $sessionService;
-    // private ?DocumentElasticsearchService $elasticsearchService = null;
 
     public function __construct(
         SessionService $sessionService,
@@ -132,7 +125,6 @@ class FilterController extends AbstractController
         ToolsManager $toolsManager,
         AlertBootstrapInterface $alert,
         DocumentRepository $documentRepository,
-        // ?DocumentElasticsearchService $elasticsearchService = null,
         DebugLogger $debugLogger
     ) {
         $this->debugLogger = $debugLogger;
@@ -145,7 +137,6 @@ class FilterController extends AbstractController
         $this->toolsManager = $toolsManager;
         $this->alert = $alert;
         $this->documentRepository = $documentRepository;
-        // $this->elasticsearchService = $elasticsearchService;
 
         // Init parameters
         $configRepository = $this->entityManager->getRepository(Config::class);
@@ -157,10 +148,8 @@ class FilterController extends AbstractController
         }
     }
 
-    /**
- * @Route("/document/list/empty-search", name="document_empty_search")
- */
-public function emptySearchAction(Request $request): Response
+    #[Route('/document/list/empty-search', name: 'document_empty_search')]
+    public function emptySearchAction(Request $request): Response
 {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
         $__debugReturn = null;
@@ -201,10 +190,8 @@ public function emptySearchAction(Request $request): Response
         }
     }
 
-/**
- * @Route("/remove-filter", name="remove_filter", methods={"POST"})
- */
-public function removeFilter(Request $request): JsonResponse
+    #[Route('/remove-filter', name: 'remove_filter', methods: ['POST'])]
+    public function removeFilter(Request $request): JsonResponse
 {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
         $__debugReturn = null;
@@ -224,10 +211,8 @@ public function removeFilter(Request $request): JsonResponse
 
     // Function to disylay the documents with filters
 
-    /**
-     * @Route("/document/list/search-{search}", name="document_list", defaults={"page"=1})
-     * @Route("/document/list/page-{page}", name="document_list_page", requirements={"page"="\d+"})
-     */
+    #[Route('/document/list/search-{search}', name: 'document_list', defaults: ['page' => 1])]
+    #[Route('/document/list/page-{page}', name: 'document_list_page', requirements: ['page' => '\d+'])]
     public function documentFilterAction(Request $request, int $page = 1, int $search = 1): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page, 'search' => $search]);
@@ -430,9 +415,7 @@ public function removeFilter(Request $request): JsonResponse
         }
     }
 
-    /**
-     * @Route("/document/{docId}/last_error_message", name="document_last_error_message", methods={"POST"})
-     */
+    #[Route('/document/{docId}/last_error_message', name: 'document_last_error_message', methods: ['POST'])]
     public function getLatestLogMsg($docId)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['docId' => $docId]);
@@ -450,9 +433,7 @@ public function removeFilter(Request $request): JsonResponse
         }
     }
 
-    /**
-     * @Route("/rule/flux/comment", name="add_document_comment", methods={"POST"})
-     */
+    #[Route('/rule/flux/comment', name: 'add_document_comment', methods: ['POST'])]
     public function updateDescription(Request $request): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -485,28 +466,6 @@ public function removeFilter(Request $request): JsonResponse
         $entityManager->flush();
 
         return $__debugReturn = new Response('', Response::HTTP_OK);
-    } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
-        }
-    }
-
-    
-    public function sortDocuments(array $documents, string $sortField, string $sortOrder){
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents, 'sortField' => $sortField, 'sortOrder' => $sortOrder]);
-        $__debugReturn = null;
-        try {
-        // Sort the arrray of documents according to the sortField and sortOrder
-        $sort = array();
-        foreach ($documents as $key => $value) {
-            $sort[$key] = $value[$sortField];
-        }
-        if ($sortOrder == 'ASC') {
-            array_multisort($sort, SORT_ASC, $documents);
-        } else {
-            array_multisort($sort, SORT_DESC, $documents);
-        }
-
-        return $__debugReturn = $documents;
     } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
@@ -581,19 +540,6 @@ public function removeFilter(Request $request): JsonResponse
             return $data;
         } catch (\Exception $e) {
             throw new \Exception('Failed to create data from form: ' . $e->getMessage());
-        }
-    } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
-    // Get the names of the rules
-    public function getRuleNameData($ruleFormData, $ruleName)
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['ruleFormData' => $ruleFormData, 'ruleName' => $ruleName]);
-        try {
-        if ($ruleFormData->isNameSet()) {
-            return $ruleName[$ruleFormData->getName()];
         }
     } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
@@ -714,24 +660,6 @@ public function removeFilter(Request $request): JsonResponse
         }
     }
 
-    // Get the data from the configuration of the limimt of the search
-    public function getLimitConfig()
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-        $__debugReturn = null;
-        try {
-        // Get the limit parameter
-        $configRepository = $this->entityManager->getRepository(Config::class);
-        $searchLimit = $configRepository->findOneBy(['name' => 'search_limit']);
-        if (!empty($searchLimit)) {
-            $limit = $searchLimit->getValue();
-        }
-        return $__debugReturn = $limit;
-    } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
-        }
-    }
-
     // Initialize the search for pagination and limit and launch the search of the documents
     public function prepareSearch(array $cleanData, int $page = 1, int $limit = 1000): array
     {
@@ -758,84 +686,18 @@ public function removeFilter(Request $request): JsonResponse
         }
     }
 
-    // Search the documents using Elasticsearch or fallback to SQL
     protected function searchDocuments($data, $page = 1, $limit = 1000) {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data, 'page' => $page, 'limit' => $limit]);
         $__debugReturn = null;
         try {
-        // // Check if Elasticsearch is enabled in database config
-        // $elasticsearchEnabled = ($this->params['elasticsearch_enabled'] ?? '0') === '1';
-
-        // // Try Elasticsearch first if available and enabled
-        // if ($elasticsearchEnabled && $this->elasticsearchService !== null) {
-        //     try {
-        //         if ($this->elasticsearchService->isAvailable()) {
-        //             $this->logger->info('Using Elasticsearch for document search');
-        //             return $this->searchDocumentsWithElasticsearch($data, $page);
-        //         }
-        //     } catch (\Exception $e) {
-        //         $this->logger->warning('Elasticsearch search failed, falling back to SQL: ' . $e->getMessage());
-        //     }
-        // }
-
-        // Fallback to SQL
         return $__debugReturn = $this->searchDocumentsWithSql($data, $page, $limit);
     } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
 
-    // /**
-    //  * Search documents using Elasticsearch
-    //  */
-    // protected function searchDocumentsWithElasticsearch(array $data, int $page = 1): array
-    // {
-    //     $perPage = $this->params['pager'] ?? 25;
-    //     $from = ($page - 1) * $perPage;
-
-    //     // Prepare filters for Elasticsearch
-    //     $filters = $data;
-
-    //     // Handle rule name to get rule_id if needed
-    //     if (!empty($data['rule'])) {
-    //         // Elasticsearch service expects rule name directly
-    //         $filters['rule'] = $data['rule'];
-    //     }
-
-    //     $searchResult = $this->elasticsearchService->searchDocuments($filters, $from, $perPage);
-
-    //     // Transform Elasticsearch results to match SQL format
-    //     $results = [];
-    //     foreach ($searchResult['hits'] as $hit) {
-    //         $results[] = [
-    //             'id' => $hit['id'],
-    //             'date_created' => $hit['date_created'] ?? null,
-    //             'date_modified' => $hit['date_modified'] ?? null,
-    //             'status' => $hit['status'] ?? null,
-    //             'source_id' => $hit['source_id'] ?? null,
-    //             'target_id' => $hit['target_id'] ?? null,
-    //             'source_date_modified' => $hit['source_date_modified'] ?? null,
-    //             'mode' => $hit['mode'] ?? null,
-    //             'type' => $hit['type'] ?? null,
-    //             'attempt' => $hit['attempt'] ?? 0,
-    //             'global_status' => $hit['global_status'] ?? null,
-    //             'rule_name' => $hit['rule_name'] ?? null,
-    //             'module_source' => $hit['module_source'] ?? null,
-    //             'module_target' => $hit['module_target'] ?? null,
-    //             'rule_id' => $hit['rule_id'] ?? null,
-    //         ];
-    //     }
-
-    //     return [
-    //         'results' => $results,
-    //         'total' => $searchResult['total'],
-    //         'page' => $page,
-    //         'perPage' => $perPage
-    //     ];
-    // }
-
     /**
-     * Search documents using SQL (original implementation)
+     * Search documents using SQL
      */
     protected function searchDocumentsWithSql($data, $page = 1, $limit = 1000) {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['data' => $data, 'page' => $page, 'limit' => $limit]);
@@ -1288,9 +1150,7 @@ public function removeFilter(Request $request): JsonResponse
         }
     }
 
-    /**
-     * @Route("/flux/export/csv", name="flux_export_docs_csv")
-     */
+    #[Route('/flux/export/csv', name: 'flux_export_docs_csv')]
     public function exportDocumentsToCsv(): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
@@ -1444,9 +1304,7 @@ public function removeFilter(Request $request): JsonResponse
         }
     }
 
-    /**
-     * @Route("/rule/lookup/names", name="rule_lookup_names")
-     */
+    #[Route('/rule/lookup/names', name: 'rule_lookup_names')]
     public function getRuleNames(EntityManagerInterface $entityManager): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['entityManager' => $entityManager]);

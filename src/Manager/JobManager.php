@@ -647,7 +647,6 @@ class JobManager
             $result = $stmt->executeQuery();
             $documents = $result->fetchAllAssociative();
 
-            // include_once 'rule.php';
             if (!empty($documents)) {
                 $param['ruleId'] = '';
                 foreach ($documents as $document) {  
@@ -1286,7 +1285,6 @@ class JobManager
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['output' => $output]);
         try {
-        // $upgrade = new Upgrade($this->logger, $this->container, $this->connection);
         $upgrade = $this->upgrade;
         $this->message = $upgrade->processUpgrade($output);
     } finally {
@@ -1353,9 +1351,7 @@ class JobManager
 					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
 					$resultDeleteSourceSelection = $stmt->executeQuery();
 					$documentIds = $resultDeleteSourceSelection->fetchAllAssociative();
-					// $this->connection->commit(); // -- COMMIT TRANSACTION
 				} catch (Exception $e) {
-                    // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 					$error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->message .= $error;
 					$this->createLog($error, 'E');
@@ -1881,7 +1877,7 @@ class JobManager
             $stmt = $this->connection->prepare($query_header);
             $stmt->bindValue(':created', $now);
             $stmt->bindValue(':typeError', $type);
-            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($message)));
+            $stmt->bindValue(':message', str_replace("'", '', $message));
             $stmt->bindValue(':job_id', $this->id);
             $result = $stmt->executeQuery();
         } catch (\Exception $e) {

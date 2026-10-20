@@ -494,7 +494,6 @@ class file extends solution
     public function getFieldsParamUpd($type, $module): array
     {
         try {
-            // $fieldsSource = array();
             if ('source' == $type) {
                 $this->get_module_fields($module, $type);
                 if (!empty($this->moduleFields)) {

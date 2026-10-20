@@ -27,59 +27,40 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RuleRelationShipRepository")
- * @ORM\HasLifecycleCallbacks()
- * @ORM\Table(name="rulerelationship", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleRelationShipRepository')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Table(name: 'rulerelationship')]
+#[ORM\Index(name: 'Krule_id', columns: ['rule_id'])]
 class RuleRelationShip
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="relationsShip")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'relationsShip')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private ?Rule $rule;
 
-    /**
-     * @ORM\Column(name="field_name_source", type="string", length=100, nullable=false)
-     */
+    #[ORM\Column(name: 'field_name_source', type: 'string', length: 100, nullable: false)]
     private string $fieldNameSource;
 
-    /**
-     * @ORM\Column(name="field_name_target", type="string", length=100, nullable=false)
-     */
+    #[ORM\Column(name: 'field_name_target', type: 'string', length: 100, nullable: false)]
     private string $fieldNameTarget;
 
-    /**
-     * @ORM\Column(name="field_id", type="string", length=100, nullable=true)
-     */
+    #[ORM\Column(name: 'field_id', type: 'string', length: 100, nullable: true)]
     private string $fieldId;
 
-    /**
-     * @ORM\Column(name="parent", type="boolean", nullable=true)
-     */
+    #[ORM\Column(name: 'parent', type: 'boolean', nullable: true)]
     private bool $parent;
 
-    /**
-     * @ORM\Column(name="deleted", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     private bool $deleted;
 
-    /**
-     * @ORM\Column(name="errorEmpty", type="boolean", options={"default":0})
-     */
+    #[ORM\Column(name: 'errorEmpty', type: 'boolean', options: ['default' => 0])]
     private bool $errorEmpty;
 
-    /**
-     * @ORM\Column(name="errorMissing", type="boolean", options={"default":1})
-     */
+    #[ORM\Column(name: 'errorMissing', type: 'boolean', options: ['default' => 1])]
     private bool $errorMissing;
 
     public function getId(): int

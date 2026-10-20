@@ -337,80 +337,52 @@ const UI = {
       const html = await UI.fetchHtml(step3ParamsPath, params);
       EL.paramsContainer.innerHTML = html;
 
-      $('.js-select-search', EL.paramsContainer).selectize({
+      $('.js-select-search', EL.paramsContainer).not('#duplicate-field').selectize({
         sortField: 'text',
         placeholder: 'Search...',
       });
 
       const dupSelect = UI.get('duplicate-field');
-      const badgesContainer = UI.get('duplicate-badges-container');
 
-      if (dupSelect && badgesContainer) {
+      if (dupSelect) {
 
-        const addBadge = (val, label) => {
-          if (badgesContainer.querySelector(`[data-field="${CSS.escape(val)}"]`)) return;
-
-          const badge = document.createElement('span');
-          badge.className = 'mapping-src-badge rounded-pill px-2 me-2 mb-2 d-inline-flex align-items-center';
-          badge.dataset.field = val;
-          badge.innerHTML = `<span class="mapping-src-badge-label">${label}</span><button type="button" class="p-0 ms-2 mapping-src-badge-remove">&times;</button>`;
-
-          badge.querySelector('button').onclick = () => {
-            badge.remove();
-            const tbody = UI.get('rule-mapping-body');
-            if (tbody) {
-              tbody.querySelectorAll('button.text-danger').forEach(b => {
-                b.disabled = false; b.style.opacity = '1'; b.style.pointerEvents = 'auto';
-                b.onclick = function () {
-                  this.closest('tr').remove();
-                };
-              });
-              Array.from(badgesContainer.querySelectorAll('.mapping-src-badge')).forEach(b => {
-                if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(b.dataset.field);
-              });
-            }
-          };
-
-          badgesContainer.appendChild(badge);
-          if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(val);
-        };
-        $(dupSelect).on('change', function () {
-          const val = $(this).val();
-          if (!val) return;
-
-          let text = val;
-          if (this.selectize) {
-            const item = this.selectize.getItem(val);
-            if (item.length) text = item.text();
-            this.selectize.clear(true);
-          } else {
-            text = this.options[this.selectedIndex].text;
-            this.value = '';
+        const releaseDuplicateMappingRows = () => {
+          const tbody = UI.get('rule-mapping-body');
+          if (!tbody) return;
+          tbody.querySelectorAll('button.text-danger').forEach(b => {
+            b.disabled = false; b.style.opacity = '1'; b.style.pointerEvents = 'auto';
+            b.onclick = function () { this.closest('tr').remove(); };
+          });
+          const sz = dupSelect.selectize;
+          if (sz && window.ensureDuplicateMappingRow) {
+            sz.items.forEach(v => window.ensureDuplicateMappingRow(v));
           }
+        };
 
-          addBadge(val, text);
-          if (step3IsComplete()) revealStep4and5();
+        $(dupSelect).selectize({
+          plugins: ['remove_button'],
+          maxItems: null,
+          sortField: 'text',
+          placeholder: 'Search...',
+          onItemAdd: function (value) {
+            if (window.ensureDuplicateMappingRow) window.ensureDuplicateMappingRow(value);
+            if (step3IsComplete()) revealStep4and5();
+          },
+          onItemRemove: function () {
+            releaseDuplicateMappingRows();
+          },
         });
         if (window.initialRule && window.initialRule.syncOptions) {
           const opts = window.initialRule.syncOptions;
           const raw = opts.duplicateField || opts.duplicate_fields || opts.duplicateFields;
           if (raw) {
-            let vals = [];
-            if (Array.isArray(raw)) vals = raw;
-            else if (typeof raw === 'string') vals = raw.split(';');
-
+            const vals = (Array.isArray(raw) ? raw : String(raw).split(';'))
+              .map(v => String(v).trim()).filter(Boolean);
+            const sz = dupSelect.selectize;
             vals.forEach(v => {
-              if (v && v.trim() !== '') {
-                let label = v.trim();
-                const opt = Array.from(dupSelect.options).find(o => o.value === label);
-                if(opt) label = opt.text;
-                addBadge(v.trim(), label);
-              }
+              if (!sz.options[v]) sz.addOption({ value: v, text: v });
+              sz.addItem(v, true);
             });
-            if (dupSelect && vals.length > 0) {
-              if (dupSelect.selectize) dupSelect.selectize.clear(true);
-              else dupSelect.value = '';
-            }
           }
         }
       }
@@ -1232,14 +1204,6 @@ window.addMappingRow = function(tbody, preselectedTarget = null, isRequired = fa
           if (ruleData.syncOptions?.type) {
               UI.setValue(UI.get('mode'), ruleData.syncOptions.type);
           }
-          if (ruleData.syncOptions?.duplicateField) {
-            const d = UI.get('duplicate-field');
-            if (d) { 
-                d.disabled = false; 
-                UI.setValue(d, ruleData.syncOptions.duplicateField); 
-            }
-          }
-          
           if (Object.keys(flatParams).length > 0) {
             Object.entries(flatParams).forEach(([k, v]) => {
               const elementHtml = UI.get(k);
@@ -1603,14 +1567,8 @@ $(document).ready(function() {
 
                 // DUPLICATE FIELD
                 if (isDuplicate) {
-                    const container = document.getElementById('duplicate-badges-container');
-                    let badgeVals = [];
-                    if (container) {
-                        badgeVals = Array.from(container.querySelectorAll('.mapping-src-badge'))
-                                         .map(b => b.dataset.field);
-                    }
-                    value = badgeVals.join(';');
-                    add('duplicate_fields', value); 
+                    const vals = el.selectize ? el.selectize.items.slice() : (value ? [value] : []);
+                    add('duplicate_fields', vals.join(';'));
                     return;
                 }
 

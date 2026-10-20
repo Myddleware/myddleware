@@ -4,9 +4,7 @@
 
 // if an element with the class table-head-result is clicked, then call the function sortTable with the id of the element as an argument
 $(document).on('click', '.table-head-result', function() {
-    // console.log('click on table-head-result');
     var id = $(this).attr('id');
-    // console.log(id);
     sortTable(id);
 });
 
@@ -17,11 +15,8 @@ function sortTable(n) {
     dir = "asc"; 
 
     // Convert n to a number
-    var columnIndex = parseInt(n, 10); // Parse n as an integer
-    // console.log("Column Index: ", columnIndex);
-  
-    // console.log(n)
-  
+    var columnIndex = parseInt(n, 10);
+
     // Update the h5 content to show the current sorting direction
     var orderInfo = document.getElementById("crontab-order-info");
     orderInfo.innerText = "Sorting: " + (dir === "asc" ? "Ascending" : "Descending");

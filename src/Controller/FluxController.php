@@ -32,7 +32,6 @@ use App\Entity\Log;
 use App\Entity\Rule;
 use App\Entity\Config;
 use App\Entity\Document;
-use App\Entity\Job;					
 use Pagerfanta\Pagerfanta;
 use App\Entity\WorkflowLog;
 use App\Manager\JobManager;
@@ -43,31 +42,26 @@ use App\Manager\DocumentManager;
 use App\Manager\SolutionManager;
 use App\Entity\DocumentRelationship;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use App\Form\Type\DocumentCommentType;							
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Pagerfanta\Exception\NotValidCurrentPageException;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use App\Manager\ToolsManager;
 use Doctrine\DBAL\Connection;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Psr\Log\LoggerInterface;
 
 use App\Service\DebugLogger;
-/**
- * @Route("/rule")
- */
+#[Route('/rule')]
 class FluxController extends AbstractController
 {
     private DebugLogger $debugLogger;
@@ -78,7 +72,6 @@ class FluxController extends AbstractController
     private EntityManagerInterface $entityManager;
     private JobManager $jobManager;
     private SolutionManager $solutionManager;
-    private DocumentRepository $documentRepository;
     private ToolsManager $toolsManager;
     private LoggerInterface $logger;
 
@@ -87,7 +80,6 @@ class FluxController extends AbstractController
         TranslatorInterface $translator,
         JobManager $jobManager,
         SolutionManager $solutionManager,
-        DocumentRepository $documentRepository,
         EntityManagerInterface $entityManager,
         ToolsManager $toolsManager,
         Connection $connection,
@@ -99,7 +91,6 @@ class FluxController extends AbstractController
         $this->translator = $translator;
         $this->jobManager = $jobManager;
         $this->solutionManager = $solutionManager;
-        $this->documentRepository = $documentRepository;
         $this->entityManager = $entityManager;
         $this->toolsManager = $toolsManager;
         $this->connection = $connection;
@@ -119,9 +110,7 @@ class FluxController extends AbstractController
         * FLUX
         ****************************************************** */
 
-    /**
-     * @Route("/flux/error/{id}", name="flux_error_rule")
-     */
+    #[Route('/flux/error/{id}', name: 'flux_error_rule')]
     public function fluxErrorByRule($id): RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -162,10 +151,8 @@ class FluxController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/flux/list/search-{search}", name="flux_list", defaults={"page"=1})
-     * @Route("/flux/list/page-{page}", name="flux_list_page", requirements={"page"="\d+"})
-     */
+    #[Route('/flux/list/search-{search}', name: 'flux_list', defaults: ['page' => 1])]
+    #[Route('/flux/list/page-{page}', name: 'flux_list_page', requirements: ['page' => '\d+'])]
     public function fluxListAction(Request $request, int $page = 1, int $search = 1): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'page' => $page, 'search' => $search]);
@@ -613,9 +600,7 @@ class FluxController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/flux/list/delete/filter", name="flux_list_delete_filter")
-     */
+    #[Route('/flux/list/delete/filter', name: 'flux_list_delete_filter')]
     public function fluxListDeleteFilter(): RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
@@ -631,11 +616,9 @@ class FluxController extends AbstractController
         }
     }
 
-/**
- * @Route("/flux/{id}/log/{logPage}", name="flux_info", defaults={"page"=1, "logPage"=1})
- * @Route("/flux/{id}/log/page-{page}/log-{logPage}", name="flux_info_page", requirements={"page"="\d+", "logPage"="\d+"})
- */
-public function fluxInfo(Request $request, $id, $page, $logPage)
+    #[Route('/flux/{id}/log/{logPage}', name: 'flux_info', defaults: ['page' => 1, 'logPage' => 1])]
+    #[Route('/flux/{id}/log/page-{page}/log-{logPage}', name: 'flux_info_page', requirements: ['page' => '\d+', 'logPage' => '\d+'])]
+    public function fluxInfo(Request $request, $id, $page, $logPage)
 
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id, 'page' => $page, 'logPage' => $logPage]);
@@ -816,56 +799,11 @@ public function fluxInfo(Request $request, $id, $page, $logPage)
 $documentPagination = $this->nav_pagination_documents($docParams, false);
 $logPagination = $this->nav_pagination_logs($logParams, false);
 
-// $formComment = $this->createForm(DocumentCommentType::class, null);
-
-
-//             $formComment->handleRequest($request);
-//             if ($formComment->isSubmitted() && $formComment->isValid()) {
-//                 $comment = $formComment->getData()['comment'];
-				
-//                 // create new job
-//                 $job = new Job();
-//                 $job->setBegin(new \DateTime());
-//                 $job->setEnd(new \DateTime());
-//                 $job->setParam('notification');
-//                 $job->setMessage('Comment log created. Comment: '.$comment);
-//                 $job->setOpen(0);
-//                 $job->setClose(0);
-//                 $job->setCancel(0);
-//                 $job->setManual(1);
-//                 $job->setApi(0);
-//                 $job->setError(0);
-//                 $job->setStatus('End');
-//                 $job->setId(uniqid(mt_rand(), true));
-                
-//                 $em->persist($job);
-//                 $em->flush();
-                
-//                 // Add log to indicate this action
-//                 $log = new Log();
-//                 $log->setCreated(new \DateTime());
-//                 $log->setType('I');
-                
-//                 $log->setRule($rule);
-//                 $log->setJob($job);
-//                 $log->setMessage($comment);
-//                 $log->setDocument($doc[0]);
-//                 $em->persist($log);
-//                 $em->flush();
-                
-//                 $this->addFlash('success', 'Comment successfully added !');
-
-//                 // Redirect the route to avoid resubmitting the form according to the PRG pattern
-//                 return $this->redirectToRoute('flux_info', ['id' => $id]);
-            // }
-
             // show the workflows logs from the table workflowlog related this document, we are looking for the field trigger_document_id in the table workflowlog
             $workflowLogs = $em->getRepository(WorkflowLog::class)->findBy(
                 ['triggerDocument' => $id],
                 ['id' => 'DESC']
             );
-
-           // $firstParentDocumentId = $parentDocuments[0]->getId();
 
            if ($this->ruleHasLookups($rule)
         && $rule->getConnectorSource()->getSolution()->getName() === 'suitecrm'
@@ -1042,9 +980,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/save", name="flux_save")
-     */
+    #[Route('/flux/save', name: 'flux_save')]
     public function fluxSave(Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -1075,7 +1011,7 @@ $result = [];
 
                     // Insert in audit
                     $oneDocAudit = new DocumentAudit();
-                    $oneDocAudit->setDoc($request->get('flux'));
+                    $oneDocAudit->setDoc($request->request->get('flux'));
                     $oneDocAudit->setDateModified(new \DateTime());
                     $oneDocAudit->setBefore($beforeValue);
                     $oneDocAudit->setAfter($value);
@@ -1094,9 +1030,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/rerun/{id}", name="flux_rerun")
-     */
+    #[Route('/flux/rerun/{id}', name: 'flux_rerun')]
     public function fluxRerun($id): RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -1116,9 +1050,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/cancel/{id}", name="flux_cancel")
-     */
+    #[Route('/flux/cancel/{id}', name: 'flux_cancel')]
     public function fluxCancel($id): RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -1138,9 +1070,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/readrecord/{id}", name="flux_readrecord")
-     */
+    #[Route('/flux/readrecord/{id}', name: 'flux_readrecord')]
     public function fluxReadRecord($id): RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -1170,11 +1100,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/{id}/action/{method}/solution/{solution}", name="flux_btn_dyn")
-     *
-     * @throws Exception
-     */
+    #[Route('/flux/{id}/action/{method}/solution/{solution}', name: 'flux_btn_dyn')]
     public function fluxBtnDyn($method, $id, $solution): RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['method' => $method, 'id' => $id, 'solution' => $solution]);
@@ -1189,9 +1115,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/masscancel", name="flux_mass_cancel")
-     */
+    #[Route('/flux/masscancel', name: 'flux_mass_cancel')]
     public function fluxMassCancelAction(?Request $request = null)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -1214,9 +1138,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/massrun", name="flux_mass_run")
-     */
+    #[Route('/flux/massrun', name: 'flux_mass_run')]
     public function fluxMassRunAction()
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
@@ -1408,9 +1330,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/document/unlock/{id}", name="document_view")
-     */
+    #[Route('/document/unlock/{id}', name: 'document_view')]
     public function unlockDocument($id) {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         try {
@@ -1426,9 +1346,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/flux/unlock", name="flux_mass_unlock")
-     */
+    #[Route('/flux/unlock', name: 'flux_mass_unlock')]
     public function unlockDocuments(Request $request) {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
         try {
@@ -1459,9 +1377,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/read_job_lock/clear/{id}", name="clear_read_job_lock", methods={"POST"})
-     */
+    #[Route('/read_job_lock/clear/{id}', name: 'clear_read_job_lock', methods: ['POST'])]
     public function clearReadJobLock($id) {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         try {
@@ -1477,11 +1393,7 @@ $result = [];
         }
     }
 
-    /**
-     * Modern JavaScript-based flux page
-     * 
-     * @Route("/flux/modern/{id}", name="flux_modern", defaults={"id"=null})
-     */
+    #[Route('/flux/modern/{id}', name: 'flux_modern', defaults: ['id' => null])]
     public function fluxModern(?string $id = null): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -1493,9 +1405,7 @@ $result = [];
         }
     }
 
-    /**
-     * @Route("/api/flux/info/{id}", name="api_flux_info", methods={"GET"})
-     */
+    #[Route('/api/flux/info/{id}', name: 'api_flux_info', methods: ['GET'])]
     public function getFluxInfo(Request $request, ?string $id = null): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
@@ -1558,9 +1468,7 @@ $result = [];
     }
 
     // function to get the rule name from the document id
-    /**
-     * @Route("/api/flux/rule-get/{id}", name="api_flux_rule", methods={"GET"})
-     */
+    #[Route('/api/flux/rule-get/{id}', name: 'api_flux_rule', methods: ['GET'])]
     public function getRuleName($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -1611,10 +1519,7 @@ $result = [];
         }
     }
 
-    /**
-     * Comprehensive document data API endpoint
-     * @Route("/api/flux/document-data/{id}", name="api_flux_document_data", methods={"GET"})
-     */
+    #[Route('/api/flux/document-data/{id}', name: 'api_flux_document_data', methods: ['GET'])]
     public function getDocumentData($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -1946,10 +1851,7 @@ $result = [];
         }
     }
 
-    /**
-     * Document history API endpoint
-     * @Route("/api/flux/document-history/{id}", name="api_flux_document_history", methods={"GET"})
-     */
+    #[Route('/api/flux/document-history/{id}', name: 'api_flux_document_history', methods: ['GET'])]
     public function getDocumentHistory($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -2031,10 +1933,7 @@ $result = [];
         }
     }
 
-    /**
-     * Document parent documents API endpoint
-     * @Route("/api/flux/document-parents/{id}", name="api_flux_document_parents", methods={"GET"})
-     */
+    #[Route('/api/flux/document-parents/{id}', name: 'api_flux_document_parents', methods: ['GET'])]
     public function getDocumentParents($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -2060,16 +1959,14 @@ $result = [];
                    'r.id as ruleId'
                ])
                ->from(DocumentRelationship::class, 'dr')
-               ->innerJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_rel_id')
+               ->innerJoin(Document::class, 'd', 'ON', 'd.id = dr.doc_rel_id')
                ->leftJoin('d.rule', 'r')
                ->where($qb->expr()->eq('dr.doc_id', ':docId'))
                ->addOrderBy('dr.dateCreated', 'DESC')
                ->addOrderBy('dr.id', 'DESC')
                ->setMaxResults(10)
-               ->setParameters([
-                   'docId' => $id,
-                   'defaultRuleName' => 'Unknown Rule'
-               ]);
+               ->setParameter('docId', $id)
+               ->setParameter('defaultRuleName', 'Unknown Rule');
             
             $results = $qb->getQuery()->getArrayResult();
             
@@ -2107,10 +2004,7 @@ $result = [];
         }
     }
 
-    /**
-     * Document child documents API endpoint
-     * @Route("/api/flux/document-children/{id}", name="api_flux_document_children", methods={"GET"})
-     */
+    #[Route('/api/flux/document-children/{id}', name: 'api_flux_document_children', methods: ['GET'])]
     public function getDocumentChildren($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -2139,16 +2033,14 @@ $result = [];
                     'dr.sourceField'
                 ])
                 ->from(DocumentRelationship::class, 'dr')
-                ->innerJoin(Document::class, 'd', 'WITH', 'd.id = dr.doc_id')
+                ->innerJoin(Document::class, 'd', 'ON', 'd.id = dr.doc_id')
                 ->leftJoin('d.rule', 'r')
                 ->where($relatedChildrenQb->expr()->eq('dr.doc_rel_id', ':docRelId'))
                 ->addOrderBy('dr.dateCreated', 'DESC')
                 ->addOrderBy('dr.id', 'DESC')
                 ->setMaxResults(10)
-                ->setParameters([
-                    'docRelId' => $id,
-                    'defaultRuleName' => 'Unknown Rule'
-                ]);
+                ->setParameter('docRelId', $id)
+                ->setParameter('defaultRuleName', 'Unknown Rule');
             
             // Execute query
             $relatedResults = $relatedChildrenQb->getQuery()->getArrayResult();
@@ -2187,10 +2079,7 @@ $result = [];
         }
     }
 
-    /**
-     * Document post documents API endpoint
-     * @Route("/api/flux/document-posts/{id}", name="api_flux_document_posts", methods={"GET"})
-     */
+    #[Route('/api/flux/document-posts/{id}', name: 'api_flux_document_posts', methods: ['GET'])]
     public function getDocumentPosts($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -2242,10 +2131,7 @@ $result = [];
         }
     }
 
-    /**
-     * Document logs API endpoint
-     * @Route("/api/flux/document-logs/{id}", name="api_flux_document_logs", methods={"GET"})
-     */
+    #[Route('/api/flux/document-logs/{id}', name: 'api_flux_document_logs', methods: ['GET'])]
     public function getDocumentLogs($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
@@ -2312,11 +2198,8 @@ $result = [];
         }
     }
 
-    /**
-     * User permissions API endpoint
-     * @Route("/api/flux/user-permissions", name="api_flux_user_permissions", methods={"GET"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/api/flux/user-permissions', name: 'api_flux_user_permissions', methods: ['GET'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function getUserPermissions(): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
         $__debugReturn = null;
@@ -2372,10 +2255,7 @@ $result = [];
         }
     }
 
-    /**
-     * Update a specific field in document target data
-     * @Route("/flux/update-field", name="flux_update_field", methods={"POST"})
-     */
+    #[Route('/flux/update-field', name: 'flux_update_field', methods: ['POST'])]
     public function updateField(Request $request): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
         $__debugReturn = null;
@@ -2502,10 +2382,7 @@ $result = [];
         }
     }
 
-    /**
-     * Document workflow logs API endpoint
-     * @Route("/api/flux/document-workflow-logs/{id}", name="api_flux_document_workflow_logs", methods={"GET"})
-     */
+    #[Route('/api/flux/document-workflow-logs/{id}', name: 'api_flux_document_workflow_logs', methods: ['GET'])]
     public function getDocumentWorkflowLogs($id): JsonResponse {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;

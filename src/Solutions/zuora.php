@@ -178,7 +178,6 @@ class zuora extends solution
         try {
             $idDocArray = '';
             $i = 0;
-            // $first = true;
             $nb_record = count($param['data']);
             foreach ($param['data'] as $idDoc => $data) {
                 ++$i;

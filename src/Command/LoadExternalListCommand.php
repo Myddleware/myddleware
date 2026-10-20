@@ -29,12 +29,14 @@ namespace App\Command;
 use App\Manager\LoadExternalListManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
+#[AsCommand(name: 'myddleware:loadexternallist', description: 'transfers all lines of csv into InternalListValue')]
 class LoadExternalListCommand extends Command
 {
     /**
@@ -53,8 +55,6 @@ class LoadExternalListCommand extends Command
     private $io;
 
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'myddleware:loadexternallist';
-    protected static $defaultDescription = 'transfers all lines of csv into InternalListValue';
 
     public function __construct(
         LoggerInterface $logger,
