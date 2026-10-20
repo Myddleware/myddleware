@@ -32,12 +32,14 @@ use App\Manager\ToolsManager;
 use App\Repository\DocumentRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Doctrine\Persistence\ManagerRegistry;
 
+#[AsCommand(name: 'myddleware:synchro')]
 class SynchroCommand extends Command
 {
     private LoggerInterface $logger;
@@ -46,10 +48,10 @@ class SynchroCommand extends Command
     private DocumentManager $documentManager;
     private RuleManager $ruleManager;
     private DocumentRepository $documentRepository;
+    private ManagerRegistry $registry;
 	private ToolsManager $toolsManager;
 
     // the name of the command (the part after "bin/console")
-    protected static $defaultName = 'myddleware:synchro';
     protected array $statusLevel = [
         'Create_KO' 		=> 0,
         'New' 				=> 10,
@@ -127,8 +129,6 @@ class SynchroCommand extends Command
 					return 1;
 				}
             }
-            // Récupération du Job
-            // $job = $this->jobManager;
             // Clear message in case this task is run by jobscheduler. In this case message has to be refreshed.
             $this->jobManager->message = '';
             $this->jobManager->setApi($api);

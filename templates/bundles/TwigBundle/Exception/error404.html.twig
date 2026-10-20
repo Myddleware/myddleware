@@ -1,19 +1,19 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>An Error Occurred: {{ status_text }}</title>
-  </head>
-  <body>
+{% extends 'base.html.twig' %}
+
+{% block title %}404 - {{ status_text }}{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
     <h1>Oops! An Error Occurred</h1>
     <h2>The server returned a "{{ status_code }} {{ status_text }}".</h2>
- 
+
     <div>
       Something is broken. Please check your log file here : \myddleware\var\log\prod.log
-      <BR> 
-      <BR> 
-      You can post an issue on <a href="https://github.com/Myddleware/myddleware/issues" target="blank_">Myddleware Github project</a>  <BR><BR>
+      <br>
+      <br>
+      You can post an issue on <a href="https://github.com/Myddleware/myddleware/issues" target="_blank">Myddleware Github project</a>
+      <br><br>
       Sorry for the inconvenience.
     </div>
-  </body>
-</html>
+</div>
+{% endblock %}

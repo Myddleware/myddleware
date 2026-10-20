@@ -472,7 +472,7 @@ class dynamicscrm extends solution
             $primaryIdAttribute = $this->getPrimaryIdAttribute($module);
 
             $url = $this->getBaseApiUrl() . $entitySetName;
-			$data = $this->prepareData($param, $data);
+			      $data = $this->prepareData($param, $data);
             $this->logDebug('dynamicscrm create request', ['url' => $url, 'method' => 'POST']);
             $this->logDebug('dynamicscrm create headers', $headers);
             $this->logDebug('dynamicscrm create payload', $data);
@@ -532,7 +532,7 @@ class dynamicscrm extends solution
             $url = $this->getBaseApiUrl() . "{$entitySetName}({$targetId})";
 
             $this->logDebug('dynamicscrm update GET request', ['url' => $url, 'method' => 'GET']);
-			$this->logDebug('dynamicscrm update headers', $headers);
+			      $this->logDebug('dynamicscrm update headers', $headers);
             $this->logDebug('dynamicscrm update payload', $data);
             $getResponse = $client->get($url, ['headers' => $this->getApiHeaders()]);
             $etag = $getResponse->getHeader('ETag')[0] ?? null;
@@ -542,7 +542,9 @@ class dynamicscrm extends solution
                 $headers['If-Match'] = $etag;
             }
 
-            $this->logDebug('dynamicscrm update PATCH request', ['url' => $url, 'method' => 'PATCH']);
+			$data = $this->prepareData($param, $data);
+            $this->logDebug('dynamicscrm create headers', $headers);
+            $this->logDebug('dynamicscrm create payload', $data);
             $response = $client->patch($url, [
                 'headers' => $headers,
                 'json' => $data
@@ -594,7 +596,7 @@ class dynamicscrm extends solution
             $url = $this->getBaseApiUrl() . "{$entitySetName}({$targetId})";
 
             $this->logDebug('dynamicscrm delete request', ['url' => $url, 'method' => 'DELETE']);
-			$this->logDebug('dynamicscrm delete headers', $headers);
+			      $this->logDebug('dynamicscrm delete headers', $headers);
             $this->logDebug('dynamicscrm delete payload', $data);
             $response = $client->delete($url, [
                 'headers' => $headers
@@ -631,7 +633,7 @@ class dynamicscrm extends solution
 			if (!empty($fields)) {
 				foreach($data as $key => $value) {
 					if ($fields[$key]['relate']) {
-						$data[$key.'@odata.bind'] = '/'.$fields[$key]['targetModule'].'('.$value.')';
+						$data[$key.'@odata.bind'] = '/'.$fields[$key]['targetModule'].'s('.$value.')';
 						unset($data[$key]);
 					}
 				}

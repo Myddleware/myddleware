@@ -254,7 +254,7 @@ public function simulatePreview(array $requestData, ?string $ruleKey = null): ar
 
         $variablesEntity = $this->variableRepository->findAll();
         $variables = [];
-        foreach ($variablesEntity as $v) $variables[$v->getName()] = $v->getValue();
+        foreach ($variablesEntity as $v) $variables[$v->getName()] = $v->getFormattedValue();
         $this->documentManager->setParam(['variables' => $variables]);
         $this->documentManager->setDocumentType('C'); 
 

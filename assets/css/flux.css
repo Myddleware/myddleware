@@ -178,7 +178,6 @@
 
 /* any li with a span inside, the span will have  white-space: normal;*/
 li span {
-	/* white-space: normal; */
 	overflow-wrap: break-word;
 }
 
@@ -476,9 +475,6 @@ li span {
 }
 
 .source-data-content-body, .target-data-content-body, .history-data-content-body {
-    /* background-color: #f8f9fa; */
-    /* border: 1px solid #dee2e6; */
-    /* we keep the 2 properties above for testing the limit of the container */
     border-radius: 10px;
     padding: 20px;
     min-height: 200px;

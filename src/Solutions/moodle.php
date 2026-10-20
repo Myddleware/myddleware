@@ -27,7 +27,6 @@ namespace App\Solutions;
 
 use App\Solutions\lib\curl;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
-//use Psr\LoggerInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
 class moodle extends solution
@@ -197,8 +196,6 @@ class moodle extends solution
         }
     }
 
-    // Read data in Moodle
-    // public function readData($param)
     public function read($param): array
     {
         try {

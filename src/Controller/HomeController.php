@@ -34,7 +34,7 @@ use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 use App\Service\DebugLogger;
 class HomeController extends AbstractController
@@ -62,14 +62,6 @@ class HomeController extends AbstractController
         $this->ruleRepository = $ruleRepository;
     }
 
-    protected function getInstanceBdd()
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-        try {
-    } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
     /**
      * TABLEAU DE BORD.
      */
@@ -104,7 +96,6 @@ class HomeController extends AbstractController
 
         $language = $request->getLocale();
 
-        $this->getInstanceBdd();
         $solution = $this->entityManager->getRepository(Solution::class)
             ->solutionActive();
         $lstArray = [];

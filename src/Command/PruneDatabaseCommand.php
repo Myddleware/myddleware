@@ -41,7 +41,7 @@ class PruneDatabaseCommand extends Command
     public function __construct(
         LoggerInterface $logger,
         JobManager $jobManager,
-        string $name = null
+        ?string $name = null
     ) {
         $this->logger = $logger;
         $this->jobManager = $jobManager;

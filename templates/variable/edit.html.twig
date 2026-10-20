@@ -11,7 +11,7 @@
         </div>
 
         {% include '_notifications.html.twig' with { filter_prefix: 'variable.edit' } %}
-        
+
         {{ form_start(form) }}
         <div class="mb-3">
             <div class="row mb-4">
@@ -19,14 +19,46 @@
                     {{ form_row(form.name) }}
                 </div>
                 <div class="col-md-6">
-                    {{ form_row(form.value) }}
+                    {{ form_label(form.type) }}
+                    <div class="d-flex gap-3 mt-1">
+                        {% for child in form.type %}
+                            <div class="form-check">
+                                {{ form_widget(child, {'attr': {'class': 'form-check-input variable-type-radio'}}) }}
+                                <label class="form-check-label" for="{{ child.vars.id }}">{{ child.vars.label }}</label>
+                            </div>
+                        {% endfor %}
+                    </div>
                 </div>
-            </div><div class="row mb-4">
+            </div>
+            <div class="row mb-4">
                 <div class="col-md-6 mb-3">
                     {{ form_row(form.description) }}
                 </div>
+                <div class="col-md-6" id="value-simple-container">
+                    {{ form_row(form.value) }}
+                </div>
+            </div>
+
+            <div id="value-table-container" class="mb-4" style="display: none;">
+                <label class="form-label">{{ 'variable.table_headers.value'|trans }} ({{ 'variable.type.table'|trans }})</label>
+                <table class="table table-bordered" id="variable-table-editor">
+                    <thead>
+                        <tr>
+                            <th>{{ 'variable.table_editor.source'|trans }}</th>
+                            <th>{{ 'variable.table_editor.target'|trans }}</th>
+                            <th style="width: 60px;"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="variable-table-body">
+                    </tbody>
+                </table>
+                <button type="button" class="btn btn-sm btn-outline-secondary" id="variable-table-add-row">
+                    <i class="fa fa-plus"></i> {{ 'variable.table_editor.add_row'|trans }}
+                </button>
             </div>
         </div>
         {{ form_end(form) }}
     </div>
+
+    {% include 'variable/_variable_type_js.html.twig' %}
 {% endblock %}
