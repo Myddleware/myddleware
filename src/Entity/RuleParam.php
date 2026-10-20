@@ -27,33 +27,24 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RuleParamRepository")
- * @ORM\Table(name="ruleparam", indexes={@ORM\Index(name="Krule_id", columns={"rule_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleParamRepository')]
+#[ORM\Table(name: 'ruleparam')]
+#[ORM\Index(name: 'Krule_id', columns: ['rule_id'])]
 class RuleParam
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="params")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'params')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=100, nullable=false)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 100, nullable: false)]
     private string $name;
 
-    /**
-     * @ORM\Column(name="value", type="text", nullable=false)
-     */
+    #[ORM\Column(name: 'value', type: 'text', nullable: false)]
     private string $value= '';
 
     public function getId(): int

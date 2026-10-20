@@ -296,7 +296,7 @@ class RulePersistenceService
                 'rule_id'      => $ruleId,
                 'created_by'   => $userId,
                 'date_created' => $nowStr,
-                'data'         => serialize(json_encode($auditPayload, JSON_UNESCAPED_UNICODE)),
+                'data'         => json_encode($auditPayload, JSON_UNESCAPED_UNICODE),
             ]);
         });
 

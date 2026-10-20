@@ -101,18 +101,18 @@ class RuleManager
         EntityManagerInterface $entityManager,
         ParameterBagInterface $parameterBagInterface,
         FormulaManager $formulaManager,
-        SolutionManager $solutionManager = null,
-        DocumentManager $documentManager = null,
-        RuleRepository $ruleRepository = null,
-        RuleRelationShipRepository $ruleRelationShipRepository = null,
-        RuleOrderRepository $ruleOrderRepository = null,
-        DocumentRepository $documentRepository = null,
-        RouterInterface $router = null,
-        KernelInterface $kernel = null,
-        RequestStack $requestStack = null,
-        ToolsManager $tools = null,
-        NotificationManager $notificationManager = null,
-        DebugLogger $debugLogger = null
+        ?SolutionManager $solutionManager = null,
+        ?DocumentManager $documentManager = null,
+        ?RuleRepository $ruleRepository = null,
+        ?RuleRelationShipRepository $ruleRelationShipRepository = null,
+        ?RuleOrderRepository $ruleOrderRepository = null,
+        ?DocumentRepository $documentRepository = null,
+        ?RouterInterface $router = null,
+        ?KernelInterface $kernel = null,
+        ?RequestStack $requestStack = null,
+        ?ToolsManager $tools = null,
+        ?NotificationManager $notificationManager = null,
+        ?DebugLogger $debugLogger = null
     ) {
         $this->debugLogger = $debugLogger;
         $this->logger = $logger;
@@ -817,7 +817,6 @@ class RuleManager
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
         $__debugReturn = null;
         try {
-        // include_once 'document.php';
         $response = [];
 
         // Sélection de tous les docuements de la règle au statut 'New' si aucun document n'est en paramètre
@@ -873,7 +872,6 @@ class RuleManager
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
         $__debugReturn = null;
         try {
-        // include_once 'document.php';
         $response = [];
 
         // Sélection de tous les docuements de la règle au statut 'Filter_OK' si aucun document n'est en paramètre
@@ -1002,8 +1000,6 @@ class RuleManager
         $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, ['documents' => $documents]);
         $__debugReturn = null;
         try {
-        // include_once 'document.php';
-
         // Permet de charger dans la classe toutes les relations de la règle
         $response = [];
 
@@ -1136,18 +1132,6 @@ class RuleManager
         }
     }
 
-    // Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle
-    // Si le retour est false, alors la sauvegarde n'est pas effectuée et un message d'erreur est indiqué à l'utilisateur
-    // data est de la forme :
-    // [ruleName] => nom
-    // [oldRule] => id de la règle précédente
-    // [connector] => Array ( [source] => 3 [cible] => 30 )
-    // [content] => Array (
-    // [fields] => Array ( [name] => Array ( [Date] => Array ( [champs] => Array ( [0] => date_entered [1] => date_modified ) [formule] => Array ( [0] => {date_entered}.{date_modified} ) ) [account_Filter] => Array ( [champs] => Array ( [0] => name ) ) ) )
-    // [params] => Array ( [mode] => 0 ) )
-    // [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
-    // [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
-    // La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
     public static function beforeSave($solutionManager, $data)
     {
         // Contrôle sur la solution source
@@ -1297,8 +1281,6 @@ class RuleManager
         // Set the param values and clear all document attributes
         $this->documentManager->setParam($param, true);
 		
-		// TO BE TESTED and REPLACE the 4 lines above
-		// $this->documentManager->setId($id_document);
         $this->documentManager->documentCancel();
 
         // Get the request from RequestStack
@@ -2401,7 +2383,6 @@ class RuleManager
                 return $__debugReturn = array('success' => false, 'error' => 'The document is locked by the task '.$documentData['job_lock'].'. ');
             }
         } catch (\Exception $e) {
-            // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
             return $__debugReturn = array('success' => false, 'error' => 'Failed to lock the document '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');
 		}
         } finally {
@@ -2494,7 +2475,7 @@ class RuleManager
 			$variablesEntity = $this->entityManager->getRepository(Variable::class)->findAll();
             if (!empty($variablesEntity)) {
 				foreach ($variablesEntity as $variable) {
-					$this->variables[$variable->getName()] = $variable->getvalue();
+					$this->variables[$variable->getName()] = $variable->getFormattedValue();
 				}
 			}
         } catch (\Exception $e) {

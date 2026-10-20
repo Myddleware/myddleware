@@ -99,7 +99,6 @@ class curl
         // TRUE to return the transfer as a string of the return
         // value of curl_exec() instead of outputting it out directly.
         $this->options['CURLOPT_RETURNTRANSFER'] = 1;
-        $this->options['CURLOPT_BINARYTRANSFER'] = 0;
         $this->options['CURLOPT_SSL_VERIFYPEER'] = 0;
         $this->options['CURLOPT_SSL_VERIFYHOST'] = 2;
         $this->options['CURLOPT_CONNECTTIMEOUT'] = 30;
@@ -276,7 +275,6 @@ class curl
      */
     public function download($requests, $options = [])
     {
-        $options['CURLOPT_BINARYTRANSFER'] = 1;
         $options['RETURNTRANSFER'] = false;
 
         return $this->multi($requests, $options);

@@ -28,46 +28,31 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="App\Repository\DocumentRelationshipRepository")
- * @ORM\Table(name="documentrelationship", indexes={
- *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
- *  @ORM\Index(name="index_doc_rel_id", columns={"doc_rel_id"}),
- *})
- */
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Entity(repositoryClass: 'App\Repository\DocumentRelationshipRepository')]
+#[ORM\Table(name: 'documentrelationship')]
+#[ORM\Index(name: 'index_doc_id', columns: ['doc_id'])]
+#[ORM\Index(name: 'index_doc_rel_id', columns: ['doc_rel_id'])]
 class DocumentRelationship
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="doc_id", type="string", length=100, nullable=false)
-     */
+    #[ORM\Column(name: 'doc_id', type: 'string', length: 100, nullable: false)]
     private string $doc_id;
 
-    /**
-     * @ORM\Column(name="doc_rel_id", type="string", length=100, nullable=false)
-     */
+    #[ORM\Column(name: 'doc_rel_id', type: 'string', length: 100, nullable: false)]
     private string $doc_rel_id;
 
-    /**
-     * @ORM\Column(name="created_by", type="integer", nullable=false)
-     */
+    #[ORM\Column(name: 'created_by', type: 'integer', nullable: false)]
     private int $createdBy;
 
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private DateTime $dateCreated;
 
-    /**
-     * @ORM\Column(name="source_field", type="string", nullable=false)
-     */
+    #[ORM\Column(name: 'source_field', type: 'string', length: 255, nullable: false)]
     private string $sourceField;
 
     public function setId($id): self

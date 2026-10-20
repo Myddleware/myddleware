@@ -27,153 +27,55 @@ namespace App\Controller;
 
 use Exception;
 use App\Entity\Rule;
-use App\Entity\User;
-use App\Entity\FuncCat;
-use App\Entity\Document;
-use App\Entity\Solution;
 use App\Entity\Workflow;
-use App\Entity\Connector;
-use App\Entity\Functions;
-use App\Entity\RuleAudit;
-use App\Entity\RuleField;
-use App\Entity\RuleParam;
-use App\Entity\RuleFilter;
 use Pagerfanta\Pagerfanta;
-use App\Entity\WorkflowLog;
-use App\Form\ConnectorType;
-use App\Manager\JobManager;
-use App\Manager\HomeManager;
-use App\Manager\RuleManager;
-use Doctrine\ORM\Mapping\Id;
-use Psr\Log\LoggerInterface;
 use App\Entity\WorkflowAudit;
 use App\Manager\ToolsManager;
-use Doctrine\DBAL\Connection;
-use App\Entity\ConnectorParam;
-use App\Entity\RuleParamAudit;
-use App\Entity\WorkflowAction;
 use App\Form\Type\WorkflowType;
-use App\Manager\FormulaManager;
-use App\Service\SessionService;
-use App\Entity\RuleRelationShip;
-use App\Manager\DocumentManager;
-use App\Manager\SolutionManager;
-use App\Manager\TemplateManager;
 use App\Service\RuleDuplicateService;
-use App\Repository\JobRepository;
-use App\Repository\RuleRepository;
-use App\Form\DuplicateRuleFormType;
 use App\Repository\ConfigRepository;
-use Illuminate\Encryption\Encrypter;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Form\Type\RelationFilterType;
-use App\Repository\DocumentRepository;
 use App\Repository\WorkflowRepository;
 use App\Repository\WorkflowLogRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use App\Service\DebugLogger;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
-/**
- * @Route("/workflow")
- */
+#[Route('/workflow')]
 class WorkflowController extends AbstractController
 {
-    private FormulaManager $formuleManager;
-    private SessionService $sessionService;
-    private ParameterBagInterface $params;
     private EntityManagerInterface $entityManager;
-    private HomeManager $home;
     private ToolsManager $tools;
     private TranslatorInterface $translator;
-    private AuthorizationCheckerInterface $authorizationChecker;
-    private JobManager $jobManager;
-    private LoggerInterface $logger;
-    private TemplateManager $template;
-    private RuleRepository $ruleRepository;
-    private JobRepository $jobRepository;
-    private DocumentRepository $documentRepository;
-    private SolutionManager $solutionManager;
-    private RuleManager $ruleManager;
-    private DocumentManager $documentManager;
     private WorkflowLogRepository $workflowLogRepository;
     private ConfigRepository $configRepository;
     private RuleDuplicateService $ruleDuplicateService;
     private DebugLogger $debugLogger;
 
-
-    protected Connection $connection;
-    // To allow sending a specific record ID to rule simulation
-    protected $simulationQueryField;
-
     public function __construct(
-        LoggerInterface $logger,
-        RuleManager $ruleManager,
-        FormulaManager $formuleManager,
-        SolutionManager $solutionManager,
-        DocumentManager $documentManager,
-        SessionService $sessionService,
         EntityManagerInterface $entityManager,
-        RuleRepository $ruleRepository,
-        JobRepository $jobRepository,
-        DocumentRepository $documentRepository,
-        Connection $connection,
         TranslatorInterface $translator,
-        AuthorizationCheckerInterface $authorizationChecker,
-        HomeManager $home,
         ToolsManager $tools,
-        JobManager $jobManager,
-        TemplateManager $template,
         WorkflowLogRepository $workflowLogRepository,
-        ParameterBagInterface $params,
         ConfigRepository $configRepository,
         RuleDuplicateService $ruleDuplicateService,
         DebugLogger $debugLogger
     ) {
-        $this->logger = $logger;
-        $this->ruleManager = $ruleManager;
-        $this->formuleManager = $formuleManager;
-        $this->solutionManager = $solutionManager;
-        $this->documentManager = $documentManager;
-        $this->sessionService = $sessionService;
         $this->entityManager = $entityManager;
-        $this->ruleRepository = $ruleRepository;
-        $this->jobRepository = $jobRepository;
-        $this->documentRepository = $documentRepository;
-        $this->connection = $connection;
         $this->translator = $translator;
-        $this->authorizationChecker = $authorizationChecker;
-        $this->home = $home;
         $this->tools = $tools;
-        $this->jobManager = $jobManager;
-        $this->template = $template;
         $this->workflowLogRepository = $workflowLogRepository;
         $this->configRepository = $configRepository;
         $this->ruleDuplicateService = $ruleDuplicateService;
         $this->debugLogger = $debugLogger;
     }
-
-    protected function getInstanceBdd() {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-        try {
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
 
     /* ******************************************************
          * RULE
@@ -245,10 +147,8 @@ class WorkflowController extends AbstractController
 
 
     // public function to delet the workflow by id (set deleted to 1)
-    /**
-     * @Route("/delete/{id}", name="workflow_delete", methods={"POST", "DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/delete/{id}', name: 'workflow_delete', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function WorkflowDeleteAction(string $id, Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'translator' => $translator]);
@@ -340,9 +240,7 @@ class WorkflowController extends AbstractController
     }
 
     // public function to set the workflow to active or inactive
-    /**
-     * @Route("/active/{id}", name="workflow_active")
-     */
+    #[Route('/active/{id}', name: 'workflow_active')]
     public function WorkflowActiveAction(string $id, Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -375,9 +273,7 @@ class WorkflowController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/active_show/{id}", name="workflow_active_show")
-     */
+    #[Route('/active_show/{id}', name: 'workflow_active_show')]
     public function WorkflowActiveShowAction(string $id, Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -444,10 +340,8 @@ class WorkflowController extends AbstractController
     }
 
     // public function to create a new workflow from a rule
-    /**
-    * @Route("/new/{rule_id}", name="workflow_create_from_rule")
-    */
-   public function WorkflowCreateFromRuleAction(Request $request, $rule_id, TranslatorInterface $translator)
+    #[Route('/new/{rule_id}', name: 'workflow_create_from_rule')]
+    public function WorkflowCreateFromRuleAction(Request $request, $rule_id, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'rule_id' => $rule_id, 'translator' => $translator]);
         $__debugReturn = null;
@@ -500,10 +394,8 @@ class WorkflowController extends AbstractController
     }
     
     // public function to create a new workflow
-    /**
-     * @Route("/new", name="workflow_create")
-     */
-  public function WorkflowCreateAction(Request $request, TranslatorInterface $translator)
+    #[Route('/new', name: 'workflow_create')]
+    public function WorkflowCreateAction(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
         $__debugReturn = null;
@@ -552,9 +444,7 @@ class WorkflowController extends AbstractController
         }
     }
 
-   /**
-     * @Route("/show/{id}", name="workflow_show")
-     */
+    #[Route('/show/{id}', name: 'workflow_show')]
     public function WorkflowShowAction(string $id, Request $request): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request]);
@@ -595,10 +485,8 @@ class WorkflowController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/show/{id}/logs", name="workflow_show_logs", defaults={"page"=1})
-     * @Route("/show/{id}/logs/page-{page}", name="workflow_show_logs_page", requirements={"page"="\d+"})
-     */
+    #[Route('/show/{id}/logs', name: 'workflow_show_logs', defaults: ['page' => 1])]
+    #[Route('/show/{id}/logs/page-{page}', name: 'workflow_show_logs_page', requirements: ['page' => '\d+'])]
     public function WorkflowShowLogs(string $id, Request $request, int $page): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'page' => $page]);
@@ -669,9 +557,7 @@ class WorkflowController extends AbstractController
     }
 
 
-    /**
-     * @Route("/duplicate/{id}", name="workflow_duplicate")
-     */
+    #[Route('/duplicate/{id}', name: 'workflow_duplicate')]
     public function WorkflowDuplicateAction(string $id, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'translator' => $translator]);
@@ -721,9 +607,7 @@ class WorkflowController extends AbstractController
     }
 
     // public function to edit a workflow
-    /**
-     * @Route("/edit/{id}", name="workflow_edit")
-     */
+    #[Route('/edit/{id}', name: 'workflow_edit')]
     public function WorkflowEditAction(string $id, Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'request' => $request, 'translator' => $translator]);

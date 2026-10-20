@@ -44,7 +44,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 
 #[Route('/task')]
 class TaskController extends AbstractController
@@ -78,7 +78,7 @@ class TaskController extends AbstractController
                 $this->params[$config->getName()] = $config->getvalue();
             }
         }
-        if (empty($this->DocumentRepository)) {
+        if (empty($this->documentRepository)) {
             $this->documentRepository = $this->entityManager->getRepository(Document::class);
         }
     }
@@ -155,7 +155,7 @@ class TaskController extends AbstractController
                     'maxPerPage' => $this->params['pager'] ?? 25,
                     'page' => $page,
                 ], false);
-                if ($timezone = '') {
+                if ($timezone == '') {
                     $timezone = 'UTC';
                 } else {
                     $timezone = $this->getUser()->getTimezone();
