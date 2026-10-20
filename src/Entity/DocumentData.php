@@ -38,10 +38,13 @@ class DocumentData
     #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="datas")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=false, columnDefinition="VARCHAR(36)")
-     */
+	#[ORM\ManyToOne(targetEntity: Document::class, inversedBy: 'datas')]
+    #[ORM\JoinColumn(
+        name: 'doc_id',
+        referencedColumnName: 'id',
+        nullable: false,
+        columnDefinition: 'VARCHAR(36)'
+    )]
     private Document $doc_id;
 
     #[ORM\Column(name: 'type', type: 'string', length: 1, nullable: false)]
