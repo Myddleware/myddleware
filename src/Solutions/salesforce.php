@@ -430,50 +430,52 @@ class salesforce extends solution {
 							// Manage relationship fields stored in a sub array
 							if(
 									$key != 'attributes'
-								AND	is_array($record[$key])
+								AND substr($key, -3) == '__r'
 							) {
-								foreach($record[$key] as $fieldKey => $fieldValue) {
-									// Don't save attributes
-									if($fieldKey != 'attributes'){
-										// In case there are 2 levels of relationship (think about a recursive function here) 
-										if(is_array($fieldValue)) {
-											if (!empty($fieldValue)) {
-												foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
-													if($fieldKeyLevel2 != 'attributes'){
-														// In case there are 3 levels of relationship (think about a recursive function here) 
-														if(is_array($fieldValueLevel2)) {
-															if(!empty($fieldValueLevel2)) {
-																foreach($fieldValueLevel2 as $fieldKeyLevel3 => $fieldValueLevel3) {
-																	if($fieldKeyLevel3 != 'attributes'){
-																		$row[mb_strtolower($fieldKeyLevel3)] = $fieldValueLevel3;
-																		$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2.'.'.$fieldKeyLevel3] = $fieldValueLevel3;
+								// If a relationship is empty, we set all field under this relationship to empty
+								if (empty($record[$key])) {
+									foreach($param['fields'] as $field) {
+										if (str_starts_with($field, $param['module'].'.'.$key)) {
+											$row[$field] = '';
+										}
+									}
+								} else {					
+									foreach($record[$key] as $fieldKey => $fieldValue) {
+										// Don't save attributes
+										if($fieldKey != 'attributes'){
+											// In case there are 2 levels of relationship (think about a recursive function here) 
+											if(is_array($fieldValue)) {
+												if (!empty($fieldValue)) {
+													foreach($fieldValue as $fieldKeyLevel2 => $fieldValueLevel2) {
+														if($fieldKeyLevel2 != 'attributes'){
+															// In case there are 3 levels of relationship (think about a recursive function here) 
+															if(is_array($fieldValueLevel2)) {
+																if(!empty($fieldValueLevel2)) {
+																	foreach($fieldValueLevel2 as $fieldKeyLevel3 => $fieldValueLevel3) {
+																		if($fieldKeyLevel3 != 'attributes'){
+																			$row[mb_strtolower($fieldKeyLevel3)] = $fieldValueLevel3;
+																			$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2.'.'.$fieldKeyLevel3] = $fieldValueLevel3;
+																		}
 																	}
-																}
-															// If a relationship is empty, we set all field under this relationship to empty
-															} else {
-																foreach($param['fields'] as $field) {
-																	if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2)) {
-																		$row[$field] = '';
+																// If a relationship is empty, we set all field under this relationship to empty
+																} else {
+																	foreach($param['fields'] as $field) {
+																		if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2)) {
+																			$row[$field] = '';
+																		}
 																	}
 																}
 															}
+															else {
+																$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2] = $fieldValueLevel2;
+															}
 														}
-														else {
-															$row[$param['module'].'.'.$key.'.'.$fieldKey.'.'.$fieldKeyLevel2] = $fieldValueLevel2;
-														}
-													}
-												}
-											// If a relationship is empty, we set all field under this relationship to empty
-											} else {
-												foreach($param['fields'] as $field) {
-													if (str_starts_with($field, $param['module'].'.'.$key.'.'.$fieldKey)) {
-														$row[$field] = '';
 													}
 												}
 											}
-										}
-										else {
-											$row[$param['module'].'.'.$key.'.'.$fieldKey] = $fieldValue;
+											else {
+												$row[$param['module'].'.'.$key.'.'.$fieldKey] = $fieldValue;
+											}
 										}
 									}
 								}

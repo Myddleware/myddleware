@@ -5,32 +5,22 @@ namespace App\Entity;
 use App\Repository\WorkflowAuditRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass=WorkflowAuditRepository::class)
- */
+#[ORM\Entity(repositoryClass: WorkflowAuditRepository::class)]
 class WorkflowAudit
 {
-    /**
-     * @ORM\Id
-     * @ORM\GeneratedValue
-     * @ORM\Column(type="integer")
-     */
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column(type: 'integer')]
     private $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Workflow::class)
-     * @ORM\JoinColumn(nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: Workflow::class)]
+    #[ORM\JoinColumn(nullable: false)]
     private $workflow;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
+    #[ORM\Column(type: 'datetime')]
     private $dateCreated;
 
-    /**
-     * @ORM\Column(name="data", type="array", nullable=false)
-     */
+    #[ORM\Column(name: 'data', type: 'json', nullable: false)]
     private $data;
 
     public function getId(): ?int

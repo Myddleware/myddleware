@@ -26,8 +26,6 @@ const $ = require('jquery');
 $(function() {
 	// ----------------------------- Fiche rule
 
-	//$( ".mapping p" ).hide();
-
 	$( ".mapping > .title" ).on('click', function() {
 		$('p',$( this ).parent()).toggle( "fadein" );
 	});

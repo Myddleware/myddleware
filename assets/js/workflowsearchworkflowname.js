@@ -13,8 +13,6 @@ function fetchFilteredData() {
       },
       success: function (response) {
         $("#workflowTableContainer").html(response);
-
-        // $('#workflowTableContainer').html($(response).find('#workflowTableContainer').html());
       },
       error: function (xhr, status, error) {
         console.error("Erreur lors de la recherche :", status, error);

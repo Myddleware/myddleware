@@ -8,14 +8,12 @@ use App\Entity\Config;
 use App\Entity\JobScheduler;
 use App\Form\JobSchedulerType;
 use App\Form\JobSchedulerCronType;
-use App\Repository\UserRepository;
-use App\Repository\ConfigRepository;
 use App\Manager\JobSchedulerManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -23,19 +21,14 @@ use Shapecode\Bundle\CronBundle\Entity\CronJob as CronJob;
 use Shapecode\Bundle\CronBundle\Entity\CronJobResult;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Pagerfanta\Doctrine\ORM\QueryAdapter;
-use Pagerfanta\Pagerfanta;
 use App\Manager\ToolsManager;
 use App\Command\SynchroCommand;
 use Symfony\Component\Console\Input\ArrayInput;
-use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\BufferedOutput;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use App\Service\DebugLogger;
 
-/**
- * @Route("/rule/jobscheduler")
- */
+#[Route('/rule/jobscheduler')]
 class JobSchedulerController extends AbstractController
 {
     private JobSchedulerManager $jobSchedulerManager;
@@ -53,9 +46,7 @@ class JobSchedulerController extends AbstractController
         $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @Route("/", name="jobscheduler")
-     */
+    #[Route('/', name: 'jobscheduler')]
     public function index(): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
@@ -76,9 +67,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/create", name="jobscheduler_create", methods={"POST"})
-     */
+    #[Route('/create', name: 'jobscheduler_create', methods: ['POST'])]
     public function create(Request $request)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -154,9 +143,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/new", name="jobscheduler_new")
-     */
+    #[Route('/new', name: 'jobscheduler_new')]
     public function new(): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
@@ -178,9 +165,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{id}/show", name="jobscheduler_show")
-     */
+    #[Route('/{id}/show', name: 'jobscheduler_show')]
     public function show($id): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -209,9 +194,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{id}/edit", name="jobscheduler_edit")
-     */
+    #[Route('/{id}/edit', name: 'jobscheduler_edit')]
     public function edit($id): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -264,11 +247,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * Edits an existing JobScheduler entity.
-     *
-     * @Route("/{id}/update", name="jobscheduler_update", methods={"POST", "PUT"})
-     */
+    #[Route('/{id}/update', name: 'jobscheduler_update', methods: ['POST', 'PUT'])]
     public function update(Request $request, $id)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
@@ -301,10 +280,8 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{id}/delete", name="jobscheduler_delete", methods={"POST", "DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/{id}/delete', name: 'jobscheduler_delete', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
@@ -314,7 +291,6 @@ class JobSchedulerController extends AbstractController
             return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
-        $id = $request->get('id');
         $entity = $this->entityManager->getRepository(JobScheduler::class)->find($id);
         if (!$entity) {
             throw $this->createNotFoundException('Unable to find JobScheduler entity.');
@@ -351,9 +327,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/getFieldsSelect", name="jobscheduler_input", methods={"GET"}, options={"expose"=true})
-     */
+    #[Route('/getFieldsSelect', name: 'jobscheduler_input', methods: ['GET'], options: ['expose' => true])]
     public function getFieldsSelect(Request $request): JsonResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
@@ -395,11 +369,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-     /**
-     * New creates job scheduler with cron.
-     *
-     * @Route("/crontab", name="crontab")
-     */
+    #[Route('/crontab', name: 'crontab')]
     public function createActionWithCron(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
@@ -465,10 +435,8 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/crontab_list", name="jobscheduler_cron_list", defaults={"page"=1})
-     * @Route("/crontab_list/page-{page}", name="jobscheduler_cron_list_page", requirements={"page"="\d+"})
-     */
+    #[Route('/crontab_list', name: 'jobscheduler_cron_list', defaults: ['page' => 1])]
+    #[Route('/crontab_list/page-{page}', name: 'jobscheduler_cron_list_page', requirements: ['page' => '\d+'])]
     public function crontabList(int $page): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['page' => $page]);
@@ -503,12 +471,8 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * Deletes a Crontab entity.
-     *
-     * @Route("/{id}/delete_crontab", name="crontab_delete", methods={"POST", "DELETE"})
-     * @IsGranted("ROLE_ADMIN")
-     */
+    #[Route('/{id}/delete_crontab', name: 'crontab_delete', methods: ['POST', 'DELETE'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function deleteCrontab(Request $request, $id): \Symfony\Component\HttpFoundation\RedirectResponse
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
@@ -518,7 +482,6 @@ class JobSchedulerController extends AbstractController
             return $__debugReturn = $this->redirectToRoute('premium_list');
         }
 
-        $id = $request->get('id');
         $entity = $this->entityManager->getRepository(CronJob::class)->find($id);
 
         if (!$entity) {
@@ -556,9 +519,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{id}/edit_crontab", name="crontab_edit")
-     */
+    #[Route('/{id}/edit_crontab', name: 'crontab_edit')]
     public function editCrontab($id): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
@@ -607,11 +568,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * Edits an existing Crontab entity.
-     *
-     * @Route("/{id}/update_crontab", name="crontab_update", methods={"POST"})
-     */
+    #[Route('/{id}/update_crontab', name: 'crontab_update', methods: ['POST'])]
     public function updateCrontab(Request $request, $id)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'id' => $id]);
@@ -670,9 +627,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{id}/enable_crontab/{enable}", name="enable_crontab", methods={"POST"})
-     */
+    #[Route('/{id}/enable_crontab/{enable}', name: 'enable_crontab', methods: ['POST'])]
     public function enableDisableCrontab(Request $request, $id, $enable): Response
     {
         // Check if it's a valid request
@@ -718,10 +673,8 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/{id}/show_crontab", name="crontab_show", defaults={"page"=1})
-     * @Route("/{id}/show_crontab/page-{page}", name="crontab_show_page", requirements={"page"="\d+"})
-     */
+    #[Route('/{id}/show_crontab', name: 'crontab_show', defaults: ['page' => 1])]
+    #[Route('/{id}/show_crontab/page-{page}', name: 'crontab_show_page', requirements: ['page' => '\d+'])]
     public function showCrontab($id, int $page): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id, 'page' => $page]);
@@ -768,11 +721,7 @@ class JobSchedulerController extends AbstractController
         }
     }
         
-    /**
-     * Disables all cron jobs.
-     *
-     * @Route("/massdisable", name="massdisable")
-     */
+    #[Route('/massdisable', name: 'massdisable')]
     public function disableAllTask(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
@@ -800,11 +749,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * Enables all cron jobs.
-     *
-     * @Route("/massenable", name="massenable")
-     */
+    #[Route('/massenable', name: 'massenable')]
     public function enableAllTask(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
@@ -831,11 +776,7 @@ class JobSchedulerController extends AbstractController
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
     }
-       /**
-     * disable all cron jobs.
-     *
-     * @Route("/massdisableCron", name="massdisableCron")
-     */
+    #[Route('/massdisableCron', name: 'massdisableCron')]
     public function disableAllCrons(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
@@ -868,11 +809,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-           /**
-     * Enables all cron jobs.
-     *
-     * @Route("/massenableCron", name="massenableCron")
-     */
+    #[Route('/massenableCron', name: 'massenableCron')]
     public function enableAllCrons(Request $request, TranslatorInterface $translator)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'translator' => $translator]);
@@ -900,51 +837,7 @@ class JobSchedulerController extends AbstractController
         }
     }
 
-    /**
-     * @Route("/execute-terminal-command", name="executeTerminalCommand")
-     */
-    public function executeTerminalCommand(Request $request, SynchroCommand $synchroCommand): JsonResponse
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'synchroCommand' => $synchroCommand]);
-        $__debugReturn = null;
-        try {
-        if (!$this->tools->isPremium()) {
-            return $__debugReturn = $this->redirectToRoute('premium_list');
-        }
-
-        $command = $request->request->get('command');
-        
-        // If the command starts with "synchro", handle it with SynchroCommand
-        if (strpos($command, 'synchro') === 0) {
-            // Extract the rule ID from the command
-            $parts = explode(' ', $command);
-            $ruleId = $parts[1] ?? null;
-
-            if (!$ruleId) {
-                return $__debugReturn = new JsonResponse(['error' => 'Rule ID is required']);
-            }
-
-            ob_start();
-            $input = new ArrayInput([
-                'rule' => $ruleId,
-                'force' => false,
-            ]);
-            $output = new BufferedOutput();
-            $synchroCommand->run($input, $output);
-            $result = ob_get_clean();
-
-            return $__debugReturn = new JsonResponse(['result' => $output->fetch()]);
-        }
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
-        }
-        
-        // ... handle other commands as before ...
-    }
-
-    /**
-     * @Route("/crontab/results", name="crontab_results_partial")
-     */
+    #[Route('/crontab/results', name: 'crontab_results_partial')]
     public function loadResults(Request $request): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);

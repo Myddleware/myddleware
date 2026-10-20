@@ -28,55 +28,37 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="documentaudit")
- * @ORM\HasLifecycleCallbacks()
- * @ORM\Entity(repositoryClass="App\Repository\DocumentAuditRepository")
- */
+#[ORM\Table(name: 'documentaudit')]
+#[ORM\HasLifecycleCallbacks]
+#[ORM\Entity(repositoryClass: 'App\Repository\DocumentAuditRepository')]
 class DocumentAudit
 {
-    /**
-     * @ORM\Column(name="id", type="string")
-     * @ORM\Id
-     */
+    #[ORM\Column(name: 'id', type: 'string', length: 255)]
+    #[ORM\Id]
     private string $id;
 
-    /**
-     * @ORM\PrePersist()
-     */
+    #[ORM\PrePersist]
     public function preSave()
     {
         $this->id = uniqid();
     }
 
-    /**
-     * @ORM\Column(name="doc_id", type="string", nullable=false)
-     */
+    #[ORM\Column(name: 'doc_id', type: 'string', length: 255, nullable: false)]
     private string $doc;
 
-    /**
-     * @ORM\Column(name="modified", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'modified', type: 'datetime', nullable: false)]
     private DateTime $dateModified;
 
-    /**
-     * @ORM\Column(name="before_value", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'before_value', type: 'string', length: 255, nullable: true)]
     private string $before;
 
-    /**
-     * @ORM\Column(name="after_value", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'after_value', type: 'string', length: 255, nullable: true)]
     private string $after;
 
-    /**
-     * @ORM\Column(name="user", type="string", nullable=false)
-     */
+    #[ORM\Column(name: 'user', type: 'string', length: 255, nullable: false)]
     private string $byUser;
 
-    /**
-     * @ORM\Column(name="name", type="string", nullable=false)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 255, nullable: false)]
     private string $name;
 
     public function setId($id): self

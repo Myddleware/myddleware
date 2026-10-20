@@ -22,10 +22,10 @@ class RuleGroupType extends AbstractType
                 'label' => 'rulegroup.rulegroup_name',
                 'required' => true,
                 'constraints' => [
-                    new Assert\NotBlank([
-                        'message' => 'rulegroup.name_cannot_be_empty',
-                        'normalizer' => 'trim',
-                    ]),
+                    new Assert\NotBlank(
+                        message: 'rulegroup.name_cannot_be_empty',
+                        normalizer: 'trim',
+                    ),
                 ],
                 'attr' => [
                     'class' => 'form-control',

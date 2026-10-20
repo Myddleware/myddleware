@@ -30,36 +30,20 @@ use App\Entity\Rule;
 use App\Entity\RuleGroup;
 use App\Service\DebugLogger;
 use Pagerfanta\Pagerfanta;
-use App\Manager\JobManager;
-use App\Manager\HomeManager;
-use App\Manager\RuleManager;
-use Psr\Log\LoggerInterface;
 use App\Manager\ToolsManager;
-use Doctrine\DBAL\Connection;
 use App\Form\Type\RuleGroupType;
-use App\Manager\FormulaManager;
-use App\Service\SessionService;
-use App\Manager\DocumentManager;
-use App\Manager\SolutionManager;
-use App\Manager\TemplateManager;
-use App\Repository\JobRepository;
 use App\Repository\RuleRepository;
-use App\Repository\ConfigRepository;
 use Pagerfanta\Adapter\ArrayAdapter;
-use App\Repository\DocumentRepository;
-use App\Repository\RuleGroupRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
-use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 
 #[Route('/rulegroup')]
@@ -68,32 +52,19 @@ class RuleGroupController extends AbstractController
     private EntityManagerInterface $entityManager;
     private TranslatorInterface $translator;
     private ToolsManager $toolsManager;
-    protected Connection $connection;
-    protected $simulationQueryField;
     private DebugLogger $debugLogger;
 
     public function __construct(
         EntityManagerInterface $entityManager,
-        Connection $connection,
         TranslatorInterface $translator,
         ToolsManager $toolsManager,
         DebugLogger $debugLogger
     ) {
         $this->entityManager = $entityManager;
-        $this->connection = $connection;
         $this->translator = $translator;
         $this->toolsManager = $toolsManager;
         $this->debugLogger = $debugLogger;
     }
-
-    protected function getInstanceBdd() {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-        try {
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
 
     /* ******************************************************
          * RULE
@@ -399,11 +370,9 @@ class RuleGroupController extends AbstractController
             ->where('r.active = :active')
             ->andWhere('r.deleted = :deleted')
             ->andWhere('r.group != :currentGroup OR r.group IS NULL')
-            ->setParameters([
-                'active' => true,
-                'deleted' => false,
-                'currentGroup' => $ruleGroup
-            ])
+            ->setParameter('active', true)
+            ->setParameter('deleted', false)
+            ->setParameter('currentGroup', $ruleGroup)
             ->orderBy('r.name', 'ASC')
             ->getQuery()
             ->getResult();

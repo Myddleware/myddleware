@@ -29,13 +29,12 @@ use App\Manager\ToolsManager;
 use App\Form\Type\ProfileFormType;
 use App\Form\Type\UpdatePasswordType;
 use App\Form\Type\TwoFactorAuthFormType;
-use App\Service\UserManagerInterface;
 use App\Service\AlertBootstrapInterface;
 use App\Service\TwoFactorAuthService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -116,8 +115,8 @@ class AccountController extends AbstractController
         AlertBootstrapInterface $alert,
         TwoFactorAuthService $twoFactorAuthService,
         DebugLogger $debugLogger,
-        SerializerInterface $serializer = null,
-        ValidatorInterface $validator = null
+        ?SerializerInterface $serializer = null,
+        ?ValidatorInterface $validator = null
     ) {
         $this->debugLogger = $debugLogger;
         $this->kernel = $kernel;
