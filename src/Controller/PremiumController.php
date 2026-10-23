@@ -26,12 +26,10 @@
 namespace App\Controller;
 
 use Exception;
-use Doctrine\DBAL\Connection;
 use App\Service\DebugLogger;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 #[Route('/premium')]
@@ -39,9 +37,6 @@ class PremiumController extends AbstractController
 {
 
 
-    protected Connection $connection;
-    // To allow sending a specific record ID to rule simulation
-    protected $simulationQueryField;
     private DebugLogger $debugLogger;
 
     public function __construct(
@@ -50,17 +45,7 @@ class PremiumController extends AbstractController
         $this->debugLogger = $debugLogger;
     }
 
-    protected function getInstanceBdd() {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
-        try {
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
-
-
-/**
+    /**
      * PAGE ACHAT PREMIUM.
      *
      * @return RedirectResponse|Response

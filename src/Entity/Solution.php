@@ -27,42 +27,28 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="solution")
- * @ORM\Entity(repositoryClass="App\Repository\SolutionRepository")
- */
+#[ORM\Table(name: 'solution')]
+#[ORM\Entity(repositoryClass: 'App\Repository\SolutionRepository')]
 class Solution
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="name", type="string", length=20,nullable=false)
-     */
+    #[ORM\Column(name: 'name', type: 'string', length: 20, nullable: false)]
     private string $name;
 
-    /**
-     * @ORM\Column(name="active", type="integer", length=1,nullable=false)
-     */
+    #[ORM\Column(name: 'active', type: 'integer', length: 1, nullable: false)]
     private int $active;
 
-    /**
-     * @ORM\Column(name="source", type="integer", length=1,nullable=false)
-     */
+    #[ORM\Column(name: 'source', type: 'integer', length: 1, nullable: false)]
     private int $source;
 
-    /**
-     * @ORM\Column(name="target", type="integer", length=1,nullable=false)
-     */
+    #[ORM\Column(name: 'target', type: 'integer', length: 1, nullable: false)]
     private int $target;
 
-    /**
-     * @ORM\OneToMany(targetEntity="Connector", mappedBy="solution", cascade={"persist", "remove", "merge"})
-     */
+    #[ORM\OneToMany(targetEntity: 'Connector', mappedBy: 'solution', cascade: ['persist', 'remove'])]
     private $connector;
 
     public function __construct()

@@ -42,6 +42,7 @@
 						<thead>
 							<tr>
 								<th class="rounded-table-up-left p-4">{{ 'variable.table_headers.name'|trans }}</th>
+								<th class="p-4">{{ 'variable.table_headers.type'|trans }}</th>
 								<th class="p-4">{{ 'variable.table_headers.value'|trans }}</th>
 								<th class="p-4">{{ 'variable.table_headers.description'|trans }}</th>
 								<th class="p-4">{{ 'variable.table_headers.created_by'|trans }}</th>
@@ -54,7 +55,14 @@
 									<td>
 										<a href="{{ path('variable_show', {'id': variable.id}) }}" class="help-link all-link">{{ variable.name }}</a>
 									</td>
-									<td>{{ variable.value }}</td>
+									<td>{{ ('variable.type.' ~ variable.type)|trans }}</td>
+									<td>
+										{% if variable.type == 'table' %}
+											{{ variable.formattedValue }}
+										{% else %}
+											{{ variable.value }}
+										{% endif %}
+									</td>
 									<td>{{ variable.description }}</td>
 									<td>{{ variable.createdBy }}</td>
 									<td class="CRUD-icons">

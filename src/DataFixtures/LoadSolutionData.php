@@ -61,7 +61,7 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'iomad',				'active' => 1, 'source' => 1, 'target' => 1]
     ];
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $this->manager = $manager;
         $this->generateEntities();

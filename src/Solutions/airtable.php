@@ -395,7 +395,6 @@ class airtable extends solution
          * In order to load relationships, we MUST first load all fields.
          */
         $allFields = $this->get_module_fields($param['module'], 'source');
-        // $relationships = $this->get_module_fields_relate($param['module'], 'source');
 
         // Group records for each calls
         // Split the data into several array using the limite size
@@ -563,6 +562,9 @@ class airtable extends solution
         $moduleNameAndRecordId = $this->extractModuleAndRecordId($rule, $document, $type);
         $moduleName = $moduleNameAndRecordId['module'];
         $recordId = $moduleNameAndRecordId['record_id'];
+        if (empty($recordId)) {
+            return '';
+        }
 
         // Load metadata to get table mappings
         $metadataMappings = $this->loadAirtableMetadataMappings();

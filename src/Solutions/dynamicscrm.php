@@ -542,7 +542,9 @@ class dynamicscrm extends solution
                 $headers['If-Match'] = $etag;
             }
 
-            $this->logDebug('dynamicscrm update PATCH request', ['url' => $url, 'method' => 'PATCH']);
+			$data = $this->prepareData($param, $data);
+            $this->logDebug('dynamicscrm create headers', $headers);
+            $this->logDebug('dynamicscrm create payload', $data);
             $response = $client->patch($url, [
                 'headers' => $headers,
                 'json' => $data
@@ -631,7 +633,7 @@ class dynamicscrm extends solution
 			if (!empty($fields)) {
 				foreach($data as $key => $value) {
 					if ($fields[$key]['relate']) {
-						$data[$key.'@odata.bind'] = '/'.$fields[$key]['targetModule'].'('.$value.')';
+						$data[$key.'@odata.bind'] = '/'.$fields[$key]['targetModule'].'s('.$value.')';
 						unset($data[$key]);
 					}
 				}

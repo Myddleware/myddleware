@@ -17,6 +17,9 @@ security:
                 check_path: /api/login_check
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
         api:
             pattern:   ^/api
             stateless: true
@@ -29,6 +32,9 @@ security:
             provider: username_provider
             custom_authenticators:
                 - App\Security\SecurityAuthenticator
+            login_throttling:
+                max_attempts: 5
+                interval: '15 minutes'
             remember_me:
                 secret:    "%secret%"
                 lifetime:  30000000
@@ -48,7 +54,6 @@ security:
         - { path: ^/login$, role: PUBLIC_ACCESS }
         - { path: ^/resetting, role: PUBLIC_ACCESS }
         - { path: ^/install_requirements, role: PUBLIC_ACCESS }
-        - { path: ^/verifAccount, role: PUBLIC_ACCESS }
         - { path: ^/panel, role: ROLE_USER }
         - { path: ^/admin/, role: ROLE_ADMIN }
         - { path: ^/rule/, role: ROLE_USER }
