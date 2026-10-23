@@ -28,39 +28,28 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\RuleAuditRepository")
- * @ORM\Table(name="ruleaudit", indexes={@ORM\Index(name="index_ruleid", columns={"rule_id"})})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\RuleAuditRepository')]
+#[ORM\Table(name: 'ruleaudit')]
+#[ORM\Index(name: 'index_ruleid', columns: ['rule_id'])]
 class RuleAudit
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Rule", inversedBy="audits")
-     * @ORM\JoinColumn(name="rule_id", referencedColumnName="id", nullable=false)
-     */
+    #[ORM\ManyToOne(targetEntity: 'Rule', inversedBy: 'audits')]
+    #[ORM\JoinColumn(name: 'rule_id', referencedColumnName: 'id', nullable: false)]
     private Rule $rule;
 
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private DateTime $dateCreated;
 
-    /**
-     * @ORM\Column(name="data", type="array", nullable=false)
-     */
+    #[ORM\Column(name: 'data', type: 'json', nullable: false)]
     private $data;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=User::class)
-     * @ORM\JoinColumn(name="created_by", referencedColumnName="id", nullable=true)
-     */
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(name: 'created_by', referencedColumnName: 'id', nullable: true)]
     private $createdBy;
 
     public function getId(): int

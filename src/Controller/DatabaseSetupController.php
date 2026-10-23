@@ -20,7 +20,7 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use App\Service\DebugLogger;
 
@@ -41,9 +41,7 @@ class DatabaseSetupController extends AbstractController
         $this->debugLogger = $debugLogger;
     }
 
-    /**
-     * @Route("install/database/setup", name="database_setup")
-     */
+    #[Route('install/database/setup', name: 'database_setup')]
     public function index(Request $request, KernelInterface $kernel): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'kernel' => $kernel]);
@@ -215,9 +213,7 @@ class DatabaseSetupController extends AbstractController
         }
     }
 
-    /**
-     * @Route("install/database/connect", name="database_connect")
-     */
+    #[Route('install/database/connect', name: 'database_connect')]
     public function connectDatabase(Request $request, KernelInterface $kernel): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'kernel' => $kernel]);
@@ -298,11 +294,7 @@ class DatabaseSetupController extends AbstractController
         }
     }
 
-    /**
-     * Attempt to load Myddleware fixtures to database.
-     *
-     * @Route("install/database/fixtures/load", name="database_fixtures_load")
-     */
+    #[Route('install/database/fixtures/load', name: 'database_fixtures_load')]
     public function doctrineFixturesLoad(Request $request, KernelInterface $kernel): Response
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'kernel' => $kernel]);

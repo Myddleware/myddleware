@@ -9,7 +9,7 @@ class MyddlewareCacheWarmer implements CacheWarmerInterface
 {
     public function __construct(private string $cacheDir) {}
 
-    public function warmup(string $cacheDir): array
+    public function warmUp(string $cacheDir, ?string $buildDir = null): array
     {
         $jobDir = $cacheDir . '/myddleware/job';
         $fs = new Filesystem();

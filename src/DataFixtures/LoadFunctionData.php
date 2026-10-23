@@ -43,7 +43,7 @@ class LoadFunctionData implements FixtureInterface
     protected $functionCats = [];
     protected $functions = [];
 
-    public function load(ObjectManager $manager)
+    public function load(ObjectManager $manager): void
     {
         $this->manager = $manager;
 

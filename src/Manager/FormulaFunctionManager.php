@@ -116,6 +116,7 @@ class FormulaFunctionManager
         if (!empty($acceptNull)) {
             return '';
         }
+		throw new \Exception('Value '.$var.' not found in the array '.print_r($arrayKeyToValue,1).'. ');
     }
 	
     public static function changeMultiValue($var, $arrayKeyToValue, $delimiter)
@@ -203,7 +204,7 @@ class FormulaFunctionManager
 									target_id record_id,
 									GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 									GROUP_CONCAT(DISTINCT document.type) types,
-									MAX(document.date_modified) date_modified
+									MAX(document.date_created) date_created
 								FROM document 
 								WHERE  
 										document.rule_id = :ruleRelateId
@@ -216,7 +217,7 @@ class FormulaFunctionManager
 									)
 								GROUP BY target_id
 								HAVING types NOT LIKE '%D%'
-								ORDER BY date_modified DESC
+								ORDER BY date_created DESC
 								LIMIT 1";
 			$direction = 1;
 		} elseif (
@@ -245,7 +246,7 @@ class FormulaFunctionManager
 								source_id record_id,
 								GROUP_CONCAT(DISTINCT document.id ORDER BY document.source_date_modified DESC) document_id,
 								GROUP_CONCAT(DISTINCT document.type) types,
-								MAX(document.date_modified) date_modified
+								MAX(document.date_created) date_created
 							FROM document
 							WHERE  
 									document.rule_id = :ruleRelateId
@@ -258,7 +259,7 @@ class FormulaFunctionManager
 								)
 							GROUP BY source_id
 							HAVING types NOT LIKE '%D%'
-							ORDER BY date_modified DESC
+							ORDER BY date_created DESC
 							LIMIT 1";
 			$direction = -1;
 		} else {

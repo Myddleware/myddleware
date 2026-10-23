@@ -33,7 +33,7 @@ use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Symfony\Component\HttpKernel\KernelEvents;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
-use Symfony\Component\Security\Core\Security;
+use Symfony\Bundle\SecurityBundle\Security;
 use Psr\Log\LoggerInterface;
 
 class TwoFactorAuthListener implements EventSubscriberInterface
@@ -77,8 +77,6 @@ class TwoFactorAuthListener implements EventSubscriberInterface
         $request = $event->getRequest();
         $path = $request->getPathInfo();
 
-        $this->logger->debug('TwoFactorAuthListener: Checking path: ' . $path);
-
         // Skip for login, verification, and public routes
         if ($this->isPublicRoute($path)) {
             $this->logger->debug('TwoFactorAuthListener: Skipping public route');
@@ -88,7 +86,6 @@ class TwoFactorAuthListener implements EventSubscriberInterface
         // Check if the user is authenticated
         $user = $this->security->getUser();
         if (!$user instanceof User) {
-            $this->logger->debug('TwoFactorAuthListener: No authenticated user');
             return;
         }
 

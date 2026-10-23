@@ -787,16 +787,6 @@
 								{% endfor %}
 							{% endif %}
 
-							{# in between end #}
-
-							{# <pre>
-															{{ dump(logPagination.pager.nbResults) }}
-															{{ dump(logPagination.pager.maxPerPage) }}
-															{{ dump(logPagination.pager.nbResults % logPagination.pager.maxPerPage) }}
-															{{ dump(more_than_one_page) }}
-														</pre> #}
-
-
 							{% if logPagination.pager.currentPage < logPagination.pager.nbResults // logPagination.pager.maxPerPage + 1 and logPagination.pager.nbResults % logPagination.pager.maxPerPage != 0 %}
 								<a class='m-1' href="{{ custom_route_next }}">
 									Next

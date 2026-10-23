@@ -134,3 +134,6 @@ composer.phar
 delete-cache-logs-myddleware.ps1
 /.env.test
 tests/Solutions/ids-to-delete.json
+
+# Auto-generated Symfony config reference (IDE helper, regenerated on cache warmup)
+/config/reference.php

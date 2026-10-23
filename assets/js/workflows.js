@@ -151,7 +151,6 @@ $(document).ready(function () {
     };
 
     if (!workflowActionFields) {
-// console.log('Using default configuration for action:', actionName);
       return defaultConfigs[actionName] || defaultConfigs.updateStatus;
     }
 
@@ -180,15 +179,10 @@ $(document).ready(function () {
 
   // Function to log field visibility
   function logFieldVisibility(field, shouldShow, containerId) {
-// console.log(`Field: ${field.padEnd(15)} | Status: ${shouldShow ? 'SHOWING' : 'HIDDEN '.padEnd(7)} | Container: ${containerId}`);
   }
 
   // Function to toggle field visibility based on configuration
   function toggleFieldVisibility(actionConfig) {
-// console.log('\n=== Field Visibility for Action: ' + actionConfig.Action + ' ===');
-// console.log('Field'.padEnd(15) + ' | Status  | Container');
-// console.log('─'.repeat(50));
-
     // Log visibility for all possible fields
     ALL_FIELDS.forEach(field => {
       const containerId = getContainerId(field);
@@ -206,8 +200,6 @@ $(document).ready(function () {
           } else {
             container.hide();
           }
-        } else {
-// console.log(`Warning: Container not found for ${field} (${containerId})`);
         }
       }
     });
@@ -226,11 +218,6 @@ $(document).ready(function () {
       dynamicContainer.hide().empty();
     }
 
-// console.log('─'.repeat(50));
-// console.log('Dynamic Fields  | Status  | Container');
-// console.log('─'.repeat(50));
-// console.log(`Add Button      | ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #addFieldButton`);
-// console.log(`Fields Container| ${isChangeData ? 'SHOWING' : 'HIDDEN '} | #dynamicFieldsContainer`);
   }
 
   // Try multiple possible paths for the JSON file
@@ -251,18 +238,14 @@ $(document).ready(function () {
       url: (window.location.origin + path).replace("http://", "https://"),
       dataType: 'json',
       success: function(data) {
-// console.log('Successfully loaded workflow action fields configuration from:', path);
         workflowActionFields = data;
-        
+
         // Handle initial load after JSON is loaded
         const selectedAction = $("#form_action").val();
-// console.log('\n=== INITIAL PAGE LOAD ===');
-// console.log('Selected Action:', selectedAction);
         const initialConfig = getFieldConfig(selectedAction);
         toggleFieldVisibility(initialConfig);
       },
       error: function() {
-// console.log('Failed to load from:', path);
         tryLoadConfig(paths.slice(1));
       }
     });

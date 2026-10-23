@@ -434,6 +434,7 @@ create_connector:
     params_error: Une erreur s'est produite lors de l'enregistrement des paramêtres
     form_error : Impossible de récupérer les informations du connecteur (solution, champs & parent)
     duplicate_name: Un connecteur porte déjà ce nom.
+    invalid_form: Le formulaire du connecteur contient des erreurs. Veuillez vérifier votre saisie.
 
 list_connector:
     empty: Vous n'avez pas encore de connecteur !
@@ -1185,12 +1186,7 @@ settings:
         description: Configurez l'affichage des tableaux dans l'application.
         rows_per_page: Lignes par page
         maximum_results: Resultats maximum
-    search_settings:
-        title: Parametres de recherche
-        description: Configurez le comportement de la recherche et l'integration Elasticsearch.
-        elasticsearch_label: Statut Elasticsearch
-        enable_elasticsearch: Activer Elastic Search
-        elasticsearch_hint: Elasticsearch permet de meilleures performances lors de la recherche de chaines parmi de tres grandes quantites de documents (+100k)
+
     logs:
         title: Logs
         enable_debug: Activer les logs de debug
@@ -1203,8 +1199,7 @@ settings:
     messages:
         save_success: Parametres enregistres avec succes
         save_error: Echec de l'enregistrement des parametres
-        elasticsearch_enabled: Elasticsearch a ete active
-        elasticsearch_disabled: Elasticsearch a ete desactive
+
         debug_enabled: Les logs de debug ont ete actives
         debug_disabled: Les logs de debug ont ete desactives
         log_level_updated: Niveau de log mis a jour a %level%
@@ -1357,12 +1352,22 @@ variable:
   detail_title: Variable
   confirm_delete: Êtes-vous sûr de vouloir supprimer cette variable ?
   no_variables: Aucune variable trouvée.
+  type:
+    simple: Simple
+    list: Liste
+    table: Table (picklist)
   table_headers:
     name: Nom
+    type: Type
     value: Valeur
     actions: Actions
     created_by: Créé par
     description: Description
+  table_editor:
+    source: Source
+    target: Cible
+    add_row: Ajouter une ligne
+    formatted_value: Valeur formatée pour changeValue
 premium:
     upgrade:
         title_main: "Passer à la version Premium"
