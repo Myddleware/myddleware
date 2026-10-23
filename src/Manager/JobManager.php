@@ -834,6 +834,9 @@ class JobManager
         $this->pruneDatabaseMaxDate = $date->format('Y-m-d H:i:s');
 
         try {
+            // Remove the old events received by webhook
+            $this->entityManager->getRepository(\App\Entity\WebhookEvent::class)->deleteReceivedBefore($date);
+
             $this->processDeletableItems($this->getListOfSqlDocumentParams(), 'document');
             // Start deleteing rules when there is no more documents to delete
             if($this->noDocumentsTablesToEmptyCounter === 4)

@@ -34,6 +34,8 @@ use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 
 class solution
 {
@@ -882,6 +884,49 @@ class solution
     // Type : source or target
     public function getDirectLink($rule, $document, $type)
     {
+    }
+
+    // Return true if the solution can receive events from webhooks (url /webhook/{connectorId}/{token})
+    public function isWebhookAvailable(): bool
+    {
+        return false;
+    }
+
+    // Some applications check the webhook url before sending events (eg Zoom url validation)
+    // Return the response expected by the application or null if the request isn't a challenge
+    public function webhookChallenge(Request $request, array $paramConnexion): ?Response
+    {
+        return null;
+    }
+
+    // Check that the request has been sent by the application (signature...)
+    // The token in the url has already been checked by Myddleware
+    public function webhookValidate(Request $request, array $paramConnexion): bool
+    {
+        return true;
+    }
+
+    // Convert the webhook request into a list of events. Expected output :
+    // array(
+    //		array('module' => 'meeting', 'record_id' => '123', 'event_type' => 'meeting.updated', 'external_id' => 'xxx', 'deletion' => false, 'payload' => array(...)),
+    // )
+    // Each event is read by the rules using the source connector and the module with the rule param webhook
+    public function webhookParse(Request $request): array
+    {
+        return [];
+    }
+
+    // Rule param to add in getFieldsParamUpd (source) for the solutions able to receive webhooks
+    protected function getWebhookParam(): array
+    {
+        return [
+            'id' => 'webhook',
+            'name' => 'webhook',
+            'type' => 'option',
+            'label' => 'Read data from webhooks',
+            'required' => false,
+            'option' => ['0' => 'No', '1' => 'Yes'],
+        ];
     }
 
     // Get a connector param decrypted

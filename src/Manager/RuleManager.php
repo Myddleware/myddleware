@@ -32,6 +32,7 @@ use App\Entity\Rule;
 use App\Entity\RuleParam;
 use App\Entity\RuleParamAudit as RuleParamAudit;
 use App\Entity\Variable;
+use App\Entity\WebhookEvent;
 use App\Repository\DocumentRepository;
 use App\Repository\RuleOrderRepository;
 use App\Repository\RuleRelationShipRepository;
@@ -701,11 +702,18 @@ class RuleManager
         if (!empty($read['fields'])) {
             $connect = $this->connexionSolution('source');
             if (true === $connect) {
-                $this->dataSource = $this->solutionSource->readData($read);
+                // Read only the records received by webhook or read the source application using the reference date
+                if (!empty($this->ruleParams['webhook'])) {
+                    $this->dataSource = $this->readWebhookData($read);
+                } else {
+                    $this->dataSource = $this->solutionSource->readData($read);
+                }
                 // If Myddleware has reached the limit, we validate data to make sure no doto won't be lost
+                // Not for webhooks, the limit is already managed in readWebhookData
                 if (
                         !empty($this->dataSource['count'])
                     && $this->dataSource['count'] == $this->limit
+                    && empty($this->ruleParams['webhook'])
                 ) {
                     // Check and clean data source
                     $validateReadDataSource = $this->validateReadDataSource();
@@ -734,6 +742,76 @@ class RuleManager
         }
 
         return $__debugReturn = ['error' => 'No field to read in source system. '];
+        } finally {
+            $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    // Read the records received by webhook since the reference date of the rule.
+    // The reference date is the reception date of the last event read, so each rule has its own cursor
+    // and several rules can read the same events. The records are read in the source application using their id.
+    protected function readWebhookData($read)
+    {
+        $this->debugLogger?->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+        try {
+            $result = ['count' => 0, 'values' => [], 'date_ref' => $read['date_ref'], 'error' => ''];
+
+            // We don't read the events received in the last seconds because some of them could be still in a transaction
+            $records = $this->entityManager->getRepository(WebhookEvent::class)->findRecordsToRead(
+                (int) $this->rule['conn_id_source'],
+                $this->rule['module_source'],
+                $read['date_ref'],
+                new \DateTime('-5 seconds'),
+                (int) $this->limit
+            );
+            if (empty($records)) {
+                return $__debugReturn = $result;
+            }
+
+            // If the limit is reached, the records received at the same time than the last one are read during the next run
+            // because some of them could be after the limit (except if all records have been received at the same time)
+            if (count($records) == $this->limit) {
+                $lastReceivedAt = end($records)['received_at'];
+                $recordsBefore = array_filter($records, function ($record) use ($lastReceivedAt) {
+                    return $record['received_at'] != $lastReceivedAt;
+                });
+                if (!empty($recordsBefore)) {
+                    $records = array_values($recordsBefore);
+                }
+            }
+
+            // Read each record in the source application
+            $read['date_ref'] = '1970-01-01 00:00:00';
+            foreach ($records as $record) {
+                $read['query'] = ['id' => $record['record_id']];
+                $dataSource = $this->solutionSource->readData($read);
+                if (!empty($dataSource['error'])) {
+                    throw new \Exception('Failed to read the record '.$record['record_id'].' received by webhook. '.$dataSource['error']);
+                }
+                if (empty($dataSource['values'])) {
+                    $this->logger->warning('Record '.$record['record_id'].' received by webhook not found in the module '.$this->rule['module_source'].' of the source solution (rule '.$this->ruleId.').');
+                } else {
+                    foreach ($dataSource['values'] as $id => $value) {
+                        // A record could be returned several times, we keep only one
+                        if (!isset($result['values'][$id])) {
+                            ++$result['count'];
+                        }
+                        $result['values'][$id] = $value;
+                    }
+                }
+                $result['date_ref'] = $record['received_at'];
+            }
+            if (empty($result['values'])) {
+                unset($result['values']);
+            }
+
+            return $__debugReturn = $result;
+        } catch (\Exception $e) {
+            // Return the error without reference date so the rule will read the same events during the next run
+            return $__debugReturn = ['error' => 'Failed to read the webhook data : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )'];
+        }
         } finally {
             $this->debugLogger?->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }
