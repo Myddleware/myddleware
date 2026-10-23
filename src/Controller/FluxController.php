@@ -424,11 +424,7 @@ class FluxController extends AbstractController
             }
 
             //Check the user timezone
-            if ($timezone = '') {
-                $timezone = 'UTC';
-            } else {
-                $timezone = $this->getUser()->getTimezone();
-            }
+            $timezone = $this->getUser()->getTimezone() ?: 'UTC';
 
             return $__debugReturn = $this->render(
                 'Flux/list.html.twig',
@@ -760,11 +756,7 @@ class FluxController extends AbstractController
                 }
             }
             //Check the user timezone
-            if ($timezone = '') {
-                $timezone = 'UTC';
-            } else {
-                $timezone = $this->getUser()->getTimezone();
-            }
+            $timezone = $this->getUser()->getTimezone() ?: 'UTC';
 
             // Get the logs
             $logs = $em->getRepository(Log::class)

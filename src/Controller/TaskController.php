@@ -155,11 +155,7 @@ class TaskController extends AbstractController
                     'maxPerPage' => $this->params['pager'] ?? 25,
                     'page' => $page,
                 ], false);
-                if ($timezone == '') {
-                    $timezone = 'UTC';
-                } else {
-                    $timezone = $this->getUser()->getTimezone();
-                }
+                $timezone = $this->getUser()->getTimezone() ?: 'UTC';
 
                 return $__debugReturn = $this->render('Task/view/view.html.twig', [
                     'task' => $task,
