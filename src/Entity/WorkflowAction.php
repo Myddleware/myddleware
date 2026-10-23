@@ -177,7 +177,7 @@ class WorkflowAction
         }
 
         if (is_string($this->arguments)) {
-            return unserialize($this->arguments);
+            return json_decode($this->arguments, true) ?? [];
         }
 
         return [];

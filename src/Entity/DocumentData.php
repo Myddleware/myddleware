@@ -77,9 +77,14 @@ class DocumentData
         return $this;
     }
 
-    public function getData()
+    public function getData(): array
     {
-        return $this->data;
+        // Data stored as a JSON string by the old versions of Myddleware
+        if (is_string($this->data)) {
+            return json_decode($this->data, true) ?? [];
+        }
+
+        return $this->data ?? [];
     }
 
     public function getDocId(): ?Document

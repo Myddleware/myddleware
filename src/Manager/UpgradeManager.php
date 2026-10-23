@@ -259,6 +259,9 @@ class UpgradeManager
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
         try {
+        // Convert the old serialized data before changing the column types into JSON
+        $this->message .= $this->convertDataToJson();
+
         // Update schema
         $application = new Application($this->kernel);
         $application->setAutoExit(false);
@@ -304,6 +307,115 @@ class UpgradeManager
     }
 
 
+
+    /**
+     * Convert the data stored with the PHP serialization (old Doctrine type array) or encoded twice in JSON
+     * into direct JSON, so the columns can be changed into the JSON type by doctrine:schema:update.
+     * The function can be run several times, the data already in JSON aren't modified.
+     *
+     * @throws Exception
+     */
+    public function convertDataToJson(): string
+    {
+        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        $__debugReturn = null;
+        try {
+            $message = '';
+            $connection = $this->entityManager->getConnection();
+            $columns = [
+                ['table' => 'documentdata', 'column' => 'data'],
+                ['table' => 'ruleaudit', 'column' => 'data'],
+                ['table' => 'workflow_audit', 'column' => 'data'],
+                ['table' => 'users', 'column' => 'roles'],
+                ['table' => 'workflowaction', 'column' => 'arguments'],
+            ];
+            foreach ($columns as $column) {
+                // No conversion if the table doesn't exist yet or if the column is already in JSON
+                $dataType = $connection->fetchOne(
+                    'SELECT DATA_TYPE FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = :tableName AND COLUMN_NAME = :columnName',
+                    ['tableName' => $column['table'], 'columnName' => $column['column']]
+                );
+                if (empty($dataType) || 'json' == strtolower($dataType)) {
+                    continue;
+                }
+
+                $converted = 0;
+                $lastId = '';
+                do {
+                    $rows = $connection->fetchAllAssociative(
+                        'SELECT id, '.$column['column'].' col_value FROM '.$column['table'].' WHERE id > :lastId ORDER BY id LIMIT 1000',
+                        ['lastId' => $lastId]
+                    );
+                    $connection->beginTransaction();
+                    try {
+                        foreach ($rows as $row) {
+                            $lastId = $row['id'];
+                            $json = $this->convertValueToJson($row['col_value']);
+                            if (null === $json) {
+                                throw new Exception('Failed to convert the value of the record '.$row['id'].' in the column '.$column['table'].'.'.$column['column'].' into JSON : '.substr((string) $row['col_value'], 0, 200));
+                            }
+                            if ($json !== $row['col_value']) {
+                                $connection->update($column['table'], [$column['column'] => $json], ['id' => $row['id']]);
+                                ++$converted;
+                            }
+                        }
+                        $connection->commit();
+                    } catch (Exception $e) {
+                        $connection->rollBack();
+                        throw $e;
+                    }
+                } while (!empty($rows));
+
+                $message .= $converted.' record(s) converted into JSON in the column '.$column['table'].'.'.$column['column'].chr(10);
+            }
+            $this->logger->info($message);
+
+            return $__debugReturn = $message;
+        } finally {
+            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    // Return the value in direct JSON or null if the value can't be converted
+    protected function convertValueToJson(?string $value): ?string
+    {
+        if (null === $value || '' === $value) {
+            return '[]';
+        }
+
+        // Value already in JSON
+        $decoded = json_decode($value, true, 512, JSON_BIGINT_AS_STRING);
+        if (JSON_ERROR_NONE === json_last_error()) {
+            // Value encoded twice (JSON string containing JSON)
+            if (is_string($decoded)) {
+                $innerDecoded = json_decode($decoded, true, 512, JSON_BIGINT_AS_STRING);
+                if (JSON_ERROR_NONE === json_last_error() && is_array($innerDecoded)) {
+                    return json_encode($innerDecoded, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+                }
+            }
+
+            return $value;
+        }
+
+        // Value stored with the PHP serialization
+        $unserialized = @unserialize($value, ['allowed_classes' => false]);
+        if (false === $unserialized && 'b:0;' !== $value) {
+            return null;
+        }
+        // Serialized array (eg users.roles)
+        if (is_array($unserialized)) {
+            return json_encode($unserialized, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+        }
+        // Serialized JSON string (eg documentdata.data)
+        if (is_string($unserialized)) {
+            $decoded = json_decode($unserialized, true, 512, JSON_BIGINT_AS_STRING);
+            if (JSON_ERROR_NONE === json_last_error()) {
+                return json_encode($decoded, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+            }
+        }
+
+        return null;
+    }
 
     /**
      * @throws Exception

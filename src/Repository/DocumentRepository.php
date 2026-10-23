@@ -335,7 +335,7 @@ class DocumentRepository extends ServiceEntityRepository
 
             if (!empty($data['source_content']) && is_string($data['source_content'])) {
                 $qb->innerJoin('document.datas', 'document_data_source')
-                    ->andWhere('document_data_source.data LIKE :source_content')
+                    ->andWhere('LOWER(document_data_source.data) LIKE LOWER(:source_content)')
                     ->andWhere('document_data_source.type = :document_data_type')
                     ->setParameter('source_content', '%'.$data['source_content'].'%')
                     ->setParameter('document_data_type', 'S');
@@ -343,7 +343,7 @@ class DocumentRepository extends ServiceEntityRepository
 
             if (!empty($data['target_content']) && is_string($data['target_content'])) {
                 $qb->innerJoin('document.datas', 'document_data_target')
-                    ->andWhere('document_data_target.data LIKE :target_content')
+                    ->andWhere('LOWER(document_data_target.data) LIKE LOWER(:target_content)')
                     ->andWhere('document_data_target.type = :document_data_type')
                     ->setParameter('target_content', '%'.$data['target_content'].'%')
                     ->setParameter('document_data_type', 'T');

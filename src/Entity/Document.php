@@ -323,7 +323,7 @@ class Document
         })->first();
 
         if ($documentData instanceof DocumentData) {
-            return json_decode($documentData->getData(), true);
+            return $documentData->getData();
         }
     }
 
@@ -368,7 +368,7 @@ class Document
                     if (
                         $oneDataset->getType() === $dataType
                     ) {
-                        $oneDataset->setData(json_encode($newValues, true));
+                        $oneDataset->setData($newValues);
                     }
                 }
             }
@@ -411,20 +411,20 @@ class Document
         return $this->triggerDocuments;
     }
 
-    public function addTriggerDocument(Workflowlog $triggerDocuments): self
+    public function addTriggerDocument(WorkflowLog $triggerDocument): self
     {
         if (!$this->triggerDocuments->contains($triggerDocument)) {
             $this->triggerDocuments[] = $triggerDocument;
-            $triggerDocument->setDocument($this);
+            $triggerDocument->setTriggerDocument($this);
         }
         return $this;
     }
 
-    public function removeTriggerDocument(Workflowlog $triggerDocument): self
+    public function removeTriggerDocument(WorkflowLog $triggerDocument): self
     {
         if ($this->triggerDocuments->removeElement($triggerDocument)) {
-            if ($triggerDocument->getDocument() === $this) {
-                $triggerDocument->setDocument(null);
+            if ($triggerDocument->getTriggerDocument() === $this) {
+                $triggerDocument->setTriggerDocument(null);
             }
         }
         return $this;

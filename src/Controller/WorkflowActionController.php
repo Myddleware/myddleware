@@ -1554,8 +1554,7 @@ class WorkflowActionController extends AbstractController
         }, $actions->toArray());
 
         // Encode every workflow parameters
-        $workflowdata = json_encode(
-            [
+        $workflowdata = [
                 'workflowName' => $workflow->getName(),
                 'rule' => $workflow->getRule()->getId(),
                 'created_by' => $workflow->getCreatedBy()->getUsername(),
@@ -1565,8 +1564,7 @@ class WorkflowActionController extends AbstractController
                 'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
                 'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
                 'actions' => $actionsArray,
-            ]
-        );
+            ];
         // Save the workflow audit
         $oneworkflowAudit = new WorkflowAudit();
         $oneworkflowAudit->setworkflow($workflow);

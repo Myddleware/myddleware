@@ -461,13 +461,13 @@ class FluxController extends AbstractController
         // Source content
         if (!empty($data['source_content'])) {
             $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
-            $where .= " AND document_data_source.data LIKE :source_content 
+            $where .= " AND LOWER(document_data_source.data) LIKE LOWER(:source_content) 
                         AND document_data_source.type = 'S'";
         }
         // Target content
         if (!empty($data['target_content'])) {
             $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
-            $where .= " AND document_data_target.data LIKE :target_content 
+            $where .= " AND LOWER(document_data_target.data) LIKE LOWER(:target_content) 
                         AND document_data_target.type = 'T'";
         }
         // Date modified (start) 
@@ -1002,12 +1002,12 @@ $result = [];
                         ]
                     );
                 if (!empty($documentDataEntity)) {
-                    $target = json_decode($documentDataEntity->getData(), true);
+                    $target = $documentDataEntity->getData();
                     $beforeValue = $target[$fields];
                     // Change the value
                     $target[$fields] = $value;
                     // Save the modification
-                    $documentDataEntity->setData(json_encode($target)); // Encode in JSON
+                    $documentDataEntity->setData($target);
 
                     // Insert in audit
                     $oneDocAudit = new DocumentAudit();
@@ -1308,7 +1308,7 @@ $result = [];
                     ]
                 );
             if (!empty($documentDataEntity)) {
-                $data = json_decode($documentDataEntity->getData(), true);
+                $data = $documentDataEntity->getData();
                 // Boolean values aren't displayed properly, we convert them into string
                 if (!empty($data)) {
                     foreach ($data as $key => $value) {
@@ -2318,7 +2318,7 @@ $result = [];
             }
 
             // Decode current target data
-            $targetData = json_decode($documentDataEntity->getData(), true);
+            $targetData = $documentDataEntity->getData();
             
             if ($targetData === null) {
                 return $__debugReturn = new JsonResponse([
@@ -2342,7 +2342,7 @@ $result = [];
             $targetData[$fieldName] = $fieldValue;
             
             // Save the updated data back to the entity
-            $documentDataEntity->setData(json_encode($targetData));
+            $documentDataEntity->setData($targetData);
             
             // Create audit record
             $documentAudit = new DocumentAudit();

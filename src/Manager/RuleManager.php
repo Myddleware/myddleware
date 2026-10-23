@@ -2673,7 +2673,7 @@ class RuleManager
                                 );
             // Generate data array
             if (!empty($documentDataEntity)) {
-                return json_decode($documentDataEntity->getData(), true);
+                return $documentDataEntity->getData();
             }
         } catch (\Exception $e) {
             $this->logger->error('Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )');

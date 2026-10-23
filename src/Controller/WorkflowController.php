@@ -215,8 +215,7 @@ class WorkflowController extends AbstractController
                 ];
             }, $actions->toArray());
 
-            $workflowdata = json_encode(
-                [
+            $workflowdata = [
                     'workflowName' => $workflow->getName(),
                     'ruleId' => $workflow->getRule()->getId(),
                     'created_by' => $workflow->getCreatedBy()->getUsername(),
@@ -226,8 +225,7 @@ class WorkflowController extends AbstractController
                     'dateCreated' => $workflow->getDateCreated()->format('Y-m-d H:i:s'),
                     'dateModified' => $workflow->getDateModified()->format('Y-m-d H:i:s'),
                     'actions' => $actionsArray,
-                ]
-            );
+                ];
             $oneworkflowAudit = new WorkflowAudit();
             $oneworkflowAudit->setworkflow($workflow);
             $oneworkflowAudit->setDateCreated(new \DateTime());

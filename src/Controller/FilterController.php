@@ -711,13 +711,13 @@ class FilterController extends AbstractController
         // Source content
         if (!empty($data['source_content'])) {
             $join .= " INNER JOIN documentdata document_data_source ON document_data_source.doc_id = document.id ";
-            $where .= " AND document_data_source.data LIKE :source_content 
+            $where .= " AND LOWER(document_data_source.data) LIKE LOWER(:source_content) 
                         AND document_data_source.type = 'S'";
         }
         // Target content
         if (!empty($data['target_content'])) {
             $join .= " INNER JOIN documentdata document_data_target ON document_data_target.doc_id = document.id ";
-            $where .= " AND document_data_target.data LIKE :target_content 
+            $where .= " AND LOWER(document_data_target.data) LIKE LOWER(:target_content) 
                         AND document_data_target.type = 'T'";
         }
         // Date modified (start) 
@@ -1243,20 +1243,7 @@ class FilterController extends AbstractController
         // writes the header in the csv file
         fputcsv($fp, $header, $mySeparator);
 
-        // the results are serialized, so we need to unserialize them
-        foreach ($results as $key => $row) {
-            // Unserialize the PHP serialization
-            $sourceData = unserialize($row['source_data']);
-            $targetData = unserialize($row['target_data']); 
-            $historyData = unserialize($row['history_data']);
-
-            // Remove extra quotes and semicolon that were added during serialization
-            $results[$key]['source_data'] = trim($sourceData, '";');
-            $results[$key]['target_data'] = trim($targetData, '";');
-            $results[$key]['history_data'] = trim($historyData, '";');
-        }
-
-        // Write data
+        // Write data (document data are already stored in JSON)
         foreach ($results as $row) {
             $csvRow = [
                 $row['id'],

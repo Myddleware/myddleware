@@ -475,10 +475,7 @@ class DocumentManager
 		$this->documentDataBatch[] = [
 			'doc_id' => $this->id,
 			'type' => 'S',
-			'data' => json_encode(
-				json_encode($dataInsert, JSON_THROW_ON_ERROR),
-				JSON_THROW_ON_ERROR
-			)
+			'data' => json_encode($dataInsert, JSON_THROW_ON_ERROR)
 		];				
 		// Flush if batch limit reached
 		if (count($this->documentBatch) >= $this->batchSize) {
@@ -1602,7 +1599,7 @@ class DocumentManager
                 );
             // Generate data array
             if (!empty($documentDataEntity)) {
-                return $__debugReturn = json_decode($documentDataEntity->getData(), true);
+                return $__debugReturn = $documentDataEntity->getData();
             }
         } catch (\Exception $e) {
             $this->message .= 'Error getSourceData  : '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
@@ -1707,7 +1704,7 @@ class DocumentManager
             $documentData = new DocumentData();
             $documentData->setDocId($documentEntity);
             $documentData->setType($type); // Source
-            $documentData->setData(json_encode($dataInsert)); // Encode in JSON
+            $documentData->setData($dataInsert);
             $this->entityManager->persist($documentData);
             $this->entityManager->flush();
         } catch (\Exception $e) {
@@ -3012,7 +3009,7 @@ class DocumentManager
             throw new Exception("No document data found for the document ".$docId." and the type ".$dataType.".");
         }
         // Get the current values                      
-        $values = json_decode($documentDataEntity->getData(),1);
+        $values = $documentDataEntity->getData();
         if(!empty($values)){
 			// In case we replace all values
 			if ($refreshData) {
@@ -3038,7 +3035,7 @@ class DocumentManager
             $this->typeError = 'I';
             $this->createDocLog();
             // Update the data of the right type
-            $documentDataEntity->setData(json_encode($values, true));
+            $documentDataEntity->setData($values);
             $this->entityManager->persist($documentDataEntity);
             $this->entityManager->flush();
         }
