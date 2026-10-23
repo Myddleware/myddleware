@@ -880,7 +880,8 @@ solution:
         client_secret: Client Secret
         environment: Environment
         org_url: Organization URL
-    params: 
+        webhooksecret: Webhook secret token
+    params:
         dateref: Reference (data will be read from this parameter)
         limit: Limit (read limit for each call)
         active: Activation

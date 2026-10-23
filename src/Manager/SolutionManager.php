@@ -64,6 +64,7 @@ use App\Solutions\zuora;
 use App\Solutions\dynamicsbusiness;
 use App\Solutions\dynamicscrm;
 use App\Solutions\iomad;
+use App\Solutions\zoom;
 use App\Service\DebugLogger;
 use Exception;
 
@@ -102,7 +103,8 @@ class SolutionManager
 							'acton',
 							'dynamicsbusiness',
 							'dynamicscrm',
-							'iomad'
+							'iomad',
+							'zoom'
 						];
 
     public function __construct(
@@ -133,7 +135,8 @@ class SolutionManager
         acton $acton,
         dynamicsbusiness $dynamicsbusiness,
         dynamicscrm $dynamicscrm,
-        iomad $iomad
+        iomad $iomad,
+        zoom $zoom
     ) {
 		$this->debugLogger = $debugLogger;
 		// Load the solution classes

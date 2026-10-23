@@ -58,7 +58,8 @@ class LoadSolutionData implements FixtureInterface
         ['name' => 'acton',           	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'dynamicsbusiness',	'active' => 1, 'source' => 1, 'target' => 1],
         ['name' => 'dynamicscrm',		'active' => 1, 'source' => 1, 'target' => 1],
-        ['name' => 'iomad',				'active' => 1, 'source' => 1, 'target' => 1]
+        ['name' => 'iomad',				'active' => 1, 'source' => 1, 'target' => 1],
+        ['name' => 'zoom',				'active' => 1, 'source' => 1, 'target' => 0]
     ];
 
     public function load(ObjectManager $manager): void
