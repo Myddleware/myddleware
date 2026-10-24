@@ -31,6 +31,7 @@ use App\Repository\LogRepository;
 use App\Repository\RuleRepository;
 use DateTime;
 use DateTimeZone;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection as DriverConnection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -1321,8 +1322,6 @@ class JobManager
         $stmt = $this->connection->prepare($sqlParams);
         $result = $stmt->executeQuery();
         $rules = $result->fetchAllAssociative();
-		// Calculate the limit for selection
-		$limit = $this->nbCallMaxDelete * $this->limitDelete;
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
@@ -1331,174 +1330,75 @@ class JobManager
 				$this->createLog($message);
                 // Calculate the date corresponding depending the rule parameters
                 $limitDate = new DateTime('now', new DateTimeZone('GMT'));
-                $limitDate->modify('-'.$rule['days'].' days');
-				
-				// Delete document data
-                // Select the list of documentdata to be deleted
+                $limitDate->modify('-'.(int) $rule['days'].' days');
+
+				// Select only the documents not cleared yet, the documents already cleared by a previous run are never read again
+				$selectDocuments = "
+					SELECT document.id
+					FROM document
+					WHERE
+							document.rule_id = :ruleId
+						AND document.deleted = 0
+						AND document.data_cleared = 0
+						AND document.global_status IN ('Close','Cancel')
+						AND document.date_modified < :limitDate
+					LIMIT ".(int) $this->limitDelete;
+				$deleteDocumentData = "DELETE FROM documentdata WHERE doc_id IN (:docIds)";
+				$deleteLog = "
+					DELETE FROM log
+					WHERE
+							doc_id IN (:docIds)
+						AND msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')";
+				$flagDocuments = "UPDATE document SET data_cleared = 1 WHERE id IN (:docIds)";
+				$arrayTypes = ['docIds' => ArrayParameterType::STRING];
+
+				$countDocumentData = 0;
+				$countLog = 0;
+				$nbCall = 0;
 				try {
-					$deleteSourceSelection = "
-						SELECT documentdata.doc_id
-						FROM document
-							INNER JOIN documentdata
-								ON document.id = documentdata.doc_id
-						WHERE 
-								document.rule_id = :ruleId
-							AND document.global_status IN ('Close','Cancel')
-							AND document.deleted = 0 
-							AND document.date_modified < :limitDate
-						LIMIT ".$limit;
-					// Get selection
-					$stmt = $this->connection->prepare($deleteSourceSelection);
-					$stmt->bindValue('ruleId', $rule['id']);
-					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-					$resultDeleteSourceSelection = $stmt->executeQuery();
-					$documentIds = $resultDeleteSourceSelection->fetchAllAssociative();
-					// $this->connection->commit(); // -- COMMIT TRANSACTION
-				} catch (Exception $e) {
-                    // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
-				
-                try {
-					$count = 0;
-					$nbCall = 0;
-					// Delete data using pack size of $this->limitDelete rows
+					// Delete data using pack size of $this->limitDelete documents
 					// Continue while we have results and if the program dosn't reach the limit call
-					while (
-							!empty($documentIds)
-						AND $nbCall < $this->nbCallMaxDelete
-					){
-						$i = 0;
+					do {
 						$nbCall++;
-						
-						// Prepare delete query
-						if (!empty($documentIds)) {
-							$idString = '';
-							// Build IN parameter
-							foreach ($documentIds as $key => $documentId) {
-								if ($i >= $this->limitDelete) {
-									break;
-								}
-								$i++;
-								$idString .= "'".$documentId['doc_id']."',";
-								unset($documentIds[$key]);
-							}
-							$idString = rtrim($idString, ',');
-							if (!empty($idString)) {
-								$this->connection->beginTransaction();
-								// Delete rows in table documentdata
-								$deleteDocumentData = "DELETE FROM documentdata WHERE doc_id IN (".$idString.")";
-								$stmtDelete = $this->connection->prepare($deleteDocumentData);
-								$result = $stmtDelete->executeQuery();
-								// Save the number of rows deleted
-								if ($result->rowCount() > 0) {
-									$count += $result->rowCount();
-								}
-								$this->connection->commit(); // -- COMMIT TRANSACTION
-							}
+						$documentIds = $this->connection->fetchFirstColumn(
+							$selectDocuments,
+							['ruleId' => $rule['id'], 'limitDate' => $limitDate->format('Y-m-d H:i:s')]
+						);
+						if (empty($documentIds)) {
+							break;
 						}
+						// Data, logs and flag are committed together so a document is flagged only if its data have been removed
+						$this->connection->beginTransaction();
+						$countDocumentData += $this->connection->executeStatement($deleteDocumentData, ['docIds' => $documentIds], $arrayTypes);
+						$countLog += $this->connection->executeStatement($deleteLog, ['docIds' => $documentIds], $arrayTypes);
+						$this->connection->executeStatement($flagDocuments, ['docIds' => $documentIds], $arrayTypes);
+						$this->connection->commit(); // -- COMMIT TRANSACTION
+					} while (
+							count($documentIds) >= $this->limitDelete
+						AND $nbCall < $this->nbCallMaxDelete
+					);
+				} catch (Exception $e) {
+					if ($this->connection->isTransactionActive()) {
+						$this->connection->rollBack(); // -- ROLLBACK TRANSACTION
 					}
-                } catch (Exception $e) {
-                    $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
+					$error = 'Failed to clear the tables DocumentData and Log for the rule '.$rule['name'].': '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$this->message .= $error;
 					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
+					$this->logger->error($this->message);
+				}
 				// Add log 
-				if ($count > 0) {
-					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. '.chr(10);
-					$message .= $count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+				if ($countDocumentData > 0) {
+					echo date('Y-m-d H:i:s').' - '.$countDocumentData.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. '.chr(10);
+					$message = $countDocumentData.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
 					$this->message .= $message;
 					$this->createLog($message);
 				}
-
-				// Delete log
-                // Select the list of log to be deleted
-				try {
-					$deleteLogSelection = "
-						SELECT log.id
-						FROM log
-							INNER JOIN document
-								ON log.doc_id = document.id
-						WHERE 
-								document.rule_id = :ruleId
-							AND log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
-							AND document.global_status IN ('Close','Cancel')
-							AND document.deleted = 0 
-							AND document.date_modified < :limitDate	
-						LIMIT ".$limit;
-					// Get selection
-					$stmt = $this->connection->prepare($deleteLogSelection);
-					$stmt->bindValue('ruleId', $rule['id']);
-					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-					$resultDeleteLogSelection = $stmt->executeQuery();
-					$logIds = $resultDeleteLogSelection->fetchAllAssociative();
-				} catch (Exception $e) {
-                    $error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
-
-
-                try {
-					$count = 0;
-					$nbCall = 0;
-					// Delete data using pack size of $this->limitDelete rows
-					// Continue while we have results and if the program dosn't reach the limit call
-					while (
-							!empty($logIds)
-						AND $nbCall < $this->nbCallMaxDelete
-					){
-						$i = 0;
-						$nbCall++;
-						
-						// Prepare delete query
-						if (!empty($logIds)) {
-							$idString = '';
-							// Build IN parameter
-							foreach ($logIds as $key => $logId) {
-								if ($i >= $this->limitDelete) {
-									break;
-								}
-								$i++;
-								$idString .= "'".$logId['id']."',";
-								unset($logIds[$key]);
-							}
-							$idString = rtrim($idString, ',');
-							if (!empty($idString)) {
-								$this->connection->beginTransaction();
-								// Delete rows in table log
-								$deleteLog = "DELETE FROM log WHERE id IN (".$idString.")";
-								$stmtDeleteLog = $this->connection->prepare($deleteLog);
-								$result = $stmtDeleteLog->executeQuery();
-								// Save the number of rows deleted
-								if ($result->rowCount() > 0) {
-									$count += $result->rowCount();
-								}
-								$this->connection->commit(); // -- COMMIT TRANSACTION
-							}
-						}
-						
-					} 
-                } catch (Exception $e) {
-                    $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
-				// Add log 
-				if ($count > 0) {
-					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Log for the rule '.$rule['name'].'. '.chr(10);
-					$message = $count.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+				if ($countLog > 0) {
+					echo date('Y-m-d H:i:s').' - '.$countLog.' rows deleted in the table Log for the rule '.$rule['name'].'. '.chr(10);
+					$message = $countLog.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
 					$this->message .= $message;
 					$this->createLog($message);
-				}	  
+				}
             }
         }
 		
@@ -1519,7 +1419,7 @@ class JobManager
 					AND cancel = 0
 					AND error = 0
 					AND end < :limitDate
-					AND job.id NOT IN (select job_id from log) 
+					AND NOT EXISTS (SELECT 1 FROM log WHERE log.job_id = job.id)
 				LIMIT ".$this->limitDelete;
 			$nbCall = 0;
 			$count = 0;
