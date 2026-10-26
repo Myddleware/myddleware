@@ -1339,8 +1339,7 @@ class JobManager
 					'ruleId' => $rule['id'],
 					'limitDate' => $limitDate->format('Y-m-d H:i:s'),
 				];
-				
-				// Select only the documents not cleared yet, the documents already cleared by a previous run are never read again
+                // Select only the documents not cleared yet, the documents already cleared by a previous run are never read again
 				$selectDocumentsSql = "
 					SELECT d.id
 					FROM document AS d

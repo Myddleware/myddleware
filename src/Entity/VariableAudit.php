@@ -50,18 +50,10 @@ class VariableAudit
     #[ORM\Column(name: 'modified', type: 'datetime', nullable: false)]
     private $dateModified;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="before_value", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'before_value', type: 'text', nullable: true)]
     private $before;
 
-    /**
-     * @var int
-     *
-     * @ORM\Column(name="after_value", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'after_value', type: 'text', nullable: true)]
     private $after;
 
     #[ORM\Column(name: 'user', type: 'string', length: 255, nullable: true)]
