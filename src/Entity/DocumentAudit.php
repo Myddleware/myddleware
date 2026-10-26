@@ -43,9 +43,7 @@ class DocumentAudit
         $this->id = uniqid();
     }
 
-    /**
-     * @ORM\Column(name="doc_id", type="string", length=36, nullable=false)
-     */
+    #[ORM\Column(name: 'doc_id', type: 'string', length: 36, nullable: false)]
     private string $doc;
 
     #[ORM\Column(name: 'modified', type: 'datetime', nullable: false)]

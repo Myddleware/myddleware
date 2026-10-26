@@ -79,6 +79,11 @@ class DocumentData
 
     public function getData()
     {
+        // Rows migrated from the old "array" type are stored as JSON objects (decoded as array by Doctrine)
+        // whereas new rows are stored as a JSON string. Callers always expect a JSON string.
+        if (null !== $this->data && !is_string($this->data)) {
+            return json_encode($this->data);
+        }
         return $this->data;
     }
 

@@ -31,6 +31,7 @@ use App\Repository\LogRepository;
 use App\Repository\RuleRepository;
 use DateTime;
 use DateTimeZone;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection as DriverConnection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -75,6 +76,9 @@ class JobManager
 
     protected int $limitDelete = 100000;
     protected int $nbCallMaxDelete = 5;
+    // Number of documents cleared per transaction by the cleardata job (ids sent in a IN clause)
+    protected int $limitClearDocument = 10000;
+    protected int $nbCallMaxClearDocument = 50;
     protected int $checkJobPeriod = 900;
 
     private ParameterBagInterface $parameterBagInterface;
@@ -1319,6 +1323,8 @@ class JobManager
         $rules = $result->fetchAllAssociative();
 		// Calculate the limit for selection
 		$batchSize = max(1, (int) $this->limitDelete);
+		$documentBatchSize = max(1, (int) $this->limitClearDocument);
+		$maximumDocumentCalls = max(0, (int) $this->nbCallMaxClearDocument);
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
@@ -1333,89 +1339,80 @@ class JobManager
 					'ruleId' => $rule['id'],
 					'limitDate' => $limitDate->format('Y-m-d H:i:s'),
 				];
-				
-				// Delete documentData
-				$deleteDocumentDataSql = "
-					DELETE FROM documentdata
-					WHERE id IN (
-						SELECT batch.id
-						FROM (
-							SELECT dd.id
-							FROM document AS d
-							INNER JOIN documentdata AS dd
-								ON dd.doc_id = d.id
-							WHERE d.rule_id = :ruleId
-							  AND d.global_status IN ('Close', 'Cancel')
-							  AND d.deleted = 0
-							  AND d.date_created < :limitDate
-							ORDER BY dd.id
-							LIMIT {$batchSize}
-						) AS batch
-					)
+                // Select only the documents not cleared yet, the documents already cleared by a previous run are never read again
+				$selectDocumentsSql = "
+					SELECT d.id
+					FROM document AS d
+					WHERE d.rule_id = :ruleId
+					  AND d.deleted = 0
+					  AND d.data_cleared = 0
+					  AND d.global_status IN ('Close', 'Cancel')
+					  AND d.date_created < :limitDate
+					LIMIT {$documentBatchSize}
 				";
-			
-				// Delete document data
-				try {	
-					echo gmdate('Y-m-d H:i:s').' - Delete rows in the table DocumentData for the rule '.$rule['name'].PHP_EOL;
-					$count = $this->executeDeleteInBatches(
-						$deleteDocumentDataSql,
-						$parameters
-					);				
-					$message = $count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
-					echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
-					if ($count > 0) {
-						$this->message .= $message;
-						$this->createLog($message);
+				$deleteDocumentDataSql = "DELETE FROM documentdata WHERE doc_id IN (:docIds)";
+				$deleteLogSql = "
+					DELETE FROM log
+					WHERE doc_id IN (:docIds)
+					  AND msg NOT IN (
+						  'Status : New',
+						  'Status : Send'
+					  )
+				";
+				$flagDocumentsSql = "UPDATE document SET data_cleared = 1 WHERE id IN (:docIds)";
+				$arrayTypes = ['docIds' => ArrayParameterType::STRING];
+
+				$countDocumentData = 0;
+				$countLog = 0;
+				$countDocuments = 0;
+				try {
+					echo gmdate('Y-m-d H:i:s').' - Delete rows in the tables DocumentData and Log for the rule '.$rule['name'].PHP_EOL;
+					for ($call = 0; $call < $maximumDocumentCalls; $call++) {
+						$documentIds = $this->connection->fetchFirstColumn($selectDocumentsSql, $parameters);
+						if (empty($documentIds)) {
+							break;
+						}
+						// Data, logs and flag are committed together so a document is flagged only if its data have been removed
+						$this->connection->beginTransaction();
+						try {
+							$countDocumentData += $this->connection->executeStatement($deleteDocumentDataSql, ['docIds' => $documentIds], $arrayTypes);
+							$countLog += $this->connection->executeStatement($deleteLogSql, ['docIds' => $documentIds], $arrayTypes);
+							$this->connection->executeStatement($flagDocumentsSql, ['docIds' => $documentIds], $arrayTypes);
+							$this->connection->commit();
+							$countDocuments += count($documentIds);
+						} catch (\Throwable $e) {
+							if ($this->connection->isTransactionActive()) {
+								$this->connection->rollBack();
+							}
+
+							throw $e;
+						}
+						echo '    - '.gmdate('Y-m-d H:i:s').' - '.$countDocuments.' documents cleared, '.$countDocumentData.' documentdata and '.$countLog.' log rows deleted. '.PHP_EOL;
+
+						// Un lot incomplet signifie qu'il n'y a plus de documents eligibles.
+						if (count($documentIds) < $documentBatchSize) {
+							break;
+						}
 					}
 				} catch (Exception $e) {
-                    // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to delete the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+					$error = 'Failed to delete the records in tables DocumentData and Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->message .= $error;
 					$this->createLog($error, 'E');
                     $this->logger->error($this->message);
                 }
 
-				// Delete logs
-				$deleteLogSql = "
-					DELETE FROM log
-					WHERE id IN (
-						SELECT batch.id
-						FROM (
-							SELECT l.id
-							FROM document AS d
-							INNER JOIN log AS l
-								ON l.doc_id = d.id
-							WHERE d.rule_id = :ruleId
-							  AND d.global_status IN ('Close', 'Cancel')
-							  AND d.deleted = 0
-							  AND d.date_created < :limitDate
-							  AND l.msg NOT IN (
-								  'Status : New',
-								  'Status : Send'
-							  )
-							LIMIT {$batchSize}
-						) AS batch
-					)
-				";
-                try {
-					echo gmdate('Y-m-d H:i:s').' - Delete rows in the table log for the rule '.$rule['name'].PHP_EOL;
-					$count = $this->executeDeleteInBatches(
-						$deleteLogSql,
-						$parameters
-					);
-					$message = $count.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
-					echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
-					if ($count > 0) {
-						$this->message .= $message;
-						$this->createLog($message);
-					}
-                } catch (Exception $e) {
-                    $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }		
+				$message = $countDocumentData.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+				echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
+				if ($countDocumentData > 0) {
+					$this->message .= $message;
+					$this->createLog($message);
+				}
+				$message = $countLog.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+				echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
+				if ($countLog > 0) {
+					$this->message .= $message;
+					$this->createLog($message);
+				}
             }
         }
 		
