@@ -207,8 +207,7 @@ $( function() {
                                 type: "POST",
                                 data:{
                                     solutionjs : true
-                                },                  
-                                // url: Routing.generate('connector_callback'),
+                                },
                                 url: '../callback/',
                                success: function(data){    
 

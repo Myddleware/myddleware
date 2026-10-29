@@ -33,7 +33,7 @@ class ConnectorType extends AbstractType
         $builder->add('name', TextType::class, [
             'label' => 'create_connector.connexion', 
             'attr' => ['id' => 'label', 'class' => 'params'],
-            'constraints' => [new NotBlank(['message' => 'Connector name is required'])]
+            'constraints' => [new NotBlank(message: 'Connector name is required')]
         ]);
         $builder->add('connectorParams', CollectionType::class, [
             'constraints' => new Valid(),

@@ -30,7 +30,6 @@ use App\Entity\Connector;
 use App\Entity\Rule;
 use App\Entity\Solution;
 use App\Form\ConnectorType;
-use App\Manager\permission;
 use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
@@ -47,10 +46,10 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Yaml\Yaml;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Illuminate\Encryption\Encrypter;
 
 use App\Service\DebugLogger;
@@ -314,8 +313,6 @@ class ConnectorController extends AbstractController
 
                 echo '0;'.$this->translator->trans('create_connector.upload_error');
                 exit;
-
-                exit;
             }
         } else {
             return $__debugReturn = $this->render('Connector/upload.html.twig', ['solution' => $solution]
@@ -475,11 +472,8 @@ class ConnectorController extends AbstractController
                     ]
                         );
                 }
-                dump($form);
-                exit();
-
+                $this->addFlash('connector.create.danger', $this->translator->trans('create_connector.invalid_form'));
                 return $this->redirect($this->generateUrl('regle_connector_list'));
-                //-----------
             } catch (Exception $e) {
                 $this->logger->error('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
                 throw $this->createNotFoundException('Error : '.$e->getMessage().' File :  '.$e->getFile().' Line : '.$e->getLine());
@@ -633,9 +627,6 @@ class ConnectorController extends AbstractController
         if (!$connector) {
             throw $this->createNotFoundException("This connector doesn't exist");
         }
-
-        // Create connector form
-        // $form = $this->createForm(new ConnectorType($this->container), $connector, ['action' => $this->generateUrl('connector_open', ['id' => $id])]);
 
         if (null != $connector->getSolution()) {
             $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();

@@ -95,7 +95,7 @@ class solution
         DocumentRepository $documentRepository,
         RuleRelationShipRepository $ruleRelationshipsRepository,
         FormulaManager $formulaManager,
-		ToolsManager $tools = null
+		?ToolsManager $tools = null
     ) {
         $this->logger = $logger;
         $this->connection = $connection;
@@ -245,26 +245,10 @@ class solution
         return $response;
     }
 
-    // Cette méthode renvoie un tableau permettant d'indiquer tous les champs nécessaire à la connexion (login, mot de passe...)
-    // Exemple de tableau
-    // array(
-    // array(
-    // 'name' => 'login',
-    // 'type' => 'text',
-    // 'label' => 'solution.fields.login'
-    // ),
-    // array(
-    // 'name' => 'password',
-    // 'type' => 'password',
-    // 'label' => 'solution.fields.password'
-    // )
-    // );
     public function getFieldsLogin()
     {
     }
 
-    // Même structure que la méthode getFieldsLogin
-    // Prend en paramètre d'entre source ou target
     public function getFieldsParamUpd($type, $module): array
     {
         return [];
@@ -282,13 +266,6 @@ class solution
         return false;
     }
 
-    // Méthode permettant de récupérer le nom de tous les modules accessible à l'utilisateur
-    // Tableau sous la forme :
-    // array(
-    // nom_module1 => libellé module 1,
-    // nom_module2 => libellé module 2
-    // )
-    // Renvoie false si aucun module n'a été récupéré
     public function get_modules($type = 'source')
     {
     }
@@ -420,32 +397,6 @@ class solution
         return null;
     }
 
-    // Permet de créer un enregistrement
-    // $param contient  :
-    //  -> le module destinataire
-    //  -> les données à envoyer sous cette forme :
-    // Array
-    // (
-    // [0] => Array
-    // (
-    // [id_sfaure01_001_target] => 52e58c482b704
-    // [name] => myddl01
-    // [email1] => myddle01@test.test
-    // )
-    // [1] => Array
-    // (
-    // [id_sfaure01_001_target] => 52e58c482baaa
-    // [name] => myddl02
-    // [email1] => myddle02@test.test
-    // )
-
-    // )
-    // Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
-    // Array
-    // (
-    // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
-    // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
-    // )
     public function createData($param): array
     {
         try {
@@ -507,34 +458,6 @@ class solution
     }
 
     // Permet de mettre à jour un enregistrement
-    // Permet de créer un enregistrement
-    // $param contient  :
-    //  -> le module destinataire
-    //  -> les données à envoyer sous cette forme (le champ id_target est obligatoire) :
-    // Array
-    // (
-    // [0] => Array
-    // (
-    // [target_id] => 54545-sds542s1d-sd21s2d54
-    // [id_sfaure01_001_target] => 52e58c482b704
-    // [name] => myddl01
-    // [email1] => myddle01@test.test
-    // )
-    // [1] => Array
-    // (
-    // [target_id] => 54545-sds542s1d-sd21s2d54
-    // [id_sfaure01_001_target] => 52e58c482baaa
-    // [name] => myddl02
-    // [email1] => myddle02@test.test
-    // )
-
-    // )
-    // Cette fonction retourne un tableau d'ID dans le même ordre que le tableau en entrée sous cette forme :
-    // Array
-    // (
-    // [0] => e1843994-10b6-09da-b2ab-52e58f6f7e57
-    // [1] => e3bc5d6a-f137-02ea-0f81-52e58fa5f75f
-    // )
     public function updateData($param): array
     {
         try {
@@ -756,18 +679,6 @@ class solution
         return $this->sendDeletion;
     }
 
-    // Permet de faire des contrôles dans Myddleware avant sauvegarde de la règle
-    // Si le retour est false, alors la sauvegarde n'est pas effectuée et un message d'erreur est indiqué à l'utilisateur
-    // data est de la forme :
-    // [datereference] => 2015-02-23 00:00:00
-    // [connector] => Array ( [source] => 3 [cible] => 30 )
-    // [content] => Array (
-    // [fields] => Array ( [name] => Array ( [Date] => Array ( [champs] => Array ( [0] => date_entered [1] => date_modified ) [formule] => Array ( [0] => {date_entered}.{date_modified} ) ) [account_Filter] => Array ( [champs] => Array ( [0] => name ) ) ) )
-    // [params] => Array ( [mode] => 0 ) )
-    // [relationships] => Array ( [0] => Array ( [target] => compte_Reference [rule] => 54ea64f1601fc [source] => Myddleware_element_id ) )
-    // [module] => Array ( [source] => Array ( [solution] => sugarcrm [name] => Accounts ) [target] => Array ( [solution] => bittle [name] => oppt_multi7 ) )
-    // La valeur de retour est de a forme : array('done'=>false, 'message'=>'message erreur');	ou array('done'=>true, 'message'=>'')
-    // Le tableau de sortie peut aussi avoir une entrée params permettant d'indiquer l'ajout de paramètre à la règle
     public function beforeRuleSave($data, $type): array
     {
         return ['done' => true, 'message' => ''];

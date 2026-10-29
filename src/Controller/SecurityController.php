@@ -12,12 +12,11 @@ use App\Service\SecurityService;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Form\FormError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\PasswordHasher\Hasher\PasswordHasherFactoryInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
@@ -68,10 +67,6 @@ class SecurityController extends AbstractController
 
             // last username entered by the user
             $lastUsername = $authenticationUtils->getLastUsername();
-            $this->calculBan($lastUsername);
-
-            $attempt = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] : 0);
-            $remaining = ((isset($_SESSION['myddleware']['secure'][$lastUsername]['remaining'])) ? $_SESSION['myddleware']['secure'][$lastUsername]['remaining'] : 0);
 
             // If we are on platform.sh, we check that the password has been changed because the first user is always admin/admin
             $passwordMessage = false;
@@ -92,86 +87,9 @@ class SecurityController extends AbstractController
             return $__debugReturn = $this->render('Login/index.html.twig', [
                 'last_username' => $lastUsername,
                 'error' => $error,
-                'attempt' => $attempt,
-                'remaining' => $remaining,
                 'password_message' => $passwordMessage,
                 'platform_sh' => $platformSh,
             ]);
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
-        }
-    }
-
-    private function calculBan($lastUsername)
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['lastUsername' => $lastUsername]);
-        try {
-            if (isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
-                if (time() > $_SESSION['myddleware']['secure'][$lastUsername]['time']) {
-                    $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
-                } else {
-                    // RESTE X MINUTES AVANT LA FUTUR CONNEXION
-                    $date1 = time();
-                    $date2 = $_SESSION['myddleware']['secure'][$lastUsername]['time'];
-                    $diff = abs($date1 - $date2);
-
-                    $diff = abs($date1 - $date2); // abs pour avoir la valeur absolute, ainsi éviter d'avoir une différence négative
-                    $remaining = [];
-
-                    $tmp = $diff;
-                    $remaining['second'] = $tmp % 60;
-
-                    $tmp = floor(($tmp - $remaining['second']) / 60);
-                    $remaining['minute'] = $tmp % 60;
-
-                    $tmp = floor(($tmp - $remaining['minute']) / 60);
-                    $remaining['hour'] = $tmp % 24;
-
-                    $tmp = floor(($tmp - $remaining['hour']) / 24);
-                    $remaining['day'] = $tmp;
-
-                    $_SESSION['myddleware']['secure'][$lastUsername]['remaining'] = $remaining;
-                }
-            }
-        } finally {
-            $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
-        }
-    }
-
-    #[Route('/verifAccount', name: 'verif_account', methods: ['POST'])]
-    public function verifAccount(Request $request): Response
-    {
-        $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request]);
-        $__debugReturn = null;
-        try {
-            try {
-                if ($request->isMethod('POST')) {
-                    $lastUsername = trim($request->request->get('login'));
-
-                    // contrôle des tentatives
-                    // si le nombre de tentative n'existe pas on affecte 0
-                    if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['attempt'])) {
-                        $_SESSION['myddleware']['secure'][$lastUsername]['attempt'] = 1;
-                    } else { // si existe on ajoute +1
-                        $_SESSION['myddleware']['secure'][$lastUsername]['attempt'];
-                    }
-
-                    // si le nombre de tentative est supérieur à 5 alors on ajoute une date de contrôle
-                    if ($_SESSION['myddleware']['secure'][$lastUsername]['attempt'] > 4) {
-                        if (!isset($_SESSION['myddleware']['secure'][$lastUsername]['time'])) {
-                            $_SESSION['myddleware']['secure'][$lastUsername]['time'] = strtotime('+15 minutes', time());
-                        } else {
-                            $this->calculBan($lastUsername);
-                        }
-                    }
-
-                    return $__debugReturn = new Response(1);
-                }
-
-                return $__debugReturn = new Response(0);
-            } catch (Exception $e) {
-                return $__debugReturn = new Response(0);
-            }
         } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
         }

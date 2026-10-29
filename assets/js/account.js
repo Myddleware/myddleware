@@ -1,4 +1,3 @@
-// console.log('loading account.js in assets/js');
 /*********************************************************************************
  * This file is part of Myddleware.
 
@@ -35,19 +34,7 @@ import { ThreeModal } from '../../public/assets/js/three-modal.js';
  */
 class AccountManager {
   constructor() {
-    // Add console logs for debugging
-    // console.log("AccountManager initializing...");
-    
-    // Debug location info
-    // console.log("Window location:", {
-    //   href: window.location.href,
-    //   origin: window.location.origin,
-    //   pathname: window.location.pathname,
-    //   host: window.location.host
-    // });
-    
     // Get base URL dynamically from current location
-    // In Docker/production environments, requests go through /index.php/
     // In development with public/ folder, requests go directly
     if (window.location.pathname.includes('/public/')) {
       this.baseUrl = window.location.pathname.split('/public/')[0] + '/public';
@@ -56,8 +43,6 @@ class AccountManager {
     } else {
       this.baseUrl = '';
     }
-    
-    // console.log("Using base URL:", this.baseUrl);
     
     // API endpoints with dynamic base URL
     this.apiEndpoints = {
@@ -69,9 +54,6 @@ class AccountManager {
       getConfig: `${this.baseUrl}/account/api/account/config`,
       updateConfig: `${this.baseUrl}/account/api/account/config/update`
     };
-    
-    // Log all endpoints for debugging
-    // console.log("API Endpoints:", this.apiEndpoints);
     
     this.user = null;
     this.config = null;
@@ -88,7 +70,6 @@ class AccountManager {
    * Initialize the account page
    */
   async init() {
-    // console.log('init in account.js in assets/js');
     // Create the basic UI structure
     this.createUIStructure();
 
@@ -112,7 +93,6 @@ class AccountManager {
    * Create the UI structure
    */
   createUIStructure() {
-    // console.log('createUIStructure in account.js in assets/js');
     const container = document.querySelector('.account-card');
     if (!container) return;
     
@@ -145,8 +125,6 @@ class AccountManager {
     // Update title
     document.querySelector('.account-header h1').textContent = t.title;
     
-    // Add logging for debugging
-    // console.log('Starting UI update with translations');
     
     container.innerHTML = `
       <!-- Tabbed Navigation -->
@@ -334,12 +312,8 @@ class AccountManager {
    * Load user data from API
    */
   async loadUserData() {
-    // console.log("Starting to fetch user data...");
-    
     try {
-      // console.log("Attempting to fetch from:", this.apiEndpoints.getUserInfo);
       const response = await axios.get(this.apiEndpoints.getUserInfo);
-      // console.log("User data received:", response.data);
       
       // Save user data and populate UI
       this.user = response.data;
@@ -368,8 +342,6 @@ class AccountManager {
 
       // Handle authentication errors
       if (error.response?.status === 401) {
-        // console.log("User not authenticated, redirecting to login...");
-        // Get the current URL to redirect back after login
         const currentPath = window.location.pathname;
         // Redirect to login page with return URL
         window.location.href = `${this.baseUrl}/login?redirect=${encodeURIComponent(currentPath)}`;
@@ -395,26 +367,6 @@ class AccountManager {
           const debugButton = document.getElementById('debug-button');
           if (debugButton) {
             debugButton.addEventListener('click', () => {
-              // console.log('====== API DEBUG INFO ======');
-              // console.log('Base URL:', this.baseUrl);
-              // console.log('API Endpoints:', this.apiEndpoints);
-              // console.log('Window Location:', window.location);
-              // console.log('Document URL:', document.URL);
-              // console.log('Error Details:', error);
-              
-              // Try to ping the server to check connectivity
-              fetch(window.location.origin)
-                .then(response => {
-                  // console.log('Server ping result:', {
-                  //   ok: response.ok,
-                  //   status: response.status,
-                  //   statusText: response.statusText
-                  // });
-                })
-                .catch(err => {
-                  // console.log('Server ping failed:', err);
-                });
-              
               alert('Debug information has been logged to the console (F12)');
             });
           }
@@ -444,21 +396,13 @@ class AccountManager {
    * Populate form fields with user data
    */
   populateUserData() {
-    // console.log('populateUserData in account.js in assets/js');
-    // console.log('User data for populating:', this.user);
-    
     document.getElementById('username').value = this.user.username || '';
     document.getElementById('email').value = this.user.email || '';
     
     // Configure two-factor toggle
     const twofaToggle = document.getElementById('twofa-enabled');
-    // console.log('twofaToggle in populateUserData in account.js in assets/js', twofaToggle ? 'found' : 'not found');
     if (twofaToggle) {
-      // console.log('this is the twofaToggle in populateUserData in account.js in assets/js', twofaToggle);
-      // console.log('Setting 2FA toggle to:', this.user.twoFactorEnabled);
       twofaToggle.checked = this.user.twoFactorEnabled || false;
-    } else {
-      // console.log('twofaToggle not found in populateUserData in account.js in assets/js');
     }
     
 
@@ -525,7 +469,6 @@ class AccountManager {
    * Populate language dropdown
    */
   populateLanguages() {
-    // console.log('populateLanguages in account.js in assets/js');
     const languageSelect = document.getElementById('language');
     
     if (!this.user || !this.user.availableLocales) return;
@@ -562,7 +505,6 @@ class AccountManager {
    */
   async changeLanguage(locale) {
     try {
-      // console.log('Changing language to:', locale);
       const response = await axios.post(this.apiEndpoints.changeLocale, { locale });
       
       if (response.data.success) {
@@ -584,8 +526,6 @@ class AccountManager {
    * Set up event listeners
    */
   setupEventListeners() {
-    // console.log('Setting up event listeners');
-    
     document.getElementById('profile-form')?.addEventListener('submit', (e) => {
       e.preventDefault();
       this.updateProfile();
@@ -609,9 +549,7 @@ class AccountManager {
     
     // 2FA toggle
     const twofaToggle = document.getElementById('twofa-enabled');
-    // console.log('twofaToggle in account.js in assets/js', twofaToggle);
     if (twofaToggle) {
-      // console.log('Adding change event listener to 2FA toggle');
       
       // Get references to the toggle components
       const toggleSwitch = twofaToggle.closest('.toggle-switch');
@@ -619,7 +557,6 @@ class AccountManager {
       
       // Add main change listener to checkbox
       twofaToggle.addEventListener('change', (e) => {
-        // console.log('2FA toggle changed:', e.target.checked);
         this.updateTwoFactor(twofaToggle.checked);
       });
       
@@ -651,17 +588,12 @@ class AccountManager {
     
     // Password strength meter
     const newPasswordInput = document.getElementById('new-password');
-    // console.log('newPasswordInput in account.js in assets/js', newPasswordInput);
     const strengthBar = document.getElementById('password-strength-bar');
-    // console.log('strengthBar in account.js in assets/js', strengthBar);
-    
+
     if (newPasswordInput && strengthBar) {
-      // console.log('Adding input event listener to password field');
       newPasswordInput.addEventListener('input', (e) => {
-        // console.log('Password input changed');
         const password = newPasswordInput.value;
         const strength = this.measurePasswordStrength(password);
-        // console.log('Password strength calculated:', strength);
         
         // Clear previous classes
         strengthBar.className = '';
@@ -669,13 +601,10 @@ class AccountManager {
         
         if (password.length > 0) {
           if (strength < 30) {
-            // console.log('Setting strength-weak class');
             strengthBar.classList.add('strength-weak');
           } else if (strength < 60) {
-            // console.log('Setting strength-medium class');
             strengthBar.classList.add('strength-medium');
           } else {
-            // console.log('Setting strength-strong class');
             strengthBar.classList.add('strength-strong');
           }
         }
@@ -718,14 +647,11 @@ class AccountManager {
    * Update two-factor authentication settings
    */
   async updateTwoFactor(enabled) {
-    // console.log('updateTwoFactor called with enabled =', enabled);
     const twoFaToggle = document.getElementById('twofa-enabled');
     const originalState = !enabled; // Store original state in case we need to revert
     
     try {
-      // console.log('Sending request to update 2FA settings to:', this.apiEndpoints.updateTwoFactor);
       const response = await axios.post(this.apiEndpoints.updateTwoFactor, { enabled });
-      // console.log('2FA update response:', response.data);
       this.showSuccessMessage('Two-factor authentication ' + (enabled ? 'enabled' : 'disabled') + ' successfully');
       
       // Update user data

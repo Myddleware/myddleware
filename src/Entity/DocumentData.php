@@ -27,36 +27,30 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Entity(repositoryClass="App\Repository\DocumentDataRepository")
- * @ORM\Table(name="documentdata", indexes={
- *  @ORM\Index(name="index_doc_id", columns={"doc_id"}),
- *  @ORM\Index(name="index_job_id_type", columns={"doc_id","type"})
- *})
- */
+#[ORM\Entity(repositoryClass: 'App\Repository\DocumentDataRepository')]
+#[ORM\Table(name: 'documentdata')]
+#[ORM\Index(name: 'index_doc_id', columns: ['doc_id'])]
+#[ORM\Index(name: 'index_job_id_type', columns: ['doc_id', 'type'])]
 class DocumentData
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\ManyToOne(targetEntity="Document", inversedBy="datas")
-     * @ORM\JoinColumn(name="doc_id", referencedColumnName="id", nullable=false)
-     */
+	#[ORM\ManyToOne(targetEntity: Document::class, inversedBy: 'datas')]
+    #[ORM\JoinColumn(
+        name: 'doc_id',
+        referencedColumnName: 'id',
+        nullable: false,
+        columnDefinition: 'VARCHAR(36)'
+    )]
     private Document $doc_id;
 
-    /**
-     * @ORM\Column(name="type", type="string", length=1, nullable=false)
-     */
+    #[ORM\Column(name: 'type', type: 'string', length: 1, nullable: false)]
     private string $type;
 
-    /**
-     * @ORM\Column(name="data", type="array", nullable=false)
-     */
+    #[ORM\Column(name: 'data', type: 'json', nullable: false)]
     private $data;
 
     public function getId(): int
@@ -85,6 +79,11 @@ class DocumentData
 
     public function getData()
     {
+        // Rows migrated from the old "array" type are stored as JSON objects (decoded as array by Doctrine)
+        // whereas new rows are stored as a JSON string. Callers always expect a JSON string.
+        if (null !== $this->data && !is_string($this->data)) {
+            return json_encode($this->data);
+        }
         return $this->data;
     }
 

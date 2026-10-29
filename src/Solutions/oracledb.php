@@ -45,7 +45,6 @@ class oracledb extends database
     protected function get_query_show_tables($type): string
     {
         return "SELECT * FROM (SELECT CONCAT(CONCAT(owner, '.'), table_name) AS \"TableName\", owner FROM all_tables UNION SELECT CONCAT(CONCAT(owner, '.'), view_name) AS \"ViewName\", owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
-        // return "SELECT * FROM (SELECT table_name, owner FROM all_tables UNION SELECT view_name, owner FROM all_views) WHERE owner NOT LIKE '%SYS'";
     }
 
     // Query to get all the flieds of the table

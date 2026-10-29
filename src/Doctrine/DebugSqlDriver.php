@@ -22,7 +22,7 @@ class DebugSqlDriver extends AbstractDriverMiddleware
     public function connect(
         #[SensitiveParameter]
         array $params
-    ) {
+    ): ConnectionInterface {
         return new DebugSqlConnection(parent::connect($params), $this->logger);
     }
 }

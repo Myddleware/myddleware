@@ -31,6 +31,7 @@ use App\Repository\LogRepository;
 use App\Repository\RuleRepository;
 use DateTime;
 use DateTimeZone;
+use Doctrine\DBAL\ArrayParameterType;
 use Doctrine\DBAL\Connection as DriverConnection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
@@ -73,8 +74,12 @@ class JobManager
 	protected int $noDocumentsTablesToEmptyCounter;
 	protected int $noRulesTablesToEmptyCounter;
 
-    protected int $limitDelete = 1000;
-    protected int $nbCallMaxDelete = 50;
+    protected int $limitDelete = 100000;
+    protected int $nbCallMaxDelete = 5;
+    // Number of documents cleared per transaction by the cleardata job (ids sent in a IN clause)
+    // Keep it low: above range_optimizer_max_mem_size (8MB by default, ~1.5KB per id) MySQL stops using the primary key and scans the whole table
+    protected int $limitClearDocument = 1000;
+    protected int $nbCallMaxClearDocument = 500;
     protected int $checkJobPeriod = 900;
 
     private ParameterBagInterface $parameterBagInterface;
@@ -647,7 +652,6 @@ class JobManager
             $result = $stmt->executeQuery();
             $documents = $result->fetchAllAssociative();
 
-            // include_once 'rule.php';
             if (!empty($documents)) {
                 $param['ruleId'] = '';
                 foreach ($documents as $document) {  
@@ -898,26 +902,26 @@ class JobManager
         $listOfSqlDocumentParams = [
             "SELECT log.id
         FROM log
-        LEFT OUTER JOIN document ON log.doc_id = document.id
+        INNER OUTER JOIN document ON log.doc_id = document.id
         WHERE document.deleted = 1 AND log.created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM log WHERE id IN (%s)",
 
         "SELECT documentdata.id
         FROM documentdata
-        LEFT OUTER JOIN document ON documentdata.doc_id = document.id
-        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
+        INNER OUTER JOIN document ON documentdata.doc_id = document.id
+        WHERE document.deleted = 1 AND document.date_created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentdata WHERE id IN (%s)",
 
         "SELECT documentaudit.id
         FROM documentaudit
-        LEFT OUTER JOIN document ON documentaudit.doc_id = document.id
-        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
+        INNER OUTER JOIN document ON documentaudit.doc_id = document.id
+        WHERE document.deleted = 1 AND document.date_created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentaudit WHERE id IN (%s)",
 
         "SELECT documentrelationship.id
         FROM documentrelationship
-        LEFT OUTER JOIN document ON documentrelationship.doc_id = document.id
-        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
+        INNER OUTER JOIN document ON documentrelationship.doc_id = document.id
+        WHERE document.deleted = 1 AND document.date_created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM documentrelationship WHERE id IN (%s)",
         ];
 
@@ -936,7 +940,7 @@ class JobManager
         $listOfSqlDocumentParams = [
             "SELECT document.id
         FROM document
-        WHERE document.deleted = 1 AND document.date_modified < '$this->pruneDatabaseMaxDate'
+        WHERE document.deleted = 1 AND document.date_created < '$this->pruneDatabaseMaxDate'
         LIMIT :limitOfDeletePerRequest" => "DELETE FROM document WHERE id IN (%s)",
         ];
         return $__debugReturn = $listOfSqlDocumentParams;
@@ -1122,13 +1126,10 @@ class JobManager
             // Si la règle n'a pas de relation on initialise l'ordre à 1 sinon on met 99
             $sql = "SELECT
 						rule.id,
-						GROUP_CONCAT(rulerelationship.field_id SEPARATOR ';') field_id,
 						GROUP_CONCAT(rulefield.formula SEPARATOR ';') formula
 					FROM rule
 						LEFT OUTER JOIN rulefield
 							ON rule.id = rulefield.rule_id
-						LEFT OUTER JOIN rulerelationship
-							ON rule.id = rulerelationship.rule_id
 					WHERE
 						rule.deleted = 0
 					GROUP BY rule.id";
@@ -1140,17 +1141,20 @@ class JobManager
 				// Add the rule in formula to the list of rules in relationship
 				foreach ($rules as $key => $rule) {
 					$matches = array();
-					// Get the second parameters (rule id) of the lookup functions
-					preg_match_all('/lookup\(\{[^}]+\},"([^"]+)"/', $rule['formula'], $matches);
-					// Transform result and add it to the other rules (old relationships)
-					$rules[$key]['field_id'] .= ';'.implode(';', array_unique($matches[1]));
-					$rules[$key]['field_id'] = trim($rules[$key]['field_id'],';');
+                    $rules[$key]['rulesLinked'] = array();
+                    // Only of lookup in the formula 
+                    if (str_contains($rule['formula'], 'lookup')) {
+                        // Get the second parameters (rule id) of the lookup functions
+                        preg_match_all('/\blookup\s*\(\s*[^,]+,\s*(["\'])(.*?)\1\s*(?=,|\))/i', $rule['formula'], $matches);
+                        // Transform result and add it to the other rules (old relationships)
+                        $rules[$key]['rulesLinked'] = array_unique($matches[2]);
+                    }
 				}
                 // Création d'un tableau en clé valeur et sauvegarde d'un tableau de référence
                 $ruleKeyValue = [];
                 foreach ($rules as $key => $rule) {
-                    // Init order depending on the field_id value
-                    if (empty($rule['field_id'])) {
+                    // Init order depending on the rulesLinked value
+                    if (empty($rule['rulesLinked'])) {
                         $rules[$key]['rule_order'] = 1;
                     } else {
                         $rules[$key]['rule_order'] = 99;
@@ -1165,7 +1169,7 @@ class JobManager
                 while ($i < 20 && in_array('99', $ruleKeyValue)) {
                     ++$i;
                     // Boucles sur les régles
-                    foreach ($rules as $rule) {
+                    foreach ($rules as $key => $rule) {
                         $order = 0;
                         // Si on est une règle sans ordre
                         if (
@@ -1173,8 +1177,7 @@ class JobManager
                             and '99' == $rule['rule_order']
                         ) {
                             // Récupération des règles liées et recherche dans le tableau keyValue
-                            $rulesLink = explode(';', $rule['field_id']);
-                            foreach ($rulesLink as $ruleLink) {
+                            foreach ($rule['rulesLinked'] as $ruleLink) {
                                 if (
                                         !empty($ruleKeyValue[$ruleLink])
                                     && $ruleKeyValue[$ruleLink] > $order
@@ -1185,11 +1188,10 @@ class JobManager
                             // Si toutes les règles trouvées ont une priorité autre que 99 alors on affecte à la règle la piorité +1 dans les tableaux de références
                             if ($order < 99) {
                                 $ruleKeyValue[$rule['id']] = $order + 1;
-                                $rulesRef[$rule['id']]['rule_order'] = $order + 1;
+                                $rules[$key]['rule_order'] = $order + 1;
                             }
                         }
                     }
-                    $rules = $rulesRef;
                 }
                 // On vide la table RuleOrder
                 $sql = 'DELETE FROM ruleorder';
@@ -1286,7 +1288,6 @@ class JobManager
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['output' => $output]);
         try {
-        // $upgrade = new Upgrade($this->logger, $this->container, $this->connection);
         $upgrade = $this->upgrade;
         $this->message = $upgrade->processUpgrade($output);
     } finally {
@@ -1322,227 +1323,154 @@ class JobManager
         $result = $stmt->executeQuery();
         $rules = $result->fetchAllAssociative();
 		// Calculate the limit for selection
-		$limit = $this->nbCallMaxDelete * $this->limitDelete;
+		$batchSize = max(1, (int) $this->limitDelete);
+		$documentBatchSize = max(1, (int) $this->limitClearDocument);
+		$maximumDocumentCalls = max(0, (int) $this->nbCallMaxClearDocument);
         if (!empty($rules)) {
             // Boucle sur toutes les règles
             foreach ($rules as $rule) {
-				$message = 'Rule '.$rule['name'].chr(10);
+ 				$message = 'Rule '.$rule['name'].chr(10);
 				echo date('Y-m-d H:i:s').' - '.$message;
 				$this->createLog($message);
                 // Calculate the date corresponding depending the rule parameters
-                $limitDate = new DateTime('now', new DateTimeZone('GMT'));
-                $limitDate->modify('-'.$rule['days'].' days');
+				$limitDate = new \DateTimeImmutable('now', new \DateTimeZone('GMT'));
+				$limitDate = $limitDate->modify('-'.(int) $rule['days'].' days');
 				
-				// Delete document data
-                // Select the list of documentdata to be deleted
+				$parameters = [
+					'ruleId' => $rule['id'],
+					'limitDate' => $limitDate->format('Y-m-d H:i:s'),
+				];
+                // Select only the documents not cleared yet, the documents already cleared by a previous run are never read again
+				$selectDocumentsSql = "
+					SELECT d.id, d.date_created
+					FROM document AS d
+					WHERE d.rule_id = :ruleId
+					  AND d.deleted = 0
+					  AND d.data_cleared = 0
+					  AND d.global_status = :globalStatus
+					  AND d.date_created < :limitDate
+					  AND d.date_created >= :lastDate
+					  AND NOT (d.date_created = :lastDateEqual AND d.id <= :lastId)
+					ORDER BY d.date_created, d.id
+					LIMIT {$documentBatchSize}
+				";
+				$deleteDocumentDataSql = "DELETE FROM documentdata WHERE doc_id IN (:docIds)";
+				$deleteLogSql = "
+					DELETE FROM log
+					WHERE doc_id IN (:docIds)
+					  AND msg NOT IN (
+						  'Status : New',
+						  'Status : Send'
+					  )
+				";
+				$flagDocumentsSql = "UPDATE document SET data_cleared = 1 WHERE id IN (:docIds)";
+				$arrayTypes = ['docIds' => ArrayParameterType::STRING];
+
+				$countDocumentData = 0;
+				$countLog = 0;
+				$countDocuments = 0;
 				try {
-					$deleteSourceSelection = "
-						SELECT documentdata.doc_id
-						FROM document
-							INNER JOIN documentdata
-								ON document.id = documentdata.doc_id
-						WHERE 
-								document.rule_id = :ruleId
-							AND document.global_status IN ('Close','Cancel')
-							AND document.deleted = 0 
-							AND document.date_modified < :limitDate
-						LIMIT ".$limit;
-					// Get selection
-					$stmt = $this->connection->prepare($deleteSourceSelection);
-					$stmt->bindValue('ruleId', $rule['id']);
-					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-					$resultDeleteSourceSelection = $stmt->executeQuery();
-					$documentIds = $resultDeleteSourceSelection->fetchAllAssociative();
-					// $this->connection->commit(); // -- COMMIT TRANSACTION
-				} catch (Exception $e) {
-                    // $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
-				
-                try {
-					$count = 0;
-					$nbCall = 0;
-					// Delete data using pack size of $this->limitDelete rows
-					// Continue while we have results and if the program dosn't reach the limit call
-					while (
-							!empty($documentIds)
-						AND $nbCall < $this->nbCallMaxDelete
-					){
-						$i = 0;
-						$nbCall++;
-						
-						// Prepare delete query
-						if (!empty($documentIds)) {
-							$idString = '';
-							// Build IN parameter
-							foreach ($documentIds as $key => $documentId) {
-								if ($i >= $this->limitDelete) {
-									break;
-								}
-								$i++;
-								$idString .= "'".$documentId['doc_id']."',";
-								unset($documentIds[$key]);
+					echo gmdate('Y-m-d H:i:s').' - Delete rows in the tables DocumentData and Log for the rule '.$rule['name'].PHP_EOL;
+					$call = 0;
+					foreach (['Close', 'Cancel'] as $globalStatus) {
+						// Keyset pagination : each call starts after the last document read, so MySQL doesn't read again
+						// the index entries of the documents just flagged (they stay in the index until InnoDB purge them)
+						$lastDate = '1000-01-01 00:00:00';
+						$lastId = '';
+						while ($call < $maximumDocumentCalls) {
+							$call++;
+							$documents = $this->connection->fetchAllAssociative($selectDocumentsSql, $parameters + [
+								'globalStatus' => $globalStatus,
+								'lastDate' => $lastDate,
+								'lastDateEqual' => $lastDate,
+								'lastId' => $lastId,
+							]);
+							if (empty($documents)) {
+								break;
 							}
-							$idString = rtrim($idString, ',');
-							if (!empty($idString)) {
-								$this->connection->beginTransaction();
-								// Delete rows in table documentdata
-								$deleteDocumentData = "DELETE FROM documentdata WHERE doc_id IN (".$idString.")";
-								$stmtDelete = $this->connection->prepare($deleteDocumentData);
-								$result = $stmtDelete->executeQuery();
-								// Save the number of rows deleted
-								if ($result->rowCount() > 0) {
-									$count += $result->rowCount();
+							$documentIds = array_column($documents, 'id');
+							$lastDocument = end($documents);
+							$lastDate = $lastDocument['date_created'];
+							$lastId = $lastDocument['id'];
+							// Data, logs and flag are committed together so a document is flagged only if its data have been removed
+							$this->connection->beginTransaction();
+							try {
+								$countDocumentData += $this->connection->executeStatement($deleteDocumentDataSql, ['docIds' => $documentIds], $arrayTypes);
+								$countLog += $this->connection->executeStatement($deleteLogSql, ['docIds' => $documentIds], $arrayTypes);
+								// document.id is a long key: a big IN list exceeds range_optimizer_max_mem_size and MySQL scans the whole table
+								foreach (array_chunk($documentIds, 100) as $documentIdsChunk) {
+									$this->connection->executeStatement($flagDocumentsSql, ['docIds' => $documentIdsChunk], $arrayTypes);
 								}
-								$this->connection->commit(); // -- COMMIT TRANSACTION
+								$this->connection->commit();
+								$countDocuments += count($documentIds);
+							} catch (\Throwable $e) {
+								if ($this->connection->isTransactionActive()) {
+									$this->connection->rollBack();
+								}
+
+								throw $e;
+							}
+							echo '    - '.gmdate('Y-m-d H:i:s').' - '.$countDocuments.' documents cleared, '.$countDocumentData.' documentdata and '.$countLog.' log rows deleted. '.PHP_EOL;
+
+							// Un lot incomplet signifie qu'il n'y a plus de documents eligibles pour ce statut.
+							if (count($documentIds) < $documentBatchSize) {
+								break;
 							}
 						}
 					}
-                } catch (Exception $e) {
-                    $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to clear the table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
+				} catch (Exception $e) {
+					$error = 'Failed to delete the records in tables DocumentData and Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
                     $this->message .= $error;
 					$this->createLog($error, 'E');
                     $this->logger->error($this->message);
                 }
-				// Add log 
-				if ($count > 0) {
-					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. '.chr(10);
-					$message .= $count.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+
+				$message = $countDocumentData.' rows deleted in the table DocumentData for the rule '.$rule['name'].'. ';
+				echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
+				if ($countDocumentData > 0) {
 					$this->message .= $message;
 					$this->createLog($message);
 				}
-
-				// Delete log
-                // Select the list of log to be deleted
-				try {
-					$deleteLogSelection = "
-						SELECT log.id
-						FROM log
-							INNER JOIN document
-								ON log.doc_id = document.id
-						WHERE 
-								document.rule_id = :ruleId
-							AND log.msg IN ('Status : Filter_OK','Status : Predecessor_OK','Status : Relate_OK','Status : Transformed','Status : Ready_to_send')	
-							AND document.global_status IN ('Close','Cancel')
-							AND document.deleted = 0 
-							AND document.date_modified < :limitDate	
-						LIMIT ".$limit;
-					// Get selection
-					$stmt = $this->connection->prepare($deleteLogSelection);
-					$stmt->bindValue('ruleId', $rule['id']);
-					$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-					$resultDeleteLogSelection = $stmt->executeQuery();
-					$logIds = $resultDeleteLogSelection->fetchAllAssociative();
-				} catch (Exception $e) {
-                    $error = 'Failed to select the records in table DocumentData: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
-
-
-                try {
-					$count = 0;
-					$nbCall = 0;
-					// Delete data using pack size of $this->limitDelete rows
-					// Continue while we have results and if the program dosn't reach the limit call
-					while (
-							!empty($logIds)
-						AND $nbCall < $this->nbCallMaxDelete
-					){
-						$i = 0;
-						$nbCall++;
-						
-						// Prepare delete query
-						if (!empty($logIds)) {
-							$idString = '';
-							// Build IN parameter
-							foreach ($logIds as $key => $logId) {
-								if ($i >= $this->limitDelete) {
-									break;
-								}
-								$i++;
-								$idString .= "'".$logId['id']."',";
-								unset($logIds[$key]);
-							}
-							$idString = rtrim($idString, ',');
-							if (!empty($idString)) {
-								$this->connection->beginTransaction();
-								// Delete rows in table log
-								$deleteLog = "DELETE FROM log WHERE id IN (".$idString.")";
-								$stmtDeleteLog = $this->connection->prepare($deleteLog);
-								$result = $stmtDeleteLog->executeQuery();
-								// Save the number of rows deleted
-								if ($result->rowCount() > 0) {
-									$count += $result->rowCount();
-								}
-								$this->connection->commit(); // -- COMMIT TRANSACTION
-							}
-						}
-						
-					} 
-                } catch (Exception $e) {
-                    $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
-					$error = 'Failed to clear the table Log: '.$e->getMessage().' '.$e->getFile().' Line : ( '.$e->getLine().' )';
-                    $this->message .= $error;
-					$this->createLog($error, 'E');
-                    $this->logger->error($this->message);
-                }
-				// Add log 
-				if ($count > 0) {
-					echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Log for the rule '.$rule['name'].'. '.chr(10);
-					$message = $count.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+				$message = $countLog.' rows deleted in the table Log for the rule '.$rule['name'].'. ';
+				echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
+				if ($countLog > 0) {
 					$this->message .= $message;
 					$this->createLog($message);
-				}	  
+				}
             }
         }
 		
+		
 		// Delete job
-        try {
-            $limitDate = new DateTime('now', new DateTimeZone('GMT'));
-            $limitDate->modify('-'.$this->nbDayClearJob.' days');
-            // Remove empty jobs
-            $deleteJob = " 	
-				DELETE 
-				FROM job
-				WHERE 
-						status = 'End'
-					AND param NOT IN ('cleardata', 'notification')
-					AND message  = ''
-					AND open = 0
-					AND close = 0
-					AND cancel = 0
-					AND error = 0
-					AND end < :limitDate
-					AND job.id NOT IN (select job_id from log) 
-				LIMIT ".$this->limitDelete;
-			$nbCall = 0;
-			$count = 0;
-			do {
-				$nbCall++;
-				$this->connection->beginTransaction();
-				$stmt = $this->connection->prepare($deleteJob);
-				$stmt->bindValue('limitDate', $limitDate->format('Y-m-d H:i:s'));
-				$resultDeleteJob = $stmt->executeQuery();
-				$this->connection->commit(); // -- COMMIT TRANSACTION
-				// Save the number of rows deleted
-				$count += $resultDeleteJob->rowCount();
-			} while (
-					$resultDeleteJob->rowCount() > 0
-				AND $nbCall < $this->nbCallMaxDelete
-			);
-			
-			// Add log 
+		try {
+			$jobLimitDate = new \DateTimeImmutable('now',new \DateTimeZone('GMT'));
+			$jobLimitDate = $jobLimitDate->modify('-'.(int) $this->nbDayClearJob.' days');
+
+			$deleteJobSql = "
+				DELETE FROM job
+				WHERE status = 'End'
+				  AND param NOT IN ('cleardata', 'notification')
+				  AND message = ''
+				  AND open = 0
+				  AND close = 0
+				  AND cancel = 0
+				  AND error = 0
+				  AND end < :limitDate
+				  AND NOT EXISTS (
+					  SELECT 1
+					  FROM log
+					  WHERE log.job_id = job.id
+				  )
+				LIMIT {$batchSize}
+			";
+			echo gmdate('Y-m-d H:i:s').' - Delete rows in the table job.'.PHP_EOL;
+			$count = $this->executeDeleteInBatches($deleteJobSql,['limitDate' => $jobLimitDate->format('Y-m-d H:i:s')]);
+
+			$message = $count.' rows deleted in the table Job. ';
+			echo gmdate('Y-m-d H:i:s').' - '.$message.PHP_EOL;
 			if ($count > 0) {
-				$message = $count.' rows deleted in the table Job. ';
 				$this->message .= $message;
 				$this->createLog($message);
-				echo date('Y-m-d H:i:s').' - '.$count.' rows deleted in the table Job. '.chr(10);
 			}
         } catch (Exception $e) {
             $this->connection->rollBack(); // -- ROLLBACK TRANSACTION
@@ -1555,6 +1483,40 @@ class JobManager
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
     }
+	
+	
+	private function executeDeleteInBatches($sql, array $parameters)
+	{
+		$totalDeleted = 0;
+		$maximumCalls = max(0, (int) $this->nbCallMaxDelete);
+		$batchSize = max(1, (int) $this->limitDelete);
+
+		for ($call = 0; $call < $maximumCalls; $call++) {
+			$this->connection->beginTransaction();
+			try {
+				$deleted = $this->connection->executeStatement(
+					$sql,
+					$parameters
+				);
+				$this->connection->commit();
+				$totalDeleted += $deleted;
+				echo '    - '.gmdate('Y-m-d H:i:s').' - '.$totalDeleted.' rows deleted. '.PHP_EOL;
+			} catch (\Throwable $e) {
+				if ($this->connection->isTransactionActive()) {
+					$this->connection->rollBack();
+				}
+
+				throw $e;
+			}
+
+			// Un lot incomplet signifie qu'il n'y a plus de lignes eligibles.
+			if ($deleted < $batchSize) {
+				break;
+			}
+		}
+
+		return $totalDeleted;
+	}
 
     // Récupération des données du job
     public function getLogData()
@@ -1767,6 +1729,7 @@ class JobManager
 					ON job.id = log.job_id
 			WHERE
 					job.status = 'start'
+				AND job.param != 'cleardata'
 			GROUP BY job.id
 			HAVING diff_log > :period OR (diff_job > :period AND log_created IS NULL)
 			";
@@ -1881,7 +1844,7 @@ class JobManager
             $stmt = $this->connection->prepare($query_header);
             $stmt->bindValue(':created', $now);
             $stmt->bindValue(':typeError', $type);
-            $stmt->bindValue(':message', str_replace("'", '', utf8_encode($message)));
+            $stmt->bindValue(':message', str_replace("'", '', $message));
             $stmt->bindValue(':job_id', $this->id);
             $result = $stmt->executeQuery();
         } catch (\Exception $e) {

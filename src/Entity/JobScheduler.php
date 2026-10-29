@@ -28,82 +28,52 @@ namespace App\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="jobscheduler")
- * @ORM\Entity(repositoryClass="App\Repository\JobSchedulerRepository")
- */
+#[ORM\Table(name: 'jobscheduler')]
+#[ORM\Entity(repositoryClass: 'App\Repository\JobSchedulerRepository')]
 class JobScheduler
 {
-    /**
-     * @ORM\Column(name="id", type="integer")
-     * @ORM\Id
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Column(name: 'id', type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     private int $id;
 
-    /**
-     * @ORM\Column(name="date_created", type="datetime", nullable=false)
-     */
+    #[ORM\Column(name: 'date_created', type: 'datetime', nullable: false)]
     private DateTime $dateCreated;
 
-    /**
-     * @ORM\Column(name="date_modified", type="datetime")
-     */
+    #[ORM\Column(name: 'date_modified', type: 'datetime')]
     private ?DateTime $dateModified;
 
-    /**
-     * @ORM\Column(name="created_by", type="integer", nullable=false, options={"default":1})
-     */
+    #[ORM\Column(name: 'created_by', type: 'integer', nullable: false, options: ['default' => 1])]
     private int $createdBy;
 
-    /**
-     * @ORM\Column(name="modified_by", type="integer", nullable=false, options={"default":1})
-     */
+    #[ORM\Column(name: 'modified_by', type: 'integer', nullable: false, options: ['default' => 1])]
     private int $modifiedBy;
 
-    /**
-     * @ORM\Column(name="command", type="string", length=50, nullable=false)
-     */
+    #[ORM\Column(name: 'command', type: 'string', length: 50, nullable: false)]
     private string $command;
 
-    /**
-     * @ORM\Column(name="paramName1", type="string", length=50, nullable=true)
-     */
+    #[ORM\Column(name: 'paramName1', type: 'string', length: 50, nullable: true)]
     private ?string $paramName1;
 
-    /**
-     * @ORM\Column(name="paramValue1", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'paramValue1', type: 'text', nullable: true)]
     private ?string $paramValue1;
 
-    /**
-     * @ORM\Column(name="paramName2", type="string", length=50, nullable=true)
-     */
+    #[ORM\Column(name: 'paramName2', type: 'string', length: 50, nullable: true)]
     private ?string $paramName2;
 
-    /**
-     * @ORM\Column(name="paramValue2", type="text", nullable=true)
-     */
+    #[ORM\Column(name: 'paramValue2', type: 'text', nullable: true)]
     private ?string $paramValue2;
 
-    /**
-     * @ORM\Column(name="period", type="integer", length=6,  nullable=false, options={"default":5})
-     */
+    #[ORM\Column(name: 'period', type: 'integer', length: 6, nullable: false, options: ['default' => 5])]
     private int $period;
 
-    /**
-     * @ORM\Column(name="lastRun", type="datetime", nullable=true)
-     */
+    #[ORM\Column(name: 'lastRun', type: 'datetime', nullable: true)]
     private ?DateTime $lastRun;
 
-    /**
-     * @ORM\Column(name="active", type="boolean", options={"default":1})
-     */
+    #[ORM\Column(name: 'active', type: 'boolean', options: ['default' => 1])]
     private bool $active;
 
-    /**
-     * @ORM\Column(name="jobOrder", type="integer", length=3, nullable=true)
-     */
+    #[ORM\Column(name: 'jobOrder', type: 'integer', length: 3, nullable: true)]
     private ?int $jobOrder;
 
     public function getId(): int

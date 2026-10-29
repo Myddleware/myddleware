@@ -32,110 +32,70 @@ use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 use Symfony\Component\Validator\Constraints as Assert;
 
-/**
- * @ORM\Table(name="users")
- * @ORM\Entity(repositoryClass="App\Repository\UserRepository")
- * @UniqueEntity(fields={"username"}, message="There is already an account with this username")
- */
+#[ORM\Table(name: 'users')]
+#[ORM\Entity(repositoryClass: 'App\Repository\UserRepository')]
+#[UniqueEntity(fields: ['username'], message: 'There is already an account with this username')]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     const ROLE_DEFAULT = 'ROLE_USER';
     const ROLE_SUPER_ADMIN = 'ROLE_SUPER_ADMIN';
     const ROLE_ADMIN = 'ROLE_ADMIN';
 
-    /**
-     * @ORM\Id
-     * @ORM\Column(type="integer")
-     * @ORM\GeneratedValue(strategy="AUTO")
-     */
+    #[ORM\Id]
+    #[ORM\Column(type: 'integer')]
+    #[ORM\GeneratedValue(strategy: 'AUTO')]
     protected int $id;
 
-    /**
-     * @ORM\Column(name="username", type="string", length=180)
-     */
+    #[ORM\Column(name: 'username', type: 'string', length: 180)]
     protected string $username;
 
-    /**
-     * @ORM\Column(name="username_canonical", type="string", length=180, unique=true)
-     */
+    #[ORM\Column(name: 'username_canonical', type: 'string', length: 180, unique: true)]
     protected ?string $usernameCanonical;
 
-    /**
-     * @ORM\Column(name="email", type="string", length=180)
-     */
+    #[ORM\Column(name: 'email', type: 'string', length: 180)]
     protected string $email;
 
-    /**
-     * @ORM\Column(name="email_canonical", type="string", length=180, unique=true)
-     */
+    #[ORM\Column(name: 'email_canonical', type: 'string', length: 180, unique: true)]
     protected ?string $emailCanonical;
 
-    /**
-     * @ORM\Column(name="enabled", type="boolean")
-     */
+    #[ORM\Column(name: 'enabled', type: 'boolean')]
     protected bool $enabled;
 
-    /**
-     * @ORM\Column(name="salt", type="string", nullable=true)
-     */
+    #[ORM\Column(name: 'salt', type: 'string', length: 255, nullable: true)]
     protected $salt;
 
-    /**
-     * @ORM\Column(name="password", type="string")
-     */
+    #[ORM\Column(name: 'password', type: 'string', length: 255)]
     protected string $password;
 
-    /**
-     * Plain password. Used for model validation. Must not be persisted.
-     */
+    /** Plain password. Used for model validation. Must not be persisted. */
     protected ?string $plainPassword;
 
-    /**
-     * @ORM\Column(name="last_login", type="datetime", nullable=true)
-     */
+    #[ORM\Column(name: 'last_login', type: 'datetime', nullable: true)]
     protected ?DateTime $lastLogin;
 
-    /**
-     * @ORM\Column(name="confirmation_token", type="string", length=180, unique=true, nullable=true)
-     */
+    #[ORM\Column(name: 'confirmation_token', type: 'string', length: 180, unique: true, nullable: true)]
     protected ?string $confirmationToken;
 
-    /**
-     * @ORM\Column(name="password_requested_at", type="datetime", nullable=true)
-     */
+    #[ORM\Column(name: 'password_requested_at', type: 'datetime', nullable: true)]
     protected ?DateTime $passwordRequestedAt;
 
-    /**
-     * @ORM\Column(name="roles", type="array")
-     */
+    #[ORM\Column(name: 'roles', type: 'json')]
     protected $roles;
 
-    /**
-     * @Assert\Timezone
-     * @ORM\Column(name="timezone", type="string")
-     */
+    #[Assert\Timezone]
+    #[ORM\Column(name: 'timezone', type: 'string', length: 255)]
     protected string $timezone;
 
-    // csv_separator is a string of length max 10 and in the table users it is defined as csv_separator varchar(5)
-    /**
-     * @ORM\Column(name="csv_separator", type="string", length=5, options={"default"=";"})
-     */
+    #[ORM\Column(name: 'csv_separator', type: 'string', length: 5, options: ['default' => ';'])]
     protected string $csv_separator = ',';
 
-    // date_format is a string of length max 10 and in the table users it is defined as date_format varchar(10)
-    /**
-     * @ORM\Column(name="date_format", type="string", length=10, options={"default"="d/m/Y"})
-     */
+    #[ORM\Column(name: 'date_format', type: 'string', length: 10, options: ['default' => 'd/m/Y'])]
     protected string $date_format = 'd/m/Y';
 
-    /**
-     * @ORM\Column(name="deleted", type="boolean", options={"default": 0})
-     */
+    #[ORM\Column(name: 'deleted', type: 'boolean', options: ['default' => 0])]
     protected bool $deleted = false;
 
-    /**
-     * @ORM\OneToOne(targetEntity=TwoFactorAuth::class, mappedBy="user", cascade={"remove"})
-     */
+    #[ORM\OneToOne(targetEntity: TwoFactorAuth::class, mappedBy: 'user', cascade: ['remove'])]
     private ?TwoFactorAuth $twoFactorAuth = null;
 
     public function __construct()
@@ -198,65 +158,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         ] = $data;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function eraseCredentials()
+    #[\Deprecated]
+    public function eraseCredentials(): void
     {
         $this->plainPassword = null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUsername(): string
     {
         return $this->username;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUsernameCanonical(): ?string
     {
         return $this->usernameCanonical;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getSalt()
     {
         return $this->salt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEmail(): string
     {
         return $this->email;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getEmailCanonical(): string
     {
         return $this->emailCanonical;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPassword(): ?string
     {
         return $this->password;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getPlainPassword(): string
     {
         return $this->plainPassword;
@@ -267,17 +204,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->lastLogin;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getConfirmationToken(): ?string
     {
         return $this->confirmationToken;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
@@ -288,41 +219,26 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return array_unique($roles);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getTimezone(): string
     {
         return $this->timezone;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasRole($role): bool
     {
         return in_array(strtoupper($role), $this->getRoles(), true);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isAccountNonExpired(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isAccountNonLocked(): bool
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isCredentialsNonExpired(): bool
     {
         return true;
@@ -333,17 +249,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->enabled;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isSuperAdmin(): bool
     {
         return $this->hasRole(static::ROLE_SUPER_ADMIN);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function removeRole($role): self
     {
         if (false !== $key = array_search(strtoupper($role), $this->roles, true)) {
@@ -354,9 +264,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setUsername($username): self
     {
         $this->username = $username;
@@ -364,9 +271,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setUsernameCanonical($usernameCanonical): self
     {
         $this->usernameCanonical = $usernameCanonical;
@@ -374,9 +278,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setSalt($salt): self
     {
         $this->salt = $salt;
@@ -384,9 +285,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEmail($email): self
     {
         $this->email = $email;
@@ -394,9 +292,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEmailCanonical($emailCanonical): self
     {
         $this->emailCanonical = $emailCanonical;
@@ -404,9 +299,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setEnabled($boolean): self
     {
         $this->enabled = (bool) $boolean;
@@ -414,9 +306,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPassword($password): self
     {
         $this->password = $password;
@@ -424,9 +313,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setSuperAdmin($boolean): self
     {
         if (true === $boolean) {
@@ -438,9 +324,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPlainPassword($password): self
     {
         $this->plainPassword = $password;
@@ -448,9 +331,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setLastLogin(?DateTime $time = null): self
     {
         $this->lastLogin = $time;
@@ -458,9 +338,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setConfirmationToken($confirmationToken): self
     {
         $this->confirmationToken = $confirmationToken;
@@ -468,9 +345,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setPasswordRequestedAt(?DateTime $date = null): self
     {
         $this->passwordRequestedAt = $date;
@@ -478,26 +352,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * Gets the timestamp that the user requested a password reset.
-     */
     public function getPasswordRequestedAt(): ?DateTime
     {
         return $this->passwordRequestedAt;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isPasswordRequestNonExpired($ttl): bool
     {
         return $this->getPasswordRequestedAt() instanceof DateTime &&
             $this->getPasswordRequestedAt()->getTimestamp() + $ttl > time();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setRoles(array $roles): self
     {
         $this->roles = [];
@@ -509,9 +374,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setTimezone(string $timezone = 'UTC'): self
     {
         $this->timezone = $timezone;
@@ -524,9 +386,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return (string) $this->getUsername();
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getUserIdentifier(): string
     {
         return $this->username;

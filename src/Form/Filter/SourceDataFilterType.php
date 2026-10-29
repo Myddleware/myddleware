@@ -1,7 +1,7 @@
 <?php
 namespace App\Form\Filter;
 
-use Lexik\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
+use Spiriit\Bundle\FormFilterBundle\Filter\Form\Type as Filters;
 
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
