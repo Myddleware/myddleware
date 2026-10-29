@@ -77,8 +77,9 @@ class JobManager
     protected int $limitDelete = 100000;
     protected int $nbCallMaxDelete = 5;
     // Number of documents cleared per transaction by the cleardata job (ids sent in a IN clause)
-    protected int $limitClearDocument = 10000;
-    protected int $nbCallMaxClearDocument = 50;
+    // Keep it low: above range_optimizer_max_mem_size (8MB by default, ~1.5KB per id) MySQL stops using the primary key and scans the whole table
+    protected int $limitClearDocument = 1000;
+    protected int $nbCallMaxClearDocument = 500;
     protected int $checkJobPeriod = 900;
 
     private ParameterBagInterface $parameterBagInterface;
@@ -1341,13 +1342,16 @@ class JobManager
 				];
                 // Select only the documents not cleared yet, the documents already cleared by a previous run are never read again
 				$selectDocumentsSql = "
-					SELECT d.id
+					SELECT d.id, d.date_created
 					FROM document AS d
 					WHERE d.rule_id = :ruleId
 					  AND d.deleted = 0
 					  AND d.data_cleared = 0
-					  AND d.global_status IN ('Close', 'Cancel')
+					  AND d.global_status = :globalStatus
 					  AND d.date_created < :limitDate
+					  AND d.date_created >= :lastDate
+					  AND NOT (d.date_created = :lastDateEqual AND d.id <= :lastId)
+					ORDER BY d.date_created, d.id
 					LIMIT {$documentBatchSize}
 				";
 				$deleteDocumentDataSql = "DELETE FROM documentdata WHERE doc_id IN (:docIds)";
@@ -1367,31 +1371,51 @@ class JobManager
 				$countDocuments = 0;
 				try {
 					echo gmdate('Y-m-d H:i:s').' - Delete rows in the tables DocumentData and Log for the rule '.$rule['name'].PHP_EOL;
-					for ($call = 0; $call < $maximumDocumentCalls; $call++) {
-						$documentIds = $this->connection->fetchFirstColumn($selectDocumentsSql, $parameters);
-						if (empty($documentIds)) {
-							break;
-						}
-						// Data, logs and flag are committed together so a document is flagged only if its data have been removed
-						$this->connection->beginTransaction();
-						try {
-							$countDocumentData += $this->connection->executeStatement($deleteDocumentDataSql, ['docIds' => $documentIds], $arrayTypes);
-							$countLog += $this->connection->executeStatement($deleteLogSql, ['docIds' => $documentIds], $arrayTypes);
-							$this->connection->executeStatement($flagDocumentsSql, ['docIds' => $documentIds], $arrayTypes);
-							$this->connection->commit();
-							$countDocuments += count($documentIds);
-						} catch (\Throwable $e) {
-							if ($this->connection->isTransactionActive()) {
-								$this->connection->rollBack();
+					$call = 0;
+					foreach (['Close', 'Cancel'] as $globalStatus) {
+						// Keyset pagination : each call starts after the last document read, so MySQL doesn't read again
+						// the index entries of the documents just flagged (they stay in the index until InnoDB purge them)
+						$lastDate = '1000-01-01 00:00:00';
+						$lastId = '';
+						while ($call < $maximumDocumentCalls) {
+							$call++;
+							$documents = $this->connection->fetchAllAssociative($selectDocumentsSql, $parameters + [
+								'globalStatus' => $globalStatus,
+								'lastDate' => $lastDate,
+								'lastDateEqual' => $lastDate,
+								'lastId' => $lastId,
+							]);
+							if (empty($documents)) {
+								break;
 							}
+							$documentIds = array_column($documents, 'id');
+							$lastDocument = end($documents);
+							$lastDate = $lastDocument['date_created'];
+							$lastId = $lastDocument['id'];
+							// Data, logs and flag are committed together so a document is flagged only if its data have been removed
+							$this->connection->beginTransaction();
+							try {
+								$countDocumentData += $this->connection->executeStatement($deleteDocumentDataSql, ['docIds' => $documentIds], $arrayTypes);
+								$countLog += $this->connection->executeStatement($deleteLogSql, ['docIds' => $documentIds], $arrayTypes);
+								// document.id is a long key: a big IN list exceeds range_optimizer_max_mem_size and MySQL scans the whole table
+								foreach (array_chunk($documentIds, 100) as $documentIdsChunk) {
+									$this->connection->executeStatement($flagDocumentsSql, ['docIds' => $documentIdsChunk], $arrayTypes);
+								}
+								$this->connection->commit();
+								$countDocuments += count($documentIds);
+							} catch (\Throwable $e) {
+								if ($this->connection->isTransactionActive()) {
+									$this->connection->rollBack();
+								}
 
-							throw $e;
-						}
-						echo '    - '.gmdate('Y-m-d H:i:s').' - '.$countDocuments.' documents cleared, '.$countDocumentData.' documentdata and '.$countLog.' log rows deleted. '.PHP_EOL;
+								throw $e;
+							}
+							echo '    - '.gmdate('Y-m-d H:i:s').' - '.$countDocuments.' documents cleared, '.$countDocumentData.' documentdata and '.$countLog.' log rows deleted. '.PHP_EOL;
 
-						// Un lot incomplet signifie qu'il n'y a plus de documents eligibles.
-						if (count($documentIds) < $documentBatchSize) {
-							break;
+							// Un lot incomplet signifie qu'il n'y a plus de documents eligibles pour ce statut.
+							if (count($documentIds) < $documentBatchSize) {
+								break;
+							}
 						}
 					}
 				} catch (Exception $e) {
