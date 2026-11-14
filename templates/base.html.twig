@@ -191,6 +191,7 @@
 										{{ app.user.username | upper}}
 									</a>
 								</li>
+								{% if is_granted('ROLE_ADMIN') %}
 								<li>
 									<a class="dropdown-item" href="{{ path('user_manager') }}">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-people-fill" viewBox="0 0 16 16">
@@ -208,6 +209,7 @@
 										{{'menu_user.settings'|trans}}
 									</a>
 								</li>
+								{% endif %}
 								<li>
 									<a id="{{ isPremium() ? 'dropdown-cron' : 'dropdown-cron-grey' }}" class="dropdown-item" href="{{ path('jobscheduler_cron_list') }}">
 										<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clock" viewbox="0 0 16 16">

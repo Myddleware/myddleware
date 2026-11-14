@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Component\Yaml\Yaml;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -24,6 +25,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
 #[Route('/managementsmtp')]
+#[IsGranted('ROLE_ADMIN')]
 class ManagementSMTPController extends AbstractController
 {
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
