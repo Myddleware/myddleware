@@ -12,6 +12,7 @@ use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Exception\ParseException;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\Mailer\Transport;
@@ -19,6 +20,7 @@ use Symfony\Component\Mailer\Mailer;
 use Symfony\Component\Mime\Email;
 
 #[Route('/managementsmtp')]
+#[IsGranted('ROLE_ADMIN')]
 class ManagementSMTPController extends AbstractController
 {
     const LOCAL_ENV_FILE = __DIR__.'/../../.env.local';
