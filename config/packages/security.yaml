@@ -43,17 +43,27 @@ security:
         ROLE_ADMIN:       ROLE_USER
         ROLE_SUPER_ADMIN: ROLE_ADMIN
 
+    # Rules are evaluated top-down, first match wins.
+    # Everything is denied to anonymous users by default (catch-all at the end):
+    # only the paths explicitly listed as PUBLIC_ACCESS are reachable without login.
     access_control:
+        # --- Public paths ---
         - { path: ^/$, role: PUBLIC_ACCESS }
         - { path: ^/login$, role: PUBLIC_ACCESS }
+        - { path: ^/logout$, role: PUBLIC_ACCESS }
         - { path: ^/resetting, role: PUBLIC_ACCESS }
-        - { path: ^/install_requirements, role: PUBLIC_ACCESS }
-        - { path: ^/verifAccount, role: PUBLIC_ACCESS }
-        - { path: ^/panel, role: ROLE_USER }
-        - { path: ^/admin/, role: ROLE_ADMIN }
-        - { path: ^/rule/, role: ROLE_USER }
+        - { path: ^/verifAccount$, role: PUBLIC_ACCESS }
+        # Install wizard and first admin registration: additionally guarded by InstallVoter
+        # (denied as soon as allow_install = false or a user is logged in)
+        - { path: ^/install/, role: PUBLIC_ACCESS }
+        - { path: ^/register$, role: PUBLIC_ACCESS }
+        # --- API (JWT) ---
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api,       roles: IS_AUTHENTICATED_FULLY }
-        - { path: ^/rulegroup/, role: ROLE_USER }
-        - { path: ^/workflow/, role: ROLE_USER }
-        - { path: ^/variables, role: ROLE_USER }
+        # --- Administration ---
+        - { path: ^/admin/, role: ROLE_ADMIN }
+        - { path: ^/user_manager, role: ROLE_ADMIN }
+        - { path: ^/settings, role: ROLE_ADMIN }
+        - { path: ^/managementsmtp, role: ROLE_ADMIN }
+        # --- Default: any other path requires an authenticated user ---
+        - { path: ^/, role: ROLE_USER }

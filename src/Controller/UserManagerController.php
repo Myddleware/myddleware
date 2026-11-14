@@ -13,10 +13,11 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Psr\Log\LoggerInterface;
 
 #[Route('/user_manager')]
+#[IsGranted('ROLE_ADMIN')]
 class UserManagerController extends AbstractController
 {
 
@@ -57,6 +58,7 @@ class UserManagerController extends AbstractController
                 $this->addFlash('user_manager.edit.danger', $translator->trans('user.not_found'));
                 return $__debugReturn = $this->redirectToRoute('user_manager');
             }
+            $this->denyAccessToHigherPrivilegedUser($user);
 
             $form = $this->createForm(UserType::class, $user, [
                 'action' => $this->generateUrl('user_manager_update', ['id' => $user->getId()]),
@@ -78,6 +80,8 @@ class UserManagerController extends AbstractController
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['request' => $request, 'user' => $user, 'em' => $em, 'translator' => $translator]);
         $__debugReturn = null;
         try {
+            $this->denyAccessToHigherPrivilegedUser($user);
+
             $form = $this->createForm(UserType::class, $user);
             $form->handleRequest($request);
 
@@ -145,6 +149,7 @@ class UserManagerController extends AbstractController
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['user' => $user, 'em' => $em, 'translator' => $translator]);
         $__debugReturn = null;
         try {
+            $this->denyAccessToHigherPrivilegedUser($user);
             try {
                 $user->setDeleted(true);
                 $user->setEnabled(false);
@@ -158,6 +163,17 @@ class UserManagerController extends AbstractController
             return $__debugReturn = $this->redirectToRoute('user_manager');
         } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__, $__debugReturn);
+        }
+    }
+
+    /**
+     * An admin must not edit or delete a super admin account
+     * (e.g. changing its e-mail address would allow taking it over via password reset).
+     */
+    private function denyAccessToHigherPrivilegedUser(User $user): void
+    {
+        if (in_array('ROLE_SUPER_ADMIN', $user->getRoles(), true)) {
+            $this->denyAccessUnlessGranted('ROLE_SUPER_ADMIN');
         }
     }
 }
