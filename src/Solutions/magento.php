@@ -812,7 +812,6 @@ class magento extends solution
             $this->logDebug('magento request', ['url' => $url, 'method' => $method]);
             $result = curl_exec($ch);
             $this->logDebug('magento response', ['response' => $result]);
-            curl_close($ch);
 
             return $result ? json_decode($result, true) : false;
         }

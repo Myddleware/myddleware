@@ -564,7 +564,6 @@ class yousign extends solution
             $response = curl_exec($curl);
             $this->logDebug('yousign response', ['response' => $response]);
             $err = curl_error($curl);
-            curl_close($curl);
             if ($err) {
                 $this->logger->error($err);
                 throw new \Exception('cURL Error #: '.$err);

@@ -990,7 +990,6 @@ class suitecrm extends solution
             $this->logDebug('suitecrm call request', ['url' => $this->paramConnexion['url'], 'method' => $method]);
             $result = curl_exec($curl_request);
             $this->logDebug('suitecrm call response', ['response' => $result]);
-            curl_close($curl_request);
             if (empty($result)) {
                 return false;
             }

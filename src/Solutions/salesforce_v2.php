@@ -154,7 +154,6 @@ class salesforce_v2 extends salesforce {
 	    if (empty($query_request_data))
 	        throw new \Exception("Couldn't decode '$query_request_data' as a JSON object");
 
-		curl_close($ch);
 		ob_end_flush();
 		return $query_request_data;	
     }

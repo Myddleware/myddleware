@@ -253,10 +253,10 @@ class Zuora_API
     public function subscribe(
         Zuora_Account $zAccount,
         Zuora_SubscriptionData $zSubscriptionData,
-        Zuora_Contact $zBillToContact = null,
-        Zuora_PaymentMethod $zPaymentMethod = null,
-        Zuora_SubscribeOptions $zSubscribeOptions = null,
-        Zuora_Contact $zSoldToContact = null
+        ?Zuora_Contact $zBillToContact = null,
+        ?Zuora_PaymentMethod $zPaymentMethod = null,
+        ?Zuora_SubscribeOptions $zSubscribeOptions = null,
+        ?Zuora_Contact $zSoldToContact = null
     ) {
         $subscribeRequest = [
             'Account' => $zAccount->getSoapVar(),
@@ -290,7 +290,7 @@ class Zuora_API
     public function subscribeWithExistingAccount(
         Zuora_Account $zAccount,
         Zuora_SubscriptionData $zSubscriptionData,
-        Zuora_SubscribeOptions $zSubscribeOptions = null
+        ?Zuora_SubscribeOptions $zSubscribeOptions = null
     ) {
         $subscribeRequest = [
             'Account' => $zAccount->getSoapVar(),

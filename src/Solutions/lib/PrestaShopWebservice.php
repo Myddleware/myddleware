@@ -209,7 +209,6 @@ class PrestaShopWebservice
         if (0 === $status_code) {
             throw new PrestaShopWebserviceException('CURL Error: '.curl_error($session));
         }
-        curl_close($session);
         if ($this->debug) {
             if ('PUT' == $curl_params[CURLOPT_CUSTOMREQUEST] || 'POST' == $curl_params[CURLOPT_CUSTOMREQUEST]) {
                 $this->printDebug('XML SENT', urldecode($curl_params[CURLOPT_POSTFIELDS]));

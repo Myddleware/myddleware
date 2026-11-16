@@ -1465,23 +1465,27 @@ class MySoapClient extends SoapClient
         parent::__setLocation($url);
     }
 
-    public function __doRequest($request, $location, $action, $version, $one_way = null)
+    // $uriParserClass was added to SoapClient::__doRequest() in PHP 8.5; only forward it there
+    // (PHP 8.4 would throw an ArgumentCountError on the extra argument).
+    public function __doRequest($request, $location, $action, $version, $one_way = false, $uriParserClass = null): ?string
     {
         if ($this->myDebug) {
             echo "\nRequest: ".$request;
             echo "\nmyRequest: ".$this->myRequest;
         }
 
+        $extraArgs = PHP_VERSION_ID >= 80500 ? [$uriParserClass] : [];
+
         if ('' != $this->myRequest) {
             if ($this->myDebug) {
                 echo "\n DOING SOMETHING SPECIAL.\n";
             }
-            $this->myResponse = parent::__doRequest($this->myRequest, $location, $action, $version, $one_way);
+            $this->myResponse = parent::__doRequest($this->myRequest, $location, $action, $version, (bool) $one_way, ...$extraArgs);
         } else {
             if ($this->myDebug) {
                 echo "\n DOING NOTHING SPECIAL.\n";
             }
-            $this->myResponse = parent::__doRequest($request, $location, $action, $version, $one_way);
+            $this->myResponse = parent::__doRequest($request, $location, $action, $version, (bool) $one_way, ...$extraArgs);
         }
 
         return $this->myResponse;

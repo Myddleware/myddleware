@@ -345,7 +345,6 @@ class curl
         $this->info = curl_getinfo($curl);
         $this->error = curl_error($curl);
 
-        curl_close($curl);
 
         if (empty($this->error)) {
             return $ret;

@@ -18,7 +18,7 @@ class Zuora_RatePlanData extends Zuora_Object
      */
     private $_ratePlanChargeDataObjects = [];
 
-    public function __construct(Zuora_RatePlan $zRatePlan = null)
+    public function __construct(?Zuora_RatePlan $zRatePlan = null)
     {
         if (isset($zRatePlan)) {
             $this->zRatePlan = $zRatePlan;

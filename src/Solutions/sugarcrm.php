@@ -694,7 +694,6 @@ class sugarcrm extends solution
         $this->logDebug('sugarcrm api request', ['url' => $url, 'method' => $method]);
         $response = curl_exec($ch);
         $httpCode = (string) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         $this->logDebug('sugarcrm api response', ['response' => $response, 'status' => $httpCode]);
 

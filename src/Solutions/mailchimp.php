@@ -287,7 +287,6 @@ class mailchimp extends solution
             $this->logDebug('mailchimp request', ['url' => $url, 'method' => $method]);
             $result = curl_exec($ch);
             $this->logDebug('mailchimp response', ['response' => $result]);
-            curl_close($ch);
 
             return $result ? json_decode($result, true) : false;
         }

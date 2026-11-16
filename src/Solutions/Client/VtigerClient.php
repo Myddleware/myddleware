@@ -100,7 +100,6 @@ class VtigerClient
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         $response = curl_exec($ch);
-        curl_close($ch);
 
         return json_decode($response, true) ?: ['success' => false, 'error' => ['message' => 'Invalid response']];
     }
@@ -113,7 +112,6 @@ class VtigerClient
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
         $response = curl_exec($ch);
-        curl_close($ch);
 
         return json_decode($response, true) ?: ['success' => false, 'error' => ['message' => 'Invalid response']];
     }

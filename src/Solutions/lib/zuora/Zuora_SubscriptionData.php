@@ -18,7 +18,7 @@ class Zuora_SubscriptionData extends Zuora_Object
      */
     private $_ratePlanDataObjects = [];
 
-    public function __construct(Zuora_Subscription $zSubscription = null)
+    public function __construct(?Zuora_Subscription $zSubscription = null)
     {
         if (isset($zSubscription)) {
             $this->zSubscription = $zSubscription;

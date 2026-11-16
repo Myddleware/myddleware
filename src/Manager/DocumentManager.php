@@ -445,7 +445,7 @@ class DocumentManager
 			'status' => 'New',
 			'created_by' => $this->userId,
 			'modified_by' => $this->userId,
-			'source_id' => utf8_encode($this->sourceId),
+			'source_id' => mb_convert_encoding($this->sourceId, 'UTF-8', 'ISO-8859-1'),
 			'source_date_modified' => $this->data['date_modified'],
 			'mode' => $this->ruleMode,
 			'type' => $this->documentType,
@@ -2697,7 +2697,7 @@ class DocumentManager
 			$this->logBatch[] = [
 				'created' => $now,
 				'type' => $this->typeError,
-				'msg' => str_replace("'", '', utf8_encode($this->message)),
+				'msg' => str_replace("'", '', mb_convert_encoding($this->message, 'UTF-8', 'ISO-8859-1')),
 				'rule_id' => $this->ruleId,
 				'doc_id' => $this->id,
 				'ref_doc_id' => $this->docIdRefError,
@@ -2920,7 +2920,7 @@ class DocumentManager
 				// Suppression de la dernière virgule
 				$stmt = $this->connection->prepare($query);
 				// Target id could contain accent
-				$stmt->bindValue(':target_id', utf8_encode($target_id));
+				$stmt->bindValue(':target_id', mb_convert_encoding($target_id, 'UTF-8', 'ISO-8859-1'));
 				$stmt->bindValue(':id', $this->id);
 				$result = $stmt->executeQuery();
 				$this->message .= 'Target id : '.$target_id;
@@ -3185,7 +3185,7 @@ class DocumentManager
 				$stmt = $this->connection->prepare($query_header);
 				$stmt->bindValue(':created', $now);
 				$stmt->bindValue(':typeError', $this->typeError);
-				$stmt->bindValue(':message', str_replace("'", '', utf8_encode($this->message)));
+				$stmt->bindValue(':message', str_replace("'", '', mb_convert_encoding($this->message, 'UTF-8', 'ISO-8859-1')));
 				$stmt->bindValue(':rule_id', $this->ruleId);
 				$stmt->bindValue(':doc_id', $this->id);
 				$stmt->bindValue(':ref_doc_id', $this->docIdRefError);

@@ -370,7 +370,7 @@ class erpnext extends solution
 
                     if (!empty($resultQuery->data->name)) {
                         // utf8_decode because the id could be a name with special characters
-                        $result[$idDoc] = ['id' => utf8_decode($resultQuery->data->name), 'error' => ''];
+                        $result[$idDoc] = ['id' => mb_convert_encoding($resultQuery->data->name, 'ISO-8859-1', 'UTF-8'), 'error' => ''];
                     } elseif (!empty($resultQuery)) {
                         throw new \Exception($resultQuery);
                     } else {
@@ -506,7 +506,6 @@ class erpnext extends solution
             // Extraction of the error from traceback'
             return substr($response, strpos($response, 'Traceback') - strlen($response));
         }
-        curl_close($ch);
 
         $result = json_decode($response);
         // If result not a json, we send the result as it has been return (used for 301 error for example)

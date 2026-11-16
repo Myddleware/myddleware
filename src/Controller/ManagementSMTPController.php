@@ -422,7 +422,6 @@ class ManagementSMTPController extends AbstractController
             $response = curl_exec($curl);
             $httpCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             $curlError = curl_error($curl);
-            curl_close($curl);
 
             if ($curlError) {
                 $this->logger->error('Brevo API cURL error: ' . $curlError);
@@ -1055,7 +1054,6 @@ class ManagementSMTPController extends AbstractController
             $err = curl_error($curl);
             $errno = curl_errno($curl);
 
-            curl_close($curl);
 
             // Check for cURL errors first
             if ($err) {

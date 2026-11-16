@@ -9,7 +9,7 @@ class ZuoraFault extends Exception
 {
     protected $previous = null;
 
-    public function __construct($message = '', SoapFault $previous = null, $request_headers = '', $last_request = '', $response_headers = '', $last_response = '')
+    public function __construct($message = '', ?SoapFault $previous = null, $request_headers = '', $last_request = '', $response_headers = '', $last_response = '')
     {
         $this->request_headers = $request_headers;
         $this->last_request = $last_request;

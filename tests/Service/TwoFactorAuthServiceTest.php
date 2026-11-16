@@ -169,7 +169,6 @@ class TwoFactorAuthServiceTest extends TestCase
             ->method('flush');
 
         $reflectionMethod = new \ReflectionMethod(TwoFactorAuthService::class, 'checkAndBlockIfNeeded');
-        $reflectionMethod->setAccessible(true);
         $reflectionMethod->invoke($this->twoFactorAuthService, $twoFactorAuth);
 
         $this->assertNull($twoFactorAuth->getBlockedUntil());

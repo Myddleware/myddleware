@@ -307,7 +307,6 @@ class ToolsManager
             ]);
             $response = curl_exec($curl);
             $err = curl_error($curl);
-            curl_close($curl);
             if ($err) {
                 $session = $this->requestStack->getSession();
                 $session->set('error', ["workflow notification error"]);
