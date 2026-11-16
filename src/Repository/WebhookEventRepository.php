@@ -105,6 +105,30 @@ class WebhookEventRepository extends ServiceEntityRepository
     }
 
     /**
+     * Get the payloads (decoded) of all the events received for a record until $maxReceivedAt, sorted by reception date.
+     * Used when the record is built from the webhook payloads instead of being read in the source application.
+     *
+     * @throws \Doctrine\DBAL\Exception
+     */
+    public function findPayloads(int $connId, string $module, string $recordId, string $maxReceivedAt): array
+    {
+        $rows = $this->getEntityManager()->getConnection()->fetchFirstColumn(
+            'SELECT payload
+            FROM webhookevent
+            WHERE conn_id = :connId
+                AND module = :module
+                AND record_id = :recordId
+                AND received_at <= :maxReceivedAt
+            ORDER BY received_at, id',
+            ['connId' => $connId, 'module' => $module, 'recordId' => $recordId, 'maxReceivedAt' => $maxReceivedAt]
+        );
+
+        return array_map(function ($payload) {
+            return json_decode((string) $payload, true) ?? [];
+        }, $rows);
+    }
+
+    /**
      * Remove the events received before the limit date.
      *
      * @throws \Doctrine\DBAL\Exception

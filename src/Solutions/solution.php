@@ -916,6 +916,14 @@ class solution
         return [];
     }
 
+    // Build a record from the payloads of the events received for this record (sorted by reception date).
+    // Return null to read the record in the source application with its id (default),
+    // an array with the record fields (id optional), or an empty array to skip the record.
+    public function getWebhookRecord(string $module, array $payloads): ?array
+    {
+        return null;
+    }
+
     // Rule param to add in getFieldsParamUpd (source) for the solutions able to receive webhooks
     protected function getWebhookParam(): array
     {

@@ -782,11 +782,28 @@ class RuleManager
                 }
             }
 
-            // Read each record in the source application
+            // Read each record in the source application, or build it from the webhook payloads if the solution can
             $read['date_ref'] = '1970-01-01 00:00:00';
             foreach ($records as $record) {
-                $read['query'] = ['id' => $record['record_id']];
-                $dataSource = $this->solutionSource->readData($read);
+                $payloads = $this->entityManager->getRepository(WebhookEvent::class)->findPayloads(
+                    (int) $this->rule['conn_id_source'],
+                    $this->rule['module_source'],
+                    $record['record_id'],
+                    $record['received_at']
+                );
+                $webhookRecord = $this->solutionSource->getWebhookRecord($this->rule['module_source'], $payloads);
+                if (null !== $webhookRecord) {
+                    $dataSource = ['values' => []];
+                    if (!empty($webhookRecord)) {
+                        $webhookRecord['id'] = $webhookRecord['id'] ?? $record['record_id'];
+                        // The reception date of the last event is used as modification date
+                        $webhookRecord['date_modified'] = substr($record['received_at'], 0, 19);
+                        $dataSource['values'][$webhookRecord['id']] = $webhookRecord;
+                    }
+                } else {
+                    $read['query'] = ['id' => $record['record_id']];
+                    $dataSource = $this->solutionSource->readData($read);
+                }
                 if (!empty($dataSource['error'])) {
                     throw new \Exception('Failed to read the record '.$record['record_id'].' received by webhook. '.$dataSource['error']);
                 }

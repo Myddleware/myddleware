@@ -38,9 +38,12 @@ use Symfony\Component\HttpFoundation\Response;
  *
  * Modules :
  *  - meetings / webinars : read by creation date or by webhook (meeting.created, meeting.updated, meeting.deleted...)
- *  - meeting_participants / webinar_participants : read by webhook only (meeting.ended / webinar.ended).
- *    When a meeting ends, Myddleware reads all its participants.
- *    The id of a participant is <meeting id>|<meeting uuid>|<participant key> (one record by join session).
+ *  - meeting_participants / webinar_participants : read by webhook only (meeting.participant_joined / meeting.participant_left...).
+ *    The record is built from the event payload (no API call, so it works with a free Zoom account).
+ *    Each event is a record : a participant who joins, leaves and joins again generates 3 records.
+ *    The id of a record is <meeting id>|<meeting uuid>|<participant key>|<joined or left>|<event time>.
+ *  - meeting_events / webinar_events : read by webhook only (meeting.started / meeting.ended...), one record by event.
+ *    The id of a record is <meeting id>|<meeting uuid>|<started or ended>.
  */
 class zoom extends solution
 {
@@ -56,21 +59,35 @@ class zoom extends solution
 
     protected array $required_fields = [
         'meetings' => ['id', 'created_at'],
+        'meeting_invitees' => ['id', 'created_at'],
         'webinars' => ['id', 'created_at'],
-        'meeting_participants' => ['id', 'join_time'],
-        'webinar_participants' => ['id', 'join_time'],
+        'meeting_participants' => ['id', 'event_time'],
+        'webinar_participants' => ['id', 'event_time'],
+        'meeting_events' => ['id', 'event_time'],
+        'webinar_events' => ['id', 'event_time'],
     ];
 
-    // Webhook events managed by Myddleware : event => [module, read the participants (event end)]
+    // Modules built from the webhook payloads only (no API call, available with a free Zoom account)
+    protected array $webhookOnlyModules = ['meeting_participants', 'webinar_participants', 'meeting_events', 'webinar_events'];
+
+    // Webhook events managed by Myddleware : event => [module, deletion, participant event]
+    // We don't use the API past_meetings/participants because it requires a paid account
     protected array $webhookEvents = [
-        'meeting.created' => ['module' => 'meetings'],
-        'meeting.updated' => ['module' => 'meetings'],
+        // The invitees of the meeting are read too (settings.meeting_invitees of the meeting)
+        'meeting.created' => ['module' => 'meetings', 'otherModules' => ['meeting_invitees']],
+        'meeting.updated' => ['module' => 'meetings', 'otherModules' => ['meeting_invitees']],
         'meeting.deleted' => ['module' => 'meetings', 'deletion' => true],
-        'meeting.ended' => ['module' => 'meeting_participants', 'participants' => true],
+        'meeting.started' => ['module' => 'meeting_events'],
+        'meeting.ended' => ['module' => 'meeting_events'],
+        'meeting.participant_joined' => ['module' => 'meeting_participants', 'participant' => true],
+        'meeting.participant_left' => ['module' => 'meeting_participants', 'participant' => true],
         'webinar.created' => ['module' => 'webinars'],
         'webinar.updated' => ['module' => 'webinars'],
         'webinar.deleted' => ['module' => 'webinars', 'deletion' => true],
-        'webinar.ended' => ['module' => 'webinar_participants', 'participants' => true],
+        'webinar.started' => ['module' => 'webinar_events'],
+        'webinar.ended' => ['module' => 'webinar_events'],
+        'webinar.participant_joined' => ['module' => 'webinar_participants', 'participant' => true],
+        'webinar.participant_left' => ['module' => 'webinar_participants', 'participant' => true],
     ];
 
     public function getFieldsLogin(): array
@@ -150,6 +167,9 @@ class zoom extends solution
             'webinars' => 'Webinars',
             'meeting_participants' => 'Meeting participants',
             'webinar_participants' => 'Webinar participants',
+            'meeting_invitees' => 'Meeting invitees',
+            'meeting_events' => 'Meeting events (started / ended)',
+            'webinar_events' => 'Webinar events (started / ended)',
         ];
     }
 
@@ -182,14 +202,44 @@ class zoom extends solution
                     $fields = [
                         $parent.'_id' => ['label' => ucfirst($parent).' ID', 'relate' => 1],
                         $parent.'_uuid' => ucfirst($parent).' UUID',
+                        'topic' => 'Topic',
+                        'participant_uuid' => 'Participant UUID',
                         'user_id' => ['label' => 'User ID', 'relate' => 1],
                         'registrant_id' => ['label' => 'Registrant ID', 'relate' => 1],
                         'name' => 'Name',
                         'user_email' => 'Email',
+                        'event' => 'Event (joined / left)',
+                        'event_time' => 'Event time',
                         'join_time' => 'Join time',
                         'leave_time' => 'Leave time',
-                        'duration' => 'Duration (seconds)',
-                        'status' => 'Status',
+                        'leave_reason' => 'Leave reason',
+                    ];
+                    break;
+                case 'meeting_invitees':
+                    $fields = [
+                        'meeting_id' => ['label' => 'Meeting ID', 'relate' => 1],
+                        'topic' => 'Topic',
+                        'start_time' => 'Start time',
+                        'email' => 'Email',
+                        'internal_user' => 'Internal user (1 / 0)',
+                        'created_at' => 'Meeting created at',
+                    ];
+                    break;
+                case 'meeting_events':
+                case 'webinar_events':
+                    $parent = ('meeting_events' == $module ? 'meeting' : 'webinar');
+                    $fields = [
+                        $parent.'_id' => ['label' => ucfirst($parent).' ID', 'relate' => 1],
+                        $parent.'_uuid' => ucfirst($parent).' UUID',
+                        'topic' => 'Topic',
+                        'type' => 'Type',
+                        'host_id' => ['label' => 'Host ID', 'relate' => 1],
+                        'event' => 'Event (started / ended)',
+                        'event_time' => 'Event time',
+                        'start_time' => 'Start time',
+                        'end_time' => 'End time',
+                        'duration' => 'Scheduled duration (minutes)',
+                        'timezone' => 'Timezone',
                     ];
                     break;
             }
@@ -227,12 +277,20 @@ class zoom extends solution
     {
         $result = [];
         $module = $param['module'];
-        $isParticipantModule = in_array($module, ['meeting_participants', 'webinar_participants']);
+        // The events (joined, left, started, ended) only exist in the webhooks, they can't be read with the API
+        if (in_array($module, $this->webhookOnlyModules)) {
+            $this->logger->info('The module '.$module.' can only be read by webhook.');
+
+            return $result;
+        }
 
         // Read a specific record (call by webhook, rerun, readrecord command...)
         if (!empty($param['query']['id'])) {
-            if ($isParticipantModule) {
-                return $this->readParticipants($module, $param['query']['id']);
+            // Invitees : the id is <meeting id> (all the invitees of the meeting) or <meeting id>|<email>
+            if ('meeting_invitees' == $module) {
+                $idParts = explode('|', $param['query']['id'], 2);
+
+                return $this->readInvitees($idParts[0], $idParts[1] ?? null);
             }
             $record = $this->zoomCall($module.'/'.$this->encodeUuid($param['query']['id']));
             if (!empty($record)) {
@@ -242,25 +300,24 @@ class zoom extends solution
             return $result;
         }
 
-        // The participants can't be read by date, Zoom doesn't have any call to get the participants modified after a date
-        if ($isParticipantModule) {
-            $this->logger->info('The module '.$module.' can only be read by webhook (event '.('meeting_participants' == $module ? 'meeting.ended' : 'webinar.ended').').');
-
-            return $result;
-        }
-
         // Read the meetings / webinars created after the reference date (Zoom doesn't return the modification date)
+        // For the invitees, we read the meetings created after the reference date then the invitees of each meeting
+        $listModule = ('meeting_invitees' == $module ? 'meetings' : $module);
         $nextPageToken = '';
         do {
-            $response = $this->zoomCall('users/me/'.$module, [
+            $response = $this->zoomCall('users/me/'.$listModule, [
                 // Type available only for the meetings
-                'type' => ('meetings' == $module ? 'scheduled' : ''),
+                'type' => ('meetings' == $listModule ? 'scheduled' : ''),
                 'page_size' => $this->pageSize,
                 'next_page_token' => $nextPageToken,
             ]);
-            foreach ($response[$module] ?? [] as $record) {
+            foreach ($response[$listModule] ?? [] as $record) {
                 if ($this->dateTimeToMyddleware($record['created_at']) > $param['date_ref']) {
-                    $result[] = $record;
+                    if ('meeting_invitees' == $module) {
+                        $result = array_merge($result, $this->readInvitees((string) $record['id']));
+                    } else {
+                        $result[] = $record;
+                    }
                 }
             }
             $nextPageToken = $response['next_page_token'] ?? '';
@@ -269,46 +326,33 @@ class zoom extends solution
         return $result;
     }
 
-    // Read all participants of a meeting / webinar instance. $id is <meeting id>|<meeting uuid> or the id of a participant
-    protected function readParticipants(string $module, string $id): array
+    // Invitees of a meeting (settings.meeting_invitees), one record by invitee : <meeting id>|<email>
+    protected function readInvitees(string $meetingId, ?string $email = null): array
     {
-        $idParts = explode('|', $id);
-        if (count($idParts) < 2) {
-            throw new \Exception('Invalid participant id '.$id.'. Expected format : <meeting id>|<meeting uuid>[|<participant key>].');
-        }
-        [$meetingId, $meetingUuid] = $idParts;
-        $participantKey = $idParts[2] ?? null;
-        $parent = ('meeting_participants' == $module ? 'meeting' : 'webinar');
-
         $result = [];
-        $nextPageToken = '';
-        do {
-            $response = $this->zoomCall('past_'.$parent.'s/'.$this->encodeUuid($meetingUuid).'/participants', [
-                'page_size' => $this->pageSize,
-                'next_page_token' => $nextPageToken,
-            ]);
-            foreach ($response['participants'] ?? [] as $participant) {
-                // No unique id returned by Zoom for a join session, we calculate a stable key
-                $key = substr(sha1(($participant['id'] ?? '').'|'.($participant['user_email'] ?? '').'|'.($participant['name'] ?? '').'|'.($participant['join_time'] ?? '')), 0, 16);
-                if (null !== $participantKey && $key !== $participantKey) {
-                    continue;
-                }
-                $participant['user_id'] = $participant['id'] ?? '';
-                $participant['id'] = $meetingId.'|'.$meetingUuid.'|'.$key;
-                $participant[$parent.'_id'] = $meetingId;
-                $participant[$parent.'_uuid'] = $meetingUuid;
-                $result[] = $participant;
+        $meeting = $this->zoomCall('meetings/'.$this->encodeUuid($meetingId));
+        foreach ($meeting['settings']['meeting_invitees'] ?? [] as $invitee) {
+            if (empty($invitee['email']) || (null !== $email && $invitee['email'] !== $email)) {
+                continue;
             }
-            $nextPageToken = $response['next_page_token'] ?? '';
-        } while (!empty($nextPageToken));
+            $result[] = [
+                'id' => $meetingId.'|'.$invitee['email'],
+                'meeting_id' => $meetingId,
+                'topic' => $meeting['topic'] ?? '',
+                'start_time' => $meeting['start_time'] ?? '',
+                'email' => $invitee['email'],
+                'internal_user' => (empty($invitee['internal_user']) ? 0 : 1),
+                'created_at' => $meeting['created_at'] ?? '',
+            ];
+        }
 
         return $result;
     }
 
     public function getRefFieldName($param)
     {
-        if (in_array($param['module'], ['meeting_participants', 'webinar_participants'])) {
-            return 'join_time';
+        if (in_array($param['module'], $this->webhookOnlyModules)) {
+            return 'event_time';
         }
 
         return 'created_at';
@@ -359,22 +403,113 @@ class zoom extends solution
             return [];
         }
         $eventConfig = $this->webhookEvents[$event];
+        $recordId = $object['id'];
+        // For the participants : <meeting id>|<meeting uuid>|<participant key>
+        if (!empty($eventConfig['participant'])) {
+            if (empty($object['participant'])) {
+                return [];
+            }
+            // One record by event : <meeting id>|<meeting uuid>|<participant key>|<joined or left>|<event time>
+            $action = (str_ends_with($event, '_left') ? 'left' : 'joined');
+            $eventTime = $object['participant']['left' == $action ? 'leave_time' : 'join_time'] ?? ($body['event_ts'] ?? '');
+            $recordId = $object['id'].'|'.($object['uuid'] ?? '').'|'.$this->getParticipantKey($object['participant']).'|'.$action.'|'.$eventTime;
+        // Meeting events : <meeting id>|<meeting uuid>|<started or ended> (a meeting instance starts and ends once)
+        } elseif (in_array($eventConfig['module'], ['meeting_events', 'webinar_events'])) {
+            $recordId = $object['id'].'|'.($object['uuid'] ?? '').'|'.$this->getMeetingAction($event);
+        }
 
-        return [[
-            'module' => $eventConfig['module'],
-            // For the participants, the record read is the instance of the meeting : <meeting id>|<meeting uuid>
-            'record_id' => (empty($eventConfig['participants']) ? $object['id'] : $object['id'].'|'.($object['uuid'] ?? '')),
-            'event_type' => $event,
-            // Zoom sends the same body when it retries a webhook
-            'external_id' => sha1($request->getContent()),
-            'deletion' => !empty($eventConfig['deletion']),
-            'payload' => $body,
-        ]];
+        $events = [];
+        foreach (array_merge([$eventConfig['module']], $eventConfig['otherModules'] ?? []) as $module) {
+            $events[] = [
+                'module' => $module,
+                // Other modules (e.g. meeting invitees) are read with the meeting id
+                'record_id' => ($module == $eventConfig['module'] ? $recordId : $object['id']),
+                'event_type' => $event,
+                // Zoom sends the same body when it retries a webhook. Module added because one event can feed several modules
+                'external_id' => sha1($request->getContent()).'|'.$module,
+                'deletion' => !empty($eventConfig['deletion']),
+                'payload' => $body,
+            ];
+        }
+
+        return $events;
     }
 
     public function isWebhookAvailable(): bool
     {
         return true;
+    }
+
+    // The participants and the meeting events are built from the event payload, the other modules are read with the API
+    public function getWebhookRecord(string $module, array $payloads): ?array
+    {
+        if (!in_array($module, $this->webhookOnlyModules)) {
+            return null;
+        }
+        // One record by event, the record id identifies the event so there is only one payload (Zoom retries are ignored)
+        $payload = end($payloads);
+        $object = $payload['payload']['object'] ?? [];
+
+        if (in_array($module, ['meeting_events', 'webinar_events'])) {
+            $parent = ('meeting_events' == $module ? 'meeting' : 'webinar');
+            $action = $this->getMeetingAction($payload['event'] ?? '');
+
+            return [
+                $parent.'_id' => (string) ($object['id'] ?? ''),
+                $parent.'_uuid' => $object['uuid'] ?? '',
+                'topic' => $object['topic'] ?? '',
+                'type' => $object['type'] ?? '',
+                'host_id' => $object['host_id'] ?? '',
+                'event' => $action,
+                'event_time' => $object['ended' == $action ? 'end_time' : 'start_time'] ?? '',
+                'start_time' => $object['start_time'] ?? '',
+                'end_time' => $object['end_time'] ?? '',
+                'duration' => $object['duration'] ?? '',
+                'timezone' => $object['timezone'] ?? '',
+            ];
+        }
+
+        $participant = $object['participant'] ?? [];
+        // Event without participant (e.g. meeting.ended received by the previous version of the connector)
+        if (empty($participant)) {
+            return [];
+        }
+        $parent = ('meeting_participants' == $module ? 'meeting' : 'webinar');
+        $action = (str_ends_with($payload['event'] ?? '', '_left') ? 'left' : 'joined');
+
+        return [
+            $parent.'_id' => (string) ($object['id'] ?? ''),
+            $parent.'_uuid' => $object['uuid'] ?? '',
+            'topic' => $object['topic'] ?? '',
+            'participant_uuid' => $participant['participant_uuid'] ?? '',
+            'user_id' => $participant['id'] ?? '',
+            'registrant_id' => $participant['registrant_id'] ?? '',
+            'name' => $participant['user_name'] ?? '',
+            'user_email' => $participant['email'] ?? '',
+            'event' => $action,
+            'event_time' => $participant['left' == $action ? 'leave_time' : 'join_time'] ?? '',
+            'join_time' => $participant['join_time'] ?? '',
+            'leave_time' => $participant['leave_time'] ?? '',
+            'leave_reason' => $participant['leave_reason'] ?? '',
+        ];
+    }
+
+    // meeting.started => started, meeting.ended => ended
+    protected function getMeetingAction(string $event): string
+    {
+        return (str_ends_with($event, '.ended') ? 'ended' : 'started');
+    }
+
+    // Key of a participant in a meeting instance : participant uuid, or Zoom user id, or email, or name
+    protected function getParticipantKey(array $participant): string
+    {
+        foreach (['participant_uuid', 'id', 'email'] as $field) {
+            if (!empty($participant[$field])) {
+                return $participant[$field];
+            }
+        }
+
+        return substr(sha1($participant['user_name'] ?? ''), 0, 16);
     }
 
     // 2026-10-23T10:00:00Z to 2026-10-23 10:00:00 (UTC)
