@@ -1,10 +1,10 @@
-FROM php:8.3-apache-bookworm
+FROM php:8.4-apache-bookworm
 
 ## Configure PHP
 RUN apt-get update && apt-get upgrade -y && \
-    apt-get -y install -qq --force-yes mariadb-client libzip-dev libicu-dev zlib1g-dev libc-client-dev libkrb5-dev gnupg2 libaio1 nano && \
-    docker-php-ext-configure intl && docker-php-ext-configure imap --with-kerberos --with-imap-ssl && \
-    docker-php-ext-install imap exif mysqli pdo pdo_mysql zip intl && \
+    apt-get -y install -qq --force-yes mariadb-client libzip-dev libicu-dev zlib1g-dev gnupg2 libaio1 nano && \
+    docker-php-ext-configure intl && \
+    docker-php-ext-install exif mysqli pdo pdo_mysql zip intl && \
     echo "short_open_tag=off" >> /usr/local/etc/php/conf.d/syntax.ini && \
     echo "memory_limit=-1" >> /usr/local/etc/php/conf.d/memory_limit.ini && \
     echo "display_errors=0" >> /usr/local/etc/php/conf.d/errors.ini && \
