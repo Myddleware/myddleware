@@ -121,6 +121,7 @@ composer.phar
 /migrations/*
 !/migrations/.gitignore
 !/migrations/Version20261116120000.php
+!/migrations/Version20261116130000.php
 
 ## PHPCSFixer
 .php-cs-fixer.php
