@@ -259,9 +259,33 @@ class UpgradeManager
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
         try {
-        // Update schema
         $application = new Application($this->kernel);
         $application->setAutoExit(false);
+
+        // Run the Doctrine migrations first: they convert the data that the schema update
+        // could not handle on its own (e.g. serialized PHP "array" columns converted to JSON in 4.4)
+        $argumentsMigrations = [
+            'command' => 'doctrine:migrations:migrate',
+            '--allow-no-migration' => true,
+            '--env' => $this->env,
+        ];
+        $input = new ArrayInput($argumentsMigrations);
+        $input->setInteractive(false);
+        $output = new BufferedOutput();
+        $returnCode = $application->run($input, $output);
+
+        $content = $output->fetch();
+        if (!empty($content)) {
+            echo $content.chr(10);
+            $this->logger->info($content);
+            $this->message .= $content.chr(10);
+        }
+        // Stop here: the schema update would fail (or lose data) on a database that was not migrated
+        if (0 !== $returnCode) {
+            throw new Exception('Doctrine migrations failed, the database schema has not been updated. '.trim($content));
+        }
+
+        // Update schema
         $arguments = [
             'command' => 'doctrine:schema:update',
             '--force' => true,
