@@ -116,6 +116,8 @@ final class Version20261116120000 extends AbstractMigration
             'UPDATE `%s` SET `%s` = ? WHERE `%s` IS NULL',
             $table, $column, $column
         ), [$def['empty']]);
+        // The ALTER copies the whole table and can be long on big tables (no progress available here).
+        $this->write(sprintf('  [%s] Changing the column type to JSON (full table copy)...', date('H:i:s')));
         $this->connection->executeStatement(sprintf(
             'ALTER TABLE `%s` CHANGE `%s` `%s` JSON NOT NULL',
             $table, $column, $column
@@ -138,8 +140,12 @@ final class Version20261116120000 extends AbstractMigration
             return;
         }
 
+        $minId = (int) $bounds['min_id'];
+        $maxId = (int) $bounds['max_id'];
         $total = 0;
-        for ($start = (int) $bounds['min_id']; $start <= (int) $bounds['max_id']; $start += self::SQL_RANGE) {
+        $startTime = microtime(true);
+        for ($start = $minId; $start <= $maxId; $start += self::SQL_RANGE) {
+            $end = min($start + self::SQL_RANGE - 1, $maxId);
             $total += $this->connection->executeStatement(sprintf(
                 "UPDATE `%1\$s` SET `%2\$s` = %3\$s
                  WHERE `%4\$s` BETWEEN ? AND ?
@@ -147,7 +153,12 @@ final class Version20261116120000 extends AbstractMigration
                    AND NOT JSON_VALID(`%2\$s`)
                    AND JSON_VALID(%3\$s)",
                 $table, $column, $inner, $pk
-            ), [$start, $start + self::SQL_RANGE - 1]);
+            ), [$start, $end]);
+            $this->write(sprintf(
+                '  [%s] %s %d -> %d / %d (%.1f %%), %d row(s) converted, %ds elapsed',
+                date('H:i:s'), $pk, $start, $end, $maxId,
+                100 * ($end - $minId + 1) / ($maxId - $minId + 1), $total, (int) (microtime(true) - $startTime)
+            ));
         }
         $this->write(sprintf('  %d row(s) converted in SQL.', $total));
     }
@@ -185,6 +196,7 @@ final class Version20261116120000 extends AbstractMigration
                 throw $e;
             }
             $total += count($rows);
+            $this->write(sprintf('  [%s] %d row(s) converted in PHP (last %s: %s)', date('H:i:s'), $total, $pk, $lastPk));
         }
 
         $this->write(sprintf('  %d row(s) converted in PHP.', $total));
