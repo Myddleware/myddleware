@@ -33,11 +33,8 @@ use Symfony\Component\Dotenv\Dotenv;
 use Symfony\Component\Process\Process;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Process\PhpExecutableFinder;
-use Symfony\Component\Console\Output\BufferedOutput;
-use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use Symfony\Component\Filesystem\Exception\IOExceptionInterface;
 use App\Service\DebugLogger;
@@ -258,48 +255,56 @@ class UpgradeManager
     protected function updateDatabase()
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, []);
+        // The files and vendors have just been updated but this process still runs the previous version
+        // of Myddleware (classes and container already loaded). The database commands are therefore run
+        // in a new PHP process, so that they use the new code (entities mapping, Doctrine migrations...),
+        // with a temporary cache directory so that the previous compiled container is not reused.
+        $temporaryCacheDir = $this->projectDir.'/var/cache/upgrade';
+        $processEnv = ['APP_CACHE_DIR' => $temporaryCacheDir];
         try {
-        // Update schema
-        $application = new Application($this->kernel);
-        $application->setAutoExit(false);
-        $arguments = [
-            'command' => 'doctrine:schema:update',
-            '--force' => true,
-            '--complete' => true,
-            '--env' => $this->env,
-        ];
+            // Doctrine migrations first: they convert the data that the schema update can't handle on its own
+            // (e.g. upgrade to 4.4: serialized PHP "array" columns converted to JSON)
+            if (!empty(glob($this->projectDir.'/migrations/Version*.php'))) {
+                $this->runConsoleCommand(['doctrine:migrations:migrate', '--allow-no-migration'], $processEnv);
+            }
 
-        $input = new ArrayInput($arguments);
-        $output = new BufferedOutput();
-        $application->run($input, $output);
+            // Update schema
+            $this->runConsoleCommand(['doctrine:schema:update', '--force', '--complete'], $processEnv);
 
-        $content = $output->fetch();
-        if (!empty($content)) {
-            echo $content.chr(10);
-            $this->logger->info($content);
-            $this->message .= $content.chr(10);
-        }
-
-        // Update data
-        $argumentsFixtures = [
-            'command' => 'doctrine:fixtures:load',
-            '--append' => true,
-            '--env' => $this->env,
-        ];
-
-        $input = new ArrayInput($argumentsFixtures);
-        $output = new BufferedOutput();
-        $application->run($input, $output);
-
-        $content = $output->fetch();
-        // Send output to the logfile if debug mode selected
-        if (!empty($content)) {
-            echo $content.chr(10);
-            $this->logger->info($content);
-            $this->message .= $content.chr(10);
-        }
+            // Update data
+            $this->runConsoleCommand(['doctrine:fixtures:load', '--append'], $processEnv);
         } finally {
+            (new Filesystem())->remove($temporaryCacheDir);
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
+        }
+    }
+
+    /**
+     * Run a Symfony console command in a new PHP process (i.e. with the code currently on the disk).
+     *
+     * @throws Exception
+     */
+    protected function runConsoleCommand(array $arguments, array $processEnv = []): void
+    {
+        $process = new Process(
+            array_merge([$this->phpExecutable, 'bin/console'], $arguments, ['--env='.$this->env, '--no-interaction']),
+            $this->projectDir,
+            $processEnv,
+            null,
+            null // No timeout: the data migration can be long on big databases
+        );
+        // Display the output in real time (progress of long commands)
+        $process->run(function ($type, $buffer) {
+            echo $buffer;
+        });
+
+        $content = trim($process->getOutput().chr(10).$process->getErrorOutput());
+        if (!empty($content)) {
+            $this->logger->info($content);
+            $this->message .= $content.chr(10);
+        }
+        if (!$process->isSuccessful()) {
+            throw new Exception('The command "'.implode(' ', $arguments).'" failed (exit code '.$process->getExitCode().'). '.$content);
         }
     }
 
@@ -315,43 +320,24 @@ class UpgradeManager
         $fs = new Filesystem();
         // Add current environment to the default list
         $this->defaultEnvironment[$this->env] = $this->env;
-    
+
+        // The cache of every environment is removed: it has been compiled with the previous version of Myddleware.
+        // It can't be cleared with the command cache:clear in this process because this process still runs
+        // the previous version of the code.
         foreach ($this->defaultEnvironment as $env) {
-            // Command clear cache remove only current environment cache
-            if ($this->env == $env) {
-                // Clear cache
-                $application = new Application($this->kernel);
-                $application->setAutoExit(false);
-                $arguments = [
-                    'command' => 'cache:clear',
-                    '--env' => $env,
-                ];
-    
-                $input = new ArrayInput($arguments);
-                $output = new BufferedOutput();
-                $application->run($input, $output);
-    
-                $content = $output->fetch();
-                // Send output to the logfile if debug mode selected
-                if (!empty($content)) {
-                    echo $content.chr(10);
-                    $this->logger->info($content);
-                    $this->message .= $content.chr(10);
-                }
-            } else {
-                // Clear other environment cache via command
-                try {
-                    $fs->remove('var/cache/'.$env.'/*');
-                } catch (IOExceptionInterface $exception) {
-                    echo "An error occurred while clearing your directory at ".$exception->getPath();
-                    $this->logger->error("An error occurred while clearing your directory at ".$exception->getPath());
-                    throw new \Exception("An error occurred while clearing your directory at ".$exception->getPath());
-                }
-                
-                $this->logger->info("Cache cleared for environment: ".$env);
-                $this->message .= "Cache cleared for environment: ".$env.chr(10);
+            try {
+                $fs->remove($this->projectDir.'/var/cache/'.$env);
+            } catch (IOExceptionInterface $exception) {
+                echo "An error occurred while clearing your directory at ".$exception->getPath();
+                $this->logger->error("An error occurred while clearing your directory at ".$exception->getPath());
+                throw new \Exception("An error occurred while clearing your directory at ".$exception->getPath());
             }
+            $this->logger->info("Cache cleared for environment: ".$env);
+            $this->message .= "Cache cleared for environment: ".$env.chr(10);
         }
+
+        // Rebuild the cache of the current environment with the new code
+        $this->runConsoleCommand(['cache:warmup']);
         } finally {
             $this->debugLogger->logEnd(__CLASS__, __FUNCTION__);
         }
