@@ -73,6 +73,7 @@
     "symfony/stopwatch": "7.*",
     "symfony/translation": "7.*",
     "symfony/twig-bundle": "7.*",
+    "symfony/uid": "7.*",
     "symfony/validator": "7.*",
     "symfony/web-profiler-bundle": "7.*",
     "symfony/webpack-encore-bundle": "^2.0",
