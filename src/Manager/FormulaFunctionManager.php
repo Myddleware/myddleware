@@ -379,9 +379,11 @@ class FormulaFunctionManager
 			$read['fields'] = array_unique(array_merge($read['fields'], $searchFields));
 			$read['call_type'] = 'getRecord';
 			$read['ruleParams']['mode'] = '0';
-			$read['ruleParams']['fieldId'] = $searchField[0];
+			$read['ruleParams']['fieldId'] = $searchFields[0];
+			// Required field but not used because query is used
+			$read['date_ref'] = '1970-01-01 00:00:00';
 			// Not used because query is used but required for some solutions 
-			$read['ruleParams']['fieldDateRef'] = $searchField[0]; 
+			$read['ruleParams']['fieldDateRef'] = $searchFields[0];
 			// Read data from the solution
 			$data = $connectionSolution['solution']->readData($read);
 			if (empty($data['values'])) {
@@ -425,9 +427,11 @@ class FormulaFunctionManager
 			$read['fields'] = array_unique(array_merge($read['fields'], $searchFields));
 			$read['call_type'] = 'getRecords';
 			$read['ruleParams']['mode'] = '0';
-			$read['ruleParams']['fieldId'] = $searchField[0];
+			$read['ruleParams']['fieldId'] = $searchFields[0];
+			// Required field but not used because query is used
+			$read['date_ref'] = '1970-01-01 00:00:00';
 			// Not used because query is used but required for some solutions 
-			$read['ruleParams']['fieldDateRef'] = $searchField[0]; 
+			$read['ruleParams']['fieldDateRef'] = $searchFields[0];
 			// Read data from the solution
 			$data = $connectionSolution['solution']->readData($read);
 			if (empty($data['values'])) {
