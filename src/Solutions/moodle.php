@@ -57,6 +57,18 @@ class moodle extends solution
 	
     protected string $delaySearch = '-1 year';
 
+    /**
+     * Add the web service token to the POST parameters.
+     * The token must never be sent in the URL (it would end up in logs: Myddleware, proxies, Moodle access logs).
+     */
+    protected function addToken($params): array
+    {
+        $params = (array) $params;
+        $params['wstoken'] = $this->paramConnexion['token'];
+
+        return $params;
+    }
+
     public function login($paramConnexion)
     {
         parent::login($paramConnexion);
@@ -65,9 +77,9 @@ class moodle extends solution
             $params = [];
             $this->paramConnexion['token'] = trim($this->paramConnexion['token']);
             $functionname = 'core_webservice_get_site_info';
-            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionname;
             $this->logDebug('moodle login request', ['url' => $serverurl]);
-            $response = $this->moodleClient->post($serverurl, $params);
+            $response = $this->moodleClient->post($serverurl, $this->addToken($params));
             $this->logDebug('moodle login response', ['response' => $response]);
             $xml = simplexml_load_string($response);
 			// Add a hook de get site information
@@ -171,9 +183,9 @@ class moodle extends solution
                     // Récupération de toutes les catégories existantes
                     $params = [];
                     $functionname = 'core_course_get_categories';
-                    $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                    $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionname;
                     $this->logDebug('moodle get_module_fields request', ['url' => $serverurl]);
-                    $response = $this->moodleClient->post($serverurl, $params);
+                    $response = $this->moodleClient->post($serverurl, $this->addToken($params));
                     $this->logDebug('moodle get_module_fields response', ['response' => $response]);
                     $xml = simplexml_load_string($response);
                     if (!empty($xml->MULTIPLE->SINGLE)) {
@@ -224,9 +236,9 @@ class moodle extends solution
             // Get the custom fields set in the connector
             $customFieldList = $this->getCustomFields($param);
             // Call to Moodle
-            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+            $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionName;
             $this->logDebug('moodle read request', ['url' => $serverurl]);
-            $response = $this->moodleClient->post($serverurl, $parameters);
+            $response = $this->moodleClient->post($serverurl, $this->addToken($parameters));
             $this->logDebug('moodle read response', ['response' => $response]);
             $xml = $this->formatResponse('read', $response, $param);
             if (!empty($xml->ERRORCODE)) {
@@ -328,9 +340,9 @@ class moodle extends solution
                         break;
                 }
 
-                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionname;
                 $this->logDebug('moodle createData request', ['url' => $serverurl]);
-                $response = $this->moodleClient->post($serverurl, $params);
+                $response = $this->moodleClient->post($serverurl, $this->addToken($params));
                 $this->logDebug('moodle createData response', ['response' => $response]);
                 $xml = simplexml_load_string($response);
 
@@ -488,9 +500,9 @@ class moodle extends solution
                         break;
                 }
 
-                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionname;
+                $serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionname;
                 $this->logDebug('moodle updateData request', ['url' => $serverurl]);
-                $response = $this->moodleClient->post($serverurl, $params);
+                $response = $this->moodleClient->post($serverurl, $this->addToken($params));
                 $this->logDebug('moodle updateData response', ['response' => $response]);
                 $xml = simplexml_load_string($response);
 				

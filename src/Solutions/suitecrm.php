@@ -989,7 +989,8 @@ class suitecrm extends solution
             curl_setopt($curl_request, CURLOPT_POSTFIELDS, $post);
             $this->logDebug('suitecrm call request', ['url' => $this->paramConnexion['url'], 'method' => $method]);
             $result = curl_exec($curl_request);
-            $this->logDebug('suitecrm call response', ['response' => $result]);
+            // The login response contains the session id: never log it
+            $this->logDebug('suitecrm call response', ['response' => ('login' === $method ? '[login response not logged]' : $result)]);
             if (empty($result)) {
                 return false;
             }

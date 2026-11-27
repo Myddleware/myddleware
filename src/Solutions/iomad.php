@@ -129,9 +129,9 @@ class iomad extends moodle
 		if (empty($this->currentUserCompanyId)) {
 			$parameters['userid'] = $this->currentUserId;
 			$functionName = 'block_iomad_company_admin_get_user_companies';
-			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionName;
 			$this->logDebug('moodle createData get_user_companies request', ['url' => $serverurl]);
-			$response = $this->moodleClient->post($serverurl, $parameters);
+			$response = $this->moodleClient->post($serverurl, $this->addToken($parameters));
 			$this->logDebug('moodle createData get_user_companies response', ['response' => $response]);
 			$xml = $this->formatResponse('read', $response, $param);
 
@@ -159,9 +159,9 @@ class iomad extends moodle
 			}
 			$parameters[$param['module']][0]['companyid'] = $this->currentUserCompanyId;		
 			$functionName = 'block_iomad_company_admin_assign_'.$param['module'];
-			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wstoken='.$this->paramConnexion['token'].'&wsfunction='.$functionName;
+			$serverurl = $this->paramConnexion['url'].'/webservice/rest/server.php'.'?wsfunction='.$functionName;
 			$this->logDebug('moodle createData assign request', ['url' => $serverurl]);
-			$response = $this->moodleClient->post($serverurl, $parameters);
+			$response = $this->moodleClient->post($serverurl, $this->addToken($parameters));
 			$this->logDebug('moodle createData assign response', ['response' => $response]);
 			$xml = $this->formatResponse('read', $response, $param);
 			// Manage error
