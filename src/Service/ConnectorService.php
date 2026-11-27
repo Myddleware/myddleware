@@ -36,9 +36,54 @@ class ConnectorService
     private $em;
     private $solutionManager;
 
+    // Placeholder displayed instead of a secret value (never send the real value to the browser)
+    public const SECRET_MASK = '******************';
+
     public function __construct(EntityManagerInterface $em, SolutionManager $solutionManager) {
         $this->em = $em;
         $this->solutionManager = $solutionManager;
+    }
+
+    /**
+     * Return the connector only if the user is allowed to access it:
+     * admins can access every connector, other users only the connectors they created.
+     */
+    public function findAccessibleConnector(int $id, $user): ?Connector
+    {
+        if (!$user instanceof \App\Entity\User) {
+            return null;
+        }
+        $qb = $this->em->getRepository(Connector::class)->createQueryBuilder('c')
+            ->where('c.id = :id AND c.deleted = 0')
+            ->setParameter('id', $id);
+        if (!$user->isAdmin()) {
+            $qb->andWhere('c.createdBy = :createdBy')->setParameter('createdBy', $user->getId());
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
+    }
+
+    /**
+     * Names (lowercase) of the connector params that must never be displayed:
+     * fields listed in SENSITIVE_FIELDS + password fields of the solution.
+     */
+    public function getSensitiveKeys(Connector $connector): array
+    {
+        $keys = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
+        try {
+            if (null !== $connector->getSolution()) {
+                $fieldsLogin = $this->solutionManager->get($connector->getSolution()->getName())->getFieldsLogin();
+                foreach ($fieldsLogin as $field) {
+                    if (($field['type'] ?? null) === \Symfony\Component\Form\Extension\Core\Type\PasswordType::class) {
+                        $keys[] = $field['name'];
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            // Keep the SENSITIVE_FIELDS list only
+        }
+
+        return array_values(array_unique(array_map(fn ($k) => strtolower(trim($k)), $keys)));
     }
 
     /**

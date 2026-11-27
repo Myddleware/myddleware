@@ -16,6 +16,7 @@ use App\Service\SessionService;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\FormFactoryInterface;
 use Symfony\Component\Routing\RouterInterface;
@@ -39,7 +40,8 @@ class RuleStepService
         private RouterInterface $router,
         private LoggerInterface $logger,
         private Connection $connection,
-        ParameterBagInterface $params
+        ParameterBagInterface $params,
+        private Security $security
     ) {
         $this->secret = $params->get('secret');
     }
@@ -330,9 +332,26 @@ class RuleStepService
                 $input = explode('::', $key);
                 if (!empty($input[0]) && (isset($input[1]) || is_numeric($input[1]))) {
                     $param[$input[0]] = trim($input[1]);
-                    $this->sessionService->setParamConnectorParentType($data['parent'], $input[0], trim($input[1]));
                 }
             }
+        }
+
+        // Test from the connector detail page: secrets are displayed masked,
+        // replace the masks by the stored values (only if the user can access this connector)
+        if (!empty($data['connector_id']) && in_array(ConnectorService::SECRET_MASK, $param, true)) {
+            $connector = $this->connectorService->findAccessibleConnector((int) $data['connector_id'], $this->security->getUser());
+            if (!$connector) {
+                return ['success' => false, 'message' => 'Connector not found'];
+            }
+            $stored = $this->connectorService->decryptParams($this->connectorService->resolveParams($connector->getId()) ?? [], $this->secret);
+            foreach ($param as $key => $value) {
+                if (ConnectorService::SECRET_MASK === $value && array_key_exists($key, $stored)) {
+                    $param[$key] = $stored[$key];
+                }
+            }
+        }
+        foreach ($param as $key => $value) {
+            $this->sessionService->setParamConnectorParentType($data['parent'], $key, $value);
         }
         $this->sessionService->setParamConnectorParentType($data['parent'], 'solution', $classe);
 

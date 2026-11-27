@@ -33,6 +33,7 @@ use App\Form\ConnectorType;
 use App\Manager\SolutionManager;
 use App\Manager\ToolsManager;
 use App\Repository\RuleRepository;
+use App\Service\ConnectorService;
 use App\Service\SessionService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\NonUniqueResultException;
@@ -827,36 +828,39 @@ class ConnectorController extends AbstractController
     }
 
     #[Route('/connector/{id}/detail', name: 'connector_detail')]
-    public function detailAction(int $id)
+    public function detailAction(int $id, ConnectorService $connectorService)
     {
         $this->debugLogger->logStart(__CLASS__, __FUNCTION__, ['id' => $id]);
         $__debugReturn = null;
         try {
-        $sensitiveFields = !empty($_ENV['SENSITIVE_FIELDS']) ? explode(',', $_ENV['SENSITIVE_FIELDS']) : [];
-        
-        $connector = $this->entityManager->getRepository(Connector::class)->find($id);
+        // Same access rule as the edit page: admin, or the user who created the connector
+        $connector = $connectorService->findAccessibleConnector($id, $this->getUser());
 
         if (!$connector) {
             throw $this->createNotFoundException('The connector does not exist');
         }
 
+        $sensitiveFields = $connectorService->getSensitiveKeys($connector);
+
         $paramConnexion = [];
-    
-        foreach ($connector->getConnectorParams() as $param) {
-            $paramConnexion[$param->getName()] = $param->getValue();
-        }
         $encrypter = new \Illuminate\Encryption\Encrypter(substr($this->getParameter('secret'), -16));
-        foreach ($paramConnexion as $key => $value) {
+        foreach ($connector->getConnectorParams() as $param) {
+            $key = $param->getName();
+            $value = $param->getValue();
+            // Secrets are never decrypted for display: the view only receives a mask
+            if (in_array(strtolower($key), $sensitiveFields, true)) {
+                $paramConnexion[$key] = (null === $value || '' === $value) ? $value : ConnectorService::SECRET_MASK;
+                continue;
+            }
             if (is_string($value)) {
                 try {
-                    $paramConnexion[$key] = $encrypter->decrypt($value);
+                    $value = $encrypter->decrypt($value);
                 } catch (\Exception $e) {
-                
                 }
             }
+            $paramConnexion[$key] = $value;
         }
 
-        // Passez les paramètres décryptés à la vue
         return $__debugReturn = $this->render('Connector/detail/detail.html.twig', [
             'connector' => $connector,
             'paramConnexion' => $paramConnexion, 
