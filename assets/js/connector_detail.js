@@ -23,8 +23,6 @@
 *********************************************************************************/ 
 const $ = require('jquery');
 
-const listOfFieldKeyWords = (typeof sensitiveFields !== 'undefined') ? sensitiveFields : [];
-
 $(function () {
     $('#connexion_detail').on('click', function () {
 
@@ -41,11 +39,7 @@ $(function () {
                 if (dataElement.length > 0) {
                     var dataParam = dataElement.attr('data-param');
                     var textValue = dataElement.is('input') ? dataElement.val() : dataElement.text().trim();
-
-                   if (listOfFieldKeyWords.some(keyword => $(this).text().toLowerCase() === keyword) && textValue === '******************') {
-                        const matchedKeyword = listOfFieldKeyWords.find(keyword => $(this).text().toLowerCase() === keyword);
-                        textValue = window[matchedKeyword];
-                    }
+                    // Masked secrets are sent as-is: the server replaces them with the stored values
                     if (dataParam !== undefined) {
                         datas += dataParam + "::" + textValue.replace(/;/g, "") + ";";
                         
@@ -61,6 +55,7 @@ $(function () {
                 champs: datas,
                 parent: parent,
                 solution: $('.vignette').attr('alt'),
+                connector_id: $('#connexion_detail').data('connector-id'),
                 mod: 2
             },
             beforeSend: function () {
